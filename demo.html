@@ -1003,6 +1003,7 @@
   })();
 
   let conversation = null;
+  let isTransitioning = false;
 
   const orbWrap = document.getElementById('orbWrap');
   const orb = document.getElementById('orb');
@@ -1024,6 +1025,8 @@
   }
 
   async function startConversation() {
+    if (isTransitioning) return;
+    isTransitioning = true;
     try {
       await navigator.mediaDevices.getUserMedia({
         audio: {
@@ -1041,6 +1044,7 @@
         agentId: 'agent_1601kp5nmptxes69zmg0xk5m8g6f',
 
         onConnect: () => {
+          isTransitioning = false;
           statusDot.className = 'nav-status-dot ready';
           statusText.textContent = 'Verbonden';
           orbLabel.textContent = 'Luisteren...';
@@ -1049,6 +1053,8 @@
         },
 
         onDisconnect: () => {
+          conversation = null;
+          isTransitioning = false;
           statusDot.className = 'nav-status-dot';
           statusText.textContent = 'Klik om te starten';
           orbLabel.textContent = 'Klik om te starten';
@@ -1057,7 +1063,6 @@
           orb.classList.remove('speaking');
           document.querySelectorAll('.wave-bar').forEach(b => b.classList.remove('speaking'));
           badgeText.textContent = 'Klik op de orb om te starten';
-          conversation = null;
         },
 
         onModeChange: (mode) => {
@@ -1086,6 +1091,7 @@
           orbLabel.className = 'orb-label';
           badgeText.textContent = 'Er ging iets mis';
           conversation = null;
+          isTransitioning = false;
         }
       });
 
@@ -1096,21 +1102,30 @@
       orbLabel.className = 'orb-label';
       statusText.textContent = 'Klik op de orb om te starten';
       badgeText.textContent = 'Klik op de orb om te starten';
+      conversation = null;
+      isTransitioning = false;
     }
   }
 
   async function stopConversation() {
-    if (conversation) {
-      await conversation.endSession();
-      conversation = null;
+    if (!conversation || isTransitioning) return;
+    isTransitioning = true;
+    const current = conversation;
+    conversation = null;
+    try {
+      await current.endSession();
+    } catch (err) {
+      console.error('Stop error:', err);
+      isTransitioning = false;
     }
   }
 
-  orbWrap.addEventListener('click', () => {
+  orbWrap.addEventListener('click', async () => {
+    if (isTransitioning) return;
     if (!conversation) {
-      startConversation();
+      await startConversation();
     } else {
-      stopConversation();
+      await stopConversation();
     }
   });
 
