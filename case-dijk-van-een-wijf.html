@@ -134,6 +134,18 @@
     .result-photo img{width:100%;height:100%;object-fit:cover;}
     .result-photo-placeholder{width:100%;height:100%;min-height:280px;display:flex;align-items:center;justify-content:center;}
 
+    /* CREDITS */
+    .credits-section{padding:72px 60px;background:#F8F8F8;border-top:1px solid var(--gray);}
+    .credits-inner{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:100px;align-items:start;}
+    .credits-title{font-size:clamp(22px,2.5vw,32px);font-weight:800;letter-spacing:-0.03em;line-height:1.1;color:var(--black);}
+    .credits-grid{display:flex;flex-direction:column;gap:0;}
+    .credits-row{display:grid;grid-template-columns:180px 1fr;gap:24px;padding:16px 0;border-bottom:1px solid var(--gray);align-items:baseline;}
+    .credits-row:first-child{border-top:1px solid var(--gray);}
+    .credits-role{font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--gray-mid);padding-top:2px;}
+    .credits-names{display:flex;flex-wrap:wrap;gap:6px 16px;}
+    .credits-names a{font-size:14px;font-weight:600;color:var(--black);text-decoration:none;border-bottom:1px solid var(--gray);padding-bottom:1px;transition:border-color 0.2s,color 0.2s;}
+    .credits-names a:hover{color:var(--blue);border-color:var(--blue);}
+
     /* NEXT CASE */
     .next-case{padding:80px 60px;border-top:1px solid var(--gray);display:flex;align-items:center;justify-content:space-between;}
     .next-case-label{font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--gray-mid);margin-bottom:10px;}
@@ -172,6 +184,7 @@
   .content-section,.content-section-dark,.content-section-gray{padding:64px 32px;}
   .result-section{padding:72px 32px;}
   .next-case{padding:60px 32px;}
+  .credits-section{padding:56px 32px;}
   section[style*="padding:0 60px"]{padding:0 32px !important;}
   footer{padding:24px 32px;}
 }
@@ -196,6 +209,9 @@
   .result-section{padding:56px 20px;}
   .result-inner{grid-template-columns:1fr;gap:40px;}
   .next-case{padding:40px 20px;flex-direction:column;align-items:flex-start;gap:16px;}
+  .credits-section{padding:48px 20px;}
+  .credits-inner{grid-template-columns:1fr;gap:32px;}
+  .credits-row{grid-template-columns:1fr;gap:8px;}
   section[style*="padding:0 60px"]{padding:0 20px !important;}
   footer{flex-direction:column;gap:20px;text-align:center;padding:24px 20px;}
   .foot-nav{flex-wrap:wrap;justify-content:center;gap:16px;}
@@ -440,6 +456,49 @@
     </div>
     <div class="result-photo reveal-right">
       <img src="images/dijk-van-een-wijf/onderaan.jpeg" alt="Het Waddenlandschap" style="width:100%;height:100%;object-fit:center;display:block;">
+    </div>
+  </div>
+</section>
+
+<!-- CREDITS -->
+<section class="credits-section reveal">
+  <div class="credits-inner">
+    <div>
+      <div style="font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--gray-mid);margin-bottom:16px;">Credits</div>
+      <h2 class="credits-title">Dijk van een Wijf</h2>
+    </div>
+    <div class="credits-grid">
+      <div class="credits-row">
+        <span class="credits-role">Strategie, Concept &amp; Design</span>
+        <div class="credits-names">
+          <a href="https://buenaparte.nl/" target="_blank" rel="noopener">Buenaparte</a>
+        </div>
+      </div>
+      <div class="credits-row">
+        <span class="credits-role">Klant</span>
+        <div class="credits-names">
+          <a href="https://sense-of-place.eu/" target="_blank" rel="noopener">Sense of Place</a>
+          <a href="https://www.visitwadden.nl/nl" target="_blank" rel="noopener">Visit Wadden</a>
+        </div>
+      </div>
+      <div class="credits-row">
+        <span class="credits-role">Kunst &amp; Inhoud</span>
+        <div class="credits-names">
+          <a href="https://sense-of-place.eu/kunstenaar/nienke-brokke/" target="_blank" rel="noopener">Nienke Brokke</a>
+        </div>
+      </div>
+      <div class="credits-row">
+        <span class="credits-role">Voice-over</span>
+        <div class="credits-names">
+          <a href="https://platform.finetune.audio/share/explore/VO_NL_HISKE_01" target="_blank" rel="noopener">Hiske</a>
+        </div>
+      </div>
+      <div class="credits-row">
+        <span class="credits-role">Audio &amp; Conversational AI</span>
+        <div class="credits-names">
+          <a href="https://finetune.audio/" target="_blank" rel="noopener">Fine Tune Audio</a>
+        </div>
+      </div>
     </div>
   </div>
 </section>
