@@ -1,0 +1,1105 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <meta name="robots" content="noindex, nofollow"/>
+  <meta name="theme-color" content="#0A0A0A"/>
+  <title>Polygon Walker | ADAM Tools</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+
+    :root{
+      --yellow:#CEFF1A;
+      --blue:#1D2ED8;
+      --black:#0A0A0A;
+      --panel:#0d0d0d;
+      --white:#FFFFFF;
+      --border:rgba(255,255,255,0.08);
+      --border-strong:rgba(255,255,255,0.14);
+      --muted:rgba(255,255,255,0.4);
+      --dim:rgba(255,255,255,0.25);
+      --warn:#ff7a45;
+    }
+
+    html,body{
+      height:100%;
+      font-family:'Sora',sans-serif;
+      background:var(--black);
+      color:var(--white);
+      -webkit-font-smoothing:antialiased;
+      overflow:hidden;
+      overscroll-behavior:none;
+    }
+
+    .nav{
+      position:fixed;
+      top:0;left:0;right:0;
+      height:54px;
+      z-index:1000;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:0 16px;
+      background:rgba(10,10,10,0.92);
+      backdrop-filter:blur(10px);
+      border-bottom:1px solid var(--border);
+    }
+    .nav-logo{display:flex;align-items:center;gap:9px;text-decoration:none;}
+    .nav-logo-mark{
+      width:22px;height:22px;border-radius:5px;background:var(--yellow);
+      display:flex;align-items:center;justify-content:center;
+      color:var(--black);font-weight:800;font-size:12px;
+    }
+    .nav-logo-text{font-size:13px;font-weight:800;color:#fff;letter-spacing:0.04em;}
+    .nav-title{
+      font-size:11px;font-weight:700;letter-spacing:0.12em;
+      text-transform:uppercase;color:var(--muted);
+    }
+    .nav-acc{
+      display:flex;align-items:center;gap:6px;
+      font-size:11px;font-weight:700;color:rgba(255,255,255,0.6);
+      font-variant-numeric:tabular-nums;
+    }
+    .nav-acc-dot{width:6px;height:6px;border-radius:50%;background:#666;}
+    .nav-acc.good .nav-acc-dot{background:var(--yellow);box-shadow:0 0 6px rgba(206,255,26,0.6);}
+    .nav-acc.warn .nav-acc-dot{background:var(--warn);}
+    .nav-acc.good{color:var(--yellow);}
+    .nav-acc.warn{color:var(--warn);}
+
+    .map-wrap{
+      position:absolute;top:54px;left:0;right:0;bottom:0;z-index:0;
+    }
+    #map{width:100%;height:100%;background:#0a0a14;}
+    .leaflet-container{background:#0a0a14 !important;font-family:'Sora',sans-serif !important;}
+    .leaflet-control-zoom{
+      border:1px solid var(--border-strong) !important;
+      box-shadow:none !important;
+      margin-top:74px !important;margin-right:12px !important;
+    }
+    .leaflet-control-zoom a{
+      background:rgba(10,10,10,0.92) !important;
+      color:#fff !important;border-color:var(--border) !important;
+    }
+    .leaflet-control-zoom a:hover{background:rgba(206,255,26,0.15) !important;}
+    .leaflet-control-attribution{
+      background:rgba(10,10,10,0.7) !important;
+      color:rgba(255,255,255,0.4) !important;font-size:9px !important;
+    }
+    .leaflet-control-attribution a{color:rgba(206,255,26,0.6) !important;}
+
+    .you-marker{width:24px;height:24px;display:flex;align-items:center;justify-content:center;}
+    .you-dot{
+      width:16px;height:16px;background:#fff;
+      border:3px solid var(--blue);border-radius:50%;
+      box-shadow:0 0 0 1px rgba(255,255,255,0.6), 0 2px 8px rgba(0,0,0,0.7);
+    }
+
+    .corner-marker{
+      width:30px;height:30px;display:flex;align-items:center;justify-content:center;
+      pointer-events:none;
+    }
+    .corner-pin{
+      width:24px;height:24px;color:var(--black);
+      border:2px solid var(--black);border-radius:50%;
+      font-size:11px;font-weight:800;
+      display:flex;align-items:center;justify-content:center;
+    }
+
+    .wing-bar-wrap{
+      position:fixed;top:62px;left:0;right:0;z-index:500;padding:0 12px;
+    }
+    .wing-bar{
+      display:flex;gap:6px;overflow-x:auto;overflow-y:hidden;
+      scrollbar-width:none;-webkit-overflow-scrolling:touch;padding-bottom:2px;
+    }
+    .wing-bar::-webkit-scrollbar{display:none;}
+    .wing-tab{
+      flex-shrink:0;background:rgba(10,10,10,0.85);backdrop-filter:blur(10px);
+      border:1px solid var(--border);color:rgba(255,255,255,0.55);
+      font-family:inherit;font-size:11px;font-weight:700;letter-spacing:0.04em;
+      padding:9px 12px;border-radius:5px;cursor:pointer;transition:all 0.15s;
+      display:flex;align-items:center;gap:8px;min-width:90px;
+    }
+    .wing-tab .wt-name{font-size:12px;font-weight:800;}
+    .wing-tab .wt-count{font-size:10px;opacity:0.6;font-weight:600;font-variant-numeric:tabular-nums;}
+    .wing-tab.active{background:var(--yellow);color:var(--black);border-color:var(--yellow);}
+    .wing-tab.active .wt-count{opacity:0.8;}
+    .wing-add{
+      flex-shrink:0;background:rgba(10,10,10,0.85);backdrop-filter:blur(10px);
+      border:1px solid var(--border);color:rgba(255,255,255,0.7);
+      width:38px;height:38px;cursor:pointer;border-radius:5px;
+      display:flex;align-items:center;justify-content:center;
+      font-size:20px;font-weight:700;transition:all 0.15s;
+    }
+    .wing-add:hover{
+      background:rgba(206,255,26,0.1);border-color:rgba(206,255,26,0.3);color:var(--yellow);
+    }
+
+    .bottom-bar{
+      position:fixed;bottom:0;left:0;right:0;z-index:600;
+      background:linear-gradient(180deg, rgba(10,10,10,0) 0%, rgba(10,10,10,0.85) 30%, rgba(10,10,10,0.95) 100%);
+      padding:50px 16px 18px;pointer-events:none;
+    }
+    .bottom-inner{
+      pointer-events:auto;display:flex;flex-direction:column;gap:10px;
+      max-width:520px;margin:0 auto;
+    }
+    .status-strip{
+      display:flex;gap:6px;background:rgba(20,20,20,0.85);backdrop-filter:blur(10px);
+      border:1px solid var(--border);border-radius:6px;padding:9px 12px;
+      font-size:11px;align-items:center;justify-content:space-between;
+    }
+    .status-strip > div{display:flex;align-items:center;gap:5px;min-width:0;}
+    .status-strip span{color:rgba(255,255,255,0.45);font-weight:600;letter-spacing:0.04em;}
+    .status-strip b{
+      color:#fff;font-weight:700;font-variant-numeric:tabular-nums;
+      white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:110px;
+    }
+    .status-strip b.warn{color:var(--warn);}
+    .status-strip b.good{color:var(--yellow);}
+
+    .capture-row{display:flex;gap:8px;}
+    .capture-btn{
+      flex:1;background:var(--yellow);color:var(--black);border:none;
+      font-family:inherit;font-size:15px;font-weight:800;letter-spacing:0.04em;
+      text-transform:uppercase;padding:18px 16px;border-radius:8px;cursor:pointer;
+      transition:transform 0.1s, opacity 0.2s;
+      display:flex;align-items:center;justify-content:center;gap:10px;
+      box-shadow:0 0 24px rgba(206,255,26,0.25);
+    }
+    .capture-btn:active{transform:scale(0.97);}
+    .capture-btn:disabled{opacity:0.4;cursor:not-allowed;box-shadow:none;}
+    .capture-btn .ic{width:18px;height:18px;display:flex;align-items:center;justify-content:center;}
+    .capture-btn .ic svg{display:block;}
+    .capture-btn.warn-state{background:#ffac82;}
+
+    .icon-btn{
+      width:54px;background:rgba(20,20,20,0.85);backdrop-filter:blur(10px);
+      border:1px solid var(--border-strong);color:rgba(255,255,255,0.7);
+      font-family:inherit;font-size:11px;font-weight:700;cursor:pointer;
+      border-radius:8px;display:flex;flex-direction:column;
+      align-items:center;justify-content:center;gap:3px;padding:8px 4px;
+      transition:all 0.15s;
+    }
+    .icon-btn:active{transform:scale(0.94);}
+    .icon-btn:disabled{opacity:0.35;cursor:not-allowed;}
+    .icon-btn svg{display:block;}
+    .icon-btn span{font-size:9px;letter-spacing:0.05em;text-transform:uppercase;}
+    .icon-btn.primary{color:#fff;border-color:rgba(206,255,26,0.3);}
+
+    .sheet-overlay{
+      position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);
+      z-index:2000;opacity:0;pointer-events:none;transition:opacity 0.25s;
+    }
+    .sheet-overlay.open{opacity:1;pointer-events:auto;}
+    .sheet{
+      position:fixed;bottom:0;left:0;right:0;z-index:2001;
+      background:var(--panel);border-top:1px solid var(--border-strong);
+      border-radius:14px 14px 0 0;max-height:85vh;overflow:hidden;
+      display:flex;flex-direction:column;transform:translateY(100%);
+      transition:transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+    }
+    .sheet.open{transform:translateY(0);}
+    .sheet-handle{
+      width:36px;height:4px;background:rgba(255,255,255,0.2);
+      border-radius:2px;margin:10px auto 4px;flex-shrink:0;
+    }
+    .sheet-header{
+      padding:14px 20px 12px;border-bottom:1px solid var(--border);
+      display:flex;align-items:center;justify-content:space-between;flex-shrink:0;
+    }
+    .sheet-title{
+      font-size:13px;font-weight:700;letter-spacing:0.1em;
+      text-transform:uppercase;color:#fff;
+    }
+    .sheet-close{
+      background:transparent;border:none;color:rgba(255,255,255,0.5);
+      font-size:22px;cursor:pointer;padding:4px 8px;line-height:1;
+    }
+    .sheet-body{padding:18px 20px 24px;overflow-y:auto;flex:1;}
+
+    .corner-list{display:flex;flex-direction:column;gap:6px;margin-bottom:18px;}
+    .corner-row{
+      display:flex;align-items:center;gap:11px;padding:11px 12px;
+      background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:5px;
+    }
+    .corner-num{
+      width:24px;height:24px;border-radius:50%;background:var(--yellow);
+      color:var(--black);font-size:11px;font-weight:800;
+      display:flex;align-items:center;justify-content:center;flex-shrink:0;
+    }
+    .corner-meta{flex:1;min-width:0;}
+    .corner-coords{
+      font-size:11px;color:#fff;font-weight:600;
+      font-variant-numeric:tabular-nums;letter-spacing:0.02em;word-break:break-all;
+    }
+    .corner-acc{font-size:10px;color:var(--muted);margin-top:2px;font-variant-numeric:tabular-nums;}
+    .corner-acc.warn{color:var(--warn);}
+    .corner-del{
+      background:transparent;border:none;color:rgba(255,255,255,0.35);
+      cursor:pointer;font-size:18px;padding:6px 8px;line-height:1;
+    }
+    .corner-del:hover{color:var(--warn);}
+
+    .empty-msg{text-align:center;padding:24px 12px;font-size:13px;color:var(--muted);}
+
+    .sheet-actions{display:flex;gap:8px;flex-wrap:wrap;}
+    .sheet-btn{
+      flex:1;min-width:120px;background:transparent;
+      border:1px solid var(--border-strong);color:rgba(255,255,255,0.75);
+      font-family:inherit;font-size:11px;font-weight:700;letter-spacing:0.06em;
+      text-transform:uppercase;padding:13px 12px;border-radius:5px;cursor:pointer;
+      transition:all 0.15s;
+    }
+    .sheet-btn:active{transform:scale(0.97);}
+    .sheet-btn.primary{background:var(--yellow);border-color:var(--yellow);color:var(--black);}
+    .sheet-btn.danger{color:var(--warn);border-color:rgba(255,122,69,0.3);}
+
+    .polygon-actions{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap;}
+    .polygon-actions .sheet-btn{min-width:110px;font-size:10px;padding:10px 10px;}
+
+    .export-block{
+      background:rgba(0,0,0,0.4);border:1px solid var(--border);border-radius:5px;
+      padding:14px;font-family:'SF Mono','Menlo','Consolas',monospace;
+      font-size:11px;line-height:1.55;color:#fff;
+      white-space:pre;overflow-x:auto;margin-bottom:14px;
+    }
+    .export-block .k{color:#ff7a45;}
+    .export-block .s{color:var(--yellow);}
+    .export-block .n{color:#5aa3ff;}
+
+    .copied-toast{
+      position:fixed;bottom:120px;left:50%;
+      transform:translateX(-50%) translateY(10px);
+      background:var(--yellow);color:var(--black);
+      font-size:12px;font-weight:800;letter-spacing:0.08em;
+      text-transform:uppercase;padding:10px 18px;border-radius:999px;
+      z-index:3000;opacity:0;pointer-events:none;transition:all 0.25s;
+      box-shadow:0 4px 18px rgba(0,0,0,0.4);
+    }
+    .copied-toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+    .permission-screen{
+      position:fixed;inset:0;z-index:4000;background:var(--black);
+      display:flex;flex-direction:column;align-items:center;justify-content:center;
+      padding:32px 24px;text-align:center;
+    }
+    .permission-screen.hidden{display:none;}
+    .perm-icon{
+      width:60px;height:60px;border-radius:50%;
+      background:rgba(206,255,26,0.1);border:1px solid rgba(206,255,26,0.3);
+      display:flex;align-items:center;justify-content:center;margin-bottom:22px;
+    }
+    .perm-title{
+      font-size:20px;font-weight:800;letter-spacing:-0.01em;
+      margin-bottom:10px;max-width:300px;
+    }
+    .perm-sub{
+      font-size:13px;color:var(--muted);max-width:320px;
+      line-height:1.55;margin-bottom:24px;
+    }
+    .perm-btn{
+      background:var(--yellow);color:var(--black);border:none;
+      font-family:inherit;font-size:13px;font-weight:800;letter-spacing:0.05em;
+      text-transform:uppercase;padding:14px 28px;border-radius:6px;cursor:pointer;
+    }
+    .perm-error{
+      color:var(--warn);font-size:12px;margin-top:14px;
+      max-width:300px;line-height:1.5;
+    }
+
+    .tips-toggle{
+      position:fixed;top:114px;right:12px;z-index:500;
+      width:34px;height:34px;border-radius:50%;
+      background:rgba(10,10,10,0.85);backdrop-filter:blur(10px);
+      border:1px solid var(--border);color:#fff;
+      font-size:14px;font-weight:700;cursor:pointer;
+      display:flex;align-items:center;justify-content:center;
+    }
+    .tips-popup{
+      position:fixed;top:156px;right:12px;z-index:500;
+      max-width:280px;background:rgba(10,10,10,0.95);backdrop-filter:blur(12px);
+      border:1px solid var(--border-strong);border-radius:6px;
+      padding:14px 14px;font-size:11px;line-height:1.55;
+      color:rgba(255,255,255,0.7);display:none;
+    }
+    .tips-popup.open{display:block;}
+    .tips-popup b{color:var(--yellow);font-weight:700;}
+
+    .prompt-overlay{
+      position:fixed;inset:0;background:rgba(0,0,0,0.75);backdrop-filter:blur(6px);
+      z-index:5000;display:none;align-items:center;justify-content:center;padding:24px;
+    }
+    .prompt-overlay.open{display:flex;}
+    .prompt-box{
+      background:var(--panel);border:1px solid var(--border-strong);
+      border-radius:10px;padding:24px 22px 20px;max-width:380px;width:100%;
+    }
+    .prompt-title{font-size:15px;font-weight:800;margin-bottom:8px;}
+    .prompt-sub{font-size:12px;color:var(--muted);margin-bottom:16px;line-height:1.55;}
+    .prompt-input{
+      width:100%;background:rgba(0,0,0,0.4);
+      border:1px solid var(--border-strong);color:#fff;
+      font-family:inherit;font-size:14px;
+      padding:11px 14px;border-radius:5px;margin-bottom:16px;outline:none;
+    }
+    .prompt-input:focus{border-color:var(--yellow);}
+    .prompt-actions{display:flex;gap:8px;}
+    .prompt-actions button{
+      flex:1;font-family:inherit;font-size:11px;font-weight:700;
+      letter-spacing:0.08em;text-transform:uppercase;
+      padding:12px;border-radius:5px;cursor:pointer;
+      border:1px solid var(--border-strong);
+      background:transparent;color:rgba(255,255,255,0.75);
+    }
+    .prompt-actions button.primary{
+      background:var(--yellow);border-color:var(--yellow);color:var(--black);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="permission-screen" id="permScreen">
+    <div class="perm-icon">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+        <path d="M12 2L12 6M12 18L12 22M22 12L18 12M6 12L2 12" stroke="#CEFF1A" stroke-width="2" stroke-linecap="round"/>
+        <circle cx="12" cy="12" r="6" stroke="#CEFF1A" stroke-width="2"/>
+        <circle cx="12" cy="12" r="2" fill="#CEFF1A"/>
+      </svg>
+    </div>
+    <div class="perm-title">Polygon Walker</div>
+    <div class="perm-sub">Loop rond een gebouw en leg per hoek je GPS positie vast. Vooraf gevuld met vleugel a t/m g — voeg toe of verwijder naar wens.</div>
+    <button class="perm-btn" id="permBtn">GPS toestaan</button>
+    <div class="perm-error" id="permError" style="display:none;"></div>
+  </div>
+
+  <nav class="nav">
+    <a href="/" class="nav-logo">
+      <div class="nav-logo-mark">A</div>
+      <span class="nav-logo-text">ADAM</span>
+    </a>
+    <div class="nav-title">Polygon Walker</div>
+    <div class="nav-acc" id="navAcc">
+      <div class="nav-acc-dot"></div>
+      <span id="navAccText">— m</span>
+    </div>
+  </nav>
+
+  <div class="wing-bar-wrap">
+    <div class="wing-bar" id="wingBar"></div>
+  </div>
+
+  <button class="tips-toggle" id="tipsToggle" aria-label="Tips">?</button>
+  <div class="tips-popup" id="tipsPopup">
+    <b>Tips</b><br>
+    • Wacht 10-15 sec bij elke hoek<br>
+    • Houd telefoon hoog, weg van lichaam<br>
+    • Tik pas als accuracy &lt; 15m (groen)<br>
+    • Loop één rondje ter "warming up"<br>
+    • Tik op <b>+</b> om een vleugel toe te voegen<br>
+    • Open de lijst om te hernoemen of wissen
+  </div>
+
+  <div class="map-wrap">
+    <div id="map"></div>
+  </div>
+
+  <div class="bottom-bar">
+    <div class="bottom-inner">
+      <div class="status-strip">
+        <div><span>Actief</span> <b id="curWing">—</b></div>
+        <div><span>Hoeken</span> <b id="curCount">0</b></div>
+        <div><span>Acc.</span> <b id="curAcc" class="warn">—</b></div>
+      </div>
+      <div class="capture-row">
+        <button class="icon-btn" id="undoBtn" disabled aria-label="Ongedaan maken">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+            <path d="M3 8L7 4M3 8L7 12M3 8H15C18.866 8 22 11.134 22 15V15C22 18.866 18.866 22 15 22H10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span>Undo</span>
+        </button>
+        <button class="capture-btn" id="captureBtn" disabled>
+          <span class="ic">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+              <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2.5"/>
+              <circle cx="12" cy="12" r="3" fill="currentColor"/>
+            </svg>
+          </span>
+          Punt vastleggen
+        </button>
+        <button class="icon-btn primary" id="listBtn" aria-label="Lijst en export">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+            <path d="M4 6H20M4 12H20M4 18H20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <span>Lijst</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="sheet-overlay" id="overlay"></div>
+  <div class="sheet" id="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-header">
+      <div class="sheet-title" id="sheetTitle">Hoeken</div>
+      <button class="sheet-close" id="sheetClose">×</button>
+    </div>
+    <div class="sheet-body" id="sheetBody"></div>
+  </div>
+
+  <div class="prompt-overlay" id="promptOverlay">
+    <div class="prompt-box">
+      <div class="prompt-title" id="promptTitle">Nieuwe vleugel</div>
+      <div class="prompt-sub" id="promptSub">Geef een naam.</div>
+      <input type="text" class="prompt-input" id="promptInput" placeholder="Naam" maxlength="40"/>
+      <div class="prompt-actions">
+        <button id="promptCancel">Annuleer</button>
+        <button class="primary" id="promptOk">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="copied-toast" id="toast">Gekopieerd</div>
+
+<script>
+const STORAGE_KEY = 'adam_polygon_walker_v2';
+const STORAGE_KEY_V1 = 'adam_polygon_walker_v1';
+const ACCURACY_GOOD = 15;
+const ACCURACY_WARN = 30;
+
+const DEFAULT_WINGS = ['a','b','c','d','e','f','g'];
+
+const COLOR_PALETTE = [
+  '#CEFF1A', '#5aa3ff', '#ff7ad9', '#ffac82', '#85ffb5',
+  '#c98bff', '#ffd97d', '#ff8b8b', '#7decd1', '#a0e8ff',
+  '#ff9eb5', '#d4ff5e'
+];
+
+let state = {
+  currentId: null,
+  order: [],
+  wings: {}
+};
+
+let userPos = null;
+let watchId = null;
+let wakeLock = null;
+let promptCallback = null;
+
+function saveState(){
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {}
+}
+
+function loadState(){
+  try {
+    const v2 = localStorage.getItem(STORAGE_KEY);
+    if(v2){
+      const parsed = JSON.parse(v2);
+      if(parsed && parsed.wings && parsed.order){
+        state = parsed;
+        return;
+      }
+    }
+    const v1 = localStorage.getItem(STORAGE_KEY_V1);
+    if(v1){
+      const old = JSON.parse(v1);
+      if(old && old.wings){
+        ['A','B','C'].forEach((key, i) => {
+          if(old.wings[key] && old.wings[key].length > 0){
+            const id = key.toLowerCase();
+            state.wings[id] = {
+              name: 'Vleugel ' + id,
+              color: COLOR_PALETTE[i % COLOR_PALETTE.length],
+              corners: old.wings[key]
+            };
+            state.order.push(id);
+          }
+        });
+        if(state.order.length > 0) state.currentId = state.order[0];
+        saveState();
+        return;
+      }
+    }
+  } catch (e) { console.warn('Load error:', e); }
+}
+
+function seedDefaults(){
+  if(state.order.length === 0){
+    DEFAULT_WINGS.forEach((id, i) => {
+      state.wings[id] = {
+        name: 'Vleugel ' + id,
+        color: COLOR_PALETTE[i % COLOR_PALETTE.length],
+        corners: []
+      };
+      state.order.push(id);
+    });
+    state.currentId = state.order[0];
+    saveState();
+  } else if(!state.currentId || !state.wings[state.currentId]){
+    state.currentId = state.order[0];
+  }
+}
+
+let map, userMarker, accCircle;
+const wingMapLayers = {};
+
+function initMap(initialLat, initialLon){
+  map = L.map('map', {
+    zoomControl: true,
+    attributionControl: true,
+    scrollWheelZoom: true,
+    tap: true,
+  }).setView([initialLat, initialLon], 19);
+
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png', {
+    attribution: '© OpenStreetMap © CARTO',
+    subdomains: 'abcd',
+    maxZoom: 22,
+    maxNativeZoom: 19,
+  }).addTo(map);
+
+  state.order.forEach(redrawWing);
+}
+
+function userIcon(){
+  return L.divIcon({
+    className: 'you-marker',
+    html: '<div class="you-dot"></div>',
+    iconSize: [24,24],
+    iconAnchor: [12,12],
+  });
+}
+
+function cornerIcon(num, color){
+  return L.divIcon({
+    className: 'corner-marker',
+    html: '<div class="corner-pin" style="background:' + color + ';box-shadow:0 0 0 1px ' + color + '99, 0 2px 6px rgba(0,0,0,0.6)">' + num + '</div>',
+    iconSize: [30,30],
+    iconAnchor: [15,15],
+  });
+}
+
+function updateUserOnMap(lat, lon, accuracy){
+  if(!map) return;
+  if(!userMarker){
+    userMarker = L.marker([lat, lon], {
+      icon: userIcon(),
+      keyboard: false,
+      zIndexOffset: 1000,
+      interactive: false,
+    }).addTo(map);
+  } else {
+    userMarker.setLatLng([lat, lon]);
+  }
+  if(accuracy && accuracy > 0){
+    if(!accCircle){
+      accCircle = L.circle([lat, lon], {
+        radius: accuracy,
+        color: '#5aa3ff',
+        weight: 1,
+        opacity: 0.4,
+        fillColor: '#5aa3ff',
+        fillOpacity: 0.08,
+        interactive: false,
+      }).addTo(map);
+    } else {
+      accCircle.setLatLng([lat, lon]);
+      accCircle.setRadius(accuracy);
+    }
+  }
+}
+
+function clearWingLayer(id){
+  const layer = wingMapLayers[id];
+  if(!layer) return;
+  if(layer.polygon) map.removeLayer(layer.polygon);
+  if(layer.polyline) map.removeLayer(layer.polyline);
+  layer.markers.forEach(m => map.removeLayer(m));
+  delete wingMapLayers[id];
+}
+
+function redrawWing(id){
+  if(!map) return;
+  clearWingLayer(id);
+  const wing = state.wings[id];
+  if(!wing) return;
+
+  const corners = wing.corners;
+  const color = wing.color;
+  const isActive = state.currentId === id;
+  const layer = { polygon: null, polyline: null, markers: [] };
+
+  if(corners.length >= 3){
+    layer.polygon = L.polygon(corners.map(c => [c.lat, c.lon]), {
+      color: color,
+      weight: 2,
+      opacity: isActive ? 0.9 : 0.45,
+      fillColor: color,
+      fillOpacity: isActive ? 0.18 : 0.07,
+      interactive: false,
+    }).addTo(map);
+  } else if(corners.length === 2){
+    layer.polyline = L.polyline(corners.map(c => [c.lat, c.lon]), {
+      color: color,
+      weight: 2,
+      opacity: isActive ? 0.9 : 0.45,
+      dashArray: '5 5',
+      interactive: false,
+    }).addTo(map);
+  }
+
+  corners.forEach((c, i) => {
+    const m = L.marker([c.lat, c.lon], {
+      icon: cornerIcon(i + 1, color),
+      keyboard: false,
+      interactive: false,
+      zIndexOffset: 500,
+    }).addTo(map);
+    layer.markers.push(m);
+  });
+
+  wingMapLayers[id] = layer;
+}
+
+function captureCurrentPoint(){
+  if(!userPos || !state.currentId) return;
+  const wing = state.wings[state.currentId];
+  if(!wing) return;
+  wing.corners.push({
+    lat: userPos.lat,
+    lon: userPos.lon,
+    accuracy: userPos.accuracy,
+    ts: Date.now()
+  });
+  saveState();
+  redrawWing(state.currentId);
+  updateUI();
+}
+
+function undoLast(){
+  if(!state.currentId) return;
+  const wing = state.wings[state.currentId];
+  if(!wing || wing.corners.length === 0) return;
+  wing.corners.pop();
+  saveState();
+  redrawWing(state.currentId);
+  updateUI();
+}
+
+function clearWing(id){
+  if(!state.wings[id]) return;
+  state.wings[id].corners = [];
+  saveState();
+  redrawWing(id);
+  updateUI();
+  renderSheet();
+}
+
+function deleteCorner(id, index){
+  if(!state.wings[id]) return;
+  state.wings[id].corners.splice(index, 1);
+  saveState();
+  redrawWing(id);
+  updateUI();
+  renderSheet();
+}
+
+function setActiveWing(id){
+  if(!state.wings[id]) return;
+  state.currentId = id;
+  saveState();
+  state.order.forEach(redrawWing);
+  updateUI();
+}
+
+function generateUniqueId(name){
+  let base = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  if(!base) base = 'poly';
+  let id = base;
+  let n = 2;
+  while(state.wings[id]){
+    id = base + '-' + n;
+    n++;
+  }
+  return id;
+}
+
+function addPolygon(name){
+  const id = generateUniqueId(name);
+  const color = COLOR_PALETTE[state.order.length % COLOR_PALETTE.length];
+  state.wings[id] = { name: name, color: color, corners: [] };
+  state.order.push(id);
+  state.currentId = id;
+  saveState();
+  renderWingBar();
+  state.order.forEach(redrawWing);
+  updateUI();
+}
+
+function renamePolygon(id, newName){
+  if(!state.wings[id] || !newName.trim()) return;
+  state.wings[id].name = newName.trim();
+  saveState();
+  renderWingBar();
+  updateUI();
+  renderSheet();
+}
+
+function deletePolygon(id){
+  if(!state.wings[id]) return;
+  clearWingLayer(id);
+  delete state.wings[id];
+  state.order = state.order.filter(x => x !== id);
+  if(state.currentId === id){
+    state.currentId = state.order[0] || null;
+  }
+  saveState();
+  renderWingBar();
+  if(state.currentId) state.order.forEach(redrawWing);
+  updateUI();
+  closeSheet();
+}
+
+function renderWingBar(){
+  const bar = document.getElementById('wingBar');
+  let html = '';
+  state.order.forEach(id => {
+    const wing = state.wings[id];
+    const active = id === state.currentId ? ' active' : '';
+    html += '<button class="wing-tab' + active + '" data-wing="' + id + '">' +
+      '<span class="wt-name">' + escapeHtml(wing.name) + '</span>' +
+      '<span class="wt-count">' + wing.corners.length + '</span>' +
+      '</button>';
+  });
+  html += '<button class="wing-add" id="addBtn" aria-label="Polygoon toevoegen">+</button>';
+  bar.innerHTML = html;
+
+  bar.querySelectorAll('.wing-tab').forEach(tab => {
+    tab.addEventListener('click', () => setActiveWing(tab.dataset.wing));
+  });
+  document.getElementById('addBtn').addEventListener('click', () => {
+    showPrompt('Nieuwe polygoon', 'Geef een naam, bijvoorbeeld "Vleugel h" of "Zelfoogsttuin".', '', (name) => {
+      if(name && name.trim()) addPolygon(name.trim());
+    });
+  });
+
+  setTimeout(() => {
+    const activeEl = bar.querySelector('.wing-tab.active');
+    if(activeEl){
+      activeEl.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+    }
+  }, 50);
+}
+
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function updateUI(){
+  document.querySelectorAll('.wing-tab').forEach(tab => {
+    const w = state.wings[tab.dataset.wing];
+    if(!w) return;
+    tab.classList.toggle('active', tab.dataset.wing === state.currentId);
+    const countEl = tab.querySelector('.wt-count');
+    if(countEl) countEl.textContent = w.corners.length;
+  });
+
+  const cur = state.currentId ? state.wings[state.currentId] : null;
+
+  document.getElementById('curWing').textContent = cur ? cur.name : '—';
+  document.getElementById('curCount').textContent = cur ? cur.corners.length : 0;
+  document.getElementById('undoBtn').disabled = !cur || cur.corners.length === 0;
+
+  const accEl = document.getElementById('curAcc');
+  const navAcc = document.getElementById('navAcc');
+  const navAccText = document.getElementById('navAccText');
+  const captureBtn = document.getElementById('captureBtn');
+
+  if(userPos && userPos.accuracy){
+    const a = Math.round(userPos.accuracy);
+    accEl.textContent = '± ' + a + ' m';
+    navAccText.textContent = '± ' + a + ' m';
+    if(userPos.accuracy <= ACCURACY_GOOD){
+      accEl.className = 'good';
+      navAcc.className = 'nav-acc good';
+      captureBtn.classList.remove('warn-state');
+    } else {
+      accEl.className = 'warn';
+      navAcc.className = 'nav-acc warn';
+      captureBtn.classList.add('warn-state');
+    }
+    captureBtn.disabled = !cur;
+  } else {
+    accEl.textContent = '—';
+    navAccText.textContent = '— m';
+    accEl.className = 'warn';
+    navAcc.className = 'nav-acc';
+    captureBtn.disabled = true;
+  }
+}
+
+function openSheet(){
+  if(!state.currentId) return;
+  renderSheet();
+  document.getElementById('overlay').classList.add('open');
+  document.getElementById('sheet').classList.add('open');
+}
+function closeSheet(){
+  document.getElementById('overlay').classList.remove('open');
+  document.getElementById('sheet').classList.remove('open');
+}
+
+function renderSheet(){
+  if(!state.currentId) return;
+  const wing = state.wings[state.currentId];
+  document.getElementById('sheetTitle').textContent = wing.name + ' — Hoeken';
+  const body = document.getElementById('sheetBody');
+  const corners = wing.corners;
+
+  let html = '';
+
+  html += '<div class="polygon-actions">';
+  html += '<button class="sheet-btn" data-action="rename">Hernoem</button>';
+  html += '<button class="sheet-btn danger" data-action="delete-poly">Verwijder polygoon</button>';
+  html += '</div>';
+
+  if(corners.length === 0){
+    html += '<div class="empty-msg">Nog geen punten vastgelegd voor ' + escapeHtml(wing.name) + '.<br>Loop naar een hoek en tik op "Punt vastleggen".</div>';
+  } else {
+    html += '<div class="corner-list">';
+    corners.forEach((c, i) => {
+      const accClass = c.accuracy <= ACCURACY_GOOD ? '' : 'warn';
+      html += '<div class="corner-row">' +
+        '<div class="corner-num">' + (i+1) + '</div>' +
+        '<div class="corner-meta">' +
+          '<div class="corner-coords">' + c.lat.toFixed(7) + ', ' + c.lon.toFixed(7) + '</div>' +
+          '<div class="corner-acc ' + accClass + '">± ' + Math.round(c.accuracy) + ' m</div>' +
+        '</div>' +
+        '<button class="corner-del" data-del="' + i + '" aria-label="Verwijder">×</button>' +
+        '</div>';
+    });
+    html += '</div>';
+    html += '<div class="export-block">' + buildJsExport(state.currentId) + '</div>';
+  }
+
+  html += '<div class="sheet-actions">';
+  if(corners.length > 0){
+    html += '<button class="sheet-btn primary" data-action="copy-current">Kopieer deze</button>';
+  }
+  html += '<button class="sheet-btn" data-action="copy-all">Alles als JSON</button>';
+  if(corners.length > 0){
+    html += '<button class="sheet-btn danger" data-action="clear">Wis hoeken</button>';
+  }
+  html += '</div>';
+
+  body.innerHTML = html;
+
+  body.querySelectorAll('[data-del]').forEach(btn => {
+    btn.addEventListener('click', () => deleteCorner(state.currentId, parseInt(btn.dataset.del)));
+  });
+  body.querySelectorAll('[data-action]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const a = btn.dataset.action;
+      if(a === 'copy-current') copyToClipboard(buildJsExportRaw(state.currentId));
+      else if(a === 'copy-all') copyToClipboard(buildJsExportAllRaw());
+      else if(a === 'clear'){
+        if(confirm('Alle hoeken van "' + wing.name + '" wissen?')) clearWing(state.currentId);
+      } else if(a === 'rename'){
+        showPrompt('Polygoon hernoemen', 'Nieuwe naam:', wing.name, (newName) => {
+          if(newName && newName.trim()) renamePolygon(state.currentId, newName);
+        });
+      } else if(a === 'delete-poly'){
+        if(confirm('Polygoon "' + wing.name + '" helemaal verwijderen?')) deletePolygon(state.currentId);
+      }
+    });
+  });
+}
+
+function showPrompt(title, sub, initialValue, callback){
+  document.getElementById('promptTitle').textContent = title;
+  document.getElementById('promptSub').textContent = sub;
+  const input = document.getElementById('promptInput');
+  input.value = initialValue || '';
+  promptCallback = callback;
+  document.getElementById('promptOverlay').classList.add('open');
+  setTimeout(() => input.focus(), 50);
+}
+function closePrompt(){
+  document.getElementById('promptOverlay').classList.remove('open');
+  promptCallback = null;
+}
+
+function buildJsExportRaw(id){
+  const wing = state.wings[id];
+  if(!wing || wing.corners.length === 0) return '';
+  const lines = wing.corners.map(c => '    [' + c.lat.toFixed(7) + ', ' + c.lon.toFixed(7) + '],').join('\n');
+  return "{\n  name: '" + wing.name.replace(/'/g, "\\'") + "',\n  polygon: [\n" + lines + "\n  ]\n}";
+}
+
+function buildJsExportAllRaw(){
+  const filled = state.order.filter(id => state.wings[id].corners.length > 0);
+  if(filled.length === 0) return '';
+  const parts = filled.map(id => {
+    const wing = state.wings[id];
+    const lines = wing.corners.map(c => '      [' + c.lat.toFixed(7) + ', ' + c.lon.toFixed(7) + '],').join('\n');
+    return "  {\n    name: '" + wing.name.replace(/'/g, "\\'") + "',\n    polygon: [\n" + lines + "\n    ]\n  }";
+  });
+  return 'const wings = [\n' + parts.join(',\n') + '\n];';
+}
+
+function buildJsExport(id){
+  return syntaxHighlight(buildJsExportRaw(id));
+}
+
+function syntaxHighlight(s){
+  return s
+    .replace(/('[^']*')/g, '<span class="s">$1</span>')
+    .replace(/(\b\d+\.\d+\b)/g, '<span class="n">$1</span>')
+    .replace(/(name|polygon)(\s*:)/g, '<span class="k">$1</span>$2');
+}
+
+function copyToClipboard(text){
+  if(!text) return;
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(showCopiedToast).catch(() => fallbackCopy(text));
+  } else {
+    fallbackCopy(text);
+  }
+}
+function fallbackCopy(text){
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.position = 'fixed';
+  ta.style.left = '-9999px';
+  document.body.appendChild(ta);
+  ta.select();
+  try { document.execCommand('copy'); showCopiedToast(); } catch (e) {}
+  document.body.removeChild(ta);
+}
+function showCopiedToast(){
+  const t = document.getElementById('toast');
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 1600);
+}
+
+function startTracking(){
+  if(!('geolocation' in navigator)){
+    showPermError('GPS wordt niet ondersteund in deze browser.');
+    return;
+  }
+  watchId = navigator.geolocation.watchPosition(
+    (position) => {
+      const { latitude, longitude, accuracy } = position.coords;
+      const firstFix = !userPos;
+      userPos = { lat: latitude, lon: longitude, accuracy: accuracy };
+
+      if(firstFix){
+        if(!map) initMap(latitude, longitude);
+        else map.setView([latitude, longitude], 19);
+      }
+      updateUserOnMap(latitude, longitude, accuracy);
+      updateUI();
+    },
+    (err) => {
+      console.warn('Geolocation error:', err);
+      if(err.code === err.PERMISSION_DENIED){
+        showPermError('Toegang geweigerd. Sta locatie toe in je browserinstellingen en herlaad de pagina.');
+      } else if(err.code === err.POSITION_UNAVAILABLE){
+        showPermError('GPS positie niet beschikbaar. Ga naar buiten en probeer opnieuw.');
+      } else if(err.code === err.TIMEOUT){
+        showPermError('GPS timeout. Probeer opnieuw — kan even duren bij eerste fix.');
+      }
+    },
+    { enableHighAccuracy: true, maximumAge: 0, timeout: 20000 }
+  );
+}
+
+function showPermError(msg){
+  const screen = document.getElementById('permScreen');
+  const err = document.getElementById('permError');
+  screen.classList.remove('hidden');
+  err.style.display = 'block';
+  err.textContent = msg;
+}
+
+async function requestWakeLock(){
+  if(!('wakeLock' in navigator)) return;
+  try { wakeLock = await navigator.wakeLock.request('screen'); } catch (err) {}
+}
+document.addEventListener('visibilitychange', () => {
+  if(wakeLock === null && document.visibilityState === 'visible') requestWakeLock();
+});
+
+loadState();
+seedDefaults();
+renderWingBar();
+updateUI();
+
+document.getElementById('permBtn').addEventListener('click', () => {
+  document.getElementById('permError').style.display = 'none';
+  navigator.geolocation.getCurrentPosition(
+    () => {
+      document.getElementById('permScreen').classList.add('hidden');
+      requestWakeLock();
+      startTracking();
+    },
+    (err) => {
+      if(err.code === err.PERMISSION_DENIED){
+        showPermError('Toegang geweigerd. Sta locatie toe in je browserinstellingen en herlaad de pagina.');
+      } else {
+        showPermError('GPS niet beschikbaar. Probeer opnieuw (kan even duren bij eerste fix).');
+      }
+    },
+    { enableHighAccuracy: true, maximumAge: 0, timeout: 20000 }
+  );
+});
+
+document.getElementById('captureBtn').addEventListener('click', () => {
+  if(!userPos) return;
+  if(navigator.vibrate) navigator.vibrate(20);
+  captureCurrentPoint();
+});
+document.getElementById('undoBtn').addEventListener('click', () => {
+  if(navigator.vibrate) navigator.vibrate(15);
+  undoLast();
+});
+document.getElementById('listBtn').addEventListener('click', openSheet);
+document.getElementById('sheetClose').addEventListener('click', closeSheet);
+document.getElementById('overlay').addEventListener('click', closeSheet);
+
+document.getElementById('promptCancel').addEventListener('click', closePrompt);
+document.getElementById('promptOk').addEventListener('click', () => {
+  const val = document.getElementById('promptInput').value;
+  const cb = promptCallback;
+  closePrompt();
+  if(cb) cb(val);
+});
+document.getElementById('promptInput').addEventListener('keydown', (e) => {
+  if(e.key === 'Enter') document.getElementById('promptOk').click();
+  else if(e.key === 'Escape') closePrompt();
+});
+
+document.getElementById('tipsToggle').addEventListener('click', (e) => {
+  e.stopPropagation();
+  document.getElementById('tipsPopup').classList.toggle('open');
+});
+document.addEventListener('click', (e) => {
+  if(!e.target.closest('#tipsToggle') && !e.target.closest('#tipsPopup')){
+    document.getElementById('tipsPopup').classList.remove('open');
+  }
+});
+
+window.addEventListener('resize', () => {
+  if(map) setTimeout(() => map.invalidateSize(), 100);
+});
+</script>
+</body>
+</html>
