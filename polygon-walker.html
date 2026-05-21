@@ -363,6 +363,132 @@
     .prompt-actions button.primary{
       background:var(--yellow);border-color:var(--yellow);color:var(--black);
     }
+
+    /* ========= FLOATING MODE BUTTONS (top-right under nav) ========= */
+    .mode-stack{
+      position:fixed;
+      top:118px;
+      left:12px;
+      z-index:500;
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+    }
+    .mode-fab{
+      width:42px;height:42px;
+      background:rgba(10,10,10,0.85);
+      backdrop-filter:blur(10px);
+      border:1px solid var(--border-strong);
+      color:rgba(255,255,255,0.65);
+      border-radius:6px;
+      cursor:pointer;
+      display:flex;align-items:center;justify-content:center;
+      transition:all 0.15s;
+      padding:0;
+    }
+    .mode-fab:active{transform:scale(0.94);}
+    .mode-fab.active{
+      background:var(--yellow);
+      color:var(--black);
+      border-color:var(--yellow);
+      box-shadow:0 0 14px rgba(206,255,26,0.35);
+    }
+    .mode-fab svg{display:block;}
+
+    /* Map cursor in click mode */
+    .map-wrap.click-mode #map{cursor:crosshair;}
+    .map-wrap.click-mode .leaflet-grab{cursor:crosshair !important;}
+
+    /* Draggable corner marker visual cue */
+    .corner-marker.draggable .corner-pin{
+      cursor:move;
+      box-shadow:0 0 0 1px rgba(255,255,255,0.9), 0 0 12px rgba(255,255,255,0.4), 0 2px 6px rgba(0,0,0,0.6) !important;
+    }
+
+    /* Click-mode hint toast */
+    .mode-hint{
+      position:fixed;
+      top:118px;
+      left:60px;
+      z-index:500;
+      background:rgba(10,10,10,0.92);
+      backdrop-filter:blur(10px);
+      border:1px solid rgba(206,255,26,0.4);
+      color:var(--yellow);
+      font-size:11px;
+      font-weight:600;
+      letter-spacing:0.04em;
+      padding:11px 14px;
+      border-radius:6px;
+      max-width:230px;
+      line-height:1.45;
+      opacity:0;
+      transform:translateX(-8px);
+      pointer-events:none;
+      transition:opacity 0.25s, transform 0.25s;
+    }
+    .mode-hint.show{opacity:1;transform:translateX(0);}
+    .mode-hint b{color:#fff;font-weight:700;}
+
+    /* ========= IMPORT SECTION IN SHEET ========= */
+    .import-block{
+      background:rgba(255,255,255,0.02);
+      border:1px solid var(--border);
+      border-radius:6px;
+      padding:14px;
+      margin-bottom:14px;
+    }
+    .import-label{
+      font-size:11px;font-weight:700;letter-spacing:0.1em;
+      text-transform:uppercase;color:rgba(255,255,255,0.5);
+      margin-bottom:9px;
+    }
+    .import-textarea{
+      width:100%;
+      background:rgba(0,0,0,0.5);
+      border:1px solid var(--border-strong);
+      color:#fff;
+      font-family:'SF Mono','Menlo','Consolas',monospace;
+      font-size:11px;
+      line-height:1.55;
+      padding:10px 12px;
+      border-radius:4px;
+      resize:vertical;
+      min-height:90px;
+      outline:none;
+      transition:border-color 0.15s;
+    }
+    .import-textarea:focus{border-color:rgba(206,255,26,0.4);}
+    .import-textarea::placeholder{color:rgba(255,255,255,0.25);}
+    .import-actions{
+      display:flex;gap:8px;margin-top:10px;
+    }
+    .import-msg{
+      font-size:11px;
+      margin-top:8px;
+      line-height:1.5;
+      min-height:14px;
+    }
+    .import-msg.error{color:var(--warn);}
+    .import-msg.success{color:var(--yellow);}
+
+    .section-divider{
+      height:1px;
+      background:var(--border);
+      margin:18px 0 16px;
+    }
+    .section-title{
+      font-size:10px;font-weight:700;letter-spacing:0.14em;
+      text-transform:uppercase;color:rgba(255,255,255,0.35);
+      margin:0 0 10px;
+    }
+
+    /* Desktop refinements */
+    @media (min-width: 900px){
+      .mode-stack{top:90px;left:16px;}
+      .mode-hint{top:90px;left:64px;}
+      .leaflet-control-zoom{margin-top:90px !important;}
+    }
   </style>
 </head>
 <body>
@@ -399,16 +525,40 @@
 
   <button class="tips-toggle" id="tipsToggle" aria-label="Tips">?</button>
   <div class="tips-popup" id="tipsPopup">
-    <b>Tips</b><br>
+    <b>Telefoon (GPS)</b><br>
     • Wacht 10-15 sec bij elke hoek<br>
     • Houd telefoon hoog, weg van lichaam<br>
     • Tik pas als accuracy &lt; 15m (groen)<br>
-    • Loop één rondje ter "warming up"<br>
-    • Tik op <b>+</b> om een vleugel toe te voegen<br>
+    <br>
+    <b>Laptop (handmatig)</b><br>
+    • Schakel <b>satelliet view</b> in (icoon links)<br>
+    • Zet <b>klik modus</b> aan om hoeken te tikken<br>
+    • Sleep bestaande hoeken om ze te verfijnen<br>
+    • Of <b>importeer</b> coördinaten via de Lijst<br>
+    <br>
+    <b>Vleugels</b><br>
+    • Tik <b>+</b> om een vleugel toe te voegen<br>
     • Open de lijst om te hernoemen of wissen
   </div>
 
-  <div class="map-wrap">
+  <div class="mode-stack">
+    <button class="mode-fab" id="satelliteFab" aria-label="Satelliet view" title="Satelliet view">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+        <path d="M4.5 9.5L14.5 19.5C15 20 16 20 16.5 19.5L19.5 16.5C20 16 20 15 19.5 14.5L9.5 4.5C9 4 8 4 7.5 4.5L4.5 7.5C4 8 4 9 4.5 9.5Z" stroke="currentColor" stroke-width="1.8"/>
+        <path d="M2 16C2 18 4 20 6 20M2 12C2 16 6 22 12 22M8 2C5 2 2 5 2 8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+        <circle cx="12" cy="12" r="1.5" fill="currentColor"/>
+      </svg>
+    </button>
+    <button class="mode-fab" id="clickFab" aria-label="Klik modus" title="Klik op kaart om hoek toe te voegen">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+        <path d="M9 3L12 12L21 9L12 21L9 3Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+      </svg>
+    </button>
+  </div>
+
+  <div class="mode-hint" id="modeHint"></div>
+
+  <div class="map-wrap" id="mapWrap">
     <div id="map"></div>
   </div>
 
@@ -550,6 +700,37 @@ function seedDefaults(){
 
 let map, userMarker, accCircle;
 const wingMapLayers = {};
+let tileLayer = null;
+let satelliteMode = false;
+let clickMode = false;
+
+const TILE_DARK = {
+  url: 'https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png',
+  options: {
+    attribution: '© OpenStreetMap © CARTO',
+    subdomains: 'abcd',
+    maxZoom: 22,
+    maxNativeZoom: 19,
+  }
+};
+const TILE_SATELLITE = {
+  url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+  options: {
+    attribution: 'Tiles © Esri — World Imagery',
+    maxZoom: 22,
+    maxNativeZoom: 19,
+  }
+};
+
+function setTileLayer(useSatellite){
+  if(!map) return;
+  if(tileLayer) map.removeLayer(tileLayer);
+  const spec = useSatellite ? TILE_SATELLITE : TILE_DARK;
+  tileLayer = L.tileLayer(spec.url, spec.options).addTo(map);
+  satelliteMode = useSatellite;
+  document.getElementById('satelliteFab').classList.toggle('active', useSatellite);
+  try { localStorage.setItem('adam_polygon_walker_tile', useSatellite ? 'sat' : 'dark'); } catch(e){}
+}
 
 function initMap(initialLat, initialLon){
   map = L.map('map', {
@@ -559,12 +740,30 @@ function initMap(initialLat, initialLon){
     tap: true,
   }).setView([initialLat, initialLon], 19);
 
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png', {
-    attribution: '© OpenStreetMap © CARTO',
-    subdomains: 'abcd',
-    maxZoom: 22,
-    maxNativeZoom: 19,
-  }).addTo(map);
+  // Restore tile preference
+  let savedTile = 'dark';
+  try { savedTile = localStorage.getItem('adam_polygon_walker_tile') || 'dark'; } catch(e){}
+  setTileLayer(savedTile === 'sat');
+
+  // Map click handler for click-mode
+  map.on('click', (e) => {
+    if(!clickMode) return;
+    if(!state.currentId) return;
+    const wing = state.wings[state.currentId];
+    if(!wing) return;
+    wing.corners.push({
+      lat: e.latlng.lat,
+      lon: e.latlng.lng,
+      accuracy: 0,         // manual entry — no GPS accuracy
+      ts: Date.now(),
+      manual: true
+    });
+    saveState();
+    redrawWing(state.currentId);
+    updateUI();
+    // small haptic on touch devices
+    if(navigator.vibrate) navigator.vibrate(15);
+  });
 
   state.order.forEach(redrawWing);
 }
@@ -578,9 +777,10 @@ function userIcon(){
   });
 }
 
-function cornerIcon(num, color){
+function cornerIcon(num, color, draggable){
+  const cls = 'corner-marker' + (draggable ? ' draggable' : '');
   return L.divIcon({
-    className: 'corner-marker',
+    className: cls,
     html: '<div class="corner-pin" style="background:' + color + ';box-shadow:0 0 0 1px ' + color + '99, 0 2px 6px rgba(0,0,0,0.6)">' + num + '</div>',
     iconSize: [30,30],
     iconAnchor: [15,15],
@@ -657,12 +857,30 @@ function redrawWing(id){
   }
 
   corners.forEach((c, i) => {
+    const draggable = clickMode && isActive;
     const m = L.marker([c.lat, c.lon], {
-      icon: cornerIcon(i + 1, color),
+      icon: cornerIcon(i + 1, color, draggable),
       keyboard: false,
-      interactive: false,
+      interactive: draggable,
+      draggable: draggable,
       zIndexOffset: 500,
     }).addTo(map);
+    if(draggable){
+      m.on('drag', (ev) => {
+        const ll = ev.target.getLatLng();
+        c.lat = ll.lat;
+        c.lon = ll.lng;
+        c.manual = true;
+        // live update polygon/line as we drag (don't fully redraw or marker recreates and drag breaks)
+        if(layer.polygon) layer.polygon.setLatLngs(corners.map(p => [p.lat, p.lon]));
+        if(layer.polyline) layer.polyline.setLatLngs(corners.map(p => [p.lat, p.lon]));
+      });
+      m.on('dragend', () => {
+        saveState();
+        updateUI();
+        if(navigator.vibrate) navigator.vibrate(15);
+      });
+    }
     layer.markers.push(m);
   });
 
@@ -866,6 +1084,19 @@ function renderSheet(){
 
   let html = '';
 
+  // ===== IMPORT SECTION =====
+  html += '<div class="import-block">';
+  html += '<div class="import-label">Importeer coördinaten</div>';
+  html += '<textarea class="import-textarea" id="importInput" placeholder="Plak hier — bijvoorbeeld:&#10;&#10;53.1772345, 6.6032456&#10;53.1773456, 6.6033567&#10;53.1771234, 6.6034678&#10;&#10;Of een heel JSON-blok uit een export."></textarea>';
+  html += '<div class="import-actions">';
+  html += '<button class="sheet-btn primary" data-action="import-new">Importeer als nieuwe vleugel(s)</button>';
+  html += '<button class="sheet-btn" data-action="import-add">Voeg toe aan deze</button>';
+  html += '</div>';
+  html += '<div class="import-msg" id="importMsg"></div>';
+  html += '</div>';
+
+  html += '<div class="section-divider"></div>';
+
   html += '<div class="polygon-actions">';
   html += '<button class="sheet-btn" data-action="rename">Hernoem</button>';
   html += '<button class="sheet-btn danger" data-action="delete-poly">Verwijder polygoon</button>';
@@ -918,6 +1149,29 @@ function renderSheet(){
         });
       } else if(a === 'delete-poly'){
         if(confirm('Polygoon "' + wing.name + '" helemaal verwijderen?')) deletePolygon(state.currentId);
+      } else if(a === 'import-new' || a === 'import-add'){
+        const text = document.getElementById('importInput').value;
+        const msg = document.getElementById('importMsg');
+        const result = parseImportText(text);
+        if(result.error){
+          msg.className = 'import-msg error';
+          msg.textContent = result.error;
+          return;
+        }
+        if(a === 'import-new'){
+          const n = importToNewWings(result);
+          msg.className = 'import-msg success';
+          msg.textContent = n + (n === 1 ? ' vleugel' : ' vleugels') + ' geïmporteerd.';
+          document.getElementById('importInput').value = '';
+          // re-render sheet to show new active wing
+          renderSheet();
+        } else {
+          const n = importToCurrentWing(result);
+          msg.className = 'import-msg success';
+          msg.textContent = n + (n === 1 ? ' hoek' : ' hoeken') + ' toegevoegd aan "' + wing.name + '".';
+          document.getElementById('importInput').value = '';
+          renderSheet();
+        }
       }
     });
   });
@@ -1096,6 +1350,160 @@ document.addEventListener('click', (e) => {
     document.getElementById('tipsPopup').classList.remove('open');
   }
 });
+
+/* =========================================================
+   MODE TOGGLES (satellite + click-to-add)
+   ========================================================= */
+function showModeHint(text, duration){
+  const el = document.getElementById('modeHint');
+  el.innerHTML = text;
+  el.classList.add('show');
+  clearTimeout(showModeHint._t);
+  if(duration > 0){
+    showModeHint._t = setTimeout(() => el.classList.remove('show'), duration);
+  }
+}
+function hideModeHint(){
+  document.getElementById('modeHint').classList.remove('show');
+  clearTimeout(showModeHint._t);
+}
+
+document.getElementById('satelliteFab').addEventListener('click', () => {
+  setTileLayer(!satelliteMode);
+  showModeHint(satelliteMode ? '<b>Satelliet</b> view' : '<b>Donkere</b> kaart', 1400);
+});
+
+function setClickMode(on){
+  clickMode = on;
+  document.getElementById('clickFab').classList.toggle('active', clickMode);
+  document.getElementById('mapWrap').classList.toggle('click-mode', clickMode);
+  if(clickMode){
+    showModeHint('<b>Klik modus aan.</b><br>Klik op de kaart om hoeken toe te voegen. Sleep bestaande hoeken om te verfijnen.', 0);
+  } else {
+    hideModeHint();
+  }
+  // redraw active wing so markers become draggable / non-draggable
+  if(state.currentId) redrawWing(state.currentId);
+}
+document.getElementById('clickFab').addEventListener('click', () => setClickMode(!clickMode));
+
+/* =========================================================
+   IMPORT PARSER
+   Accepts:
+     - Full JSON object:   { name: 'X', polygon: [[lat,lon],...] }
+     - Array of wings:     [{ name, polygon }, ...]  OR  const wings = [...]
+     - Raw lat,lon pairs:  one per line, comma- or space-separated
+   ========================================================= */
+function parseImportText(text){
+  text = (text || '').trim();
+  if(!text) return { error: 'Plak eerst coördinaten of een JSON blok.' };
+
+  // Try JSON first (with light cleanup of JS-style content)
+  let jsonText = text
+    .replace(/^const\s+\w+\s*=\s*/, '')  // strip "const wings ="
+    .replace(/;\s*$/, '')                 // strip trailing semicolon
+    .replace(/\/\/[^\n]*/g, '');          // strip line comments
+
+  // Convert JS keys (name:, polygon:) to JSON keys ("name":, "polygon":)
+  // and single quotes to double quotes
+  let jsonCandidate = jsonText
+    .replace(/([{,]\s*)(\w+)(\s*:)/g, '$1"$2"$3')
+    .replace(/'/g, '"');
+
+  let parsed = null;
+  try { parsed = JSON.parse(jsonCandidate); } catch(e){ parsed = null; }
+
+  if(parsed){
+    // Single wing object?
+    if(parsed && typeof parsed === 'object' && !Array.isArray(parsed) && Array.isArray(parsed.polygon)){
+      return { wings: [normalizeWing(parsed)] };
+    }
+    // Array of wings?
+    if(Array.isArray(parsed) && parsed.length > 0 && parsed[0].polygon){
+      return { wings: parsed.map(normalizeWing) };
+    }
+    // Array of [lat,lon] pairs?
+    if(Array.isArray(parsed) && parsed.length > 0 && Array.isArray(parsed[0]) && parsed[0].length >= 2){
+      return { wings: [{ name: null, corners: parsed.map(p => makeCorner(p[0], p[1])) }] };
+    }
+  }
+
+  // Fallback: parse as raw lat,lon lines
+  const lines = text.split(/\n/).map(l => l.trim()).filter(l => l && !l.startsWith('//'));
+  const corners = [];
+  for(const line of lines){
+    // Remove brackets, then extract two numbers
+    const cleaned = line.replace(/[\[\]()]/g, '');
+    const m = cleaned.match(/(-?\d+\.?\d*)\s*[,\s]\s*(-?\d+\.?\d*)/);
+    if(m){
+      const lat = parseFloat(m[1]);
+      const lon = parseFloat(m[2]);
+      if(isFinite(lat) && isFinite(lon) && Math.abs(lat) <= 90 && Math.abs(lon) <= 180){
+        corners.push(makeCorner(lat, lon));
+      }
+    }
+  }
+  if(corners.length === 0){
+    return { error: 'Geen geldige coördinaten gevonden. Verwacht: lat,lon per regel, of een JSON blok.' };
+  }
+  return { wings: [{ name: null, corners: corners }] };
+}
+
+function makeCorner(lat, lon){
+  return { lat: lat, lon: lon, accuracy: 0, ts: Date.now(), manual: true };
+}
+
+function normalizeWing(w){
+  const corners = (w.polygon || []).map(p => makeCorner(p[0], p[1]));
+  return { name: w.name || null, corners: corners };
+}
+
+function importToNewWings(parsedResult){
+  const created = [];
+  parsedResult.wings.forEach(w => {
+    const id = makeId();
+    const idx = state.order.length;
+    state.wings[id] = {
+      id: id,
+      name: w.name || ('Vleugel ' + String.fromCharCode(65 + idx)),
+      color: nextColor(idx),
+      corners: w.corners,
+    };
+    state.order.push(id);
+    created.push(id);
+  });
+  if(created.length > 0){
+    state.currentId = created[created.length - 1];
+  }
+  saveState();
+  // redraw all and re-render UI
+  Object.keys(wingMapLayers).forEach(clearWingLayer);
+  state.order.forEach(redrawWing);
+  updateUI();
+  return created.length;
+}
+
+function importToCurrentWing(parsedResult){
+  if(!state.currentId) return 0;
+  const wing = state.wings[state.currentId];
+  if(!wing) return 0;
+  // concat all corners from all parsed wings into the current one
+  let added = 0;
+  parsedResult.wings.forEach(w => {
+    w.corners.forEach(c => {
+      wing.corners.push(c);
+      added++;
+    });
+  });
+  saveState();
+  redrawWing(state.currentId);
+  updateUI();
+  return added;
+}
+
+function nextColor(idx){
+  return COLOR_PALETTE[idx % COLOR_PALETTE.length];
+}
 
 window.addEventListener('resize', () => {
   if(map) setTimeout(() => map.invalidateSize(), 100);
