@@ -5,9 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
   <meta name="robots" content="noindex, nofollow"/>
   <meta name="theme-color" content="#0A0A0A"/>
-  <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <title>Geo Trigger Demo | ADAM AI Agents</title>
-  <meta name="description" content="Proof of concept: een ADAM agent die activeert zodra je binnen 50 meter van een locatie bent. Loop naar de Biotoop in Haren en begin het gesprek."/>
+  <meta name="description" content="Proof of concept: een ADAM agent die per vleugel van De Biotoop activeert zodra je naar binnen loopt."/>
 
   <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
@@ -33,6 +32,7 @@
       --border-strong:rgba(255,255,255,0.12);
       --muted:rgba(255,255,255,0.4);
       --dim:rgba(255,255,255,0.25);
+      --warn:#ff7a45;
     }
 
     html,body{
@@ -46,521 +46,347 @@
 
     /* ========= NAV ========= */
     .nav{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      padding:0 48px;
-      height:64px;
-      position:fixed;
-      top:0;left:0;right:0;
-      z-index:30;
+      display:flex;align-items:center;justify-content:space-between;
+      padding:0 48px;height:64px;
+      position:fixed;top:0;left:0;right:0;z-index:30;
       border-bottom:1px solid var(--border);
       backdrop-filter:blur(10px);
       background:rgba(10,10,10,0.85);
     }
-
-    .nav-logo{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      text-decoration:none;
-    }
-    .nav-logo-text{
-      font-size:16px;
-      font-weight:800;
-      color:#fff;
-      letter-spacing:0.05em;
-    }
+    .nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none;}
+    .nav-logo-text{font-size:16px;font-weight:800;color:#fff;letter-spacing:0.05em;}
     .nav-logo-mark{
-      width:24px;height:24px;
-      border-radius:6px;
-      background:var(--yellow);
+      width:24px;height:24px;border-radius:6px;background:var(--yellow);
       display:flex;align-items:center;justify-content:center;
-      color:var(--black);
-      font-weight:800;
-      font-size:13px;
-      letter-spacing:-0.03em;
+      color:var(--black);font-weight:800;font-size:13px;
     }
-
     .nav-status{
-      position:absolute;
-      left:50%;
-      top:50%;
-      transform:translate(-50%, -50%);
-      display:flex;
-      align-items:center;
-      gap:8px;
-      font-size:12px;
-      font-weight:600;
-      letter-spacing:0.08em;
-      text-transform:uppercase;
-      color:rgba(255,255,255,0.45);
+      position:absolute;left:50%;top:50%;transform:translate(-50%, -50%);
+      display:flex;align-items:center;gap:8px;
+      font-size:12px;font-weight:600;letter-spacing:0.08em;
+      text-transform:uppercase;color:rgba(255,255,255,0.45);
     }
     .nav-status-dot{
-      width:7px;height:7px;
-      border-radius:50%;
-      background:#444;
+      width:7px;height:7px;border-radius:50%;background:#444;
       transition:background 0.3s, box-shadow 0.3s;
     }
-    .nav-status-dot.searching{
-      background:#888;
-      animation:pulse-dot-soft 1.4s ease-in-out infinite;
-    }
-    .nav-status-dot.ready{
-      background:var(--yellow);
-      box-shadow:0 0 8px rgba(206,255,26,0.5);
-    }
-    .nav-status-dot.active{
-      background:var(--yellow);
-      animation:pulse-dot 1.2s ease-in-out infinite;
-    }
-    .nav-status-dot.warn{
-      background:#ff7a45;
-    }
+    .nav-status-dot.searching{background:#888;animation:pulse-dot-soft 1.4s ease-in-out infinite;}
+    .nav-status-dot.ready{background:var(--yellow);box-shadow:0 0 8px rgba(206,255,26,0.5);}
+    .nav-status-dot.active{background:var(--yellow);animation:pulse-dot 1.2s ease-in-out infinite;}
+    .nav-status-dot.warn{background:var(--warn);}
 
     @keyframes pulse-dot{
       0%,100%{box-shadow:0 0 6px rgba(206,255,26,0.4);}
       50%{box-shadow:0 0 14px rgba(206,255,26,0.85);}
     }
-    @keyframes pulse-dot-soft{
-      0%,100%{opacity:0.4;}
-      50%{opacity:1;}
-    }
+    @keyframes pulse-dot-soft{0%,100%{opacity:0.4;}50%{opacity:1;}}
 
     .nav-back{
-      font-size:13px;
-      font-weight:600;
-      color:rgba(255,255,255,0.4);
-      text-decoration:none;
-      display:flex;
-      align-items:center;
-      gap:6px;
+      font-size:13px;font-weight:600;color:rgba(255,255,255,0.4);
+      text-decoration:none;display:flex;align-items:center;gap:6px;
       transition:color 0.2s;
     }
     .nav-back:hover{color:#fff;}
 
     /* ========= LAYOUT ========= */
-    .layout{
-      display:grid;
-      grid-template-columns:420px 1fr;
-      height:100vh;
-      padding-top:64px;
-    }
+    .layout{display:grid;grid-template-columns:420px 1fr;height:100vh;padding-top:64px;}
 
     /* ========= LEFT PANEL ========= */
     .left-panel{
-      background:var(--panel);
-      border-right:1px solid var(--border);
-      display:flex;
-      flex-direction:column;
-      overflow:hidden;
+      background:var(--panel);border-right:1px solid var(--border);
+      display:flex;flex-direction:column;overflow:hidden;
     }
-
-    .left-header{
-      padding:36px 40px 28px;
-      border-bottom:1px solid var(--border);
-    }
+    .left-header{padding:36px 40px 28px;border-bottom:1px solid var(--border);}
     .left-eyebrow{
-      font-size:11px;
-      font-weight:700;
-      letter-spacing:0.14em;
-      text-transform:uppercase;
-      color:var(--yellow);
-      margin-bottom:12px;
+      font-size:11px;font-weight:700;letter-spacing:0.14em;
+      text-transform:uppercase;color:var(--yellow);margin-bottom:12px;
     }
-    .left-title{
-      font-size:22px;
-      font-weight:800;
-      line-height:1.15;
-      letter-spacing:-0.02em;
-    }
-    .left-subtitle{
-      font-size:13px;
-      color:var(--muted);
-      margin-top:10px;
-      line-height:1.6;
-    }
+    .left-title{font-size:22px;font-weight:800;line-height:1.15;letter-spacing:-0.02em;}
+    .left-subtitle{font-size:13px;color:var(--muted);margin-top:10px;line-height:1.6;}
 
     .left-body{
-      padding:24px 40px 28px;
-      flex:1;
-      overflow-y:auto;
-      scrollbar-width:thin;
-      scrollbar-color:rgba(255,255,255,0.1) transparent;
+      padding:24px 40px 28px;flex:1;overflow-y:auto;
+      scrollbar-width:thin;scrollbar-color:rgba(255,255,255,0.1) transparent;
     }
     .left-body::-webkit-scrollbar{width:3px;}
     .left-body::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.1);border-radius:3px;}
 
-    .info-block{
-      margin-bottom:28px;
-    }
+    .info-block{margin-bottom:28px;}
     .info-block:last-child{margin-bottom:0;}
-
     .info-block-label{
-      font-size:11px;
-      font-weight:700;
-      letter-spacing:0.12em;
-      text-transform:uppercase;
-      color:rgba(255,255,255,0.35);
-      margin-bottom:14px;
+      font-size:11px;font-weight:700;letter-spacing:0.12em;
+      text-transform:uppercase;color:rgba(255,255,255,0.35);margin-bottom:14px;
     }
 
-    /* ========= MODE TOGGLE ========= */
     .mode-toggle{
-      display:flex;
-      background:rgba(255,255,255,0.04);
-      border:1px solid var(--border);
-      border-radius:4px;
-      padding:3px;
-      gap:3px;
+      display:flex;background:rgba(255,255,255,0.04);
+      border:1px solid var(--border);border-radius:4px;padding:3px;gap:3px;
     }
     .mode-btn{
-      flex:1;
-      background:transparent;
-      border:none;
-      color:rgba(255,255,255,0.5);
-      font-family:inherit;
-      font-size:11px;
-      font-weight:700;
-      letter-spacing:0.1em;
-      text-transform:uppercase;
-      padding:9px 12px;
-      cursor:pointer;
-      border-radius:3px;
-      transition:all 0.2s;
+      flex:1;background:transparent;border:none;
+      color:rgba(255,255,255,0.5);font-family:inherit;
+      font-size:11px;font-weight:700;letter-spacing:0.1em;
+      text-transform:uppercase;padding:9px 12px;cursor:pointer;
+      border-radius:3px;transition:all 0.2s;
     }
     .mode-btn:hover{color:#fff;}
-    .mode-btn.active{
-      background:var(--yellow);
-      color:var(--black);
-    }
+    .mode-btn.active{background:var(--yellow);color:var(--black);}
 
-    /* ========= STATUS READOUT ========= */
     .status-block{
       background:rgba(255,255,255,0.03);
-      border:1px solid var(--border);
-      border-radius:4px;
-      padding:16px;
+      border:1px solid var(--border);border-radius:4px;padding:16px;
     }
     .status-row{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      padding:7px 0;
-      font-size:12px;
+      display:flex;align-items:center;justify-content:space-between;
+      padding:7px 0;font-size:12px;
     }
-    .status-row + .status-row{
-      border-top:1px solid var(--border);
-    }
+    .status-row + .status-row{border-top:1px solid var(--border);}
     .status-label{
-      color:rgba(255,255,255,0.35);
-      font-weight:500;
-      letter-spacing:0.04em;
-      text-transform:uppercase;
-      font-size:10px;
+      color:rgba(255,255,255,0.35);font-weight:500;
+      letter-spacing:0.04em;text-transform:uppercase;font-size:10px;
     }
     .status-value{
-      color:#fff;
-      font-weight:600;
-      font-variant-numeric:tabular-nums;
-      font-size:13px;
+      color:#fff;font-weight:600;
+      font-variant-numeric:tabular-nums;font-size:13px;
+      text-align:right;
+      max-width:60%;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
     }
     .status-value.accent{color:var(--yellow);}
-    .status-value.warn{color:#ff9466;}
+    .status-value.warn{color:var(--warn);}
     .status-value.dim{color:rgba(255,255,255,0.35);}
 
-    /* ========= HOW IT WORKS ========= */
-    .steps{
-      display:flex;
-      flex-direction:column;
-      gap:14px;
+    /* Wing chip in status */
+    .active-wing-card{
+      background:rgba(206,255,26,0.06);
+      border:1px solid rgba(206,255,26,0.25);
+      border-radius:5px;
+      padding:14px 14px 12px;
+      margin-top:10px;
+      display:none;
     }
-    .step{
-      display:flex;
-      align-items:flex-start;
-      gap:14px;
-      font-size:13px;
-      color:rgba(255,255,255,0.55);
-      line-height:1.55;
-    }
-    .step-num{
-      width:22px;height:22px;
-      border-radius:50%;
-      border:1px solid rgba(206,255,26,0.35);
+    .active-wing-card.visible{display:block;}
+    .active-wing-label{
+      font-size:10px;font-weight:700;
+      letter-spacing:0.14em;text-transform:uppercase;
       color:var(--yellow);
-      display:flex;align-items:center;justify-content:center;
-      font-size:11px;
-      font-weight:700;
-      flex-shrink:0;
-      margin-top:1px;
     }
-    .step b{color:#fff;font-weight:700;}
+    .active-wing-name{
+      font-size:17px;font-weight:800;
+      color:#fff;margin:6px 0 6px;letter-spacing:-0.01em;
+    }
+    .active-wing-focus{
+      font-size:12px;color:rgba(255,255,255,0.55);
+      line-height:1.5;
+    }
 
-    /* ========= DEMO MODE SHORTCUTS ========= */
-    .demo-shortcuts{
+    /* Wing list in demo mode */
+    .wing-grid{
       display:grid;
-      grid-template-columns:1fr 1fr 1fr;
+      grid-template-columns:1fr 1fr;
       gap:6px;
     }
-    .shortcut-btn{
+    .wing-chip{
       background:rgba(255,255,255,0.04);
       border:1px solid var(--border);
-      color:rgba(255,255,255,0.6);
+      color:rgba(255,255,255,0.7);
       font-family:inherit;
-      font-size:10px;
+      font-size:11px;
       font-weight:700;
-      letter-spacing:0.06em;
-      text-transform:uppercase;
-      padding:11px 6px;
+      letter-spacing:0.04em;
+      padding:11px 10px;
       cursor:pointer;
-      border-radius:3px;
-      transition:all 0.2s;
-      line-height:1.3;
+      border-radius:4px;
+      transition:all 0.15s;
+      display:flex;
+      align-items:center;
+      gap:8px;
+      text-align:left;
     }
-    .shortcut-btn:hover{
+    .wing-chip:hover{
       background:rgba(206,255,26,0.08);
       border-color:rgba(206,255,26,0.3);
       color:#fff;
     }
-    .shortcut-btn.in-range{
-      background:rgba(206,255,26,0.08);
-      border-color:rgba(206,255,26,0.25);
+    .wing-chip.current{
+      background:rgba(206,255,26,0.1);
+      border-color:rgba(206,255,26,0.4);
       color:var(--yellow);
     }
+    .wing-chip .dot{
+      width:8px;height:8px;border-radius:50%;
+      background:var(--yellow);flex-shrink:0;
+    }
+    .outside-chip{
+      width:100%;
+      margin-top:6px;
+      background:rgba(255,122,69,0.06);
+      border:1px solid rgba(255,122,69,0.2);
+      color:rgba(255,122,69,0.8);
+      font-family:inherit;
+      font-size:11px;font-weight:700;letter-spacing:0.06em;
+      padding:10px;cursor:pointer;border-radius:4px;
+      transition:all 0.15s;
+    }
+    .outside-chip:hover{
+      background:rgba(255,122,69,0.1);
+      color:#ff9466;
+    }
     .demo-hint{
-      font-size:11px;
-      color:rgba(255,255,255,0.3);
-      line-height:1.5;
-      margin-top:10px;
+      font-size:11px;color:rgba(255,255,255,0.3);
+      line-height:1.5;margin-top:10px;
     }
 
-    /* ========= LEFT FOOTER ========= */
-    .left-footer{
-      padding:20px 40px;
-      border-top:1px solid var(--border);
+    /* Steps */
+    .steps{display:flex;flex-direction:column;gap:14px;}
+    .step{
+      display:flex;align-items:flex-start;gap:14px;
+      font-size:13px;color:rgba(255,255,255,0.55);line-height:1.55;
     }
-    .api-notice{
-      font-size:10px;
-      color:rgba(255,255,255,0.25);
-      line-height:1.6;
-      letter-spacing:0.02em;
+    .step-num{
+      width:22px;height:22px;border-radius:50%;
+      border:1px solid rgba(206,255,26,0.35);color:var(--yellow);
+      display:flex;align-items:center;justify-content:center;
+      font-size:11px;font-weight:700;flex-shrink:0;margin-top:1px;
     }
-    .api-notice span{
-      color:rgba(206,255,26,0.55);
-      font-weight:600;
-    }
+    .step b{color:#fff;font-weight:700;}
+
+    .left-footer{padding:20px 40px;border-top:1px solid var(--border);}
+    .api-notice{font-size:10px;color:rgba(255,255,255,0.25);line-height:1.6;letter-spacing:0.02em;}
+    .api-notice span{color:rgba(206,255,26,0.55);font-weight:600;}
 
     /* ========= RIGHT PANEL ========= */
     .right-panel{
-      position:relative;
-      display:flex;
-      flex-direction:column;
-      overflow:hidden;
-      min-height:0;
+      position:relative;display:flex;flex-direction:column;
+      overflow:hidden;min-height:0;
     }
     .right-canvas{
-      position:absolute;
-      top:0;left:0;
-      width:100%;height:100%;
-      pointer-events:none;
-      z-index:0;
+      position:absolute;top:0;left:0;width:100%;height:100%;
+      pointer-events:none;z-index:0;
     }
 
-    /* ========= MAP ========= */
     .map-wrap{
-      position:relative;
-      width:calc(100% - 64px);
-      margin:32px 32px 0;
-      flex:0 0 auto;
-      height:42%;
-      min-height:280px;
-      border-radius:8px;
-      overflow:hidden;
-      border:1px solid var(--border-strong);
-      z-index:2;
+      position:relative;width:calc(100% - 64px);
+      margin:32px 32px 0;flex:0 0 auto;
+      height:42%;min-height:280px;
+      border-radius:8px;overflow:hidden;
+      border:1px solid var(--border-strong);z-index:2;
       background:#0a0a14;
     }
-    #map{
-      width:100%;height:100%;
-      background:#0a0a14;
-    }
+    #map{width:100%;height:100%;background:#0a0a14;}
     .leaflet-container{
       background:#0a0a14 !important;
       font-family:'Sora',sans-serif !important;
     }
     .leaflet-control-zoom{
-      border:1px solid var(--border-strong) !important;
-      box-shadow:none !important;
+      border:1px solid var(--border-strong) !important;box-shadow:none !important;
     }
     .leaflet-control-zoom a{
-      background:rgba(10,10,10,0.9) !important;
-      color:#fff !important;
+      background:rgba(10,10,10,0.9) !important;color:#fff !important;
       border-color:var(--border) !important;
     }
-    .leaflet-control-zoom a:hover{
-      background:rgba(206,255,26,0.15) !important;
-    }
+    .leaflet-control-zoom a:hover{background:rgba(206,255,26,0.15) !important;}
     .leaflet-control-attribution{
       background:rgba(10,10,10,0.7) !important;
-      color:rgba(255,255,255,0.4) !important;
-      font-size:9px !important;
+      color:rgba(255,255,255,0.4) !important;font-size:9px !important;
     }
     .leaflet-control-attribution a{color:rgba(206,255,26,0.6) !important;}
 
     .map-overlay-badge{
-      position:absolute;
-      top:14px;left:14px;
-      z-index:1000;
-      background:rgba(10,10,10,0.85);
-      backdrop-filter:blur(8px);
-      border:1px solid var(--border-strong);
-      border-radius:3px;
-      padding:7px 11px;
-      font-size:10px;
-      font-weight:700;
-      letter-spacing:0.1em;
-      text-transform:uppercase;
+      position:absolute;top:14px;left:14px;z-index:1000;
+      background:rgba(10,10,10,0.85);backdrop-filter:blur(8px);
+      border:1px solid var(--border-strong);border-radius:3px;
+      padding:7px 11px;font-size:10px;font-weight:700;
+      letter-spacing:0.1em;text-transform:uppercase;
       color:rgba(255,255,255,0.6);
-      display:flex;
-      align-items:center;
-      gap:8px;
-      pointer-events:none;
+      display:flex;align-items:center;gap:8px;pointer-events:none;
     }
     .map-overlay-badge .mob-dot{
-      width:6px;height:6px;
-      border-radius:50%;
-      background:var(--yellow);
+      width:6px;height:6px;border-radius:50%;background:var(--yellow);
     }
     .map-overlay-badge.demo .mob-dot{background:#5aa3ff;}
 
-    .poi-marker{
-      width:38px;height:38px;
-      display:flex;align-items:center;justify-content:center;
+    /* Polygon labels on map */
+    .wing-label{
+      background:transparent;border:none;pointer-events:none;
+      font-family:'Sora',sans-serif;
+      font-size:9px;
+      font-weight:800;
+      color:rgba(206,255,26,0.75);
+      letter-spacing:0.06em;
+      text-transform:uppercase;
+      text-shadow:0 1px 2px rgba(0,0,0,0.8), 0 0 4px rgba(0,0,0,0.5);
+      white-space:nowrap;
     }
-    .poi-marker-pin{
-      width:18px;height:18px;
-      background:var(--yellow);
-      border:3px solid var(--black);
-      border-radius:50%;
-      box-shadow:0 0 0 1px var(--yellow), 0 0 16px rgba(206,255,26,0.7);
-      position:relative;
-    }
-    .poi-marker-pin::after{
-      content:'';
-      position:absolute;
-      inset:-12px;
-      border-radius:50%;
-      border:1px solid rgba(206,255,26,0.3);
-      animation:ring-expand-poi 2.4s ease-out infinite;
-    }
-    @keyframes ring-expand-poi{
-      0%{opacity:0;transform:scale(0.6);}
-      30%{opacity:1;}
-      100%{opacity:0;transform:scale(1.5);}
+    .wing-label.active{
+      color:#fff;
+      font-size:10px;
+      text-shadow:0 1px 2px rgba(0,0,0,0.9), 0 0 6px rgba(206,255,26,0.6);
     }
 
+    /* User marker */
     .user-marker{
-      width:24px;height:24px;
-      display:flex;align-items:center;justify-content:center;
-      transition:filter 0.3s;
+      width:24px;height:24px;display:flex;align-items:center;justify-content:center;
     }
     .user-marker-dot{
-      width:14px;height:14px;
-      background:#fff;
-      border:3px solid var(--blue);
-      border-radius:50%;
+      width:14px;height:14px;background:#fff;
+      border:3px solid var(--blue);border-radius:50%;
       box-shadow:0 0 0 1px rgba(255,255,255,0.6), 0 2px 8px rgba(0,0,0,0.6);
     }
     .user-marker.draggable .user-marker-dot{
-      background:#5aa3ff;
-      border-color:#fff;
-      cursor:move;
+      background:#5aa3ff;border-color:#fff;cursor:move;
     }
 
     /* ========= ORB AREA ========= */
     .orb-area{
-      flex:1;
-      position:relative;
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      justify-content:center;
-      z-index:2;
-      padding:20px;
-      min-height:0;
+      flex:1;position:relative;
+      display:flex;flex-direction:column;
+      align-items:center;justify-content:center;
+      z-index:2;padding:20px;min-height:0;
     }
-
     .status-badge{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
+      display:inline-flex;align-items:center;gap:8px;
       background:rgba(255,255,255,0.05);
       border:1px solid var(--border-strong);
-      border-radius:999px;
-      padding:8px 16px;
-      font-size:11px;
-      font-weight:700;
-      letter-spacing:0.1em;
-      text-transform:uppercase;
-      color:rgba(255,255,255,0.5);
-      margin-bottom:28px;
-      transition:all 0.3s;
-      max-width:calc(100% - 32px);
-      text-align:center;
+      border-radius:999px;padding:8px 16px;
+      font-size:11px;font-weight:700;letter-spacing:0.1em;
+      text-transform:uppercase;color:rgba(255,255,255,0.5);
+      margin-bottom:28px;transition:all 0.3s;
+      max-width:calc(100% - 32px);text-align:center;
     }
-    .status-badge.searching{
-      color:rgba(255,255,255,0.65);
-    }
+    .status-badge.searching{color:rgba(255,255,255,0.65);}
     .status-badge.out-of-range{
       background:rgba(255,122,69,0.08);
-      border-color:rgba(255,122,69,0.25);
-      color:#ff9466;
+      border-color:rgba(255,122,69,0.25);color:var(--warn);
     }
     .status-badge.in-range{
       background:rgba(206,255,26,0.1);
-      border-color:rgba(206,255,26,0.3);
-      color:var(--yellow);
+      border-color:rgba(206,255,26,0.3);color:var(--yellow);
     }
     .status-badge-dot{
-      width:6px;height:6px;
-      border-radius:50%;
-      background:currentColor;
-      flex-shrink:0;
+      width:6px;height:6px;border-radius:50%;background:currentColor;flex-shrink:0;
     }
-    .status-badge.in-range .status-badge-dot{
-      animation:pulse-dot 1.2s ease-in-out infinite;
-    }
+    .status-badge.in-range .status-badge-dot{animation:pulse-dot 1.2s ease-in-out infinite;}
 
-    /* ========= ORB ========= */
     .orb-container{
-      position:relative;
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      gap:26px;
+      position:relative;display:flex;flex-direction:column;
+      align-items:center;gap:26px;
     }
     .orb-wrap{
-      position:relative;
-      width:170px;height:170px;
-      cursor:pointer;
+      position:relative;width:170px;height:170px;cursor:pointer;
       transition:filter 0.4s, opacity 0.4s;
     }
     .orb-wrap.locked{
       cursor:not-allowed;
-      filter:grayscale(0.85) brightness(0.55);
-      opacity:0.7;
+      filter:grayscale(0.85) brightness(0.55);opacity:0.7;
     }
-    .orb-rings{
-      position:absolute;
-      inset:-40px;
-      pointer-events:none;
-    }
+    .orb-rings{position:absolute;inset:-40px;pointer-events:none;}
     .orb-ring{
-      position:absolute;
-      border-radius:50%;
+      position:absolute;border-radius:50%;
       border:1px solid rgba(206,255,26,0.12);
-      opacity:0;
-      animation:ring-expand 3s ease-out infinite;
+      opacity:0;animation:ring-expand 3s ease-out infinite;
     }
     .orb-ring:nth-child(1){inset:40px;animation-delay:0s;}
     .orb-ring:nth-child(2){inset:20px;animation-delay:0.8s;}
@@ -573,67 +399,43 @@
     }
 
     .orb{
-      width:170px;height:170px;
-      border-radius:50%;
-      background:var(--blue);
-      position:relative;
-      overflow:hidden;
+      width:170px;height:170px;border-radius:50%;background:var(--blue);
+      position:relative;overflow:hidden;
       transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
     }
     .orb-wrap:not(.locked) .orb:hover{transform:scale(1.04);}
     .orb.speaking{animation:orb-pulse 0.8s ease-in-out infinite alternate;}
-    @keyframes orb-pulse{
-      from{transform:scale(1.04);}
-      to{transform:scale(1.09);}
-    }
+    @keyframes orb-pulse{from{transform:scale(1.04);}to{transform:scale(1.09);}}
     .orb-canvas{width:100%;height:100%;display:block;}
     .orb-icon{
       position:absolute;inset:0;
-      display:flex;align-items:center;justify-content:center;
-      pointer-events:none;
+      display:flex;align-items:center;justify-content:center;pointer-events:none;
     }
     .orb-mic{width:30px;height:30px;}
-    .orb-mic svg{width:100%;height:100%;}
-
     .orb-lock-icon{
-      position:absolute;
-      inset:0;
+      position:absolute;inset:0;
       display:flex;align-items:center;justify-content:center;
-      pointer-events:none;
-      opacity:0;
-      transition:opacity 0.3s;
+      pointer-events:none;opacity:0;transition:opacity 0.3s;
     }
     .orb-wrap.locked .orb-lock-icon{opacity:0.85;}
     .orb-wrap.locked .orb-icon{opacity:0;}
 
     .orb-label{
-      font-size:12px;
-      font-weight:700;
-      letter-spacing:0.12em;
-      text-transform:uppercase;
-      color:rgba(255,255,255,0.4);
-      text-align:center;
-      transition:color 0.3s;
-      min-height:18px;
+      font-size:12px;font-weight:700;letter-spacing:0.12em;
+      text-transform:uppercase;color:rgba(255,255,255,0.4);
+      text-align:center;transition:color 0.3s;min-height:18px;
     }
     .orb-label.ready{color:var(--yellow);}
     .orb-label.active-label{color:var(--yellow);}
 
     .waveform-wrap{
-      display:flex;
-      align-items:center;
-      gap:3px;
-      height:32px;
-      opacity:0;
-      transition:opacity 0.4s;
+      display:flex;align-items:center;gap:3px;height:32px;
+      opacity:0;transition:opacity 0.4s;
     }
     .waveform-wrap.visible{opacity:1;}
     .wave-bar{
-      width:3px;
-      border-radius:2px;
-      background:var(--yellow);
-      transform-origin:center;
-      animation:wave-idle 1.8s ease-in-out infinite;
+      width:3px;border-radius:2px;background:var(--yellow);
+      transform-origin:center;animation:wave-idle 1.8s ease-in-out infinite;
     }
     .wave-bar:nth-child(1){height:8px;animation-delay:0s;}
     .wave-bar:nth-child(2){height:16px;animation-delay:0.15s;}
@@ -651,135 +453,79 @@
       0%,100%{transform:scaleY(1);opacity:0.5;}
       50%{transform:scaleY(1.8);opacity:1;}
     }
-    .wave-bar.speaking{
-      animation:wave-speak 0.4s ease-in-out infinite alternate;
-    }
-    @keyframes wave-speak{
-      from{transform:scaleY(0.4);}
-      to{transform:scaleY(1);}
-    }
+    .wave-bar.speaking{animation:wave-speak 0.4s ease-in-out infinite alternate;}
+    @keyframes wave-speak{from{transform:scaleY(0.4);}to{transform:scaleY(1);}}
 
-    /* ========= TRANSCRIPT ========= */
+    /* Transcript */
     .transcript-area{
-      width:calc(100% - 64px);
-      margin:0 32px 28px;
-      z-index:2;
-      min-height:90px;
+      width:calc(100% - 64px);margin:0 32px 28px;z-index:2;min-height:90px;
     }
     .transcript-bubble{
-      background:rgba(255,255,255,0.05);
-      backdrop-filter:blur(12px);
-      border:1px solid var(--border-strong);
-      border-radius:10px;
-      padding:16px 20px;
-      opacity:0;
-      transform:translateY(8px);
+      background:rgba(255,255,255,0.05);backdrop-filter:blur(12px);
+      border:1px solid var(--border-strong);border-radius:10px;
+      padding:16px 20px;opacity:0;transform:translateY(8px);
       transition:opacity 0.4s, transform 0.4s;
-      min-height:90px;
-      max-height:130px;
-      overflow-y:auto;
-      scrollbar-width:thin;
-      scrollbar-color:rgba(255,255,255,0.14) transparent;
+      min-height:90px;max-height:130px;overflow-y:auto;
+      scrollbar-width:thin;scrollbar-color:rgba(255,255,255,0.14) transparent;
     }
     .transcript-bubble.visible{opacity:1;transform:translateY(0);}
     .transcript-bubble::-webkit-scrollbar{width:4px;}
-    .transcript-bubble::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.14);border-radius:999px;}
-
+    .transcript-bubble::-webkit-scrollbar-thumb{
+      background:rgba(255,255,255,0.14);border-radius:999px;
+    }
     .transcript-role{
-      font-size:10px;
-      font-weight:700;
-      letter-spacing:0.12em;
-      text-transform:uppercase;
-      color:rgba(255,255,255,0.3);
-      margin-bottom:8px;
+      font-size:10px;font-weight:700;letter-spacing:0.12em;
+      text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:8px;
     }
     .transcript-role.agent-role{color:rgba(206,255,26,0.6);}
     .transcript-text{
-      font-size:15px;
-      color:#fff;
-      line-height:1.55;
-      font-weight:400;
-      word-break:break-word;
+      font-size:15px;color:#fff;line-height:1.55;
+      font-weight:400;word-break:break-word;
     }
 
-    /* ========= MOBILE HEADER ========= */
     .mobile-header{display:none;}
 
     /* ========= RESPONSIVE ========= */
     @media (max-width: 900px){
       html,body{overflow:auto;height:auto;}
       .nav{padding:0 20px;}
-      .nav-status{
-        position:static;
-        transform:none;
-        font-size:11px;
-      }
+      .nav-status{position:static;transform:none;font-size:11px;}
       .nav-status span:not(.nav-status-dot){display:none;}
       .nav-back-text{display:none;}
 
       .layout{
-        display:flex;
-        flex-direction:column;
-        grid-template-columns:1fr;
-        height:auto;
-        min-height:100vh;
-        padding-top:64px;
+        display:flex;flex-direction:column;grid-template-columns:1fr;
+        height:auto;min-height:100vh;padding-top:64px;
       }
-
-      .right-panel{
-        order:1;
-        min-height:0;
-      }
+      .right-panel{order:1;min-height:0;}
       .left-panel{
-        order:2;
-        height:auto;
-        overflow:visible;
-        border-right:none;
-        border-top:1px solid var(--border);
+        order:2;height:auto;overflow:visible;
+        border-right:none;border-top:1px solid var(--border);
       }
       .left-body{overflow:visible;padding:24px 20px 28px;}
       .left-header{display:none;}
       .left-footer{padding:20px;}
 
       .mobile-header{
-        display:block;
-        padding:24px 20px 18px;
-        border-bottom:1px solid var(--border);
-        background:var(--panel);
+        display:block;padding:24px 20px 18px;
+        border-bottom:1px solid var(--border);background:var(--panel);
       }
       .mobile-header .left-eyebrow{margin-bottom:10px;}
       .mobile-header .left-title{font-size:20px;}
       .mobile-header .left-subtitle{font-size:13px;margin-top:8px;}
 
       .map-wrap{
-        margin:18px 16px 0;
-        width:calc(100% - 32px);
-        height:260px;
-        min-height:260px;
-        flex:0 0 260px;
+        margin:18px 16px 0;width:calc(100% - 32px);
+        height:300px;min-height:300px;flex:0 0 300px;
       }
-
-      .orb-area{
-        padding:24px 16px;
-      }
-      .status-badge{
-        margin-bottom:20px;
-        font-size:10.5px;
-        padding:8px 14px;
-      }
+      .orb-area{padding:24px 16px;}
+      .status-badge{margin-bottom:20px;font-size:10.5px;padding:8px 14px;}
       .orb-wrap{width:140px;height:140px;}
       .orb{width:140px;height:140px;}
       .orb-container{gap:20px;}
-
-      .transcript-area{
-        margin:0 16px 22px;
-        width:calc(100% - 32px);
-      }
+      .transcript-area{margin:0 16px 22px;width:calc(100% - 32px);}
       .transcript-bubble{
-        min-height:80px;
-        max-height:140px;
-        padding:14px 16px;
-        border-radius:8px;
+        min-height:80px;max-height:140px;padding:14px 16px;border-radius:8px;
       }
       .transcript-text{font-size:14px;}
     }
@@ -790,31 +536,19 @@
       .nav-logo-text{font-size:14px;}
       .mobile-header{padding:20px 16px 16px;}
       .mobile-header .left-title{font-size:18px;}
-
-      .map-wrap{
-        height:220px;
-        min-height:220px;
-        flex:0 0 220px;
-      }
+      .map-wrap{height:240px;min-height:240px;flex:0 0 240px;}
       .orb-wrap{width:120px;height:120px;}
       .orb{width:120px;height:120px;}
-
       .left-body{padding:20px 16px 24px;}
       .left-footer{padding:18px 16px;}
+      .wing-grid{grid-template-columns:1fr;}
     }
 
-    @media (max-width: 360px){
-      .demo-shortcuts{
-        grid-template-columns:1fr;
-      }
-      .shortcut-btn{padding:10px 8px;font-size:10px;}
-    }
-
-    /* Helper class */
     .hidden{display:none !important;}
   </style>
 </head>
 <body>
+
   <nav class="nav">
     <a href="/" class="nav-logo">
       <div class="nav-logo-mark">A</div>
@@ -831,17 +565,17 @@
   </nav>
 
   <div class="mobile-header">
-    <div class="left-eyebrow">Geo Trigger POC</div>
-    <div class="left-title">Praat met De Biotoop wanneer je er bent</div>
-    <div class="left-subtitle">Een ADAM agent die alleen activeert binnen 50 meter van de locatie. Live GPS of demo modus.</div>
+    <div class="left-eyebrow">Geo Trigger POC — Multi vleugel</div>
+    <div class="left-title">Praat met de juiste gids per vleugel van De Biotoop</div>
+    <div class="left-subtitle">Acht polygonen, één agent. Het systeem detecteert in welke vleugel je bent en geeft de agent automatisch de juiste context.</div>
   </div>
 
   <div class="layout">
     <aside class="left-panel">
       <div class="left-header">
-        <div class="left-eyebrow">Geo Trigger POC</div>
-        <div class="left-title">Praat met De Biotoop wanneer je er bent</div>
-        <div class="left-subtitle">Een ADAM agent die alleen activeert binnen 50 meter van de locatie. Live GPS of demo modus om het concept te ervaren.</div>
+        <div class="left-eyebrow">Geo Trigger POC — Multi vleugel</div>
+        <div class="left-title">Praat met de juiste gids per vleugel van De Biotoop</div>
+        <div class="left-subtitle">Acht polygonen, één agent. Het systeem detecteert in welke vleugel je bent en geeft de agent automatisch de juiste context.</div>
       </div>
 
       <div class="left-body">
@@ -862,8 +596,12 @@
               <span class="status-value dim" id="statLocation">Wachten</span>
             </div>
             <div class="status-row">
-              <span class="status-label">Afstand tot POI</span>
-              <span class="status-value dim" id="statDistance">—</span>
+              <span class="status-label">Vleugel</span>
+              <span class="status-value dim" id="statWing">Geen</span>
+            </div>
+            <div class="status-row">
+              <span class="status-label">Dichtstbij</span>
+              <span class="status-value dim" id="statNearest">—</span>
             </div>
             <div class="status-row">
               <span class="status-label">GPS nauwkeurigheid</span>
@@ -874,15 +612,18 @@
               <span class="status-value dim" id="statAgent">Vergrendeld</span>
             </div>
           </div>
+
+          <div class="active-wing-card" id="activeWingCard">
+            <div class="active-wing-label">Actieve gids</div>
+            <div class="active-wing-name" id="activeWingName">—</div>
+            <div class="active-wing-focus" id="activeWingFocus">—</div>
+          </div>
         </div>
 
         <div class="info-block" id="demoControlsBlock" style="display:none;">
           <div class="info-block-label">Demo positie</div>
-          <div class="demo-shortcuts">
-            <button class="shortcut-btn" data-distance="far">Ver weg<br>(200m)</button>
-            <button class="shortcut-btn" data-distance="edge">Op de rand<br>(60m)</button>
-            <button class="shortcut-btn in-range" data-distance="here">Aangekomen<br>(5m)</button>
-          </div>
+          <div class="wing-grid" id="wingGrid"></div>
+          <button class="outside-chip" id="outsideChip">Buiten alle vleugels</button>
           <div class="demo-hint">Of sleep de blauwe pin op de kaart om je positie zelf te zetten.</div>
         </div>
 
@@ -891,15 +632,15 @@
           <div class="steps">
             <div class="step">
               <div class="step-num">1</div>
-              <div>De browser geeft continu je GPS positie door. <b>Buiten 50m</b> is de agent vergrendeld.</div>
+              <div>De webapp meet je positie en checkt voor <b>elk van de 8 polygonen</b> of je erbinnen staat.</div>
             </div>
             <div class="step">
               <div class="step-num">2</div>
-              <div>Zodra je <b>binnen 50m</b> bent ontgrendelt de orb en verschijnt een actie knop.</div>
+              <div>Zodra je in een vleugel staat ontgrendelt de orb en weet de agent <b>welke vleugel</b> dat is.</div>
             </div>
             <div class="step">
               <div class="step-num">3</div>
-              <div>Tik op de orb en het gesprek begint. <b>Loop weg</b> en de verbinding sluit vanzelf.</div>
+              <div>Loop je naar een andere vleugel? Het gesprek schakelt automatisch over op de nieuwe context.</div>
             </div>
           </div>
         </div>
@@ -908,7 +649,7 @@
 
       <div class="left-footer">
         <div class="api-notice">
-          <span>POC</span> &nbsp;De Biotoop &middot; Haren &middot; 53.17732, 6.60327 &middot; Trigger radius 50m
+          <span>POC</span> &nbsp;De Biotoop &middot; Haren &middot; 8 vleugels via polygon-detectie
         </div>
       </div>
     </aside>
@@ -958,18 +699,12 @@
           </div>
 
           <div class="waveform-wrap" id="waveform">
-            <div class="wave-bar"></div>
-            <div class="wave-bar"></div>
-            <div class="wave-bar"></div>
-            <div class="wave-bar"></div>
-            <div class="wave-bar"></div>
-            <div class="wave-bar"></div>
-            <div class="wave-bar"></div>
-            <div class="wave-bar"></div>
-            <div class="wave-bar"></div>
-            <div class="wave-bar"></div>
-            <div class="wave-bar"></div>
-            <div class="wave-bar"></div>
+            <div class="wave-bar"></div><div class="wave-bar"></div>
+            <div class="wave-bar"></div><div class="wave-bar"></div>
+            <div class="wave-bar"></div><div class="wave-bar"></div>
+            <div class="wave-bar"></div><div class="wave-bar"></div>
+            <div class="wave-bar"></div><div class="wave-bar"></div>
+            <div class="wave-bar"></div><div class="wave-bar"></div>
           </div>
 
           <div class="orb-label" id="orbLabel">Vergrendeld</div>
@@ -979,7 +714,7 @@
       <div class="transcript-area">
         <div class="transcript-bubble" id="transcriptBubble">
           <div class="transcript-role agent-role" id="transcriptRole">ADAM</div>
-          <div class="transcript-text" id="transcriptText">Hallo! Loop binnen 50 meter van De Biotoop in Haren en tik op de orb om het gesprek te starten. Zet de modus op Demo om het zonder GPS te proberen.</div>
+          <div class="transcript-text" id="transcriptText">Loop een van de vleugels van De Biotoop binnen om het gesprek te starten. Schakel naar Demo modus om het zonder GPS te proberen.</div>
         </div>
       </div>
     </section>
@@ -987,25 +722,159 @@
 
 <script>
   /* =========================================================
-     CONFIG
+     CONFIG — 8 vleugels van De Biotoop
      ========================================================= */
-  const POI = {
-    name: 'De Biotoop',
-    lat: 53.17732512986996,
-    lon: 6.603276531957379,
-    radius: 50,        // trigger drempel binnenkomen (m)
-    exitRadius: 70,    // hysteresis drempel verlaten (m)
-    agentId: 'agent_1601kp5nmptxes69zmg0xk5m8g6f'
-  };
 
-  const ACCURACY_MAX = 50; // negeer GPS metingen slechter dan dit (m)
+  // ÉÉN agent. Vul per vleugel de variables in zodra je de
+  // ElevenLabs agent met dynamic variables (wing_name, wing_focus,
+  // wing_description) hebt geconfigureerd. De webapp stuurt
+  // deze waarden mee bij het starten van een conversatie.
+  const SHARED_AGENT_ID = 'agent_1601kp5nmptxes69zmg0xk5m8g6f';
+
+  const WINGS = [
+    {
+      id: 'a',
+      name: 'Vleugel A',
+      polygon: [
+        [53.1779481, 6.6049186],
+        [53.1782137, 6.6047493],
+        [53.1779322, 6.6032375],
+        [53.1776318, 6.6033894],
+      ],
+      agentId: SHARED_AGENT_ID,
+      variables: {
+        wing_name: 'Vleugel A',
+        wing_focus: 'TBD — vul in via ElevenLabs dashboard',
+        wing_description: 'TBD'
+      }
+    },
+    {
+      id: 'b',
+      name: 'Vleugel B',
+      polygon: [
+        [53.1777733, 6.6050577],
+        [53.1773585, 6.6052589],
+        [53.1771718, 6.6043627],
+        [53.1770804, 6.6037086],
+        [53.1774920, 6.6034699],
+        [53.1776639, 6.6043121],
+      ],
+      agentId: SHARED_AGENT_ID,
+      variables: {
+        wing_name: 'Vleugel B',
+        wing_focus: 'TBD',
+        wing_description: 'TBD'
+      }
+    },
+    {
+      id: 'c',
+      name: 'Vleugel C',
+      polygon: [
+        [53.1769534, 6.6037461],
+        [53.1772331, 6.6053565],
+        [53.1769447, 6.6054971],
+        [53.1766528, 6.6050497],
+        [53.1765258, 6.6043040],
+        [53.1766239, 6.6039364],
+      ],
+      agentId: SHARED_AGENT_ID,
+      variables: {
+        wing_name: 'Vleugel C',
+        wing_focus: 'TBD',
+        wing_description: 'TBD'
+      }
+    },
+    {
+      id: 'd',
+      name: 'Vleugel D',
+      polygon: [
+        [53.1775711, 6.6032963],
+        [53.1773170, 6.6017205],
+        [53.1775780, 6.6016229],
+        [53.1778821, 6.6030927],
+      ],
+      agentId: SHARED_AGENT_ID,
+      variables: {
+        wing_name: 'Vleugel D',
+        wing_focus: 'TBD',
+        wing_description: 'TBD'
+      }
+    },
+    {
+      id: 'e',
+      name: 'Vleugel E',
+      polygon: [
+        [53.1781269, 6.6038422],
+        [53.1781623, 6.6023460],
+        [53.1786012, 6.6023836],
+        [53.1785642, 6.6038722],
+      ],
+      agentId: SHARED_AGENT_ID,
+      variables: {
+        wing_name: 'Vleugel E',
+        wing_focus: 'TBD',
+        wing_description: 'TBD'
+      }
+    },
+    {
+      id: 'f',
+      name: 'Vleugel F',
+      polygon: [
+        [53.1774891, 6.6032852],
+        [53.1773698, 6.6025203],
+        [53.1767876, 6.6028178],
+        [53.1769660, 6.6036225],
+      ],
+      agentId: SHARED_AGENT_ID,
+      variables: {
+        wing_name: 'Vleugel F',
+        wing_focus: 'TBD',
+        wing_description: 'TBD'
+      }
+    },
+    {
+      id: 'g',
+      name: 'Vleugel G',
+      polygon: [
+        [53.1769004, 6.6036871],
+        [53.1765724, 6.6038583],
+        [53.1764599, 6.6033300],
+        [53.1767878, 6.6031453],
+      ],
+      agentId: SHARED_AGENT_ID,
+      variables: {
+        wing_name: 'Vleugel G',
+        wing_focus: 'TBD',
+        wing_description: 'TBD'
+      }
+    },
+    {
+      id: 'tuin',
+      name: 'Zelfoogsttuin',
+      polygon: [
+        [53.1763860, 6.6040412],
+        [53.1754246, 6.6046327],
+        [53.1757365, 6.6059414],
+        [53.1766801, 6.6056317],
+      ],
+      agentId: SHARED_AGENT_ID,
+      variables: {
+        wing_name: 'Zelfoogsttuin',
+        wing_focus: 'TBD',
+        wing_description: 'TBD'
+      }
+    },
+  ];
+
+  const EXIT_BUFFER = 10;       // m — hysteresis buiten polygoonrand
+  const ACCURACY_MAX = 50;      // m — negeer GPS slechter dan dit (live mode)
 
   /* =========================================================
      STATE
      ========================================================= */
-  let mode = 'live';          // 'live' | 'demo'
-  let userPos = null;         // {lat, lon, accuracy}
-  let inRange = false;        // current trigger state
+  let mode = 'live';
+  let userPos = null;
+  let activeWing = null;        // huidige actieve vleugel (object) of null
   let watchId = null;
   let wakeLock = null;
   let conversation = null;
@@ -1018,13 +887,13 @@
   const navDot = $('navDot');
   const navStatusText = $('navStatusText');
   const statLocation = $('statLocation');
-  const statDistance = $('statDistance');
+  const statWing = $('statWing');
+  const statNearest = $('statNearest');
   const statAccuracy = $('statAccuracy');
   const statAgent = $('statAgent');
   const statusBadge = $('statusBadge');
   const statusBadgeText = $('statusBadgeText');
   const orbWrap = $('orbWrap');
-  const orb = $('orb');
   const orbLabel = $('orbLabel');
   const waveform = $('waveform');
   const transcriptBubble = $('transcriptBubble');
@@ -1033,35 +902,123 @@
   const demoControlsBlock = $('demoControlsBlock');
   const mapBadge = $('mapBadge');
   const mapBadgeText = $('mapBadgeText');
+  const activeWingCard = $('activeWingCard');
 
   /* =========================================================
-     UTILS
+     GEO HELPERS
      ========================================================= */
-  function distanceMeters(lat1, lon1, lat2, lon2){
+
+  // Haversine distance in meters between two lat/lon points
+  function haversine(lat1, lon1, lat2, lon2){
     const R = 6371000;
-    const toRad = (d) => d * Math.PI / 180;
-    const phi1 = toRad(lat1);
-    const phi2 = toRad(lat2);
+    const toRad = d => d * Math.PI / 180;
+    const phi1 = toRad(lat1), phi2 = toRad(lat2);
     const dphi = toRad(lat2 - lat1);
-    const dlambda = toRad(lon2 - lon1);
-    const a = Math.sin(dphi/2)**2 + Math.cos(phi1)*Math.cos(phi2)*Math.sin(dlambda/2)**2;
+    const dl = toRad(lon2 - lon1);
+    const a = Math.sin(dphi/2)**2 + Math.cos(phi1)*Math.cos(phi2)*Math.sin(dl/2)**2;
     return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
   }
 
-  // offset a coordinate by a given distance (meters) on a bearing (degrees)
-  function offsetLatLon(lat, lon, distance, bearing){
+  // Point-in-polygon via ray-casting algorithm
+  function pointInPolygon(lat, lon, polygon){
+    let inside = false;
+    for(let i = 0, j = polygon.length - 1; i < polygon.length; j = i++){
+      const [latI, lonI] = polygon[i];
+      const [latJ, lonJ] = polygon[j];
+      const intersect = ((lonI > lon) !== (lonJ > lon)) &&
+        (lat < (latJ - latI) * (lon - lonI) / (lonJ - lonI) + latI);
+      if(intersect) inside = !inside;
+    }
+    return inside;
+  }
+
+  // Distance from point to a line segment, in meters
+  // Approximates by projecting into local cartesian (fine for small distances)
+  function distancePointToSegment(lat, lon, latA, lonA, latB, lonB){
     const R = 6371000;
-    const br = bearing * Math.PI / 180;
-    const lat1 = lat * Math.PI / 180;
-    const lon1 = lon * Math.PI / 180;
-    const lat2 = Math.asin(Math.sin(lat1)*Math.cos(distance/R) + Math.cos(lat1)*Math.sin(distance/R)*Math.cos(br));
-    const lon2 = lon1 + Math.atan2(Math.sin(br)*Math.sin(distance/R)*Math.cos(lat1), Math.cos(distance/R) - Math.sin(lat1)*Math.sin(lat2));
-    return { lat: lat2 * 180 / Math.PI, lon: lon2 * 180 / Math.PI };
+    const toRad = d => d * Math.PI / 180;
+    const refLat = toRad((lat + latA + latB) / 3);
+    const x = ll => toRad(ll - lonA) * R * Math.cos(refLat);
+    const y = la => toRad(la - latA) * R;
+
+    const px = x(lon), py = y(lat);
+    const ax = 0, ay = 0;
+    const bx = x(lonB), by = y(latB);
+
+    const dx = bx - ax, dy = by - ay;
+    const lenSq = dx*dx + dy*dy;
+    let t = lenSq === 0 ? 0 : ((px - ax) * dx + (py - ay) * dy) / lenSq;
+    t = Math.max(0, Math.min(1, t));
+    const cx = ax + t * dx;
+    const cy = ay + t * dy;
+    return Math.sqrt((px - cx)**2 + (py - cy)**2);
+  }
+
+  // Min distance to any edge of polygon
+  function distanceToPolygonEdge(lat, lon, polygon){
+    let min = Infinity;
+    for(let i = 0; i < polygon.length; i++){
+      const a = polygon[i];
+      const b = polygon[(i + 1) % polygon.length];
+      const d = distancePointToSegment(lat, lon, a[0], a[1], b[0], b[1]);
+      if(d < min) min = d;
+    }
+    return min;
+  }
+
+  // Distance from point to wing: 0 if inside, edge distance if outside
+  function distanceToWing(lat, lon, wing){
+    if(pointInPolygon(lat, lon, wing.polygon)) return 0;
+    return distanceToPolygonEdge(lat, lon, wing.polygon);
+  }
+
+  // Centroid (simple average — good enough for teleport target)
+  function polygonCentroid(polygon){
+    let lat = 0, lon = 0;
+    for(const p of polygon){ lat += p[0]; lon += p[1]; }
+    return [lat / polygon.length, lon / polygon.length];
+  }
+
+  // Find which wing should be active given a position, applying hysteresis
+  // returns { wing, nearestWing, nearestDistance }
+  function evaluatePosition(lat, lon){
+    // 1) inside any polygon?
+    for(const w of WINGS){
+      if(pointInPolygon(lat, lon, w.polygon)){
+        // also compute nearest for display purposes
+        return { wing: w, nearestWing: w, nearestDistance: 0 };
+      }
+    }
+    // 2) not inside any. find nearest wing.
+    let nearestWing = null, nearestDist = Infinity;
+    for(const w of WINGS){
+      const d = distanceToPolygonEdge(lat, lon, w.polygon);
+      if(d < nearestDist){ nearestDist = d; nearestWing = w; }
+    }
+    // 3) apply hysteresis: if we have a current active wing and we're
+    // within EXIT_BUFFER of its edge, stay active.
+    if(activeWing){
+      const d = distanceToPolygonEdge(lat, lon, activeWing.polygon);
+      if(d < EXIT_BUFFER){
+        return { wing: activeWing, nearestWing: nearestWing, nearestDistance: nearestDist };
+      }
+    }
+    return { wing: null, nearestWing: nearestWing, nearestDistance: nearestDist };
+  }
+
+  function formatDistance(m){
+    if(m < 1000) return Math.round(m) + ' m';
+    return (m / 1000).toFixed(2) + ' km';
   }
 
   /* =========================================================
      LEAFLET MAP
      ========================================================= */
+  // Map centroid for initial view
+  const allCentroids = WINGS.map(w => polygonCentroid(w.polygon));
+  const avgLat = allCentroids.reduce((s,c) => s + c[0], 0) / allCentroids.length;
+  const avgLon = allCentroids.reduce((s,c) => s + c[1], 0) / allCentroids.length;
+
   const map = L.map('map', {
     zoomControl: true,
     attributionControl: true,
@@ -1069,7 +1026,7 @@
     scrollWheelZoom: false,
     doubleClickZoom: true,
     touchZoom: true,
-  }).setView([POI.lat, POI.lon], 17);
+  }).setView([avgLat, avgLon], 17);
 
   L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png', {
     attribution: '© OpenStreetMap © CARTO',
@@ -1077,41 +1034,58 @@
     maxZoom: 19,
   }).addTo(map);
 
-  // POI radius circle (50m trigger)
-  const poiRing = L.circle([POI.lat, POI.lon], {
-    radius: POI.radius,
-    color: '#CEFF1A',
-    weight: 1.5,
-    opacity: 0.6,
-    fillColor: '#CEFF1A',
-    fillOpacity: 0.08,
-    interactive: false,
-  }).addTo(map);
+  // Render all wing polygons
+  const wingLayers = new Map();    // wingId -> {polygon, label}
+  WINGS.forEach(w => {
+    const poly = L.polygon(w.polygon, {
+      color: '#CEFF1A',
+      weight: 1.5,
+      opacity: 0.55,
+      fillColor: '#CEFF1A',
+      fillOpacity: 0.08,
+      interactive: false,
+    }).addTo(map);
 
-  // exit hysteresis ring (70m, dashed, subtle)
-  L.circle([POI.lat, POI.lon], {
-    radius: POI.exitRadius,
-    color: '#CEFF1A',
-    weight: 1,
-    opacity: 0.2,
-    fillOpacity: 0,
-    dashArray: '4 6',
-    interactive: false,
-  }).addTo(map);
+    // Label at centroid
+    const [clat, clon] = polygonCentroid(w.polygon);
+    const labelIcon = L.divIcon({
+      className: 'wing-label',
+      html: w.name,
+      iconSize: [80, 12],
+      iconAnchor: [40, 6],
+    });
+    const label = L.marker([clat, clon], { icon: labelIcon, interactive: false }).addTo(map);
 
-  // POI marker
-  const poiIcon = L.divIcon({
-    className: 'poi-marker',
-    html: '<div class="poi-marker-pin"></div>',
-    iconSize: [38,38],
-    iconAnchor: [19,19],
+    wingLayers.set(w.id, { polygon: poly, label: label });
   });
-  L.marker([POI.lat, POI.lon], { icon: poiIcon, interactive: false }).addTo(map);
 
-  // User marker (added/updated dynamically)
+  // Auto-fit map to show all wings
+  const allBounds = L.latLngBounds(
+    WINGS.flatMap(w => w.polygon.map(p => [p[0], p[1]]))
+  );
+  map.fitBounds(allBounds, { padding: [20, 20], maxZoom: 18 });
+
+  function updateWingHighlights(){
+    WINGS.forEach(w => {
+      const layer = wingLayers.get(w.id);
+      if(!layer) return;
+      const isActive = activeWing && activeWing.id === w.id;
+      layer.polygon.setStyle({
+        weight: isActive ? 2.5 : 1.5,
+        opacity: isActive ? 1 : 0.55,
+        fillOpacity: isActive ? 0.22 : 0.08,
+      });
+      const labelEl = layer.label.getElement();
+      if(labelEl){
+        labelEl.classList.toggle('active', !!isActive);
+      }
+    });
+  }
+  updateWingHighlights();
+
+  // User marker
   let userMarker = null;
   let accuracyCircle = null;
-  let connectingLine = null;
 
   function makeUserIcon(draggable){
     return L.divIcon({
@@ -1125,7 +1099,6 @@
   function setUserMarker(lat, lon, opts = {}){
     const { accuracy = null, draggable = false } = opts;
 
-    // if draggable state changed, recreate marker (cleanest way in Leaflet)
     if(userMarker && userMarker.options.draggable !== draggable){
       map.removeLayer(userMarker);
       userMarker = null;
@@ -1136,7 +1109,7 @@
         icon: makeUserIcon(draggable),
         draggable: draggable,
         keyboard: false,
-        zIndexOffset: 500,
+        zIndexOffset: 1000,
       }).addTo(map);
       if(draggable){
         userMarker.on('drag', (e) => {
@@ -1148,7 +1121,6 @@
       userMarker.setLatLng([lat, lon]);
     }
 
-    // accuracy circle
     if(accuracy !== null && accuracy > 0){
       if(!accuracyCircle){
         accuracyCircle = L.circle([lat, lon], {
@@ -1157,7 +1129,7 @@
           weight: 1,
           opacity: 0.3,
           fillColor: '#5aa3ff',
-          fillOpacity: 0.08,
+          fillOpacity: 0.06,
           interactive: false,
         }).addTo(map);
       } else {
@@ -1168,29 +1140,10 @@
       map.removeLayer(accuracyCircle);
       accuracyCircle = null;
     }
-
-    // connecting line user -> POI
-    if(connectingLine){
-      connectingLine.setLatLngs([[lat, lon], [POI.lat, POI.lon]]);
-    } else {
-      connectingLine = L.polyline([[lat, lon], [POI.lat, POI.lon]], {
-        color: '#ffffff',
-        weight: 1,
-        opacity: 0.18,
-        dashArray: '3 5',
-        interactive: false,
-      }).addTo(map);
-    }
-  }
-
-  function fitMapToUserAndPoi(){
-    if(!userPos) return;
-    const bounds = L.latLngBounds([[userPos.lat, userPos.lon], [POI.lat, POI.lon]]);
-    map.fitBounds(bounds, { padding: [40, 40], maxZoom: 18 });
   }
 
   /* =========================================================
-     CORE POSITION HANDLING
+     POSITION HANDLING + STATE MACHINE
      ========================================================= */
   function setUserPosition(pos, fromDrag = false){
     userPos = pos;
@@ -1199,12 +1152,14 @@
       draggable: mode === 'demo',
     });
 
-    // ignore unreliable readings only in live mode
+    // Live mode: ignore unreliable readings
     if(mode === 'live' && pos.accuracy && pos.accuracy > ACCURACY_MAX){
       statLocation.textContent = 'Onnauwkeurig';
       statLocation.className = 'status-value warn';
-      statDistance.textContent = '—';
-      statDistance.className = 'status-value dim';
+      statWing.textContent = '—';
+      statWing.className = 'status-value dim';
+      statNearest.textContent = '—';
+      statNearest.className = 'status-value dim';
       statAccuracy.textContent = '± ' + Math.round(pos.accuracy) + ' m';
       statAccuracy.className = 'status-value warn';
       setBadge('searching', 'GPS te onnauwkeurig — wachten op betere meting');
@@ -1212,82 +1167,123 @@
       return;
     }
 
-    const dist = distanceMeters(pos.lat, pos.lon, POI.lat, POI.lon);
-
-    // update readouts
+    // Update readouts
     statLocation.textContent = mode === 'demo' ? 'Demo positie' : 'Actief';
     statLocation.className = 'status-value accent';
-    statDistance.textContent = formatDistance(dist);
-    statDistance.className = 'status-value' + (dist < POI.radius ? ' accent' : '');
     statAccuracy.textContent = pos.accuracy ? '± ' + Math.round(pos.accuracy) + ' m' : '—';
     statAccuracy.className = 'status-value';
 
-    // hysteresis
-    if(!inRange && dist < POI.radius){
-      enterRange(dist);
-    } else if(inRange && dist > POI.exitRadius){
-      leaveRange(dist);
+    // Evaluate position vs wings (with hysteresis)
+    const evalResult = evaluatePosition(pos.lat, pos.lon);
+    const newWing = evalResult.wing;
+    const nearest = evalResult.nearestWing;
+    const nearestDist = evalResult.nearestDistance;
+
+    // Update nearest readout
+    if(nearest){
+      const insideText = pointInPolygon(pos.lat, pos.lon, nearest.polygon)
+        ? 'binnen'
+        : formatDistance(nearestDist);
+      statNearest.textContent = nearest.name + ' — ' + insideText;
+      statNearest.className = 'status-value';
     } else {
-      // status update without state change
-      if(inRange){
-        // don't overwrite badge during active conversation
-        if(!conversation){
-          setBadge('in-range', 'In range — tik op de orb om te praten');
-        }
-        setNav('ready', 'In range');
-      } else {
-        const need = Math.ceil(dist - POI.radius);
-        setBadge('out-of-range', 'Nog ' + formatDistance(need) + ' tot in range');
-        setNav('searching', 'Buiten range');
-      }
+      statNearest.textContent = '—';
+      statNearest.className = 'status-value dim';
     }
 
-    if(!fromDrag){
-      // auto-fit map when position first updates significantly
-      // (kept simple: don't pan map every tick)
+    // State transitions
+    const wasActive = activeWing;
+    const wasInRange = !!activeWing;
+    const nowInRange = !!newWing;
+
+    if(newWing && (!wasActive || wasActive.id !== newWing.id)){
+      // Either entering from outside, OR switching from one wing to another
+      enterWing(newWing, wasActive);
+    } else if(!newWing && wasInRange){
+      leaveWing();
+    } else if(newWing && wasActive && wasActive.id === newWing.id){
+      // still in same wing — just update display
+      if(!conversation){
+        setBadge('in-range', 'In ' + newWing.name + ' — tik op de orb om te praten');
+      }
+      setNav('ready', 'In ' + newWing.name);
+    } else {
+      // outside, not in range
+      if(nearest){
+        setBadge('out-of-range', formatDistance(nearestDist) + ' van ' + nearest.name);
+      } else {
+        setBadge('out-of-range', 'Buiten alle vleugels');
+      }
+      setNav('searching', 'Buiten range');
     }
   }
 
-  function enterRange(dist){
-    inRange = true;
-    setBadge('in-range', 'In range — tik op de orb om te praten');
-    setNav('ready', 'In range');
+  function enterWing(wing, previousWing){
+    const isSwitch = !!previousWing;
+
+    // If we were in another wing and conversation is active, end it first
+    if(isSwitch && conversation){
+      stopConversation(true /* silent transition */);
+    }
+
+    activeWing = wing;
+    updateWingHighlights();
+
+    // Status displays
+    statWing.textContent = wing.name;
+    statWing.className = 'status-value accent';
+    statAgent.textContent = 'Ontgrendeld';
+    statAgent.className = 'status-value accent';
+
     orbWrap.classList.remove('locked');
     orbLabel.textContent = 'Tik om te praten';
     orbLabel.className = 'orb-label ready';
-    statAgent.textContent = 'Ontgrendeld';
-    statAgent.className = 'status-value accent';
-    updateTranscript('agent', 'Je bent in range van De Biotoop. Tik op de orb om het gesprek te starten.');
-  }
 
-  function leaveRange(dist){
-    inRange = false;
-    orbWrap.classList.add('locked');
-    orbLabel.textContent = 'Vergrendeld';
-    orbLabel.className = 'orb-label';
-    statAgent.textContent = 'Vergrendeld';
-    statAgent.className = 'status-value dim';
-    const need = Math.ceil(dist - POI.radius);
-    setBadge('out-of-range', 'Buiten range — loop terug naar De Biotoop');
-    setNav('searching', 'Buiten range');
+    activeWingCard.classList.add('visible');
+    $('activeWingName').textContent = wing.name;
+    $('activeWingFocus').textContent = wing.variables.wing_focus === 'TBD'
+      ? 'Geen samenvatting — vul ' + wing.name + ' aan in de WINGS config en in je ElevenLabs agent.'
+      : wing.variables.wing_focus;
 
-    // end conversation if active
-    if(conversation){
-      stopConversation();
-      updateTranscript('agent', 'Je bent uit range gelopen. Het gesprek is gesloten.');
+    setBadge('in-range', 'In ' + wing.name + ' — tik op de orb om te praten');
+    setNav('ready', 'In ' + wing.name);
+
+    if(isSwitch){
+      updateTranscript('agent', 'Je bent nu in ' + wing.name + '. Tik op de orb om hier het gesprek te starten.');
+    } else {
+      updateTranscript('agent', 'Welkom in ' + wing.name + '. Tik op de orb om het gesprek te starten.');
     }
   }
 
-  function formatDistance(m){
-    if(m < 1000) return Math.round(m) + ' m';
-    return (m / 1000).toFixed(2) + ' km';
+  function leaveWing(){
+    const prev = activeWing;
+    activeWing = null;
+    updateWingHighlights();
+
+    orbWrap.classList.add('locked');
+    orbLabel.textContent = 'Vergrendeld';
+    orbLabel.className = 'orb-label';
+
+    statWing.textContent = 'Geen';
+    statWing.className = 'status-value dim';
+    statAgent.textContent = 'Vergrendeld';
+    statAgent.className = 'status-value dim';
+
+    activeWingCard.classList.remove('visible');
+
+    setBadge('out-of-range', 'Buiten alle vleugels — loop een binnen om te praten');
+    setNav('searching', 'Buiten range');
+
+    if(conversation){
+      stopConversation();
+      updateTranscript('agent', 'Je bent uit ' + prev.name + ' gelopen. Het gesprek is gesloten.');
+    }
   }
 
   function setBadge(state, text){
     statusBadge.className = 'status-badge ' + state;
     statusBadgeText.textContent = text;
   }
-
   function setNav(state, text){
     navDot.className = 'nav-status-dot ' + (state === 'in-range' ? 'ready' : state);
     navStatusText.textContent = text;
@@ -1299,7 +1295,6 @@
   function setMode(newMode){
     if(newMode === mode) return;
     mode = newMode;
-
     document.querySelectorAll('.mode-btn').forEach(b => {
       b.classList.toggle('active', b.dataset.mode === mode);
     });
@@ -1314,8 +1309,8 @@
       demoControlsBlock.style.display = 'block';
       mapBadge.classList.add('demo');
       mapBadgeText.textContent = 'Demo modus';
-      // start demo at "ver weg" default
-      setDemoDistance('far');
+      // start demo outside all wings
+      teleportToOutside();
     }
   }
 
@@ -1327,36 +1322,24 @@
       setNav('warn', 'Geen GPS');
       return;
     }
-
     statLocation.textContent = 'Zoeken...';
     statLocation.className = 'status-value';
     setBadge('searching', 'Locatie ophalen — sta toestemming toe');
     setNav('searching', 'GPS zoeken');
 
-    if(watchId !== null){
-      navigator.geolocation.clearWatch(watchId);
-    }
+    if(watchId !== null) navigator.geolocation.clearWatch(watchId);
 
     watchId = navigator.geolocation.watchPosition(
       (position) => {
         const { latitude, longitude, accuracy } = position.coords;
-        const wasFirstFix = !userPos;
         setUserPosition({ lat: latitude, lon: longitude, accuracy: accuracy });
-        if(wasFirstFix){
-          // first fix: center map nicely on both points
-          fitMapToUserAndPoi();
-        }
       },
       (err) => {
         console.warn('Geolocation error:', err);
         let msg = 'GPS niet beschikbaar';
-        if(err.code === err.PERMISSION_DENIED){
-          msg = 'Locatie toegang geweigerd';
-        } else if(err.code === err.POSITION_UNAVAILABLE){
-          msg = 'GPS positie niet beschikbaar';
-        } else if(err.code === err.TIMEOUT){
-          msg = 'GPS timeout — probeer opnieuw';
-        }
+        if(err.code === err.PERMISSION_DENIED) msg = 'Locatie toegang geweigerd';
+        else if(err.code === err.POSITION_UNAVAILABLE) msg = 'GPS positie niet beschikbaar';
+        else if(err.code === err.TIMEOUT) msg = 'GPS timeout — probeer opnieuw';
         statLocation.textContent = 'Geblokkeerd';
         statLocation.className = 'status-value warn';
         setBadge('out-of-range', msg);
@@ -1373,19 +1356,39 @@
     }
   }
 
-  function setDemoDistance(preset){
-    let meters;
-    if(preset === 'far') meters = 200;
-    else if(preset === 'edge') meters = 60;
-    else if(preset === 'here') meters = 5;
-    else return;
-
-    // place user north-west of POI for visual balance
-    const bearing = 305;
-    const { lat, lon } = offsetLatLon(POI.lat, POI.lon, meters, bearing);
-    setUserPosition({ lat, lon, accuracy: 5 });
-    fitMapToUserAndPoi();
+  function teleportToWing(wingId){
+    const wing = WINGS.find(w => w.id === wingId);
+    if(!wing) return;
+    const [lat, lon] = polygonCentroid(wing.polygon);
+    setUserPosition({ lat: lat, lon: lon, accuracy: 5 });
   }
+
+  function teleportToOutside(){
+    // Place 150m north of overall centroid (toward Botanicuslaan area)
+    setUserPosition({ lat: avgLat + 0.0015, lon: avgLon, accuracy: 5 });
+  }
+
+  /* =========================================================
+     WING GRID (demo controls)
+     ========================================================= */
+  function renderWingGrid(){
+    const grid = $('wingGrid');
+    grid.innerHTML = '';
+    WINGS.forEach(w => {
+      const btn = document.createElement('button');
+      btn.className = 'wing-chip';
+      btn.dataset.wingId = w.id;
+      btn.innerHTML = '<span class="dot"></span><span>' + w.name + '</span>';
+      btn.addEventListener('click', () => {
+        teleportToWing(w.id);
+        // small visual feedback on which is current
+        document.querySelectorAll('.wing-chip').forEach(c => c.classList.remove('current'));
+        btn.classList.add('current');
+      });
+      grid.appendChild(btn);
+    });
+  }
+  renderWingGrid();
 
   /* =========================================================
      MODE BUTTON BINDINGS
@@ -1393,9 +1396,9 @@
   document.querySelectorAll('.mode-btn').forEach(btn => {
     btn.addEventListener('click', () => setMode(btn.dataset.mode));
   });
-
-  document.querySelectorAll('.shortcut-btn').forEach(btn => {
-    btn.addEventListener('click', () => setDemoDistance(btn.dataset.distance));
+  $('outsideChip').addEventListener('click', () => {
+    teleportToOutside();
+    document.querySelectorAll('.wing-chip').forEach(c => c.classList.remove('current'));
   });
 
   /* =========================================================
@@ -1409,23 +1412,31 @@
     transcriptBubble.scrollTop = transcriptBubble.scrollHeight;
   }
 
-  async function startConversation() {
+  async function startConversation(){
     if(isTransitioning || conversation) return;
-    if(!inRange){
-      updateTranscript('agent', 'Je bent nog buiten range. Kom dichterbij De Biotoop om te praten.');
+    if(!activeWing){
+      updateTranscript('agent', 'Je bent niet in een vleugel. Loop een vleugel binnen om te praten.');
       return;
     }
     isTransitioning = true;
+    const wingForThisSession = activeWing;
+
     try {
       await navigator.mediaDevices.getUserMedia({
         audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true }
       });
 
       orbLabel.textContent = 'Verbinden...';
-      setBadge('in-range', 'Verbinden met agent...');
+      setBadge('in-range', 'Verbinden met agent voor ' + wingForThisSession.name + '...');
 
       conversation = await window.ElevenLabsConversation.startSession({
-        agentId: POI.agentId,
+        agentId: wingForThisSession.agentId,
+
+        // Stuurt de wing-specifieke variabelen naar de agent.
+        // Werkt zodra je in het ElevenLabs dashboard de dynamic
+        // variables (wing_name, wing_focus, wing_description) hebt
+        // gedefinieerd. Daarvoor: zie de docs over dynamic variables.
+        dynamicVariables: wingForThisSession.variables,
 
         onConnect: () => {
           isTransitioning = false;
@@ -1434,21 +1445,19 @@
           setBadge('in-range', 'Verbonden — tik nogmaals om te stoppen');
           requestWakeLock();
         },
-
         onDisconnect: () => {
           conversation = null;
           isTransitioning = false;
-          orbLabel.textContent = inRange ? 'Tik om te praten' : 'Vergrendeld';
-          orbLabel.className = 'orb-label' + (inRange ? ' ready' : '');
+          orbLabel.textContent = activeWing ? 'Tik om te praten' : 'Vergrendeld';
+          orbLabel.className = 'orb-label' + (activeWing ? ' ready' : '');
           waveform.classList.remove('visible');
-          orb.classList.remove('speaking');
           document.querySelectorAll('.wave-bar').forEach(b => b.classList.remove('speaking'));
-          if(inRange) setBadge('in-range', 'In range — tik op de orb om te praten');
+          orb.classList.remove('speaking');
+          if(activeWing) setBadge('in-range', 'In ' + activeWing.name + ' — tik op de orb om te praten');
           releaseWakeLock();
         },
-
         onModeChange: (m) => {
-          if(m.mode === 'speaking') {
+          if(m.mode === 'speaking'){
             waveform.classList.add('visible');
             document.querySelectorAll('.wave-bar').forEach(b => b.classList.add('speaking'));
             orb.classList.add('speaking');
@@ -1460,13 +1469,11 @@
             orbLabel.textContent = 'Luisteren...';
           }
         },
-
         onMessage: (message) => {
           if(message.message){
             updateTranscript(message.source === 'user' ? 'user' : 'agent', message.message);
           }
         },
-
         onError: (error) => {
           console.error('Agent error:', error);
           orbLabel.textContent = 'Fout — probeer opnieuw';
@@ -1476,18 +1483,17 @@
           isTransitioning = false;
         }
       });
-
     } catch (err) {
       console.error('Start error:', err);
-      orbLabel.textContent = inRange ? 'Tik om te praten' : 'Vergrendeld';
-      orbLabel.className = 'orb-label' + (inRange ? ' ready' : '');
+      orbLabel.textContent = activeWing ? 'Tik om te praten' : 'Vergrendeld';
+      orbLabel.className = 'orb-label' + (activeWing ? ' ready' : '');
       setBadge('in-range', 'Microfoon toegang geweigerd');
       conversation = null;
       isTransitioning = false;
     }
   }
 
-  async function stopConversation() {
+  async function stopConversation(silent = false){
     if(!conversation || isTransitioning) return;
     isTransitioning = true;
     const current = conversation;
@@ -1500,6 +1506,7 @@
     }
   }
 
+  const orb = $('orb');
   orbWrap.addEventListener('click', async () => {
     if(orbWrap.classList.contains('locked')) return;
     if(isTransitioning) return;
@@ -1512,11 +1519,8 @@
      ========================================================= */
   async function requestWakeLock(){
     if(!('wakeLock' in navigator)) return;
-    try {
-      wakeLock = await navigator.wakeLock.request('screen');
-    } catch (err) {
-      console.warn('Wake lock denied:', err);
-    }
+    try { wakeLock = await navigator.wakeLock.request('screen'); }
+    catch (err) { console.warn('Wake lock denied:', err); }
   }
   function releaseWakeLock(){
     if(wakeLock){
@@ -1531,7 +1535,7 @@
   });
 
   /* =========================================================
-     BACKGROUND CANVAS (zelfde sfeer als bestaande demo)
+     BACKGROUND CANVAS
      ========================================================= */
   (function(){
     const canvas = document.getElementById('bgCanvas');
@@ -1545,18 +1549,15 @@
       canvas.width = W;
       canvas.height = H;
     }
-
     function draw(){
       t += 0.004;
       ctx.fillStyle = '#080810';
       ctx.fillRect(0,0,W,H);
-
       const blobs = [
         {x:.2,y:.3,r:.45,s:.3},
         {x:.75,y:.6,r:.5,s:.2},
         {x:.5,y:.85,r:.35,s:.5}
       ];
-
       blobs.forEach((b,i)=>{
         const cx = (b.x + Math.sin(t*b.s+i*1.2)*0.1) * W;
         const cy = (b.y + Math.cos(t*b.s*0.8+i)*0.12) * H;
@@ -1570,10 +1571,7 @@
         ctx.fillStyle = g;
         ctx.fill();
       });
-
-      const cx = W * .5;
-      const cy = H * .5;
-      const r = W * .3;
+      const cx = W * .5, cy = H * .5, r = W * .3;
       const bg = ctx.createRadialGradient(cx,cy,0,cx,cy,r);
       bg.addColorStop(0,'rgba(29,46,216,0.10)');
       bg.addColorStop(1,'rgba(29,46,216,0)');
@@ -1581,49 +1579,41 @@
       ctx.arc(cx,cy,r,0,Math.PI*2);
       ctx.fillStyle = bg;
       ctx.fill();
-
       requestAnimationFrame(draw);
     }
-
     window.addEventListener('resize', resize);
     resize();
     draw();
   })();
 
   /* =========================================================
-     ORB CANVAS (zelfde animation als bestaande demo)
+     ORB CANVAS
      ========================================================= */
   (function(){
     const canvas = document.getElementById('orbCanvas');
     const ctx = canvas.getContext('2d');
     let W = 0, H = 0, t = 0;
-
     function resize(){
       W = canvas.offsetWidth;
       H = canvas.offsetHeight;
       canvas.width = W;
       canvas.height = H;
     }
-
     function draw(){
       t += 0.008;
       ctx.clearRect(0,0,W,H);
-
       const base = ctx.createRadialGradient(W*.5,H*.5,0,W*.5,H*.5,W*.5);
       base.addColorStop(0,'#2a40f0');
       base.addColorStop(1,'#1020c0');
-
       ctx.beginPath();
       ctx.arc(W*.5,H*.5,W*.5,0,Math.PI*2);
       ctx.fillStyle = base;
       ctx.fill();
-
       const blobs = [
         {x:.35,y:.4,r:.28,s:.7},
         {x:.6,y:.55,r:.22,s:.5},
         {x:.45,y:.65,r:.18,s:.9}
       ];
-
       blobs.forEach((b,i)=>{
         const cx = (b.x + Math.sin(t*b.s+i)*0.15) * W;
         const cy = (b.y + Math.cos(t*b.s+i)*0.12) * H;
@@ -1637,10 +1627,8 @@
         ctx.fillStyle = g;
         ctx.fill();
       });
-
       requestAnimationFrame(draw);
     }
-
     window.addEventListener('resize', resize);
     resize();
     draw();
@@ -1649,10 +1637,7 @@
   /* =========================================================
      BOOT
      ========================================================= */
-  // start in live mode
   startLiveTracking();
-
-  // make sure map renders correctly after layout settles
   setTimeout(() => map.invalidateSize(), 200);
   window.addEventListener('resize', () => map.invalidateSize());
 </script>
