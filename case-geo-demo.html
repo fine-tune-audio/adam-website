@@ -6,7 +6,11 @@
   <meta name="robots" content="noindex, nofollow"/>
   <meta name="theme-color" content="#0A0A0A"/>
   <title>Geo Trigger Demo | ADAM AI Agents</title>
-  <meta name="description" content="Proof of concept: een ADAM agent die per vleugel van De Biotoop activeert zodra je naar binnen loopt."/>
+  <meta name="description" content="Praat met een ADAM gids van De Biotoop. De agent past z'n kennis aan op de vleugel waar je bent."/>
+
+  <!-- Favicon: vervang adam-favicon.svg met je eigen SVG bestand in dezelfde directory -->
+  <link rel="icon" type="image/svg+xml" href="adam-favicon.svg"/>
+  <link rel="alternate icon" href="adam-favicon.svg"/>
 
   <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
@@ -20,7 +24,7 @@
   </script>
 
   <style>
-    *{margin:0;padding:0;box-sizing:border-box;}
+    *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
 
     :root{
       --blue:#1D2ED8;
@@ -53,13 +57,29 @@
       backdrop-filter:blur(10px);
       background:rgba(10,10,10,0.85);
     }
-    .nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none;}
-    .nav-logo-text{font-size:16px;font-weight:800;color:#fff;letter-spacing:0.05em;}
+    .nav-logo{
+      display:flex;align-items:center;gap:10px;
+      text-decoration:none;color:inherit;
+    }
+    .nav-logo-img{
+      height:24px;width:auto;display:block;
+    }
+    /* Fallback when logo SVG is missing — shows ADAM text + mark */
+    .nav-logo-fallback{
+      display:none;
+      align-items:center;gap:10px;
+    }
+    .nav-logo-img.fallback-active + .nav-logo-fallback,
+    .nav-logo-img[data-fallback="true"] + .nav-logo-fallback{
+      display:flex;
+    }
     .nav-logo-mark{
       width:24px;height:24px;border-radius:6px;background:var(--yellow);
       display:flex;align-items:center;justify-content:center;
       color:var(--black);font-weight:800;font-size:13px;
     }
+    .nav-logo-text{font-size:16px;font-weight:800;color:#fff;letter-spacing:0.05em;}
+
     .nav-status{
       position:absolute;left:50%;top:50%;transform:translate(-50%, -50%);
       display:flex;align-items:center;gap:8px;
@@ -96,7 +116,7 @@
       background:var(--panel);border-right:1px solid var(--border);
       display:flex;flex-direction:column;overflow:hidden;
     }
-    .left-header{padding:36px 40px 28px;border-bottom:1px solid var(--border);}
+    .left-header{padding:36px 40px 24px;border-bottom:1px solid var(--border);}
     .left-eyebrow{
       font-size:11px;font-weight:700;letter-spacing:0.14em;
       text-transform:uppercase;color:var(--yellow);margin-bottom:12px;
@@ -118,6 +138,7 @@
       text-transform:uppercase;color:rgba(255,255,255,0.35);margin-bottom:14px;
     }
 
+    /* ========= MODE TOGGLE ========= */
     .mode-toggle{
       display:flex;background:rgba(255,255,255,0.04);
       border:1px solid var(--border);border-radius:4px;padding:3px;gap:3px;
@@ -132,114 +153,169 @@
     .mode-btn:hover{color:#fff;}
     .mode-btn.active{background:var(--yellow);color:var(--black);}
 
+    /* ========= VISITOR VIEW (live modus) ========= */
+    .visitor-view{display:block;}
+    .dev-view{display:none;}
+    body.dev-mode .visitor-view{display:none;}
+    body.dev-mode .dev-view{display:block;}
+
+    .location-hero{
+      position:relative;overflow:hidden;
+      background:linear-gradient(135deg, rgba(206,255,26,0.08) 0%, rgba(206,255,26,0.02) 100%);
+      border:1px solid rgba(206,255,26,0.22);
+      border-radius:10px;
+      padding:24px 22px 22px;
+      margin-bottom:28px;
+      transition:background 0.4s, border-color 0.4s;
+    }
+    .location-hero::before{
+      content:'';position:absolute;top:-30px;right:-30px;
+      width:140px;height:140px;border-radius:50%;
+      background:radial-gradient(circle, rgba(206,255,26,0.12), transparent 70%);
+      pointer-events:none;
+    }
+    .location-hero.general{
+      background:linear-gradient(135deg, rgba(29,46,216,0.10) 0%, rgba(29,46,216,0.02) 100%);
+      border-color:rgba(29,46,216,0.28);
+    }
+    .location-hero.general::before{
+      background:radial-gradient(circle, rgba(29,46,216,0.18), transparent 70%);
+    }
+    .location-eyebrow{
+      font-size:10px;font-weight:700;letter-spacing:0.16em;
+      text-transform:uppercase;color:var(--yellow);
+      display:flex;align-items:center;gap:8px;
+      margin-bottom:10px;
+      position:relative;
+    }
+    .location-hero.general .location-eyebrow{color:#7a8aff;}
+    .location-eyebrow-dot{
+      width:6px;height:6px;border-radius:50%;background:currentColor;
+      animation:pulse-dot 1.4s ease-in-out infinite;
+    }
+    .location-name{
+      font-size:26px;font-weight:800;
+      letter-spacing:-0.02em;line-height:1.12;
+      margin-bottom:10px;color:#fff;
+      position:relative;
+    }
+    .location-focus{
+      font-size:13.5px;color:rgba(255,255,255,0.68);
+      line-height:1.55;position:relative;
+    }
+
+    /* Visitor steps */
+    .visitor-steps{
+      display:flex;flex-direction:column;gap:16px;
+    }
+    .visitor-step{
+      display:flex;align-items:flex-start;gap:14px;
+    }
+    .visitor-step-icon{
+      width:36px;height:36px;border-radius:8px;
+      background:rgba(255,255,255,0.04);
+      border:1px solid var(--border);
+      display:flex;align-items:center;justify-content:center;
+      flex-shrink:0;color:var(--yellow);
+    }
+    .visitor-step-content{flex:1;min-width:0;}
+    .visitor-step-title{
+      font-size:13px;font-weight:700;color:#fff;
+      letter-spacing:-0.005em;margin-bottom:3px;
+    }
+    .visitor-step-desc{
+      font-size:12px;color:rgba(255,255,255,0.5);line-height:1.5;
+    }
+
+    /* GPS status pill (visitor-friendly) */
+    .gps-pill{
+      display:inline-flex;align-items:center;gap:8px;
+      background:rgba(255,255,255,0.03);
+      border:1px solid var(--border);
+      border-radius:999px;
+      padding:8px 14px 8px 12px;
+      font-size:11px;font-weight:600;
+      color:rgba(255,255,255,0.55);
+      letter-spacing:0.04em;
+    }
+    .gps-pill-dot{
+      width:7px;height:7px;border-radius:50%;background:#666;
+    }
+    .gps-pill.searching .gps-pill-dot{
+      background:#888;animation:pulse-dot-soft 1.4s ease-in-out infinite;
+    }
+    .gps-pill.ok .gps-pill-dot{
+      background:var(--yellow);box-shadow:0 0 6px rgba(206,255,26,0.5);
+    }
+    .gps-pill.ok{color:var(--yellow);}
+    .gps-pill.warn .gps-pill-dot{background:var(--warn);}
+    .gps-pill.warn{color:var(--warn);}
+
+    /* ========= DEV VIEW ========= */
     .status-block{
       background:rgba(255,255,255,0.03);
       border:1px solid var(--border);border-radius:4px;padding:16px;
     }
     .status-row{
       display:flex;align-items:center;justify-content:space-between;
-      padding:7px 0;font-size:12px;
+      padding:7px 0;font-size:12px;gap:10px;
     }
     .status-row + .status-row{border-top:1px solid var(--border);}
     .status-label{
       color:rgba(255,255,255,0.35);font-weight:500;
       letter-spacing:0.04em;text-transform:uppercase;font-size:10px;
+      flex-shrink:0;
     }
     .status-value{
       color:#fff;font-weight:600;
       font-variant-numeric:tabular-nums;font-size:13px;
-      text-align:right;
-      max-width:60%;
-      overflow:hidden;
-      text-overflow:ellipsis;
-      white-space:nowrap;
+      text-align:right;max-width:60%;
+      overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
     }
     .status-value.accent{color:var(--yellow);}
     .status-value.warn{color:var(--warn);}
     .status-value.dim{color:rgba(255,255,255,0.35);}
 
-    /* Wing chip in status */
-    .active-wing-card{
-      background:rgba(206,255,26,0.06);
-      border:1px solid rgba(206,255,26,0.25);
-      border-radius:5px;
-      padding:14px 14px 12px;
-      margin-top:10px;
-      display:none;
-    }
-    .active-wing-card.visible{display:block;}
-    .active-wing-label{
-      font-size:10px;font-weight:700;
-      letter-spacing:0.14em;text-transform:uppercase;
-      color:var(--yellow);
-    }
-    .active-wing-name{
-      font-size:17px;font-weight:800;
-      color:#fff;margin:6px 0 6px;letter-spacing:-0.01em;
-    }
-    .active-wing-focus{
-      font-size:12px;color:rgba(255,255,255,0.55);
-      line-height:1.5;
-    }
-
-    /* Wing list in demo mode */
     .wing-grid{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:6px;
+      display:grid;grid-template-columns:1fr 1fr;gap:6px;
     }
     .wing-chip{
       background:rgba(255,255,255,0.04);
       border:1px solid var(--border);
       color:rgba(255,255,255,0.7);
-      font-family:inherit;
-      font-size:11px;
-      font-weight:700;
+      font-family:inherit;font-size:11px;font-weight:700;
       letter-spacing:0.04em;
-      padding:11px 10px;
-      cursor:pointer;
-      border-radius:4px;
+      padding:11px 10px;cursor:pointer;border-radius:4px;
       transition:all 0.15s;
-      display:flex;
-      align-items:center;
-      gap:8px;
-      text-align:left;
+      display:flex;align-items:center;gap:8px;text-align:left;
     }
     .wing-chip:hover{
       background:rgba(206,255,26,0.08);
-      border-color:rgba(206,255,26,0.3);
-      color:#fff;
+      border-color:rgba(206,255,26,0.3);color:#fff;
     }
     .wing-chip.current{
       background:rgba(206,255,26,0.1);
-      border-color:rgba(206,255,26,0.4);
-      color:var(--yellow);
+      border-color:rgba(206,255,26,0.4);color:var(--yellow);
     }
     .wing-chip .dot{
-      width:8px;height:8px;border-radius:50%;
-      background:var(--yellow);flex-shrink:0;
+      width:8px;height:8px;border-radius:50%;background:var(--yellow);flex-shrink:0;
     }
     .outside-chip{
-      width:100%;
-      margin-top:6px;
-      background:rgba(255,122,69,0.06);
-      border:1px solid rgba(255,122,69,0.2);
-      color:rgba(255,122,69,0.8);
+      width:100%;margin-top:6px;
+      background:rgba(122,138,255,0.07);
+      border:1px solid rgba(122,138,255,0.22);
+      color:rgba(122,138,255,0.85);
       font-family:inherit;
       font-size:11px;font-weight:700;letter-spacing:0.06em;
-      padding:10px;cursor:pointer;border-radius:4px;
-      transition:all 0.15s;
+      padding:10px;cursor:pointer;border-radius:4px;transition:all 0.15s;
     }
-    .outside-chip:hover{
-      background:rgba(255,122,69,0.1);
-      color:#ff9466;
-    }
+    .outside-chip:hover{background:rgba(122,138,255,0.12);color:#9fa8ff;}
     .demo-hint{
       font-size:11px;color:rgba(255,255,255,0.3);
       line-height:1.5;margin-top:10px;
     }
 
-    /* Steps */
+    /* Dev "how it works" */
     .steps{display:flex;flex-direction:column;gap:14px;}
     .step{
       display:flex;align-items:flex-start;gap:14px;
@@ -253,7 +329,7 @@
     }
     .step b{color:#fff;font-weight:700;}
 
-    .left-footer{padding:20px 40px;border-top:1px solid var(--border);}
+    .left-footer{padding:18px 40px;border-top:1px solid var(--border);}
     .api-notice{font-size:10px;color:rgba(255,255,255,0.25);line-height:1.6;letter-spacing:0.02em;}
     .api-notice span{color:rgba(206,255,26,0.55);font-weight:600;}
 
@@ -308,25 +384,20 @@
     }
     .map-overlay-badge.demo .mob-dot{background:#5aa3ff;}
 
-    /* Polygon labels on map */
     .wing-label{
       background:transparent;border:none;pointer-events:none;
       font-family:'Sora',sans-serif;
-      font-size:9px;
-      font-weight:800;
+      font-size:9px;font-weight:800;
       color:rgba(206,255,26,0.75);
-      letter-spacing:0.06em;
-      text-transform:uppercase;
+      letter-spacing:0.06em;text-transform:uppercase;
       text-shadow:0 1px 2px rgba(0,0,0,0.8), 0 0 4px rgba(0,0,0,0.5);
       white-space:nowrap;
     }
     .wing-label.active{
-      color:#fff;
-      font-size:10px;
+      color:#fff;font-size:10px;
       text-shadow:0 1px 2px rgba(0,0,0,0.9), 0 0 6px rgba(206,255,26,0.6);
     }
 
-    /* User marker */
     .user-marker{
       width:24px;height:24px;display:flex;align-items:center;justify-content:center;
     }
@@ -358,8 +429,8 @@
     }
     .status-badge.searching{color:rgba(255,255,255,0.65);}
     .status-badge.out-of-range{
-      background:rgba(255,122,69,0.08);
-      border-color:rgba(255,122,69,0.25);color:var(--warn);
+      background:rgba(122,138,255,0.08);
+      border-color:rgba(122,138,255,0.25);color:#9fa8ff;
     }
     .status-badge.in-range{
       background:rgba(206,255,26,0.1);
@@ -456,7 +527,6 @@
     .wave-bar.speaking{animation:wave-speak 0.4s ease-in-out infinite alternate;}
     @keyframes wave-speak{from{transform:scaleY(0.4);}to{transform:scaleY(1);}}
 
-    /* Transcript */
     .transcript-area{
       width:calc(100% - 64px);margin:0 32px 28px;z-index:2;min-height:90px;
     }
@@ -488,60 +558,95 @@
     /* ========= RESPONSIVE ========= */
     @media (max-width: 900px){
       html,body{overflow:auto;height:auto;}
-      .nav{padding:0 20px;}
-      .nav-status{position:static;transform:none;font-size:11px;}
+      .nav{padding:0 18px;height:58px;}
+      .nav-logo-img{height:22px;}
+      .nav-logo-mark{width:22px;height:22px;font-size:12px;}
+      .nav-logo-text{font-size:14px;}
+      .nav-status{position:static;transform:none;font-size:10px;letter-spacing:0.08em;}
       .nav-status span:not(.nav-status-dot){display:none;}
       .nav-back-text{display:none;}
 
       .layout{
         display:flex;flex-direction:column;grid-template-columns:1fr;
-        height:auto;min-height:100vh;padding-top:64px;
+        height:auto;min-height:100vh;padding-top:58px;
       }
       .right-panel{order:1;min-height:0;}
       .left-panel{
         order:2;height:auto;overflow:visible;
         border-right:none;border-top:1px solid var(--border);
       }
-      .left-body{overflow:visible;padding:24px 20px 28px;}
+      .left-body{overflow:visible;padding:22px 18px 24px;}
       .left-header{display:none;}
-      .left-footer{padding:20px;}
+      .left-footer{padding:18px;}
 
       .mobile-header{
-        display:block;padding:24px 20px 18px;
+        display:block;padding:22px 18px 16px;
         border-bottom:1px solid var(--border);background:var(--panel);
       }
-      .mobile-header .left-eyebrow{margin-bottom:10px;}
-      .mobile-header .left-title{font-size:20px;}
-      .mobile-header .left-subtitle{font-size:13px;margin-top:8px;}
+      .mobile-header .left-eyebrow{margin-bottom:8px;}
+      .mobile-header .left-title{font-size:19px;letter-spacing:-0.015em;}
+      .mobile-header .left-subtitle{font-size:12.5px;margin-top:8px;line-height:1.55;}
 
       .map-wrap{
-        margin:18px 16px 0;width:calc(100% - 32px);
-        height:300px;min-height:300px;flex:0 0 300px;
+        margin:16px 14px 0;width:calc(100% - 28px);
+        height:280px;min-height:280px;flex:0 0 280px;
+        border-radius:6px;
       }
-      .orb-area{padding:24px 16px;}
-      .status-badge{margin-bottom:20px;font-size:10.5px;padding:8px 14px;}
-      .orb-wrap{width:140px;height:140px;}
-      .orb{width:140px;height:140px;}
-      .orb-container{gap:20px;}
-      .transcript-area{margin:0 16px 22px;width:calc(100% - 32px);}
+      .orb-area{padding:24px 18px;}
+      .status-badge{
+        margin-bottom:22px;font-size:10px;padding:8px 14px;
+        letter-spacing:0.08em;
+      }
+      .orb-wrap{width:148px;height:148px;}
+      .orb{width:148px;height:148px;}
+      .orb-rings{inset:-30px;}
+      .orb-container{gap:22px;}
+      .orb-label{font-size:11px;}
+      .transcript-area{margin:0 14px 22px;width:calc(100% - 28px);}
       .transcript-bubble{
-        min-height:80px;max-height:140px;padding:14px 16px;border-radius:8px;
+        min-height:80px;max-height:160px;padding:14px 16px;border-radius:8px;
       }
       .transcript-text{font-size:14px;}
+      .transcript-role{font-size:9px;}
+
+      .location-hero{padding:20px 18px 18px;margin-bottom:24px;border-radius:8px;}
+      .location-name{font-size:22px;}
+      .location-focus{font-size:13px;}
+      .info-block{margin-bottom:24px;}
+      .visitor-steps{gap:14px;}
+      .visitor-step-icon{width:32px;height:32px;}
+      .wing-grid{grid-template-columns:1fr 1fr;}
     }
 
     @media (max-width: 480px){
-      .nav{padding:0 14px;height:56px;}
-      .layout{padding-top:56px;}
-      .nav-logo-text{font-size:14px;}
-      .mobile-header{padding:20px 16px 16px;}
-      .mobile-header .left-title{font-size:18px;}
-      .map-wrap{height:240px;min-height:240px;flex:0 0 240px;}
-      .orb-wrap{width:120px;height:120px;}
-      .orb{width:120px;height:120px;}
-      .left-body{padding:20px 16px 24px;}
-      .left-footer{padding:18px 16px;}
+      .nav{padding:0 12px;height:54px;}
+      .layout{padding-top:54px;}
+      .nav-status{display:none;}
+      .mobile-header{padding:18px 16px 14px;}
+      .mobile-header .left-title{font-size:17px;}
+      .map-wrap{
+        margin:14px 12px 0;width:calc(100% - 24px);
+        height:230px;min-height:230px;flex:0 0 230px;
+      }
+      .orb-wrap{width:130px;height:130px;}
+      .orb{width:130px;height:130px;}
+      .orb-rings{inset:-24px;}
+      .orb-container{gap:18px;}
+      .left-body{padding:18px 16px 22px;}
+      .left-footer{padding:16px;}
+      .location-hero{padding:18px 16px 16px;}
+      .location-name{font-size:20px;line-height:1.14;}
+      .location-focus{font-size:12.5px;}
+      .location-eyebrow{font-size:9.5px;}
       .wing-grid{grid-template-columns:1fr;}
+      .status-row{font-size:11.5px;}
+      .status-value{font-size:12.5px;}
+    }
+
+    @media (max-width: 360px){
+      .orb-wrap{width:118px;height:118px;}
+      .orb{width:118px;height:118px;}
+      .location-name{font-size:18px;}
     }
 
     .hidden{display:none !important;}
@@ -551,8 +656,19 @@
 
   <nav class="nav">
     <a href="/" class="nav-logo">
-      <div class="nav-logo-mark">A</div>
-      <span class="nav-logo-text">ADAM</span>
+      <!--
+        ADAM logo: vervang adam-logo.svg met je eigen SVG bestand
+        in dezelfde directory als deze HTML.
+        Onderaan staat een fallback (gele tile + ADAM tekst) die
+        automatisch verschijnt als het SVG bestand niet wordt
+        gevonden — handig tijdens setup.
+      -->
+      <img src="adam-logo.svg" alt="ADAM" class="nav-logo-img"
+        onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"/>
+      <span class="nav-logo-fallback">
+        <span class="nav-logo-mark">A</span>
+        <span class="nav-logo-text">ADAM</span>
+      </span>
     </a>
     <div class="nav-status">
       <div class="nav-status-dot" id="navDot"></div>
@@ -565,21 +681,22 @@
   </nav>
 
   <div class="mobile-header">
-    <div class="left-eyebrow">Geo Trigger POC — Multi vleugel</div>
-    <div class="left-title">Praat met de juiste gids per vleugel van De Biotoop</div>
-    <div class="left-subtitle">Acht polygonen, één agent. Het systeem detecteert in welke vleugel je bent en geeft de agent automatisch de juiste context.</div>
+    <div class="left-eyebrow">Audio gids · De Biotoop</div>
+    <div class="left-title">Praat met de gids waar je ook bent</div>
+    <div class="left-subtitle">Loop door De Biotoop. De stem die je hoort weet welk deel je bezoekt en past z'n verhaal aan.</div>
   </div>
 
   <div class="layout">
     <aside class="left-panel">
       <div class="left-header">
-        <div class="left-eyebrow">Geo Trigger POC — Multi vleugel</div>
-        <div class="left-title">Praat met de juiste gids per vleugel van De Biotoop</div>
-        <div class="left-subtitle">Acht polygonen, één agent. Het systeem detecteert in welke vleugel je bent en geeft de agent automatisch de juiste context.</div>
+        <div class="left-eyebrow">Audio gids · De Biotoop</div>
+        <div class="left-title">Praat met de gids waar je ook bent</div>
+        <div class="left-subtitle">Loop door De Biotoop. De stem die je hoort weet welk deel je bezoekt en past z'n verhaal aan.</div>
       </div>
 
       <div class="left-body">
 
+        <!-- Mode toggle (always visible) -->
         <div class="info-block">
           <div class="info-block-label">Modus</div>
           <div class="mode-toggle">
@@ -588,68 +705,141 @@
           </div>
         </div>
 
-        <div class="info-block">
-          <div class="info-block-label">Status</div>
-          <div class="status-block">
-            <div class="status-row">
-              <span class="status-label">Locatie</span>
-              <span class="status-value dim" id="statLocation">Wachten</span>
+        <!-- ============================================== -->
+        <!-- VISITOR VIEW (live modus — voor bezoekers)     -->
+        <!-- ============================================== -->
+        <div class="visitor-view">
+
+          <!-- Active location hero card -->
+          <div class="location-hero" id="locationHero">
+            <div class="location-eyebrow">
+              <div class="location-eyebrow-dot"></div>
+              <span id="locationEyebrow">Je bent bij</span>
             </div>
-            <div class="status-row">
-              <span class="status-label">Vleugel</span>
-              <span class="status-value dim" id="statWing">Geen</span>
-            </div>
-            <div class="status-row">
-              <span class="status-label">Dichtstbij</span>
-              <span class="status-value dim" id="statNearest">—</span>
-            </div>
-            <div class="status-row">
-              <span class="status-label">GPS nauwkeurigheid</span>
-              <span class="status-value dim" id="statAccuracy">—</span>
-            </div>
-            <div class="status-row">
-              <span class="status-label">Agent</span>
-              <span class="status-value dim" id="statAgent">Vergrendeld</span>
+            <div class="location-name" id="locationName">De Biotoop</div>
+            <div class="location-focus" id="locationFocus">Welkom op de open dag — loop rond en kom langs alle vleugels.</div>
+          </div>
+
+          <!-- GPS pill (subtle, not in your face) -->
+          <div class="info-block">
+            <div class="gps-pill" id="gpsPill">
+              <div class="gps-pill-dot"></div>
+              <span id="gpsPillText">Locatie zoeken...</span>
             </div>
           </div>
 
-          <div class="active-wing-card" id="activeWingCard">
-            <div class="active-wing-label">Actieve gids</div>
-            <div class="active-wing-name" id="activeWingName">—</div>
-            <div class="active-wing-focus" id="activeWingFocus">—</div>
+          <!-- How it works (3 simple steps) -->
+          <div class="info-block">
+            <div class="info-block-label">Hoe het werkt</div>
+            <div class="visitor-steps">
+
+              <div class="visitor-step">
+                <div class="visitor-step-icon">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                    <path d="M12 2C8 2 5 5 5 9C5 14 12 22 12 22C12 22 19 14 19 9C19 5 16 2 12 2Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+                    <circle cx="12" cy="9" r="2.5" stroke="currentColor" stroke-width="1.8"/>
+                  </svg>
+                </div>
+                <div class="visitor-step-content">
+                  <div class="visitor-step-title">Loop De Biotoop in</div>
+                  <div class="visitor-step-desc">De app weet welke vleugel je binnenloopt op basis van je GPS positie.</div>
+                </div>
+              </div>
+
+              <div class="visitor-step">
+                <div class="visitor-step-icon">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                    <path d="M12 2V22M2 12H22M5 5L19 19M19 5L5 19" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" opacity="0.5"/>
+                    <circle cx="12" cy="12" r="6" stroke="currentColor" stroke-width="1.8"/>
+                    <circle cx="12" cy="12" r="2" fill="currentColor"/>
+                  </svg>
+                </div>
+                <div class="visitor-step-content">
+                  <div class="visitor-step-title">Tik op de orb</div>
+                  <div class="visitor-step-desc">De gids weet waar je bent en vertelt je over deze plek. Stel gerust vragen.</div>
+                </div>
+              </div>
+
+              <div class="visitor-step">
+                <div class="visitor-step-icon">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                    <path d="M5 12L19 12M12 5L19 12L12 19" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </div>
+                <div class="visitor-step-content">
+                  <div class="visitor-step-title">Loop verder</div>
+                  <div class="visitor-step-desc">In een nieuwe vleugel? De gids past z'n verhaal automatisch aan.</div>
+                </div>
+              </div>
+
+            </div>
           </div>
+
         </div>
 
-        <div class="info-block" id="demoControlsBlock" style="display:none;">
-          <div class="info-block-label">Demo positie</div>
-          <div class="wing-grid" id="wingGrid"></div>
-          <button class="outside-chip" id="outsideChip">Buiten alle vleugels</button>
-          <div class="demo-hint">Of sleep de blauwe pin op de kaart om je positie zelf te zetten.</div>
-        </div>
+        <!-- ============================================== -->
+        <!-- DEV VIEW (demo modus — voor testen/pitchen)    -->
+        <!-- ============================================== -->
+        <div class="dev-view">
 
-        <div class="info-block">
-          <div class="info-block-label">Hoe het werkt</div>
-          <div class="steps">
-            <div class="step">
-              <div class="step-num">1</div>
-              <div>De webapp meet je positie en checkt voor <b>elk van de 8 polygonen</b> of je erbinnen staat.</div>
-            </div>
-            <div class="step">
-              <div class="step-num">2</div>
-              <div>Zodra je in een vleugel staat ontgrendelt de orb en weet de agent <b>welke vleugel</b> dat is.</div>
-            </div>
-            <div class="step">
-              <div class="step-num">3</div>
-              <div>Loop je naar een andere vleugel? Het gesprek schakelt automatisch over op de nieuwe context.</div>
+          <div class="info-block">
+            <div class="info-block-label">Status</div>
+            <div class="status-block">
+              <div class="status-row">
+                <span class="status-label">Locatie</span>
+                <span class="status-value dim" id="statLocation">Wachten</span>
+              </div>
+              <div class="status-row">
+                <span class="status-label">Vleugel</span>
+                <span class="status-value dim" id="statWing">Geen</span>
+              </div>
+              <div class="status-row">
+                <span class="status-label">Dichtstbij</span>
+                <span class="status-value dim" id="statNearest">—</span>
+              </div>
+              <div class="status-row">
+                <span class="status-label">GPS nauwkeurigheid</span>
+                <span class="status-value dim" id="statAccuracy">—</span>
+              </div>
+              <div class="status-row">
+                <span class="status-label">Agent</span>
+                <span class="status-value dim" id="statAgent">Vergrendeld</span>
+              </div>
             </div>
           </div>
+
+          <div class="info-block">
+            <div class="info-block-label">Demo positie</div>
+            <div class="wing-grid" id="wingGrid"></div>
+            <button class="outside-chip" id="outsideChip">Buiten alle vleugels (algemene gids)</button>
+            <div class="demo-hint">Of sleep de blauwe pin op de kaart om je positie zelf te zetten.</div>
+          </div>
+
+          <div class="info-block">
+            <div class="info-block-label">Hoe het werkt (technisch)</div>
+            <div class="steps">
+              <div class="step">
+                <div class="step-num">1</div>
+                <div>De webapp checkt per GPS-tick voor <b>elk van de 8 polygonen</b> of je erbinnen staat.</div>
+              </div>
+              <div class="step">
+                <div class="step-num">2</div>
+                <div>Binnen een vleugel: agent krijgt <b>vleugel-specifieke variables</b>. Buiten: <b>algemene Biotoop context</b>.</div>
+              </div>
+              <div class="step">
+                <div class="step-num">3</div>
+                <div>Wisselen tussen contexten sluit lopend gesprek netjes af en opent een nieuw gesprek met de juiste context.</div>
+              </div>
+            </div>
+          </div>
+
         </div>
 
       </div>
 
       <div class="left-footer">
         <div class="api-notice">
-          <span>POC</span> &nbsp;De Biotoop &middot; Haren &middot; 8 vleugels via polygon-detectie
+          <span>POC</span> &nbsp;De Biotoop &middot; Haren &middot; 8 vleugels + algemene gids
         </div>
       </div>
     </aside>
@@ -707,14 +897,14 @@
             <div class="wave-bar"></div><div class="wave-bar"></div>
           </div>
 
-          <div class="orb-label" id="orbLabel">Vergrendeld</div>
+          <div class="orb-label" id="orbLabel">Wachten op locatie</div>
         </div>
       </div>
 
       <div class="transcript-area">
         <div class="transcript-bubble" id="transcriptBubble">
           <div class="transcript-role agent-role" id="transcriptRole">ADAM</div>
-          <div class="transcript-text" id="transcriptText">Loop een van de vleugels van De Biotoop binnen om het gesprek te starten. Schakel naar Demo modus om het zonder GPS te proberen.</div>
+          <div class="transcript-text" id="transcriptText">Welkom op de open dag van De Biotoop. Tik op de orb om met de gids te praten — hij weet welk deel van het terrein je bezoekt en past z'n verhaal aan.</div>
         </div>
       </div>
     </section>
@@ -722,14 +912,24 @@
 
 <script>
   /* =========================================================
-     CONFIG — 8 vleugels van De Biotoop
+     CONFIG
      ========================================================= */
-
-  // ÉÉN agent. Vul per vleugel de variables in zodra je de
-  // ElevenLabs agent met dynamic variables (wing_name, wing_focus,
-  // wing_description) hebt geconfigureerd. De webapp stuurt
-  // deze waarden mee bij het starten van een conversatie.
   const SHARED_AGENT_ID = 'agent_4301ks0bz1d3ftbsspdz0ynzbj1d';
+
+  // Algemene "fallback" context — gebruikt wanneer je niet
+  // in een specifieke vleugel bent. De orb blijft beschikbaar
+  // zodat bezoekers altijd met de gids kunnen praten.
+  const GENERAL_CONTEXT = {
+    id: 'general',
+    name: 'De Biotoop',
+    isGeneral: true,
+    agentId: SHARED_AGENT_ID,
+    variables: {
+      wing_name: 'De Biotoop',
+      wing_focus: 'het hele terrein van De Biotoop met meerdere vleugels (a t/m g), de Zelfoogsttuin en de Open Kas',
+      wing_description: 'De Biotoop is een creatieve werkplek in Haren, gevestigd in een voormalig ziekenhuis. Vandaag is open dag. Het hart van de open dag is Vleugel F met de kantine, foyer, informatiemarkt en horeca. Vleugels A t/m E en G hebben ieder hun eigen makers en activiteiten. De Zelfoogsttuin ligt aan de zuidwestkant. Verwijs bezoekers door naar specifieke vleugels op basis van waar ze in geïnteresseerd zijn.'
+    }
+  };
 
   const WINGS = [
     {
@@ -874,23 +1074,32 @@
      ========================================================= */
   let mode = 'live';
   let userPos = null;
-  let activeWing = null;        // huidige actieve vleugel (object) of null
+  let activeContext = null;     // GENERAL_CONTEXT of een specifieke wing
   let watchId = null;
   let wakeLock = null;
   let conversation = null;
   let isTransitioning = false;
 
   /* =========================================================
-     DOM
+     DOM SHORTCUTS
      ========================================================= */
   const $ = (id) => document.getElementById(id);
   const navDot = $('navDot');
   const navStatusText = $('navStatusText');
+  // dev view
   const statLocation = $('statLocation');
   const statWing = $('statWing');
   const statNearest = $('statNearest');
   const statAccuracy = $('statAccuracy');
   const statAgent = $('statAgent');
+  // visitor view
+  const locationHero = $('locationHero');
+  const locationEyebrow = $('locationEyebrow');
+  const locationName = $('locationName');
+  const locationFocus = $('locationFocus');
+  const gpsPill = $('gpsPill');
+  const gpsPillText = $('gpsPillText');
+  // shared
   const statusBadge = $('statusBadge');
   const statusBadgeText = $('statusBadgeText');
   const orbWrap = $('orbWrap');
@@ -899,16 +1108,13 @@
   const transcriptBubble = $('transcriptBubble');
   const transcriptRole = $('transcriptRole');
   const transcriptText = $('transcriptText');
-  const demoControlsBlock = $('demoControlsBlock');
   const mapBadge = $('mapBadge');
   const mapBadgeText = $('mapBadgeText');
-  const activeWingCard = $('activeWingCard');
+  const orb = $('orb');
 
   /* =========================================================
      GEO HELPERS
      ========================================================= */
-
-  // Haversine distance in meters between two lat/lon points
   function haversine(lat1, lon1, lat2, lon2){
     const R = 6371000;
     const toRad = d => d * Math.PI / 180;
@@ -919,7 +1125,6 @@
     return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
   }
 
-  // Point-in-polygon via ray-casting algorithm
   function pointInPolygon(lat, lon, polygon){
     let inside = false;
     for(let i = 0, j = polygon.length - 1; i < polygon.length; j = i++){
@@ -932,19 +1137,15 @@
     return inside;
   }
 
-  // Distance from point to a line segment, in meters
-  // Approximates by projecting into local cartesian (fine for small distances)
   function distancePointToSegment(lat, lon, latA, lonA, latB, lonB){
     const R = 6371000;
     const toRad = d => d * Math.PI / 180;
     const refLat = toRad((lat + latA + latB) / 3);
     const x = ll => toRad(ll - lonA) * R * Math.cos(refLat);
     const y = la => toRad(la - latA) * R;
-
     const px = x(lon), py = y(lat);
     const ax = 0, ay = 0;
     const bx = x(lonB), by = y(latB);
-
     const dx = bx - ax, dy = by - ay;
     const lenSq = dx*dx + dy*dy;
     let t = lenSq === 0 ? 0 : ((px - ax) * dx + (py - ay) * dy) / lenSq;
@@ -954,7 +1155,6 @@
     return Math.sqrt((px - cx)**2 + (py - cy)**2);
   }
 
-  // Min distance to any edge of polygon
   function distanceToPolygonEdge(lat, lon, polygon){
     let min = Infinity;
     for(let i = 0; i < polygon.length; i++){
@@ -966,44 +1166,35 @@
     return min;
   }
 
-  // Distance from point to wing: 0 if inside, edge distance if outside
-  function distanceToWing(lat, lon, wing){
-    if(pointInPolygon(lat, lon, wing.polygon)) return 0;
-    return distanceToPolygonEdge(lat, lon, wing.polygon);
-  }
-
-  // Centroid (simple average — good enough for teleport target)
   function polygonCentroid(polygon){
     let lat = 0, lon = 0;
     for(const p of polygon){ lat += p[0]; lon += p[1]; }
     return [lat / polygon.length, lon / polygon.length];
   }
 
-  // Find which wing should be active given a position, applying hysteresis
-  // returns { wing, nearestWing, nearestDistance }
+  // Evaluate position: returns { context, nearestWing, nearestDistance }
+  // - If inside a polygon: context = that wing
+  // - Else if currently in a wing's exit buffer: stay in that wing
+  // - Else: context = GENERAL_CONTEXT (always-on fallback)
   function evaluatePosition(lat, lon){
-    // 1) inside any polygon?
     for(const w of WINGS){
       if(pointInPolygon(lat, lon, w.polygon)){
-        // also compute nearest for display purposes
-        return { wing: w, nearestWing: w, nearestDistance: 0 };
+        return { context: w, nearestWing: w, nearestDistance: 0 };
       }
     }
-    // 2) not inside any. find nearest wing.
     let nearestWing = null, nearestDist = Infinity;
     for(const w of WINGS){
       const d = distanceToPolygonEdge(lat, lon, w.polygon);
       if(d < nearestDist){ nearestDist = d; nearestWing = w; }
     }
-    // 3) apply hysteresis: if we have a current active wing and we're
-    // within EXIT_BUFFER of its edge, stay active.
-    if(activeWing){
-      const d = distanceToPolygonEdge(lat, lon, activeWing.polygon);
+    // Hysteresis: if a wing is currently active and we're within buffer of it, stay
+    if(activeContext && !activeContext.isGeneral){
+      const d = distanceToPolygonEdge(lat, lon, activeContext.polygon);
       if(d < EXIT_BUFFER){
-        return { wing: activeWing, nearestWing: nearestWing, nearestDistance: nearestDist };
+        return { context: activeContext, nearestWing: nearestWing, nearestDistance: nearestDist };
       }
     }
-    return { wing: null, nearestWing: nearestWing, nearestDistance: nearestDist };
+    return { context: GENERAL_CONTEXT, nearestWing: nearestWing, nearestDistance: nearestDist };
   }
 
   function formatDistance(m){
@@ -1012,9 +1203,8 @@
   }
 
   /* =========================================================
-     LEAFLET MAP
+     MAP
      ========================================================= */
-  // Map centroid for initial view
   const allCentroids = WINGS.map(w => polygonCentroid(w.polygon));
   const avgLat = allCentroids.reduce((s,c) => s + c[0], 0) / allCentroids.length;
   const avgLon = allCentroids.reduce((s,c) => s + c[1], 0) / allCentroids.length;
@@ -1034,8 +1224,7 @@
     maxZoom: 19,
   }).addTo(map);
 
-  // Render all wing polygons
-  const wingLayers = new Map();    // wingId -> {polygon, label}
+  const wingLayers = new Map();
   WINGS.forEach(w => {
     const poly = L.polygon(w.polygon, {
       color: '#CEFF1A',
@@ -1045,8 +1234,6 @@
       fillOpacity: 0.08,
       interactive: false,
     }).addTo(map);
-
-    // Label at centroid
     const [clat, clon] = polygonCentroid(w.polygon);
     const labelIcon = L.divIcon({
       className: 'wing-label',
@@ -1055,35 +1242,28 @@
       iconAnchor: [40, 6],
     });
     const label = L.marker([clat, clon], { icon: labelIcon, interactive: false }).addTo(map);
-
     wingLayers.set(w.id, { polygon: poly, label: label });
   });
 
-  // Auto-fit map to show all wings
-  const allBounds = L.latLngBounds(
-    WINGS.flatMap(w => w.polygon.map(p => [p[0], p[1]]))
-  );
+  const allBounds = L.latLngBounds(WINGS.flatMap(w => w.polygon.map(p => [p[0], p[1]])));
   map.fitBounds(allBounds, { padding: [20, 20], maxZoom: 18 });
 
   function updateWingHighlights(){
     WINGS.forEach(w => {
       const layer = wingLayers.get(w.id);
       if(!layer) return;
-      const isActive = activeWing && activeWing.id === w.id;
+      const isActive = activeContext && activeContext.id === w.id;
       layer.polygon.setStyle({
         weight: isActive ? 2.5 : 1.5,
         opacity: isActive ? 1 : 0.55,
         fillOpacity: isActive ? 0.22 : 0.08,
       });
       const labelEl = layer.label.getElement();
-      if(labelEl){
-        labelEl.classList.toggle('active', !!isActive);
-      }
+      if(labelEl) labelEl.classList.toggle('active', !!isActive);
     });
   }
   updateWingHighlights();
 
-  // User marker
   let userMarker = null;
   let accuracyCircle = null;
 
@@ -1098,12 +1278,10 @@
 
   function setUserMarker(lat, lon, opts = {}){
     const { accuracy = null, draggable = false } = opts;
-
     if(userMarker && userMarker.options.draggable !== draggable){
       map.removeLayer(userMarker);
       userMarker = null;
     }
-
     if(!userMarker){
       userMarker = L.marker([lat, lon], {
         icon: makeUserIcon(draggable),
@@ -1120,17 +1298,12 @@
     } else {
       userMarker.setLatLng([lat, lon]);
     }
-
     if(accuracy !== null && accuracy > 0){
       if(!accuracyCircle){
         accuracyCircle = L.circle([lat, lon], {
           radius: accuracy,
-          color: '#5aa3ff',
-          weight: 1,
-          opacity: 0.3,
-          fillColor: '#5aa3ff',
-          fillOpacity: 0.06,
-          interactive: false,
+          color: '#5aa3ff', weight: 1, opacity: 0.3,
+          fillColor: '#5aa3ff', fillOpacity: 0.06, interactive: false,
         }).addTo(map);
       } else {
         accuracyCircle.setLatLng([lat, lon]);
@@ -1143,7 +1316,7 @@
   }
 
   /* =========================================================
-     POSITION HANDLING + STATE MACHINE
+     POSITION + STATE MACHINE
      ========================================================= */
   function setUserPosition(pos, fromDrag = false){
     userPos = pos;
@@ -1154,36 +1327,31 @@
 
     // Live mode: ignore unreliable readings
     if(mode === 'live' && pos.accuracy && pos.accuracy > ACCURACY_MAX){
+      setGpsPill('warn', 'GPS te onnauwkeurig — wachten op betere meting');
       statLocation.textContent = 'Onnauwkeurig';
       statLocation.className = 'status-value warn';
-      statWing.textContent = '—';
-      statWing.className = 'status-value dim';
-      statNearest.textContent = '—';
-      statNearest.className = 'status-value dim';
       statAccuracy.textContent = '± ' + Math.round(pos.accuracy) + ' m';
       statAccuracy.className = 'status-value warn';
-      setBadge('searching', 'GPS te onnauwkeurig — wachten op betere meting');
-      setNav('searching', 'GPS onnauwkeurig');
+      setNav('warn', 'GPS onnauwkeurig');
+      // Don't change activeContext during noise
       return;
     }
 
-    // Update readouts
+    // Update dev readouts
     statLocation.textContent = mode === 'demo' ? 'Demo positie' : 'Actief';
     statLocation.className = 'status-value accent';
     statAccuracy.textContent = pos.accuracy ? '± ' + Math.round(pos.accuracy) + ' m' : '—';
     statAccuracy.className = 'status-value';
 
-    // Evaluate position vs wings (with hysteresis)
-    const evalResult = evaluatePosition(pos.lat, pos.lon);
-    const newWing = evalResult.wing;
-    const nearest = evalResult.nearestWing;
-    const nearestDist = evalResult.nearestDistance;
+    // Evaluate position
+    const result = evaluatePosition(pos.lat, pos.lon);
+    const newContext = result.context;
+    const nearest = result.nearestWing;
+    const nearestDist = result.nearestDistance;
 
-    // Update nearest readout
+    // Dev: nearest readout
     if(nearest){
-      const insideText = pointInPolygon(pos.lat, pos.lon, nearest.polygon)
-        ? 'binnen'
-        : formatDistance(nearestDist);
+      const insideText = pointInPolygon(pos.lat, pos.lon, nearest.polygon) ? 'binnen' : formatDistance(nearestDist);
       statNearest.textContent = nearest.name + ' — ' + insideText;
       statNearest.className = 'status-value';
     } else {
@@ -1191,95 +1359,91 @@
       statNearest.className = 'status-value dim';
     }
 
-    // State transitions
-    const wasActive = activeWing;
-    const wasInRange = !!activeWing;
-    const nowInRange = !!newWing;
+    // GPS pill (visitor)
+    setGpsPill('ok', mode === 'demo' ? 'Demo positie actief' : 'Locatie actief');
 
-    if(newWing && (!wasActive || wasActive.id !== newWing.id)){
-      // Either entering from outside, OR switching from one wing to another
-      enterWing(newWing, wasActive);
-    } else if(!newWing && wasInRange){
-      leaveWing();
-    } else if(newWing && wasActive && wasActive.id === newWing.id){
-      // still in same wing — just update display
-      if(!conversation){
-        setBadge('in-range', 'In ' + newWing.name + ' — tik op de orb om te praten');
-      }
-      setNav('ready', 'In ' + newWing.name);
+    // State transitions
+    const previousContext = activeContext;
+
+    if(!previousContext || previousContext.id !== newContext.id){
+      switchContext(newContext, previousContext);
     } else {
-      // outside, not in range
-      if(nearest){
-        setBadge('out-of-range', formatDistance(nearestDist) + ' van ' + nearest.name);
-      } else {
-        setBadge('out-of-range', 'Buiten alle vleugels');
-      }
-      setNav('searching', 'Buiten range');
+      // Same context — just refresh derived UI
+      updateContextDisplay(newContext, nearest, nearestDist);
     }
   }
 
-  function enterWing(wing, previousWing){
-    const isSwitch = !!previousWing;
+  function switchContext(newContext, previousContext){
+    const wasInWing = previousContext && !previousContext.isGeneral;
+    const isInWing = !newContext.isGeneral;
+    const switchingDuringConversation = !!conversation;
 
-    // If we were in another wing and conversation is active, end it first
-    if(isSwitch && conversation){
-      stopConversation(true /* silent transition */);
+    if(switchingDuringConversation){
+      // End the current conversation gracefully so a new one can start
+      // with the new context's variables
+      stopConversation(true);
     }
 
-    activeWing = wing;
+    activeContext = newContext;
     updateWingHighlights();
+    updateContextDisplay(newContext);
 
-    // Status displays
-    statWing.textContent = wing.name;
-    statWing.className = 'status-value accent';
-    statAgent.textContent = 'Ontgrendeld';
+    // Orb behaviour: always unlocked once we have any position
+    orbWrap.classList.remove('locked');
+
+    if(switchingDuringConversation){
+      if(isInWing){
+        updateTranscript('agent', 'Je bent nu in ' + newContext.name + '. Tik op de orb om hier verder te praten.');
+      } else if(wasInWing){
+        updateTranscript('agent', 'Je bent uit ' + previousContext.name + ' gelopen. Tik op de orb voor de algemene gids.');
+      }
+    }
+  }
+
+  function updateContextDisplay(ctx, nearestWing, nearestDist){
+    const isGeneral = ctx.isGeneral;
+
+    // Visitor view: hero card
+    locationHero.classList.toggle('general', isGeneral);
+    locationEyebrow.textContent = isGeneral ? 'Algemene gids' : 'Je bent bij';
+    locationName.textContent = ctx.name;
+    locationFocus.textContent = ctx.variables.wing_focus;
+
+    // Dev view: wing status
+    statWing.textContent = isGeneral ? 'Algemeen (buiten vleugels)' : ctx.name;
+    statWing.className = 'status-value ' + (isGeneral ? 'dim' : 'accent');
+    statAgent.textContent = 'Beschikbaar — ' + (isGeneral ? 'algemeen' : ctx.name);
     statAgent.className = 'status-value accent';
 
-    orbWrap.classList.remove('locked');
-    orbLabel.textContent = 'Tik om te praten';
-    orbLabel.className = 'orb-label ready';
-
-    activeWingCard.classList.add('visible');
-    $('activeWingName').textContent = wing.name;
-    $('activeWingFocus').textContent = wing.variables.wing_focus === 'TBD'
-      ? 'Geen samenvatting — vul ' + wing.name + ' aan in de WINGS config en in je ElevenLabs agent.'
-      : wing.variables.wing_focus;
-
-    setBadge('in-range', 'In ' + wing.name + ' — tik op de orb om te praten');
-    setNav('ready', 'In ' + wing.name);
-
-    if(isSwitch){
-      updateTranscript('agent', 'Je bent nu in ' + wing.name + '. Tik op de orb om hier het gesprek te starten.');
-    } else {
-      updateTranscript('agent', 'Welkom in ' + wing.name + '. Tik op de orb om het gesprek te starten.');
-    }
-  }
-
-  function leaveWing(){
-    const prev = activeWing;
-    activeWing = null;
-    updateWingHighlights();
-
-    orbWrap.classList.add('locked');
-    orbLabel.textContent = 'Vergrendeld';
-    orbLabel.className = 'orb-label';
-
-    statWing.textContent = 'Geen';
-    statWing.className = 'status-value dim';
-    statAgent.textContent = 'Vergrendeld';
-    statAgent.className = 'status-value dim';
-
-    activeWingCard.classList.remove('visible');
-
-    setBadge('out-of-range', 'Buiten alle vleugels — loop een binnen om te praten');
-    setNav('searching', 'Buiten range');
-
+    // Orb label
     if(conversation){
-      stopConversation();
-      updateTranscript('agent', 'Je bent uit ' + prev.name + ' gelopen. Het gesprek is gesloten.');
+      // mid-conversation; orb-label is managed by conversation callbacks
+    } else {
+      orbLabel.textContent = 'Tik om te praten';
+      orbLabel.className = 'orb-label ready';
     }
+
+    // Status badge (above the orb)
+    if(!conversation){
+      if(isGeneral){
+        setBadge('out-of-range', 'Algemene gids — tik om te praten');
+        setNav('ready', 'Algemene gids');
+      } else {
+        setBadge('in-range', 'In ' + ctx.name + ' — tik om te praten');
+        setNav('ready', 'In ' + ctx.name);
+      }
+    }
+
+    // Mark active wing chip in dev grid
+    document.querySelectorAll('.wing-chip').forEach(c => {
+      c.classList.toggle('current', c.dataset.wingId === ctx.id);
+    });
   }
 
+  function setGpsPill(state, text){
+    gpsPill.className = 'gps-pill ' + state;
+    gpsPillText.textContent = text;
+  }
   function setBadge(state, text){
     statusBadge.className = 'status-badge ' + state;
     statusBadgeText.textContent = text;
@@ -1298,34 +1462,38 @@
     document.querySelectorAll('.mode-btn').forEach(b => {
       b.classList.toggle('active', b.dataset.mode === mode);
     });
+    document.body.classList.toggle('dev-mode', mode === 'demo');
 
     if(mode === 'live'){
-      demoControlsBlock.style.display = 'none';
       mapBadge.classList.remove('demo');
       mapBadgeText.textContent = 'Live GPS';
       startLiveTracking();
     } else {
       stopLiveTracking();
-      demoControlsBlock.style.display = 'block';
       mapBadge.classList.add('demo');
       mapBadgeText.textContent = 'Demo modus';
-      // start demo outside all wings
       teleportToOutside();
     }
   }
 
   function startLiveTracking(){
     if(!('geolocation' in navigator)){
-      statLocation.textContent = 'Niet beschikbaar';
-      statLocation.className = 'status-value warn';
-      setBadge('out-of-range', 'GPS niet ondersteund in deze browser');
+      setGpsPill('warn', 'GPS wordt niet ondersteund in deze browser');
+      setBadge('out-of-range', 'GPS niet beschikbaar');
       setNav('warn', 'Geen GPS');
+      orbWrap.classList.add('locked');
+      orbLabel.textContent = 'Wachten op GPS';
+      orbLabel.className = 'orb-label';
       return;
     }
+    setGpsPill('searching', 'Locatie zoeken...');
     statLocation.textContent = 'Zoeken...';
     statLocation.className = 'status-value';
     setBadge('searching', 'Locatie ophalen — sta toestemming toe');
     setNav('searching', 'GPS zoeken');
+    orbWrap.classList.add('locked');
+    orbLabel.textContent = 'Wachten op locatie';
+    orbLabel.className = 'orb-label';
 
     if(watchId !== null) navigator.geolocation.clearWatch(watchId);
 
@@ -1340,10 +1508,14 @@
         if(err.code === err.PERMISSION_DENIED) msg = 'Locatie toegang geweigerd';
         else if(err.code === err.POSITION_UNAVAILABLE) msg = 'GPS positie niet beschikbaar';
         else if(err.code === err.TIMEOUT) msg = 'GPS timeout — probeer opnieuw';
+        setGpsPill('warn', msg);
         statLocation.textContent = 'Geblokkeerd';
         statLocation.className = 'status-value warn';
         setBadge('out-of-range', msg);
         setNav('warn', 'Geen GPS');
+        orbWrap.classList.add('locked');
+        orbLabel.textContent = 'Geen GPS';
+        orbLabel.className = 'orb-label';
       },
       { enableHighAccuracy: true, maximumAge: 0, timeout: 15000 }
     );
@@ -1364,12 +1536,11 @@
   }
 
   function teleportToOutside(){
-    // Place 150m north of overall centroid (toward Botanicuslaan area)
     setUserPosition({ lat: avgLat + 0.0015, lon: avgLon, accuracy: 5 });
   }
 
   /* =========================================================
-     WING GRID (demo controls)
+     WING GRID (dev)
      ========================================================= */
   function renderWingGrid(){
     const grid = $('wingGrid');
@@ -1379,27 +1550,19 @@
       btn.className = 'wing-chip';
       btn.dataset.wingId = w.id;
       btn.innerHTML = '<span class="dot"></span><span>' + w.name + '</span>';
-      btn.addEventListener('click', () => {
-        teleportToWing(w.id);
-        // small visual feedback on which is current
-        document.querySelectorAll('.wing-chip').forEach(c => c.classList.remove('current'));
-        btn.classList.add('current');
-      });
+      btn.addEventListener('click', () => teleportToWing(w.id));
       grid.appendChild(btn);
     });
   }
   renderWingGrid();
 
   /* =========================================================
-     MODE BUTTON BINDINGS
+     BINDINGS
      ========================================================= */
   document.querySelectorAll('.mode-btn').forEach(btn => {
     btn.addEventListener('click', () => setMode(btn.dataset.mode));
   });
-  $('outsideChip').addEventListener('click', () => {
-    teleportToOutside();
-    document.querySelectorAll('.wing-chip').forEach(c => c.classList.remove('current'));
-  });
+  $('outsideChip').addEventListener('click', () => teleportToOutside());
 
   /* =========================================================
      ELEVENLABS CONVERSATION
@@ -1414,12 +1577,12 @@
 
   async function startConversation(){
     if(isTransitioning || conversation) return;
-    if(!activeWing){
-      updateTranscript('agent', 'Je bent niet in een vleugel. Loop een vleugel binnen om te praten.');
+    if(!activeContext){
+      updateTranscript('agent', 'Wachten op locatie. Sta toegang toe of schakel naar demo modus.');
       return;
     }
     isTransitioning = true;
-    const wingForThisSession = activeWing;
+    const ctxForSession = activeContext;
 
     try {
       await navigator.mediaDevices.getUserMedia({
@@ -1427,33 +1590,32 @@
       });
 
       orbLabel.textContent = 'Verbinden...';
-      setBadge('in-range', 'Verbinden met agent voor ' + wingForThisSession.name + '...');
+      setBadge(ctxForSession.isGeneral ? 'out-of-range' : 'in-range',
+        'Verbinden met ' + (ctxForSession.isGeneral ? 'algemene gids' : ctxForSession.name) + '...');
 
       conversation = await window.ElevenLabsConversation.startSession({
-        agentId: wingForThisSession.agentId,
-
-        // Stuurt de wing-specifieke variabelen naar de agent.
-        // Werkt zodra je in het ElevenLabs dashboard de dynamic
-        // variables (wing_name, wing_focus, wing_description) hebt
-        // gedefinieerd. Daarvoor: zie de docs over dynamic variables.
-        dynamicVariables: wingForThisSession.variables,
+        agentId: ctxForSession.agentId,
+        dynamicVariables: ctxForSession.variables,
 
         onConnect: () => {
           isTransitioning = false;
           orbLabel.textContent = 'Luisteren...';
           orbLabel.className = 'orb-label active-label';
-          setBadge('in-range', 'Verbonden — tik nogmaals om te stoppen');
+          setBadge(ctxForSession.isGeneral ? 'out-of-range' : 'in-range', 'Verbonden — tik nogmaals om te stoppen');
           requestWakeLock();
         },
         onDisconnect: () => {
           conversation = null;
           isTransitioning = false;
-          orbLabel.textContent = activeWing ? 'Tik om te praten' : 'Vergrendeld';
-          orbLabel.className = 'orb-label' + (activeWing ? ' ready' : '');
+          orbLabel.textContent = activeContext ? 'Tik om te praten' : 'Wachten op locatie';
+          orbLabel.className = 'orb-label' + (activeContext ? ' ready' : '');
           waveform.classList.remove('visible');
           document.querySelectorAll('.wave-bar').forEach(b => b.classList.remove('speaking'));
           orb.classList.remove('speaking');
-          if(activeWing) setBadge('in-range', 'In ' + activeWing.name + ' — tik op de orb om te praten');
+          if(activeContext){
+            if(activeContext.isGeneral) setBadge('out-of-range', 'Algemene gids — tik om te praten');
+            else setBadge('in-range', 'In ' + activeContext.name + ' — tik om te praten');
+          }
           releaseWakeLock();
         },
         onModeChange: (m) => {
@@ -1485,8 +1647,8 @@
       });
     } catch (err) {
       console.error('Start error:', err);
-      orbLabel.textContent = activeWing ? 'Tik om te praten' : 'Vergrendeld';
-      orbLabel.className = 'orb-label' + (activeWing ? ' ready' : '');
+      orbLabel.textContent = activeContext ? 'Tik om te praten' : 'Wachten op locatie';
+      orbLabel.className = 'orb-label' + (activeContext ? ' ready' : '');
       setBadge('in-range', 'Microfoon toegang geweigerd');
       conversation = null;
       isTransitioning = false;
@@ -1506,7 +1668,6 @@
     }
   }
 
-  const orb = $('orb');
   orbWrap.addEventListener('click', async () => {
     if(orbWrap.classList.contains('locked')) return;
     if(isTransitioning) return;
