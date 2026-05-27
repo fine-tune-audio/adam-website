@@ -1387,10 +1387,16 @@
 
   function handlePositionUpdate(){
     if(!userPos) return;
-    const acc = userPos.accuracy;
-    const reliable = !acc || acc <= ACCURACY_MAX;
+    const acc = userPos.accuracy || 0;
     const det = detectWing(userPos.lat, userPos.lon);
-    detectedWing = (reliable && det.distance === 0) ? det.wing : null;
+    const insidePolygon = det.distance === 0;
+    // Trust polygon-inside detection regardless of accuracy.
+    // If GPS says "you're inside polygon X", that's a strong signal —
+    // even when accuracy is moderate (30-100m typical indoor).
+    // Only outright reject garbage readings (>250m accuracy).
+    const garbage = acc > 250;
+    detectedWing = (insidePolygon && !garbage) ? det.wing : null;
+    const reliable = !acc || acc <= ACCURACY_MAX;
 
     updateDev({
       gps: reliable ? 'Actief' : 'Onnauwkeurig',
