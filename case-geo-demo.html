@@ -6,7 +6,7 @@
   <meta name="robots" content="noindex, nofollow"/>
   <meta name="theme-color" content="#0A0A0A"/>
   <title>Audio gids · De Biotoop · ADAM</title>
-  <meta name="description" content="Persoonlijke audio gids voor de open dag van De Biotoop in Haren. Tik op je vleugel en stel je vragen."/>
+  <meta name="description" content="Persoonlijke audio gids voor de open dag van De Biotoop in Haren."/>
 
   <link rel="icon" type="image/svg+xml" href="adam-favicon.svg"/>
 
@@ -29,7 +29,6 @@
       --yellow:#CEFF1A;
       --black:#0A0A0A;
       --panel:#0d0d0d;
-      --panel-2:#141414;
       --white:#FFFFFF;
       --border:rgba(255,255,255,0.08);
       --border-strong:rgba(255,255,255,0.14);
@@ -47,881 +46,341 @@
       overscroll-behavior:none;
     }
     body{overflow:hidden;}
-
-    button{
-      font-family:inherit;
-      cursor:pointer;
-      border:none;
-      background:transparent;
-      color:inherit;
-    }
-
-    input,textarea{
-      font-family:inherit;
-      color:inherit;
-      background:transparent;
-      border:none;
-      outline:none;
-    }
+    button,input{font-family:inherit;color:inherit;}
+    button{cursor:pointer;border:none;background:transparent;}
+    input{background:transparent;border:none;outline:none;}
 
     /* ========= APP SHELL ========= */
     .app{
-      width:100%;
-      height:100%;
-      max-width:540px;
-      margin:0 auto;
-      position:relative;
-      background:var(--black);
-      display:flex;
-      flex-direction:column;
-      overflow:hidden;
+      width:100%;height:100%;
+      max-width:540px;margin:0 auto;
+      position:relative;background:var(--black);
+      display:flex;flex-direction:column;overflow:hidden;
     }
 
     /* ========= NAV ========= */
     .nav{
       flex:0 0 auto;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      padding:14px 18px;
-      height:58px;
+      display:flex;align-items:center;justify-content:space-between;
+      padding:0 18px;height:54px;
       background:rgba(10,10,10,0.92);
       backdrop-filter:blur(10px);
       border-bottom:1px solid var(--border);
-      position:relative;
-      z-index:30;
+      position:relative;z-index:30;
     }
-    .nav-logo{
-      display:flex;align-items:center;gap:9px;
-      text-decoration:none;color:inherit;
-    }
-    /* Placeholder mark - replace by inlining your real ADAM SVG */
+    .nav-logo{display:flex;align-items:center;gap:9px;text-decoration:none;color:inherit;}
     .nav-logo-mark{
       width:22px;height:22px;border-radius:5px;background:var(--yellow);
       display:flex;align-items:center;justify-content:center;
       color:var(--black);font-weight:800;font-size:12px;
     }
-    .nav-logo-text{
-      font-size:14px;font-weight:800;color:#fff;letter-spacing:0.04em;
-    }
+    .nav-logo-text{font-size:14px;font-weight:800;color:#fff;letter-spacing:0.04em;}
     .nav-title{
       position:absolute;left:50%;top:50%;transform:translate(-50%, -50%);
       font-size:11px;font-weight:600;letter-spacing:0.12em;
+      text-transform:uppercase;color:var(--dim);pointer-events:none;
+    }
+    .nav-info{
+      width:32px;height:32px;border-radius:8px;
+      display:flex;align-items:center;justify-content:center;
+      color:var(--muted);transition:all 0.15s;
+    }
+    .nav-info:hover{background:rgba(255,255,255,0.06);color:#fff;}
+
+    /* ========= CHIP SELECTOR ========= */
+    .chip-bar{
+      flex:0 0 auto;
+      padding:10px 14px 4px;
+      background:var(--panel);
+      border-bottom:1px solid var(--border);
+      position:relative;
+    }
+    .chip-bar-header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom:6px;
+      min-height:14px;
+    }
+    .chip-bar-label{
+      font-size:9px;font-weight:700;letter-spacing:0.16em;
       text-transform:uppercase;color:var(--dim);
-      pointer-events:none;
     }
-    .nav-action{
-      width:36px;height:36px;border-radius:8px;
-      display:flex;align-items:center;justify-content:center;
-      color:var(--muted);
-      transition:background 0.15s, color 0.15s;
-    }
-    .nav-action:hover{background:rgba(255,255,255,0.05);color:#fff;}
-    .nav-action:active{transform:scale(0.94);}
-    .nav-action svg{display:block;}
-
-    .nav-back-button{
-      display:flex;align-items:center;gap:5px;
-      padding:7px 12px 7px 8px;
-      border-radius:999px;
-      font-size:12px;font-weight:600;
-      color:var(--muted);
-      transition:all 0.15s;
-    }
-    .nav-back-button:hover{background:rgba(255,255,255,0.05);color:#fff;}
-    .nav-back-button:active{transform:scale(0.97);}
-
-    /* Hidden dev trigger zone — bottom-right corner */
-    .dev-trigger{
-      position:fixed;
-      bottom:0;right:0;
-      width:50px;height:50px;
-      z-index:50;
-      cursor:default;
-    }
-
-    /* ========= SCREENS ========= */
-    .screen{
-      flex:1;
-      overflow-y:auto;
-      overflow-x:hidden;
-      scrollbar-width:thin;
-      scrollbar-color:rgba(255,255,255,0.1) transparent;
+    .gps-resume{
       display:none;
-      flex-direction:column;
-      position:relative;
-    }
-    .screen.active{display:flex;}
-    .screen::-webkit-scrollbar{width:3px;}
-    .screen::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.1);border-radius:3px;}
-
-    /* ========= WELCOME SCREEN ========= */
-    .welcome-bg{
-      position:absolute;
-      inset:0;
-      pointer-events:none;
-      z-index:0;
-      overflow:hidden;
-    }
-    .welcome-bg canvas{width:100%;height:100%;display:block;}
-
-    .welcome-content{
-      flex:1;
-      display:flex;
-      flex-direction:column;
-      padding:40px 22px 28px;
-      position:relative;
-      z-index:1;
-      min-height:min-content;
-    }
-
-    .welcome-eyebrow{
-      font-size:11px;
-      font-weight:700;
-      letter-spacing:0.18em;
-      text-transform:uppercase;
-      color:var(--yellow);
-      margin-bottom:18px;
-    }
-
-    .welcome-title{
-      font-size:34px;
-      font-weight:800;
-      line-height:1.05;
-      letter-spacing:-0.02em;
-      margin-bottom:14px;
-    }
-    .welcome-title em{
-      font-style:normal;
-      color:var(--yellow);
-    }
-
-    .welcome-subtitle{
-      font-size:15px;
-      line-height:1.55;
-      color:var(--muted);
-      margin-bottom:28px;
-      max-width:380px;
-    }
-
-    .welcome-features{
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-      margin-bottom:auto;
-    }
-
-    .welcome-feature{
-      display:flex;
-      align-items:flex-start;
-      gap:12px;
-      padding:14px 16px;
-      background:rgba(255,255,255,0.025);
-      border:1px solid var(--border);
-      border-radius:10px;
-    }
-    .welcome-feature-icon{
-      width:32px;height:32px;
-      border-radius:8px;
+      align-items:center;
+      gap:5px;
+      padding:3px 9px 3px 7px;
       background:rgba(206,255,26,0.08);
-      border:1px solid rgba(206,255,26,0.2);
-      color:var(--yellow);
-      display:flex;align-items:center;justify-content:center;
-      flex-shrink:0;
-    }
-    .welcome-feature-body{
-      flex:1;min-width:0;padding-top:1px;
-    }
-    .welcome-feature-title{
-      font-size:13px;
-      font-weight:700;
-      color:#fff;
-      margin-bottom:3px;
-    }
-    .welcome-feature-desc{
-      font-size:12px;
-      color:var(--muted);
-      line-height:1.45;
-    }
-
-    .privacy-card{
-      display:flex;
-      align-items:flex-start;
-      gap:11px;
-      padding:13px 14px;
-      background:rgba(29,46,216,0.08);
-      border:1px solid rgba(29,46,216,0.22);
-      border-radius:9px;
-      margin-bottom:22px;
-    }
-    .privacy-card svg{
-      flex-shrink:0;
-      color:#7a8aff;
-      margin-top:1px;
-    }
-    .privacy-card-content{
-      flex:1;
-      font-size:11.5px;
-      color:rgba(255,255,255,0.65);
-      line-height:1.5;
-    }
-    .privacy-card-content b{
-      color:#fff;
-      font-weight:600;
-    }
-
-    .start-button{
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      gap:10px;
-      width:100%;
-      background:var(--yellow);
-      color:var(--black);
-      font-size:15px;
-      font-weight:700;
-      letter-spacing:0.02em;
-      padding:18px 24px;
-      border-radius:12px;
-      transition:transform 0.1s, box-shadow 0.2s;
-      box-shadow:0 0 30px rgba(206,255,26,0.2);
-    }
-    .start-button:hover{
-      box-shadow:0 0 40px rgba(206,255,26,0.35);
-    }
-    .start-button:active{transform:scale(0.98);}
-    .start-button svg{display:block;}
-
-    /* ========= WING PICKER SCREEN ========= */
-    .picker-content{
-      padding:24px 18px 28px;
-      flex:1;
-      display:flex;
-      flex-direction:column;
-    }
-    .picker-header{
-      margin-bottom:22px;
-    }
-    .picker-title{
-      font-size:22px;
-      font-weight:800;
-      letter-spacing:-0.015em;
-      margin-bottom:6px;
-      line-height:1.2;
-    }
-    .picker-subtitle{
-      font-size:13px;
-      color:var(--muted);
-      line-height:1.5;
-    }
-
-    .gps-suggestion{
-      background:linear-gradient(135deg, rgba(206,255,26,0.12) 0%, rgba(206,255,26,0.04) 100%);
       border:1px solid rgba(206,255,26,0.3);
-      border-radius:12px;
-      padding:16px 18px 16px;
-      margin-bottom:18px;
-      position:relative;
-      overflow:hidden;
-      display:none;
-    }
-    .gps-suggestion.visible{display:block;}
-    .gps-suggestion::before{
-      content:'';
-      position:absolute;
-      top:-30px;right:-30px;
-      width:120px;height:120px;
-      border-radius:50%;
-      background:radial-gradient(circle, rgba(206,255,26,0.18), transparent 70%);
-      pointer-events:none;
-    }
-    .gps-suggestion-label{
-      font-size:10px;
-      font-weight:700;
-      letter-spacing:0.14em;
-      text-transform:uppercase;
       color:var(--yellow);
-      margin-bottom:6px;
-      display:flex;
-      align-items:center;
-      gap:6px;
-      position:relative;
-    }
-    .gps-suggestion-label .live-dot{
-      width:6px;height:6px;
-      border-radius:50%;
-      background:var(--yellow);
-      animation:pulse-dot 1.4s ease-in-out infinite;
-    }
-    @keyframes pulse-dot{
-      0%,100%{box-shadow:0 0 6px rgba(206,255,26,0.4);}
-      50%{box-shadow:0 0 14px rgba(206,255,26,0.85);}
-    }
-    .gps-suggestion-text{
-      font-size:14px;
-      color:#fff;
-      line-height:1.4;
-      position:relative;
-    }
-    .gps-suggestion-text b{
-      color:var(--yellow);
-      font-weight:700;
-    }
-    .gps-suggestion-actions{
-      display:flex;
-      gap:8px;
-      margin-top:12px;
-      position:relative;
-    }
-    .gps-action-btn{
-      flex:1;
-      padding:9px 12px;
-      border-radius:7px;
-      font-size:12px;
-      font-weight:700;
-      letter-spacing:0.04em;
+      border-radius:999px;
+      font-size:9.5px;font-weight:700;
+      letter-spacing:0.08em;text-transform:uppercase;
       transition:all 0.15s;
     }
-    .gps-action-btn.primary{
-      background:var(--yellow);
-      color:var(--black);
+    .gps-resume.visible{display:inline-flex;}
+    .gps-resume:hover{background:rgba(206,255,26,0.14);}
+    .gps-resume:active{transform:scale(0.95);}
+    .gps-resume svg{display:block;}
+    .chip-row{
+      display:flex;gap:5px;
+      overflow-x:auto;overflow-y:hidden;
+      scrollbar-width:none;padding:2px 0 8px;
+      -webkit-overflow-scrolling:touch;
     }
-    .gps-action-btn.primary:active{transform:scale(0.97);}
-    .gps-action-btn.secondary{
-      background:rgba(255,255,255,0.06);
-      border:1px solid var(--border-strong);
-      color:#fff;
-    }
-    .gps-action-btn.secondary:hover{background:rgba(255,255,255,0.1);}
-
-    .section-label{
-      font-size:10px;
-      font-weight:700;
-      letter-spacing:0.14em;
-      text-transform:uppercase;
-      color:var(--dim);
-      margin-bottom:10px;
-    }
-
-    .wing-list{
-      display:flex;
-      flex-direction:column;
-      gap:8px;
-      margin-bottom:24px;
-    }
-    .wing-card{
-      display:flex;
-      align-items:center;
-      gap:14px;
-      padding:14px 16px;
-      background:rgba(255,255,255,0.025);
-      border:1px solid var(--border);
-      border-radius:10px;
-      text-align:left;
-      width:100%;
-      transition:all 0.15s;
-    }
-    .wing-card:hover{
-      background:rgba(255,255,255,0.05);
-      border-color:var(--border-strong);
-    }
-    .wing-card:active{transform:scale(0.99);}
-    .wing-card.detected{
-      background:rgba(206,255,26,0.05);
-      border-color:rgba(206,255,26,0.3);
-    }
-    .wing-card-glyph{
-      width:38px;height:38px;
-      border-radius:8px;
-      background:rgba(206,255,26,0.12);
-      color:var(--yellow);
-      display:flex;align-items:center;justify-content:center;
-      font-size:15px;font-weight:800;
+    .chip-row::-webkit-scrollbar{display:none;}
+    .chip{
       flex-shrink:0;
-    }
-    .wing-card.special .wing-card-glyph{
-      background:rgba(29,46,216,0.18);
-      color:#7a8aff;
-    }
-    .wing-card-body{
-      flex:1;min-width:0;
-    }
-    .wing-card-name{
-      font-size:14.5px;
-      font-weight:700;
-      color:#fff;
-      letter-spacing:-0.005em;
-      margin-bottom:2px;
-    }
-    .wing-card-focus{
-      font-size:11.5px;
-      color:var(--muted);
-      line-height:1.4;
-      overflow:hidden;
-      display:-webkit-box;
-      -webkit-line-clamp:1;
-      -webkit-box-orient:vertical;
-    }
-    .wing-card-chevron{
-      color:var(--dim);
-      flex-shrink:0;
-      transition:transform 0.15s, color 0.15s;
-    }
-    .wing-card:hover .wing-card-chevron{
-      color:var(--yellow);
-      transform:translateX(2px);
-    }
-
-    .picker-divider{
-      height:1px;
-      background:var(--border);
-      margin:6px 0 18px;
-    }
-
-    /* ========= WING DETAIL SCREEN ========= */
-    .detail-content{
-      flex:1;
-      display:flex;
-      flex-direction:column;
-      padding:22px 18px 18px;
-    }
-
-    .detail-hero{
-      background:linear-gradient(135deg, rgba(206,255,26,0.10) 0%, rgba(206,255,26,0.02) 100%);
-      border:1px solid rgba(206,255,26,0.25);
-      border-radius:14px;
-      padding:22px 20px 20px;
-      margin-bottom:18px;
-      position:relative;
-      overflow:hidden;
-    }
-    .detail-hero.general{
-      background:linear-gradient(135deg, rgba(29,46,216,0.12) 0%, rgba(29,46,216,0.02) 100%);
-      border-color:rgba(29,46,216,0.28);
-    }
-    .detail-hero::before{
-      content:'';
-      position:absolute;
-      top:-40px;right:-40px;
-      width:160px;height:160px;
-      border-radius:50%;
-      background:radial-gradient(circle, rgba(206,255,26,0.16), transparent 70%);
-      pointer-events:none;
-    }
-    .detail-hero.general::before{
-      background:radial-gradient(circle, rgba(29,46,216,0.22), transparent 70%);
-    }
-    .detail-hero-eyebrow{
-      font-size:10px;
-      font-weight:700;
-      letter-spacing:0.16em;
-      text-transform:uppercase;
-      color:var(--yellow);
-      margin-bottom:9px;
-      display:flex;
-      align-items:center;
-      gap:7px;
-      position:relative;
-    }
-    .detail-hero.general .detail-hero-eyebrow{color:#7a8aff;}
-    .detail-hero-eyebrow .live-dot{
-      width:6px;height:6px;border-radius:50%;background:currentColor;
-      animation:pulse-dot 1.4s ease-in-out infinite;
-    }
-    .detail-hero-name{
-      font-size:26px;
-      font-weight:800;
-      letter-spacing:-0.02em;
-      line-height:1.1;
-      margin-bottom:10px;
-      color:#fff;
-      position:relative;
-    }
-    .detail-hero-focus{
-      font-size:13.5px;
-      color:rgba(255,255,255,0.72);
-      line-height:1.55;
-      position:relative;
-    }
-
-    .aanrader-card{
-      display:flex;
-      align-items:flex-start;
-      gap:11px;
-      padding:14px 16px;
-      background:rgba(255,255,255,0.03);
-      border:1px solid var(--border);
-      border-radius:10px;
-      margin-bottom:18px;
-    }
-    .aanrader-icon{
-      width:30px;height:30px;
-      border-radius:7px;
-      background:rgba(206,255,26,0.1);
-      color:var(--yellow);
-      display:flex;align-items:center;justify-content:center;
-      flex-shrink:0;
-    }
-    .aanrader-content{flex:1;min-width:0;}
-    .aanrader-label{
-      font-size:9.5px;
-      font-weight:700;
-      letter-spacing:0.14em;
-      text-transform:uppercase;
-      color:var(--yellow);
-      margin-bottom:3px;
-    }
-    .aanrader-text{
-      font-size:13px;
-      color:#fff;
-      line-height:1.5;
-    }
-
-    .suggestions-label{
-      font-size:10px;
-      font-weight:700;
-      letter-spacing:0.14em;
-      text-transform:uppercase;
-      color:var(--dim);
-      margin-bottom:10px;
-    }
-
-    .suggestion-list{
-      display:flex;
-      flex-direction:column;
-      gap:7px;
-      margin-bottom:18px;
-    }
-    .suggestion-chip{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      padding:12px 14px;
-      background:rgba(255,255,255,0.03);
-      border:1px solid var(--border);
-      border-radius:9px;
-      text-align:left;
-      width:100%;
-      font-size:13px;
-      color:rgba(255,255,255,0.78);
-      transition:all 0.15s;
-    }
-    .suggestion-chip:hover{
-      background:rgba(206,255,26,0.06);
-      border-color:rgba(206,255,26,0.25);
-      color:#fff;
-    }
-    .suggestion-chip:active{transform:scale(0.99);}
-    .suggestion-chip svg{
-      color:var(--dim);
-      flex-shrink:0;
-      transition:color 0.15s;
-    }
-    .suggestion-chip:hover svg{color:var(--yellow);}
-    .suggestion-chip-text{flex:1;line-height:1.4;}
-
-    .start-talk-button{
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      gap:10px;
-      width:100%;
-      background:var(--yellow);
-      color:var(--black);
-      font-size:15px;
-      font-weight:700;
-      letter-spacing:0.02em;
-      padding:17px 22px;
-      border-radius:12px;
-      transition:transform 0.1s, box-shadow 0.2s;
-      margin-bottom:10px;
-      box-shadow:0 0 22px rgba(206,255,26,0.18);
-    }
-    .start-talk-button:hover{
-      box-shadow:0 0 30px rgba(206,255,26,0.32);
-    }
-    .start-talk-button:active{transform:scale(0.98);}
-
-    .map-toggle-btn{
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      gap:8px;
-      width:100%;
-      padding:13px 16px;
+      min-width:38px;height:32px;
+      padding:0 12px;border-radius:6px;
       background:rgba(255,255,255,0.04);
-      border:1px solid var(--border-strong);
-      color:rgba(255,255,255,0.7);
-      font-size:12.5px;
-      font-weight:600;
-      letter-spacing:0.04em;
-      border-radius:10px;
-      margin-bottom:14px;
-      transition:all 0.15s;
-    }
-    .map-toggle-btn:hover{
-      background:rgba(255,255,255,0.07);
-      color:#fff;
-    }
-    .map-toggle-btn:active{transform:scale(0.99);}
-
-    /* Text input always available at bottom of detail */
-    .text-composer{
-      background:rgba(255,255,255,0.03);
       border:1px solid var(--border);
-      border-radius:24px;
-      padding:6px 6px 6px 18px;
-      display:flex;
-      align-items:center;
-      gap:8px;
-      transition:border-color 0.15s;
-      margin-top:auto;
+      color:rgba(255,255,255,0.6);
+      font-size:12px;font-weight:700;letter-spacing:0.04em;
+      transition:all 0.15s;
+      display:flex;align-items:center;justify-content:center;
     }
-    .text-composer:focus-within{
+    .chip:active{transform:scale(0.94);}
+    .chip.active{
+      background:var(--yellow);color:var(--black);border-color:var(--yellow);
+    }
+    .chip.special{
+      background:rgba(29,46,216,0.12);
+      border-color:rgba(122,138,255,0.3);
+      color:#9fa8ff;
+    }
+    .chip.special.active{
+      background:#9fa8ff;color:var(--black);border-color:#9fa8ff;
+    }
+    .chip.suggested:not(.active){
       border-color:rgba(206,255,26,0.4);
-      background:rgba(255,255,255,0.05);
-    }
-    .text-composer-input{
-      flex:1;
-      font-size:14px;
-      color:#fff;
-      padding:10px 4px;
-      min-width:0;
-    }
-    .text-composer-input::placeholder{color:var(--dim);}
-    .text-composer-send{
-      width:38px;height:38px;
-      border-radius:50%;
-      background:var(--yellow);
-      color:var(--black);
-      display:flex;align-items:center;justify-content:center;
-      transition:transform 0.1s, opacity 0.2s;
-      flex-shrink:0;
-    }
-    .text-composer-send:active{transform:scale(0.92);}
-    .text-composer-send:disabled{
-      opacity:0.3;
-      cursor:not-allowed;
-    }
-    .text-composer-send svg{display:block;}
-
-    /* ========= CONVERSATION SCREEN ========= */
-    .conv-screen{
-      padding:0;
-    }
-    .conv-content{
-      flex:1;
-      display:flex;
-      flex-direction:column;
-      padding:18px 18px 14px;
-      min-height:0;
-    }
-
-    .conv-header{
-      display:flex;
-      align-items:center;
-      gap:12px;
-      padding:12px 14px;
-      background:rgba(206,255,26,0.06);
-      border:1px solid rgba(206,255,26,0.22);
-      border-radius:10px;
-      margin-bottom:18px;
-      flex-shrink:0;
-    }
-    .conv-header.general{
-      background:rgba(29,46,216,0.08);
-      border-color:rgba(29,46,216,0.25);
-    }
-    .conv-header-glyph{
-      width:32px;height:32px;
-      border-radius:8px;
-      background:rgba(206,255,26,0.14);
+      box-shadow:0 0 0 1px rgba(206,255,26,0.15);
       color:var(--yellow);
-      display:flex;align-items:center;justify-content:center;
-      font-size:13px;font-weight:800;
-      flex-shrink:0;
     }
-    .conv-header.general .conv-header-glyph{
-      background:rgba(29,46,216,0.22);
-      color:#7a8aff;
+
+    /* ========= ORB SECTION ========= */
+    .orb-section{
+      flex:0 0 auto;
+      padding:16px 14px 8px;
+      display:flex;flex-direction:column;align-items:center;
+      position:relative;
+      background:radial-gradient(ellipse at center top, rgba(29,46,216,0.10), transparent 70%);
     }
-    .conv-header-body{flex:1;min-width:0;}
-    .conv-header-name{
-      font-size:13px;font-weight:700;color:#fff;
+
+    /* Active context card */
+    .ctx-card{
+      width:100%;
+      padding:10px 14px;
+      background:rgba(206,255,26,0.06);
+      border:1px solid rgba(206,255,26,0.25);
+      border-radius:9px;
+      display:flex;align-items:center;gap:11px;
+      margin-bottom:14px;
+      transition:all 0.3s;
+    }
+    .ctx-card.general{
+      background:rgba(29,46,216,0.08);
+      border-color:rgba(122,138,255,0.25);
+    }
+    .ctx-card-dot{
+      width:8px;height:8px;border-radius:50%;
+      background:var(--yellow);flex-shrink:0;
+      animation:pulse-soft 1.6s ease-in-out infinite;
+      box-shadow:0 0 8px rgba(206,255,26,0.5);
+    }
+    .ctx-card.general .ctx-card-dot{
+      background:#9fa8ff;
+      box-shadow:0 0 8px rgba(159,168,255,0.5);
+    }
+    @keyframes pulse-soft{0%,100%{opacity:0.6;}50%{opacity:1;}}
+    .ctx-card-body{flex:1;min-width:0;}
+    .ctx-card-eyebrow{
+      font-size:9px;font-weight:700;letter-spacing:0.14em;
+      text-transform:uppercase;color:var(--yellow);
       margin-bottom:1px;
+    }
+    .ctx-card.general .ctx-card-eyebrow{color:#9fa8ff;}
+    .ctx-card-name{
+      font-size:14px;font-weight:700;color:#fff;
       overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
     }
-    .conv-header-status{
-      font-size:10.5px;color:var(--muted);
-      font-weight:500;
-      display:flex;align-items:center;gap:6px;
-    }
-    .conv-header-status .pulse{
-      width:5px;height:5px;border-radius:50%;
-      background:var(--yellow);
-      animation:pulse-dot-soft 1.2s ease-in-out infinite;
-    }
-    @keyframes pulse-dot-soft{0%,100%{opacity:0.4;}50%{opacity:1;}}
 
-    /* Orb during conversation */
-    .conv-orb-zone{
-      flex:1;
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      justify-content:center;
-      padding:14px 0;
-      min-height:0;
+    /* Orb */
+    .orb-wrap{
+      position:relative;width:150px;height:150px;
+      cursor:pointer;
+      transition:filter 0.4s,opacity 0.4s;
     }
-    .conv-orb-wrap{
-      position:relative;
-      width:150px;height:150px;
-      margin-bottom:18px;
-      transition:filter 0.4s;
+    .orb-wrap.locked{
+      cursor:not-allowed;filter:grayscale(0.85) brightness(0.55);opacity:0.7;
     }
-    .conv-orb-rings{position:absolute;inset:-30px;pointer-events:none;}
-    .conv-orb-ring{
+    .orb-rings{position:absolute;inset:-30px;pointer-events:none;}
+    .orb-ring{
       position:absolute;border-radius:50%;
       border:1px solid rgba(206,255,26,0.15);
       opacity:0;animation:ring-expand 3s ease-out infinite;
     }
-    .conv-orb-ring:nth-child(1){inset:30px;animation-delay:0s;}
-    .conv-orb-ring:nth-child(2){inset:15px;animation-delay:0.9s;}
-    .conv-orb-ring:nth-child(3){inset:0;animation-delay:1.8s;}
+    .orb-ring:nth-child(1){inset:30px;animation-delay:0s;}
+    .orb-ring:nth-child(2){inset:15px;animation-delay:1s;}
+    .orb-ring:nth-child(3){inset:0;animation-delay:2s;}
+    .orb-wrap.locked .orb-ring{display:none;}
     @keyframes ring-expand{
       0%{opacity:0;transform:scale(0.8);}
       30%{opacity:1;}
       100%{opacity:0;transform:scale(1.3);}
     }
-    .conv-orb{
+
+    .orb{
       width:150px;height:150px;border-radius:50%;
       background:var(--blue);position:relative;overflow:hidden;
       transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+      box-shadow:0 8px 32px rgba(29,46,216,0.3);
     }
-    .conv-orb.speaking{animation:orb-pulse 0.7s ease-in-out infinite alternate;}
-    @keyframes orb-pulse{from{transform:scale(1.03);}to{transform:scale(1.08);}}
-    .conv-orb-canvas{width:100%;height:100%;display:block;}
+    .orb-wrap:not(.locked) .orb:hover{transform:scale(1.04);}
+    .orb.speaking{animation:orb-pulse 0.7s ease-in-out infinite alternate;}
+    @keyframes orb-pulse{from{transform:scale(1.04);}to{transform:scale(1.09);}}
+    .orb-canvas{width:100%;height:100%;display:block;}
 
-    .conv-status-label{
-      font-size:11px;
-      font-weight:700;
-      letter-spacing:0.14em;
-      text-transform:uppercase;
-      color:var(--yellow);
-      text-align:center;
-      min-height:16px;
+    .orb-icon{
+      position:absolute;inset:0;
+      display:flex;align-items:center;justify-content:center;
+      pointer-events:none;
+    }
+    .orb-mic{width:30px;height:30px;}
+    .orb-lock-icon{
+      position:absolute;inset:0;
+      display:flex;align-items:center;justify-content:center;
+      pointer-events:none;opacity:0;transition:opacity 0.3s;
+    }
+    .orb-wrap.locked .orb-lock-icon{opacity:0.85;}
+    .orb-wrap.locked .orb-icon{opacity:0;}
+
+    /* Status label below orb */
+    .orb-status{
+      font-size:11px;font-weight:700;
+      letter-spacing:0.14em;text-transform:uppercase;
+      color:var(--yellow);text-align:center;
+      margin-top:14px;min-height:16px;
+      transition:color 0.3s;
+    }
+    .orb-status.dim{color:var(--muted);}
+    .orb-status.locked{color:var(--dim);}
+
+    /* Waveform during speaking */
+    .waveform{
+      display:flex;align-items:center;gap:2px;height:18px;
+      opacity:0;transition:opacity 0.3s;margin-top:6px;
+    }
+    .waveform.visible{opacity:1;}
+    .wave-bar{
+      width:2px;border-radius:1px;background:var(--yellow);
+      transform-origin:center;animation:wave-idle 1.6s ease-in-out infinite;
+    }
+    .wave-bar:nth-child(1){height:5px;animation-delay:0s;}
+    .wave-bar:nth-child(2){height:10px;animation-delay:0.1s;}
+    .wave-bar:nth-child(3){height:15px;animation-delay:0.2s;}
+    .wave-bar:nth-child(4){height:18px;animation-delay:0.05s;}
+    .wave-bar:nth-child(5){height:12px;animation-delay:0.25s;}
+    .wave-bar:nth-child(6){height:8px;animation-delay:0.15s;}
+    .wave-bar:nth-child(7){height:14px;animation-delay:0.3s;}
+    .wave-bar:nth-child(8){height:6px;animation-delay:0.2s;}
+    @keyframes wave-idle{
+      0%,100%{transform:scaleY(0.7);opacity:0.5;}
+      50%{transform:scaleY(1.4);opacity:1;}
+    }
+    .wave-bar.speaking{animation:wave-speak 0.4s ease-in-out infinite alternate;}
+    @keyframes wave-speak{from{transform:scaleY(0.3);}to{transform:scaleY(1);}}
+
+    /* ========= INFO STRIP (suggestions OR transcript) ========= */
+    .info-strip{
+      flex:0 0 auto;
+      padding:6px 14px 10px;
     }
 
-    /* Transcript */
-    .conv-transcript{
-      background:rgba(255,255,255,0.03);
-      border:1px solid var(--border);
-      border-radius:10px;
-      padding:14px 16px;
-      max-height:140px;
-      overflow-y:auto;
-      margin-bottom:12px;
-      opacity:0;
-      transform:translateY(6px);
-      transition:opacity 0.3s, transform 0.3s;
+    /* Suggestion chips */
+    .suggestion-row{
+      display:flex;gap:6px;
+      overflow-x:auto;overflow-y:hidden;
+      scrollbar-width:none;padding:2px 0;
+      -webkit-overflow-scrolling:touch;
+    }
+    .suggestion-row::-webkit-scrollbar{display:none;}
+    .suggestion{
       flex-shrink:0;
+      padding:8px 12px;
+      background:rgba(255,255,255,0.04);
+      border:1px solid var(--border);
+      color:rgba(255,255,255,0.75);
+      font-size:12px;font-weight:500;
+      border-radius:18px;
+      transition:all 0.15s;
+      white-space:nowrap;
+    }
+    .suggestion:hover{
+      background:rgba(206,255,26,0.07);
+      border-color:rgba(206,255,26,0.25);color:#fff;
+    }
+    .suggestion:active{transform:scale(0.97);}
+
+    /* Transcript bubble */
+    .transcript{
+      padding:11px 14px;
+      background:rgba(255,255,255,0.04);
+      border:1px solid var(--border);
+      border-radius:9px;
+      max-height:90px;overflow-y:auto;
+      display:none;
       scrollbar-width:thin;
       scrollbar-color:rgba(255,255,255,0.14) transparent;
     }
-    .conv-transcript.visible{opacity:1;transform:translateY(0);}
-    .conv-transcript::-webkit-scrollbar{width:3px;}
-    .conv-transcript::-webkit-scrollbar-thumb{
-      background:rgba(255,255,255,0.14);border-radius:999px;
+    .transcript.visible{display:block;}
+    .transcript::-webkit-scrollbar{width:3px;}
+    .transcript::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.14);border-radius:999px;}
+    .transcript-role{
+      font-size:9px;font-weight:700;letter-spacing:0.12em;
+      text-transform:uppercase;color:rgba(206,255,26,0.65);margin-bottom:4px;
     }
-    .conv-transcript-role{
-      font-size:10px;font-weight:700;letter-spacing:0.12em;
-      text-transform:uppercase;color:var(--dim);
-      margin-bottom:6px;
-    }
-    .conv-transcript-role.agent{color:rgba(206,255,26,0.65);}
-    .conv-transcript-text{
-      font-size:14px;color:#fff;line-height:1.5;
-      word-break:break-word;
-    }
+    .transcript-role.user{color:var(--dim);}
+    .transcript-text{font-size:13px;color:#fff;line-height:1.5;word-break:break-word;}
 
-    /* End conversation button */
-    .conv-end{
-      width:100%;
-      padding:13px;
-      background:rgba(255,122,69,0.08);
-      border:1px solid rgba(255,122,69,0.25);
-      color:#ff9466;
-      font-size:12px;
-      font-weight:700;
-      letter-spacing:0.08em;
-      text-transform:uppercase;
-      border-radius:10px;
-      margin-bottom:10px;
-      transition:all 0.15s;
+    /* ========= COMPOSER ========= */
+    .composer{
+      flex:0 0 auto;
+      padding:0 14px 10px;
     }
-    .conv-end:hover{background:rgba(255,122,69,0.14);}
-    .conv-end:active{transform:scale(0.99);}
-
-    /* ========= MAP MODAL ========= */
-    .map-modal-overlay{
-      position:fixed;inset:0;
-      background:rgba(0,0,0,0.7);
-      backdrop-filter:blur(6px);
-      z-index:2000;
-      opacity:0;pointer-events:none;
-      transition:opacity 0.25s;
+    .composer-box{
+      display:flex;align-items:center;gap:6px;
+      background:rgba(255,255,255,0.04);
+      border:1px solid var(--border);
+      border-radius:22px;padding:4px 4px 4px 16px;
+      transition:border-color 0.15s, background 0.15s;
     }
-    .map-modal-overlay.open{opacity:1;pointer-events:auto;}
-
-    .map-modal{
-      position:fixed;
-      bottom:0;left:50%;
-      transform:translate(-50%, 100%);
-      width:100%;
-      max-width:540px;
-      max-height:80vh;
-      background:var(--panel);
-      border-top:1px solid var(--border-strong);
-      border-radius:16px 16px 0 0;
-      z-index:2001;
-      display:flex;
-      flex-direction:column;
-      overflow:hidden;
-      transition:transform 0.32s cubic-bezier(0.32, 0.72, 0, 1);
+    .composer-box:focus-within{
+      border-color:rgba(206,255,26,0.35);
+      background:rgba(255,255,255,0.06);
     }
-    .map-modal.open{transform:translate(-50%, 0);}
-
-    .map-modal-handle{
-      width:36px;height:4px;
-      background:rgba(255,255,255,0.2);
-      border-radius:2px;
-      margin:10px auto 4px;
-      flex-shrink:0;
+    .composer-input{
+      flex:1;font-size:13.5px;color:#fff;
+      padding:9px 4px;min-width:0;
     }
-    .map-modal-header{
-      padding:12px 18px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      border-bottom:1px solid var(--border);
-      flex-shrink:0;
-    }
-    .map-modal-title{
-      font-size:13px;font-weight:700;
-      letter-spacing:0.1em;text-transform:uppercase;
-    }
-    .map-modal-close{
-      width:32px;height:32px;border-radius:8px;
+    .composer-input::placeholder{color:var(--dim);}
+    .composer-send{
+      width:34px;height:34px;border-radius:50%;
+      background:var(--yellow);color:var(--black);
       display:flex;align-items:center;justify-content:center;
-      color:var(--muted);
-      transition:all 0.15s;
+      transition:transform 0.1s, opacity 0.2s;flex-shrink:0;
     }
-    .map-modal-close:hover{background:rgba(255,255,255,0.06);color:#fff;}
+    .composer-send:active{transform:scale(0.92);}
+    .composer-send:disabled{opacity:0.3;cursor:not-allowed;}
+    .composer-send svg{display:block;}
 
-    .map-container{
-      flex:1;
+    /* ========= MAP ========= */
+    .map-section{
+      flex:1;min-height:240px;
       position:relative;
-      min-height:380px;
+      border-top:1px solid var(--border);
     }
     #map{width:100%;height:100%;background:#0a0a14;}
     .leaflet-container{
@@ -970,174 +429,237 @@
     }
 
     .map-you-here{
-      position:absolute;
-      z-index:1000;
+      position:absolute;z-index:500;
       background:rgba(10,10,10,0.92);
       backdrop-filter:blur(10px);
       border:1px solid var(--border-strong);
-      border-radius:8px;
-      padding:7px 11px;
-      font-size:10px;
-      font-weight:700;
-      letter-spacing:0.1em;
-      text-transform:uppercase;
+      border-radius:7px;padding:5px 9px;
+      font-size:9.5px;font-weight:700;
+      letter-spacing:0.1em;text-transform:uppercase;
       color:var(--yellow);
-      pointer-events:none;
-      white-space:nowrap;
-      transform:translate(-50%, -180%);
+      pointer-events:none;white-space:nowrap;
+      transform:translate(-50%, calc(-100% - 18px));
       transition:opacity 0.3s;
     }
-    .map-you-here.fade-out{opacity:0;}
+    .map-you-here.hidden{opacity:0;}
 
-    .map-recenter-btn{
+    .recenter-btn{
       position:absolute;
-      bottom:18px;right:14px;
-      z-index:1000;
-      display:flex;
-      align-items:center;
-      gap:7px;
-      padding:10px 14px 10px 12px;
+      bottom:14px;right:12px;z-index:500;
+      display:flex;align-items:center;gap:6px;
+      padding:9px 14px 9px 11px;
       background:rgba(10,10,10,0.92);
       backdrop-filter:blur(10px);
       border:1px solid rgba(206,255,26,0.35);
-      color:var(--yellow);
-      border-radius:999px;
-      font-size:11.5px;
-      font-weight:700;
-      letter-spacing:0.04em;
+      color:var(--yellow);border-radius:999px;
+      font-size:11px;font-weight:700;letter-spacing:0.04em;
       box-shadow:0 4px 14px rgba(0,0,0,0.3);
       opacity:0;pointer-events:none;
       transform:translateY(6px);
       transition:all 0.22s;
     }
-    .map-recenter-btn.visible{
+    .recenter-btn.visible{
       opacity:1;pointer-events:auto;transform:translateY(0);
     }
-    .map-recenter-btn:active{transform:scale(0.96);}
-    .map-recenter-btn svg{display:block;}
+    .recenter-btn:active{transform:scale(0.96);}
 
-    /* ========= DEV PANEL ========= */
-    .dev-panel{
-      display:none;
-      flex-direction:column;
-      gap:12px;
+    /* ========= WELCOME POPUP ========= */
+    .welcome-overlay{
+      position:fixed;inset:0;z-index:1000;
+      background:rgba(0,0,0,0.85);
+      backdrop-filter:blur(8px);
+      display:flex;align-items:center;justify-content:center;
       padding:18px;
-      background:linear-gradient(180deg, rgba(122,138,255,0.06) 0%, transparent 60%);
-      border-top:1px solid rgba(122,138,255,0.25);
+      opacity:1;transition:opacity 0.3s;
     }
-    body.dev .dev-panel{display:flex;}
+    .welcome-overlay.closing{opacity:0;pointer-events:none;}
+    .welcome-overlay.hidden{display:none;}
 
-    .dev-panel-header{
-      display:flex;
-      align-items:center;
-      gap:8px;
-      font-size:10px;
-      font-weight:700;
-      letter-spacing:0.16em;
-      text-transform:uppercase;
-      color:#7a8aff;
-      margin-bottom:2px;
+    .welcome-card{
+      width:100%;max-width:380px;
+      max-height:90vh;overflow-y:auto;
+      background:var(--panel);
+      border:1px solid var(--border-strong);
+      border-radius:16px;
+      padding:28px 24px 24px;
+      position:relative;
+      scrollbar-width:thin;
+      scrollbar-color:rgba(255,255,255,0.14) transparent;
     }
-    .dev-panel-header .badge{
-      padding:2px 7px;
-      background:#7a8aff;
-      color:var(--black);
-      border-radius:3px;
-      font-size:9px;
-      letter-spacing:0.1em;
-    }
-    .dev-exit-btn{
-      margin-left:auto;
-      padding:4px 10px;
-      font-size:10px;
-      color:#7a8aff;
-      border:1px solid rgba(122,138,255,0.3);
-      border-radius:5px;
-      letter-spacing:0.08em;
-      text-transform:uppercase;
-    }
-    .dev-exit-btn:hover{background:rgba(122,138,255,0.1);}
+    .welcome-card::-webkit-scrollbar{width:3px;}
+    .welcome-card::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.14);border-radius:999px;}
 
-    .dev-status{
-      background:rgba(0,0,0,0.3);
+    .welcome-card::before{
+      content:'';position:absolute;
+      top:-30px;right:-30px;
+      width:140px;height:140px;border-radius:50%;
+      background:radial-gradient(circle, rgba(206,255,26,0.12), transparent 70%);
+      pointer-events:none;
+    }
+
+    .welcome-eyebrow{
+      font-size:10px;font-weight:700;letter-spacing:0.18em;
+      text-transform:uppercase;color:var(--yellow);
+      margin-bottom:12px;position:relative;
+    }
+    .welcome-title{
+      font-size:26px;font-weight:800;
+      letter-spacing:-0.02em;line-height:1.1;
+      margin-bottom:10px;position:relative;
+    }
+    .welcome-title em{font-style:normal;color:var(--yellow);}
+    .welcome-sub{
+      font-size:13.5px;color:var(--muted);
+      line-height:1.55;margin-bottom:20px;position:relative;
+    }
+
+    .welcome-features{
+      display:flex;flex-direction:column;gap:8px;margin-bottom:18px;
+      position:relative;
+    }
+    .welcome-feature{
+      display:flex;align-items:flex-start;gap:10px;
+      padding:10px 12px;
+      background:rgba(255,255,255,0.025);
       border:1px solid var(--border);
       border-radius:8px;
-      padding:12px;
-      font-size:11px;
     }
-    .dev-row{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      padding:5px 0;
-      gap:8px;
-    }
-    .dev-row + .dev-row{border-top:1px solid var(--border);}
-    .dev-row-label{
-      color:var(--dim);
-      font-size:9.5px;
-      letter-spacing:0.06em;
-      text-transform:uppercase;
-      font-weight:600;
+    .welcome-feature-ic{
+      width:26px;height:26px;border-radius:6px;
+      background:rgba(206,255,26,0.08);
+      border:1px solid rgba(206,255,26,0.2);
+      color:var(--yellow);
+      display:flex;align-items:center;justify-content:center;
       flex-shrink:0;
     }
-    .dev-row-value{
-      color:#fff;
-      font-weight:600;
-      font-size:11px;
-      font-variant-numeric:tabular-nums;
-      text-align:right;
-      overflow:hidden;
-      text-overflow:ellipsis;
-      white-space:nowrap;
+    .welcome-feature-body{flex:1;min-width:0;padding-top:1px;}
+    .welcome-feature-title{
+      font-size:12.5px;font-weight:700;color:#fff;margin-bottom:2px;
     }
-    .dev-row-value.accent{color:var(--yellow);}
-    .dev-row-value.dim{color:var(--dim);}
+    .welcome-feature-desc{font-size:11.5px;color:var(--muted);line-height:1.4;}
+
+    .welcome-privacy{
+      display:flex;align-items:flex-start;gap:9px;
+      padding:11px 12px;
+      background:rgba(29,46,216,0.08);
+      border:1px solid rgba(29,46,216,0.22);
+      border-radius:8px;margin-bottom:18px;
+      position:relative;
+    }
+    .welcome-privacy svg{flex-shrink:0;color:#7a8aff;margin-top:1px;}
+    .welcome-privacy-text{
+      flex:1;font-size:11px;color:rgba(255,255,255,0.65);line-height:1.5;
+    }
+    .welcome-privacy-text b{color:#fff;font-weight:600;}
+
+    .welcome-start{
+      width:100%;
+      display:flex;align-items:center;justify-content:center;gap:10px;
+      background:var(--yellow);color:var(--black);
+      font-size:14.5px;font-weight:700;letter-spacing:0.02em;
+      padding:15px 22px;border-radius:11px;
+      transition:transform 0.1s, box-shadow 0.2s;
+      box-shadow:0 0 24px rgba(206,255,26,0.2);
+      position:relative;
+    }
+    .welcome-start:hover{box-shadow:0 0 32px rgba(206,255,26,0.32);}
+    .welcome-start:active{transform:scale(0.98);}
+
+    /* ========= DEV OVERLAY ========= */
+    .dev-overlay{
+      position:fixed;top:0;left:0;right:0;
+      z-index:90;
+      max-width:540px;margin:0 auto;
+      background:rgba(20,20,30,0.95);
+      backdrop-filter:blur(10px);
+      border-bottom:1px solid rgba(122,138,255,0.3);
+      transform:translateY(-100%);
+      transition:transform 0.25s;
+      display:none;
+    }
+    body.dev .dev-overlay{display:block;transform:translateY(0);}
+
+    .dev-header{
+      display:flex;align-items:center;gap:8px;
+      padding:10px 16px;
+      border-bottom:1px solid rgba(122,138,255,0.15);
+    }
+    .dev-header .badge{
+      padding:2px 7px;background:#9fa8ff;color:var(--black);
+      border-radius:3px;font-size:9px;letter-spacing:0.1em;
+      font-weight:800;
+    }
+    .dev-header-title{
+      font-size:10px;font-weight:700;letter-spacing:0.14em;
+      text-transform:uppercase;color:#9fa8ff;
+    }
+    .dev-header-exit{
+      margin-left:auto;
+      padding:4px 10px;font-size:10px;
+      color:#9fa8ff;border:1px solid rgba(122,138,255,0.3);
+      border-radius:5px;letter-spacing:0.08em;text-transform:uppercase;
+    }
+    .dev-body{padding:12px 16px 14px;}
+    .dev-stats{
+      display:grid;grid-template-columns:1fr 1fr;gap:6px 14px;
+      font-size:10.5px;margin-bottom:12px;
+    }
+    .dev-stat{display:flex;justify-content:space-between;gap:8px;}
+    .dev-stat-label{color:var(--dim);font-weight:600;letter-spacing:0.04em;}
+    .dev-stat-value{color:#fff;font-weight:600;font-variant-numeric:tabular-nums;
+      overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+    .dev-stat-value.accent{color:#9fa8ff;}
+    .dev-stat-value.warn{color:var(--warn);}
 
     .dev-teleport{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:5px;
+      display:grid;grid-template-columns:repeat(5,1fr);gap:4px;
     }
-    .dev-teleport-btn{
-      padding:8px 10px;
-      background:rgba(255,255,255,0.04);
-      border:1px solid var(--border);
-      color:var(--muted);
-      font-size:10px;
-      font-weight:700;
-      letter-spacing:0.04em;
-      border-radius:5px;
+    .dev-tp-btn{
+      padding:8px 4px;
+      background:rgba(122,138,255,0.08);
+      border:1px solid rgba(122,138,255,0.2);
+      color:#9fa8ff;font-size:10px;font-weight:700;
+      letter-spacing:0.04em;border-radius:5px;
       transition:all 0.15s;
     }
-    .dev-teleport-btn:hover{
-      background:rgba(122,138,255,0.1);
-      border-color:rgba(122,138,255,0.3);
-      color:#fff;
-    }
-    .dev-teleport-btn.outside{
-      grid-column:span 2;
-      background:rgba(122,138,255,0.08);
-      border-color:rgba(122,138,255,0.25);
-      color:#9fa8ff;
+    .dev-tp-btn:active{transform:scale(0.95);}
+    .dev-tp-btn:hover{background:rgba(122,138,255,0.15);}
+    .dev-tp-btn.outside{
+      grid-column:span 5;margin-top:4px;
+      background:rgba(122,138,255,0.04);
+      color:rgba(159,168,255,0.7);
     }
 
-    /* ========= MOBILE/SMALL TWEAKS ========= */
-    @media (max-height: 700px){
-      .welcome-title{font-size:28px;margin-bottom:10px;}
-      .welcome-subtitle{margin-bottom:20px;font-size:14px;}
-      .welcome-feature{padding:11px 14px;}
-      .welcome-feature-icon{width:28px;height:28px;}
-      .welcome-features{gap:8px;margin-bottom:14px;}
-      .privacy-card{padding:11px 13px;margin-bottom:16px;}
-      .conv-orb-wrap{width:128px;height:128px;}
-      .conv-orb{width:128px;height:128px;}
+    /* Hidden dev trigger zone */
+    .dev-trigger{
+      position:fixed;
+      bottom:0;right:0;
+      width:56px;height:56px;
+      z-index:200;
     }
-    @media (max-width: 400px){
-      .welcome-title{font-size:30px;}
-      .detail-hero-name{font-size:22px;}
-      .picker-title{font-size:20px;}
+
+    /* ========= SCALING ========= */
+    @media (max-height: 740px){
+      .nav{height:50px;}
+      .ctx-card{margin-bottom:10px;padding:8px 12px;}
+      .orb-wrap{width:130px;height:130px;}
+      .orb{width:130px;height:130px;}
+      .orb-rings{inset:-22px;}
+      .orb-section{padding:12px 14px 6px;}
+      .orb-status{margin-top:10px;}
+      .map-section{min-height:200px;}
+    }
+    @media (max-height: 640px){
+      .orb-wrap{width:115px;height:115px;}
+      .orb{width:115px;height:115px;}
+      .orb-rings{inset:-18px;}
+      .chip-bar{padding:8px 14px 4px;}
+      .chip-bar-label{font-size:8.5px;margin-bottom:4px;}
+      .chip{height:28px;}
+    }
+    @media (max-width: 360px){
       .nav-title{display:none;}
+      .nav{padding:0 12px;}
     }
   </style>
 </head>
@@ -1145,299 +667,195 @@
 
 <div class="app">
 
-  <!-- ========= NAV ========= -->
+  <!-- Dev overlay (slides down when dev=1) -->
+  <div class="dev-overlay" id="devOverlay">
+    <div class="dev-header">
+      <span class="badge">DEV</span>
+      <span class="dev-header-title">Developer panel</span>
+      <button class="dev-header-exit" id="devExitBtn">Sluit</button>
+    </div>
+    <div class="dev-body">
+      <div class="dev-stats">
+        <div class="dev-stat"><span class="dev-stat-label">GPS</span><span class="dev-stat-value" id="devGps">Wachten</span></div>
+        <div class="dev-stat"><span class="dev-stat-label">Acc.</span><span class="dev-stat-value" id="devAcc">—</span></div>
+        <div class="dev-stat"><span class="dev-stat-label">Lat</span><span class="dev-stat-value" id="devLat">—</span></div>
+        <div class="dev-stat"><span class="dev-stat-label">Lon</span><span class="dev-stat-value" id="devLon">—</span></div>
+        <div class="dev-stat"><span class="dev-stat-label">In polygoon</span><span class="dev-stat-value" id="devPoly">—</span></div>
+        <div class="dev-stat"><span class="dev-stat-label">Dichtstbij</span><span class="dev-stat-value" id="devNear">—</span></div>
+      </div>
+      <div class="dev-teleport" id="devTeleport"></div>
+    </div>
+  </div>
+
+  <!-- Nav -->
   <nav class="nav">
-    <!-- Logo: vervang door je inline ADAM SVG markup -->
     <a class="nav-logo" href="https://adamagents.nl">
       <span class="nav-logo-mark">A</span>
       <span class="nav-logo-text">ADAM</span>
     </a>
-    <div class="nav-title" id="navTitle">Audio gids</div>
-
-    <!-- Back button (visible on detail/conv screens only) -->
-    <button class="nav-back-button" id="navBack" style="display:none;">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-        <path d="M15 6L9 12L15 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <div class="nav-title">Audio gids</div>
+    <button class="nav-info" id="navInfoBtn" aria-label="Hoe werkt dit?">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+        <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.7"/>
+        <path d="M12 11V17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        <circle cx="12" cy="7.5" r="1" fill="currentColor"/>
       </svg>
-      <span>Terug</span>
     </button>
   </nav>
 
-  <!-- ========= SCREEN 1: WELCOME ========= -->
-  <section class="screen active" id="screenWelcome">
-    <div class="welcome-bg"><canvas id="welcomeBg"></canvas></div>
-    <div class="welcome-content">
-      <div class="welcome-eyebrow">Audio gids · BiotOPENdag</div>
-      <h1 class="welcome-title">Praat met je<br><em>persoonlijke gids</em></h1>
-      <p class="welcome-subtitle">Ontdek De Biotoop met een AI-gids die weet welke vleugel je bezoekt en je verhaal aanpast. Stel je vragen met je stem of typ ze in.</p>
-
-      <div class="welcome-features">
-        <div class="welcome-feature">
-          <div class="welcome-feature-icon">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-              <path d="M12 2C8 2 5 5 5 9C5 14 12 22 12 22C12 22 19 14 19 9C19 5 16 2 12 2Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
-              <circle cx="12" cy="9" r="2.5" stroke="currentColor" stroke-width="1.8"/>
-            </svg>
-          </div>
-          <div class="welcome-feature-body">
-            <div class="welcome-feature-title">Vleugel-specifiek</div>
-            <div class="welcome-feature-desc">De gids weet waar je bent en vertelt wat er hier vandaag te zien is.</div>
-          </div>
-        </div>
-
-        <div class="welcome-feature">
-          <div class="welcome-feature-icon">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-              <rect x="9" y="3" width="6" height="13" rx="3" stroke="currentColor" stroke-width="1.8"/>
-              <path d="M6 12C6 16 8 19 12 19C16 19 18 16 18 12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-              <path d="M12 19V22" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-            </svg>
-          </div>
-          <div class="welcome-feature-body">
-            <div class="welcome-feature-title">Spreek of typ</div>
-            <div class="welcome-feature-desc">Stel je vraag met je stem, of typ als het te druk is om hardop te praten.</div>
-          </div>
-        </div>
-
-        <div class="welcome-feature">
-          <div class="welcome-feature-icon">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-              <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/>
-              <path d="M12 7V12L15 14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-            </svg>
-          </div>
-          <div class="welcome-feature-body">
-            <div class="welcome-feature-title">Open dag info</div>
-            <div class="welcome-feature-desc">Activiteiten, tijden en aanraders per vleugel — alles in één gesprek.</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="privacy-card">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-          <path d="M12 2L4 6V12C4 17 8 21 12 22C16 21 20 17 20 12V6L12 2Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
-          <path d="M9 12L11 14L15 10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Chip bar: wing selector -->
+  <div class="chip-bar">
+    <div class="chip-bar-header">
+      <div class="chip-bar-label">Waar ben je?</div>
+      <button class="gps-resume" id="gpsResumeBtn" aria-label="Hervat GPS detectie">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none">
+          <path d="M21 12C21 16.97 16.97 21 12 21C9.5 21 7.24 19.98 5.61 18.34M3 12C3 7.03 7.03 3 12 3C14.5 3 16.76 4.02 18.39 5.66" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+          <path d="M17 3V7H21M7 21V17H3" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
-        <div class="privacy-card-content">
-          <b>Privacy:</b> we gebruiken je locatie alleen om te zien in welke vleugel je bent. Je locatie wordt niet opgeslagen en blijft op je telefoon. Je kunt ook handmatig kiezen.
-        </div>
-      </div>
-
-      <button class="start-button" id="welcomeStart">
-        <span>Start de gids</span>
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-          <path d="M5 12H19M12 5L19 12L12 19" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
+        <span>Hervat GPS</span>
       </button>
     </div>
-  </section>
-
-  <!-- ========= SCREEN 2: WING PICKER ========= -->
-  <section class="screen" id="screenPicker">
-    <div class="picker-content">
-      <div class="picker-header">
-        <h2 class="picker-title">Waar ben je?</h2>
-        <p class="picker-subtitle">Kies de vleugel waar je nu bent of waar je benieuwd naar bent.</p>
-      </div>
-
-      <!-- GPS suggestion (appears when detected) -->
-      <div class="gps-suggestion" id="gpsSuggestion">
-        <div class="gps-suggestion-label">
-          <div class="live-dot"></div>
-          <span>We denken dat je hier bent</span>
-        </div>
-        <div class="gps-suggestion-text" id="gpsSuggestionText">
-          Op basis van je locatie zit je in <b>Vleugel A</b>.
-        </div>
-        <div class="gps-suggestion-actions">
-          <button class="gps-action-btn primary" id="gpsAcceptBtn">Klopt, ga verder</button>
-          <button class="gps-action-btn secondary" id="gpsRejectBtn">Andere vleugel</button>
-        </div>
-      </div>
-
-      <div class="section-label" id="wingListLabel">Alle plekken</div>
-      <div class="wing-list" id="wingList"></div>
-
-      <button class="map-toggle-btn" id="openMapBtn">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
-          <path d="M9 3L3 5V20L9 18M9 3V18M9 3L15 5M15 5V20M15 5L21 3V18L15 20" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
-        </svg>
-        <span>Bekijk op de kaart</span>
-      </button>
-    </div>
-
-    <!-- Dev panel (visible only in ?dev mode) -->
-    <div class="dev-panel">
-      <div class="dev-panel-header">
-        <span class="badge">DEV</span>
-        <span>Developer tools</span>
-        <button class="dev-exit-btn" id="devExitBtn">Verlaten</button>
-      </div>
-
-      <div class="dev-status">
-        <div class="dev-row">
-          <span class="dev-row-label">GPS</span>
-          <span class="dev-row-value dim" id="devGps">Wachten</span>
-        </div>
-        <div class="dev-row">
-          <span class="dev-row-label">Coords</span>
-          <span class="dev-row-value dim" id="devCoords">—</span>
-        </div>
-        <div class="dev-row">
-          <span class="dev-row-label">Accuracy</span>
-          <span class="dev-row-value dim" id="devAcc">—</span>
-        </div>
-        <div class="dev-row">
-          <span class="dev-row-label">In polygoon</span>
-          <span class="dev-row-value dim" id="devPoly">—</span>
-        </div>
-        <div class="dev-row">
-          <span class="dev-row-label">Dichtstbij</span>
-          <span class="dev-row-value dim" id="devNearest">—</span>
-        </div>
-      </div>
-
-      <div>
-        <div class="dev-panel-header" style="margin:0 0 8px;">
-          <span>Teleport (simuleer positie)</span>
-        </div>
-        <div class="dev-teleport" id="devTeleport"></div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ========= SCREEN 3: WING DETAIL ========= -->
-  <section class="screen" id="screenDetail">
-    <div class="detail-content">
-
-      <div class="detail-hero" id="detailHero">
-        <div class="detail-hero-eyebrow">
-          <div class="live-dot"></div>
-          <span id="detailEyebrow">Je bent bij</span>
-        </div>
-        <div class="detail-hero-name" id="detailName">Vleugel A</div>
-        <div class="detail-hero-focus" id="detailFocus">Focus van deze vleugel...</div>
-      </div>
-
-      <div class="aanrader-card" id="aanraderCard">
-        <div class="aanrader-icon">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
-            <path d="M12 2L14.5 9H22L16 13.5L18 21L12 17L6 21L8 13.5L2 9H9.5L12 2Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" fill="rgba(206,255,26,0.15)"/>
-          </svg>
-        </div>
-        <div class="aanrader-content">
-          <div class="aanrader-label">Aanrader vandaag</div>
-          <div class="aanrader-text" id="aanraderText">—</div>
-        </div>
-      </div>
-
-      <div class="suggestions-label">Stel een vraag</div>
-      <div class="suggestion-list" id="suggestionList"></div>
-
-      <button class="start-talk-button" id="startTalkBtn">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-          <rect x="9" y="3" width="6" height="13" rx="3" fill="currentColor"/>
-          <path d="M6 12C6 16 8 19 12 19C16 19 18 16 18 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-          <path d="M12 19V22" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-        </svg>
-        <span>Start gesprek met gids</span>
-      </button>
-
-      <button class="map-toggle-btn" id="detailMapBtn">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
-          <path d="M9 3L3 5V20L9 18M9 3V18M9 3L15 5M15 5V20M15 5L21 3V18L15 20" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
-        </svg>
-        <span>Bekijk op de kaart</span>
-      </button>
-
-      <div class="text-composer" id="detailComposer">
-        <input type="text" class="text-composer-input" id="detailInput"
-          placeholder="Of typ je vraag..." autocomplete="off"/>
-        <button class="text-composer-send" id="detailSend" disabled aria-label="Verstuur">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-            <path d="M5 12L19 5L14 19L12 13L5 12Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round" fill="currentColor"/>
-          </svg>
-        </button>
-      </div>
-    </div>
-  </section>
-
-  <!-- ========= SCREEN 4: CONVERSATION ========= -->
-  <section class="screen conv-screen" id="screenConv">
-    <div class="conv-content">
-
-      <div class="conv-header" id="convHeader">
-        <div class="conv-header-glyph" id="convHeaderGlyph">A</div>
-        <div class="conv-header-body">
-          <div class="conv-header-name" id="convHeaderName">Vleugel A</div>
-          <div class="conv-header-status">
-            <div class="pulse"></div>
-            <span id="convHeaderStatus">Verbinden...</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="conv-orb-zone">
-        <div class="conv-orb-wrap">
-          <div class="conv-orb-rings">
-            <div class="conv-orb-ring"></div>
-            <div class="conv-orb-ring"></div>
-            <div class="conv-orb-ring"></div>
-          </div>
-          <div class="conv-orb" id="convOrb">
-            <canvas class="conv-orb-canvas" id="convOrbCanvas"></canvas>
-          </div>
-        </div>
-        <div class="conv-status-label" id="convStatusLabel">Luisteren...</div>
-      </div>
-
-      <div class="conv-transcript" id="convTranscript">
-        <div class="conv-transcript-role agent" id="convTranscriptRole">ADAM</div>
-        <div class="conv-transcript-text" id="convTranscriptText">—</div>
-      </div>
-
-      <button class="conv-end" id="convEndBtn">Beëindig gesprek</button>
-
-      <div class="text-composer">
-        <input type="text" class="text-composer-input" id="convInput"
-          placeholder="Typ een vraag..." autocomplete="off"/>
-        <button class="text-composer-send" id="convSend" disabled aria-label="Verstuur">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-            <path d="M5 12L19 5L14 19L12 13L5 12Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round" fill="currentColor"/>
-          </svg>
-        </button>
-      </div>
-    </div>
-  </section>
-
-</div>
-
-<!-- ========= MAP MODAL ========= -->
-<div class="map-modal-overlay" id="mapOverlay"></div>
-<div class="map-modal" id="mapModal">
-  <div class="map-modal-handle"></div>
-  <div class="map-modal-header">
-    <div class="map-modal-title">De Biotoop</div>
-    <button class="map-modal-close" id="mapClose" aria-label="Sluit">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-        <path d="M5 5L19 19M5 19L19 5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-      </svg>
-    </button>
+    <div class="chip-row" id="chipRow"></div>
   </div>
-  <div class="map-container">
+
+  <!-- Orb section -->
+  <div class="orb-section">
+    <div class="ctx-card" id="ctxCard">
+      <div class="ctx-card-dot"></div>
+      <div class="ctx-card-body">
+        <div class="ctx-card-eyebrow" id="ctxEyebrow">Algemene gids</div>
+        <div class="ctx-card-name" id="ctxName">De Biotoop</div>
+      </div>
+    </div>
+
+    <div class="orb-wrap locked" id="orbWrap">
+      <div class="orb-rings">
+        <div class="orb-ring"></div>
+        <div class="orb-ring"></div>
+        <div class="orb-ring"></div>
+      </div>
+      <div class="orb" id="orb">
+        <canvas class="orb-canvas" id="orbCanvas"></canvas>
+        <div class="orb-icon">
+          <div class="orb-mic">
+            <svg viewBox="0 0 32 32" fill="none">
+              <rect x="11" y="4" width="10" height="16" rx="5" fill="white" opacity="0.9"/>
+              <path d="M7 16C7 21 9.5 24 16 24C22.5 24 25 21 25 16" stroke="white" stroke-width="2" stroke-linecap="round" opacity="0.7"/>
+              <line x1="16" y1="24" x2="16" y2="28" stroke="white" stroke-width="2" stroke-linecap="round" opacity="0.7"/>
+            </svg>
+          </div>
+        </div>
+        <div class="orb-lock-icon">
+          <svg width="30" height="30" viewBox="0 0 32 32" fill="none">
+            <rect x="7" y="14" width="18" height="13" rx="2.5" fill="white" opacity="0.85"/>
+            <path d="M11 14V10C11 7.23858 13.2386 5 16 5C18.7614 5 21 7.23858 21 10V14" stroke="white" stroke-width="2.4" stroke-linecap="round" opacity="0.85"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <div class="orb-status locked" id="orbStatus">Tik om te starten</div>
+
+    <div class="waveform" id="waveform">
+      <div class="wave-bar"></div><div class="wave-bar"></div>
+      <div class="wave-bar"></div><div class="wave-bar"></div>
+      <div class="wave-bar"></div><div class="wave-bar"></div>
+      <div class="wave-bar"></div><div class="wave-bar"></div>
+    </div>
+  </div>
+
+  <!-- Info strip: suggestions OR transcript -->
+  <div class="info-strip">
+    <div class="suggestion-row" id="suggestionRow"></div>
+    <div class="transcript" id="transcript">
+      <div class="transcript-role" id="transcriptRole">ADAM</div>
+      <div class="transcript-text" id="transcriptText">—</div>
+    </div>
+  </div>
+
+  <!-- Composer -->
+  <div class="composer">
+    <div class="composer-box">
+      <input type="text" class="composer-input" id="composerInput"
+        placeholder="Typ een vraag..." autocomplete="off"/>
+      <button class="composer-send" id="composerSend" disabled aria-label="Verstuur">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+          <path d="M5 12L19 5L14 19L12 13L5 12Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round" fill="currentColor"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Map -->
+  <div class="map-section">
     <div id="map"></div>
-    <div class="map-you-here" id="youHereLabel" style="display:none;">Jij bent hier</div>
-    <button class="map-recenter-btn" id="recenterBtn">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+    <div class="map-you-here hidden" id="youHere">Jij bent hier</div>
+    <button class="recenter-btn" id="recenterBtn">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
         <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/>
         <path d="M12 2V5M12 19V22M2 12H5M19 12H22" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
       </svg>
       <span>Terug naar mijn locatie</span>
     </button>
   </div>
+
 </div>
 
-<!-- Hidden dev trigger zone -->
+<!-- Welcome popup -->
+<div class="welcome-overlay" id="welcomeOverlay">
+  <div class="welcome-card">
+    <div class="welcome-eyebrow">Audio gids · BiotOPENdag</div>
+    <h1 class="welcome-title">Praat met je<br><em>persoonlijke gids</em></h1>
+    <p class="welcome-sub">Ontdek De Biotoop met een AI-gids die weet welke vleugel je bezoekt en je verhaal aanpast.</p>
+
+    <div class="welcome-features">
+      <div class="welcome-feature">
+        <div class="welcome-feature-ic">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+            <path d="M12 2C8 2 5 5 5 9C5 14 12 22 12 22C12 22 19 14 19 9C19 5 16 2 12 2Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+            <circle cx="12" cy="9" r="2.5" stroke="currentColor" stroke-width="1.8"/>
+          </svg>
+        </div>
+        <div class="welcome-feature-body">
+          <div class="welcome-feature-title">Vleugel-specifiek</div>
+          <div class="welcome-feature-desc">De gids weet waar je bent en vertelt wat hier vandaag te zien is.</div>
+        </div>
+      </div>
+      <div class="welcome-feature">
+        <div class="welcome-feature-ic">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+            <rect x="9" y="3" width="6" height="13" rx="3" stroke="currentColor" stroke-width="1.8"/>
+            <path d="M6 12C6 16 8 19 12 19C16 19 18 16 18 12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            <path d="M12 19V22" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="welcome-feature-body">
+          <div class="welcome-feature-title">Spreek of typ</div>
+          <div class="welcome-feature-desc">Tik op de orb en praat, of typ je vraag als het te druk is.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="welcome-privacy">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+        <path d="M12 2L4 6V12C4 17 8 21 12 22C16 21 20 17 20 12V6L12 2Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+        <path d="M9 12L11 14L15 10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <div class="welcome-privacy-text">
+        <b>Privacy:</b> we gebruiken je locatie alleen om te herkennen in welke vleugel je bent. Niets wordt opgeslagen. Je kunt ook handmatig kiezen.
+      </div>
+    </div>
+
+    <button class="welcome-start" id="welcomeStart">
+      <span>Start de gids</span>
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none">
+        <path d="M5 12H19M12 5L19 12L12 19" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+  </div>
+</div>
+
+<!-- Hidden dev tap zone -->
 <div class="dev-trigger" id="devTrigger"></div>
 
 <script>
@@ -1450,15 +868,15 @@
     id: 'general',
     name: 'Algemene gids',
     short: '★',
+    eyebrow: 'Algemene gids',
     isGeneral: true,
     polygon: null,
     agentId: SHARED_AGENT_ID,
-    aanrader: 'Loop eens binnen bij Vleugel F — daar speelt band Sole Fiesta in vier sessies tussen 12:00 en 15:30, en zit de informatiemarkt en horeca.',
     suggestions: [
-      'Wat is De Biotoop precies?',
       'Wat is er vandaag te zien?',
-      'Welke vleugel zou ik moeten bezoeken?',
-      'Waar is de horeca?'
+      'Welke vleugel raad je aan?',
+      'Waar is de horeca?',
+      'Wat is De Biotoop precies?',
     ],
     variables: {
       wing_name: 'De Biotoop',
@@ -1469,21 +887,10 @@
 
   const WINGS = [
     {
-      id: 'a', name: 'Vleugel A', short: 'A',
-      polygon: [
-        [53.1779481, 6.6049186],
-        [53.1782137, 6.6047493],
-        [53.1779322, 6.6032375],
-        [53.1776318, 6.6033894],
-      ],
+      id: 'a', name: 'Vleugel A', short: 'A', eyebrow: 'Je bent in',
+      polygon: [[53.1779481,6.6049186],[53.1782137,6.6047493],[53.1779322,6.6032375],[53.1776318,6.6033894]],
       agentId: SHARED_AGENT_ID,
-      aanrader: 'De Rebel Session: live soundscapes met creatieve opdrachten om 13:00, 15:00 en 16:30 in atelier AL107.',
-      suggestions: [
-        'Welke kunstenaars werken hier?',
-        'Wat is Paper Orchestra?',
-        'Wanneer is de Rebel Session?',
-        'Waar is de Biotoop winkel?'
-      ],
+      suggestions: ['Welke kunstenaars werken hier?','Wat is Paper Orchestra?','Wanneer is de Rebel Session?','Waar is de Biotoop winkel?'],
       variables: {
         wing_name: 'Vleugel A',
         wing_focus: 'ateliers van kunstenaars, illustratoren en ontwerpers op drie verdiepingen',
@@ -1491,23 +898,10 @@
       }
     },
     {
-      id: 'b', name: 'Vleugel B', short: 'B',
-      polygon: [
-        [53.1777733, 6.6050577],
-        [53.1773585, 6.6052589],
-        [53.1771718, 6.6043627],
-        [53.1770804, 6.6037086],
-        [53.1774920, 6.6034699],
-        [53.1776639, 6.6043121],
-      ],
+      id: 'b', name: 'Vleugel B', short: 'B', eyebrow: 'Je bent in',
+      polygon: [[53.1777733,6.6050577],[53.1773585,6.6052589],[53.1771718,6.6043627],[53.1770804,6.6037086],[53.1774920,6.6034699],[53.1776639,6.6043121]],
       agentId: SHARED_AGENT_ID,
-      aanrader: 'De Creatoop: een doorlopende maakplek voor kinderen vanaf 8 jaar, met 3D-printer in BL006.',
-      suggestions: [
-        'Wat is De Creatoop?',
-        'Wat doen de landschapsarchitecten hier?',
-        'Waar kan ik wat eten?',
-        'Wat is Mama&?'
-      ],
+      suggestions: ['Wat is De Creatoop?','Wat doen de landschapsarchitecten?','Waar kan ik eten?','Wat is Mama&?'],
       variables: {
         wing_name: 'Vleugel B',
         wing_focus: 'ontwerpers, landschapsarchitecten en De Creatoop voor kinderen',
@@ -1515,23 +909,10 @@
       }
     },
     {
-      id: 'c', name: 'Vleugel C', short: 'C',
-      polygon: [
-        [53.1769534, 6.6037461],
-        [53.1772331, 6.6053565],
-        [53.1769447, 6.6054971],
-        [53.1766528, 6.6050497],
-        [53.1765258, 6.6043040],
-        [53.1766239, 6.6039364],
-      ],
+      id: 'c', name: 'Vleugel C', short: 'C', eyebrow: 'Je bent in',
+      polygon: [[53.1769534,6.6037461],[53.1772331,6.6053565],[53.1769447,6.6054971],[53.1766528,6.6050497],[53.1765258,6.6043040],[53.1766239,6.6039364]],
       agentId: SHARED_AGENT_ID,
-      aanrader: 'De Lees- en spelletjestent tussen B en C — een rustig plekje om met de kinderen te chillen.',
-      suggestions: [
-        'Wat kan ik hier doen?',
-        'Wat is Onder Honderd?',
-        'Waar is de Lees- en spelletjestent?',
-        'Welke vleugel kan ik nog bezoeken?'
-      ],
+      suggestions: ['Wat kan ik hier doen?','Wat is Onder Honderd?','Waar is de spelletjestent?','Welke vleugel raad je aan?'],
       variables: {
         wing_name: 'Vleugel C',
         wing_focus: 'een rustigere vleugel — buiten de Lees- en spelletjestent, op de loopbrug naar G zit Onder Honderd',
@@ -1539,21 +920,10 @@
       }
     },
     {
-      id: 'd', name: 'Vleugel D', short: 'D',
-      polygon: [
-        [53.1775711, 6.6032963],
-        [53.1773170, 6.6017205],
-        [53.1775780, 6.6016229],
-        [53.1778821, 6.6030927],
-      ],
+      id: 'd', name: 'Vleugel D', short: 'D', eyebrow: 'Je bent in',
+      polygon: [[53.1775711,6.6032963],[53.1773170,6.6017205],[53.1775780,6.6016229],[53.1778821,6.6030927]],
       agentId: SHARED_AGENT_ID,
-      aanrader: 'De lezing over Zen & Stress door dr. Charlotte Oomen om 15:00 in Studio "de Ruimte" — inclusief meditatie.',
-      suggestions: [
-        'Wanneer is de yoga les?',
-        'Waar is Studio "de Ruimte"?',
-        'Wat is de lezing over Zen & Stress?',
-        'Wat doet Zen.nl Haren?'
-      ],
+      suggestions: ['Wanneer is de yoga les?','Waar is Studio "de Ruimte"?','Wat is de Zen & Stress lezing?','Wat doet Zen.nl?'],
       variables: {
         wing_name: 'Vleugel D',
         wing_focus: 'rust, yoga en meditatie in Studio "de Ruimte"',
@@ -1561,21 +931,10 @@
       }
     },
     {
-      id: 'e', name: 'Vleugel E', short: 'E',
-      polygon: [
-        [53.1781269, 6.6038422],
-        [53.1781623, 6.6023460],
-        [53.1786012, 6.6023836],
-        [53.1785642, 6.6038722],
-      ],
+      id: 'e', name: 'Vleugel E', short: 'E', eyebrow: 'Je bent in',
+      polygon: [[53.1781269,6.6038422],[53.1781623,6.6023460],[53.1786012,6.6023836],[53.1785642,6.6038722]],
       agentId: SHARED_AGENT_ID,
-      aanrader: 'Fossiele haaientanden zoeken in het Schelpenmuseum — perfect voor de kinderen.',
-      suggestions: [
-        'Wat is het Schelpenmuseum?',
-        'Wanneer is de verf-demonstratie?',
-        'Wat is schimmelkunst?',
-        'Waar kan ik fossielen zoeken?'
-      ],
+      suggestions: ['Wat is het Schelpenmuseum?','Wanneer is de verf-demonstratie?','Wat is schimmelkunst?','Waar zoek ik fossielen?'],
       variables: {
         wing_name: 'Vleugel E',
         wing_focus: 'natuur en wetenschap — het Schelpenmuseum, paddenstoelen en schimmelkunst',
@@ -1583,21 +942,10 @@
       }
     },
     {
-      id: 'f', name: 'Vleugel F', short: 'F',
-      polygon: [
-        [53.1774891, 6.6032852],
-        [53.1773698, 6.6025203],
-        [53.1767876, 6.6028178],
-        [53.1769660, 6.6036225],
-      ],
+      id: 'f', name: 'Vleugel F', short: 'F', eyebrow: 'Je bent in',
+      polygon: [[53.1774891,6.6032852],[53.1773698,6.6025203],[53.1767876,6.6028178],[53.1769660,6.6036225]],
       agentId: SHARED_AGENT_ID,
-      aanrader: 'Band Sole Fiesta speelt in vier sessies tussen 12:00 en 15:30 in de kantine — perfecte plek om een pauze te nemen.',
-      suggestions: [
-        'Waar kan ik wat eten?',
-        'Wanneer speelt Sole Fiesta?',
-        'Waar is de informatiemarkt?',
-        'Waar zijn de toiletten?'
-      ],
+      suggestions: ['Waar kan ik eten?','Wanneer speelt Sole Fiesta?','Waar is de informatiemarkt?','Waar zijn de toiletten?'],
       variables: {
         wing_name: 'Vleugel F',
         wing_focus: 'het hart van de open dag — kantine, foyer, horeca en de informatiemarkt',
@@ -1605,21 +953,10 @@
       }
     },
     {
-      id: 'g', name: 'Vleugel G', short: 'G',
-      polygon: [
-        [53.1769004, 6.6036871],
-        [53.1765724, 6.6038583],
-        [53.1764599, 6.6033300],
-        [53.1767878, 6.6031453],
-      ],
+      id: 'g', name: 'Vleugel G', short: 'G', eyebrow: 'Je bent in',
+      polygon: [[53.1769004,6.6036871],[53.1765724,6.6038583],[53.1764599,6.6033300],[53.1767878,6.6031453]],
       agentId: SHARED_AGENT_ID,
-      aanrader: 'Korte stress-regulerende massages van 30 minuten op de eerste verdieping in G1 — schrijf jezelf in op de lijst.',
-      suggestions: [
-        'Wat is wonen-en-werken hier?',
-        'Hoe werkt de stress-massage?',
-        'Wanneer is de open les?',
-        'Wanneer is de rondleiding?'
-      ],
+      suggestions: ['Wat is wonen-en-werken hier?','Hoe werkt de stress-massage?','Wanneer is de open les?','Wanneer is de rondleiding?'],
       variables: {
         wing_name: 'Vleugel G',
         wing_focus: 'wonen-en-werken, stress-regulerende massages en open les zenuwstelsel-reset',
@@ -1627,21 +964,10 @@
       }
     },
     {
-      id: 'tuin', name: 'Zelfoogsttuin', short: '🌱',
-      polygon: [
-        [53.1763860, 6.6040412],
-        [53.1754246, 6.6046327],
-        [53.1757365, 6.6059414],
-        [53.1766801, 6.6056317],
-      ],
+      id: 'tuin', name: 'Zelfoogsttuin', short: 'T', eyebrow: 'Je bent in',
+      polygon: [[53.1763860,6.6040412],[53.1754246,6.6046327],[53.1757365,6.6059414],[53.1766801,6.6056317]],
       agentId: SHARED_AGENT_ID,
-      aanrader: 'Rondleiding door ecologe Judith Brouwer om 12:00 of 14:00 vanaf het Verzamelpunt.',
-      suggestions: [
-        'Wat is de Zelfoogsttuin?',
-        'Wanneer is de rondleiding?',
-        'Hoe word ik lid?',
-        'Wat groeit hier?'
-      ],
+      suggestions: ['Wat is de Zelfoogsttuin?','Wanneer is de rondleiding?','Hoe word ik lid?','Wat groeit hier?'],
       variables: {
         wing_name: 'Zelfoogsttuin',
         wing_focus: 'de biologische tuin van De Biotoop waar leden zelf hun groenten oogsten',
@@ -1656,26 +982,20 @@
   /* =========================================================
      STATE
      ========================================================= */
-  let currentScreen = 'welcome';
-  let selectedContext = null;   // wing or general context selected by user
+  let activeContext = GENERAL_CONTEXT;
   let userPos = null;
-  let detectedWing = null;      // wing GPS thinks user is in (suggestion)
+  let detectedWing = null;
   let watchId = null;
   let wakeLock = null;
   let conversation = null;
   let isTransitioning = false;
-  let pendingInitialMessage = null;  // tekst om mee te starten
+  let manualOverride = false;   // true zodra user een chip tikt; tot "Hervat GPS"
 
-  // Map state
-  let map = null;
-  let mapInitialized = false;
-  let userMarker = null;
-  let accCircle = null;
-  let wingLayers = new Map();
-  let mapFollowMode = true;     // auto-follow user position
-  let mapUserInteractedAt = 0;
-  let mapResumeFollowTimer = null;
-  let youHereVisible = false;
+  // Map
+  let map = null, userMarker = null, accCircle = null;
+  const wingLayers = new Map();
+  let mapFollowMode = true;
+  let suppressMapInteractionEvents = false;
 
   /* =========================================================
      DOM
@@ -1685,21 +1005,19 @@
   /* =========================================================
      DEV MODE
      ========================================================= */
-  if(DEV_MODE){
-    document.body.classList.add('dev');
-  }
+  if(DEV_MODE) document.body.classList.add('dev');
 
-  // Hidden dev trigger: tap 5x in bottom-right corner
+  // 5-tap hidden trigger
   (function(){
     let taps = [];
-    const TRIGGER_WINDOW = 2200;
+    const WINDOW = 2200;
     $('devTrigger').addEventListener('click', () => {
       const now = Date.now();
-      taps = taps.filter(t => now - t < TRIGGER_WINDOW);
+      taps = taps.filter(t => now - t < WINDOW);
       taps.push(now);
       if(taps.length >= 5){
         const url = new URL(window.location.href);
-        url.searchParams.set('dev', '1');
+        url.searchParams.set('dev','1');
         window.location.href = url.toString();
       }
     });
@@ -1711,7 +1029,7 @@
   })();
 
   /* =========================================================
-     GEO HELPERS
+     GEO
      ========================================================= */
   function pointInPolygon(lat, lon, polygon){
     let inside = false;
@@ -1724,46 +1042,35 @@
     }
     return inside;
   }
-
   function distancePointToSegment(lat, lon, latA, lonA, latB, lonB){
-    const R = 6371000;
-    const toRad = d => d * Math.PI / 180;
+    const R = 6371000, toRad = d => d * Math.PI / 180;
     const refLat = toRad((lat + latA + latB) / 3);
     const x = ll => toRad(ll - lonA) * R * Math.cos(refLat);
     const y = la => toRad(la - latA) * R;
-    const px = x(lon), py = y(lat);
-    const bx = x(lonB), by = y(latB);
-    const dx = bx, dy = by;
-    const lenSq = dx*dx + dy*dy;
-    let t = lenSq === 0 ? 0 : (px * dx + py * dy) / lenSq;
+    const px = x(lon), py = y(lat), bx = x(lonB), by = y(latB);
+    const lenSq = bx*bx + by*by;
+    let t = lenSq === 0 ? 0 : (px*bx + py*by) / lenSq;
     t = Math.max(0, Math.min(1, t));
-    const cx = t * dx, cy = t * dy;
-    return Math.sqrt((px - cx)**2 + (py - cy)**2);
+    return Math.sqrt((px - t*bx)**2 + (py - t*by)**2);
   }
-
   function distanceToPolygonEdge(lat, lon, polygon){
     let min = Infinity;
     for(let i = 0; i < polygon.length; i++){
-      const a = polygon[i];
-      const b = polygon[(i + 1) % polygon.length];
+      const a = polygon[i], b = polygon[(i+1) % polygon.length];
       const d = distancePointToSegment(lat, lon, a[0], a[1], b[0], b[1]);
       if(d < min) min = d;
     }
     return min;
   }
-
   function polygonCentroid(polygon){
     let lat = 0, lon = 0;
     for(const p of polygon){ lat += p[0]; lon += p[1]; }
     return [lat / polygon.length, lon / polygon.length];
   }
-
-  function detectWingForPosition(lat, lon){
-    // inside polygon takes precedence
+  function detectWing(lat, lon){
     for(const w of WINGS){
       if(pointInPolygon(lat, lon, w.polygon)) return { wing: w, distance: 0 };
     }
-    // else nearest by edge
     let near = null, dist = Infinity;
     for(const w of WINGS){
       const d = distanceToPolygonEdge(lat, lon, w.polygon);
@@ -1773,171 +1080,287 @@
   }
 
   /* =========================================================
-     SCREEN NAVIGATION
+     CHIP BAR
      ========================================================= */
-  function setScreen(name){
-    currentScreen = name;
-    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-    if(name === 'welcome') $('screenWelcome').classList.add('active');
-    else if(name === 'picker') $('screenPicker').classList.add('active');
-    else if(name === 'detail') $('screenDetail').classList.add('active');
-    else if(name === 'conv') $('screenConv').classList.add('active');
-
-    // Back button visibility
-    $('navBack').style.display = (name === 'detail' || name === 'conv') ? 'flex' : 'none';
-
-    // Nav title per screen
-    const titles = { welcome:'Audio gids', picker:'Kies vleugel', detail:'', conv:'In gesprek' };
-    $('navTitle').textContent = titles[name] || '';
-  }
-
-  $('navBack').addEventListener('click', () => {
-    if(currentScreen === 'conv'){
-      endConversation();
-    } else if(currentScreen === 'detail'){
-      setScreen('picker');
-    }
-  });
-
-  /* =========================================================
-     WELCOME SCREEN
-     ========================================================= */
-  $('welcomeStart').addEventListener('click', () => {
-    setScreen('picker');
-    startGpsTracking();
-  });
-
-  /* =========================================================
-     WING PICKER
-     ========================================================= */
-  function renderWingList(){
-    const list = $('wingList');
-    list.innerHTML = '';
-
+  function renderChips(){
+    const row = $('chipRow');
+    row.innerHTML = '';
     // General first
-    const generalCard = makeWingCard(GENERAL_CONTEXT, true);
-    list.appendChild(generalCard);
-
-    // Then all wings
-    WINGS.forEach(w => list.appendChild(makeWingCard(w, false)));
-
-    // Dev teleport buttons
-    const tele = $('devTeleport');
-    tele.innerHTML = '';
-    WINGS.forEach(w => {
-      const b = document.createElement('button');
-      b.className = 'dev-teleport-btn';
-      b.textContent = w.name;
-      b.addEventListener('click', () => teleportToWing(w));
-      tele.appendChild(b);
-    });
-    const outBtn = document.createElement('button');
-    outBtn.className = 'dev-teleport-btn outside';
-    outBtn.textContent = 'Buiten alle vleugels';
-    outBtn.addEventListener('click', () => teleportToOutside());
-    tele.appendChild(outBtn);
+    row.appendChild(makeChip(GENERAL_CONTEXT, true));
+    // Wings
+    WINGS.forEach(w => row.appendChild(makeChip(w, false)));
+    updateChipStates();
   }
-
-  function makeWingCard(ctx, isSpecial){
+  function makeChip(ctx, special){
     const btn = document.createElement('button');
-    btn.className = 'wing-card' + (isSpecial ? ' special' : '');
-    btn.dataset.contextId = ctx.id;
-    btn.innerHTML = `
-      <div class="wing-card-glyph">${ctx.short}</div>
-      <div class="wing-card-body">
-        <div class="wing-card-name">${ctx.name}</div>
-        <div class="wing-card-focus">${ctx.variables.wing_focus}</div>
-      </div>
-      <svg class="wing-card-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none">
-        <path d="M9 6L15 12L9 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-    `;
-    btn.addEventListener('click', () => selectContext(ctx));
+    btn.className = 'chip' + (special ? ' special' : '');
+    btn.dataset.id = ctx.id;
+    btn.textContent = ctx.short;
+    btn.title = ctx.name;
+    btn.addEventListener('click', () => {
+      setManualOverride(true);
+      setContext(ctx);
+    });
     return btn;
   }
-
-  function selectContext(ctx){
-    selectedContext = ctx;
-    pendingInitialMessage = null;
-    renderDetailScreen();
-    setScreen('detail');
-  }
-
-  $('gpsAcceptBtn').addEventListener('click', () => {
-    if(detectedWing) selectContext(detectedWing);
-  });
-  $('gpsRejectBtn').addEventListener('click', () => {
-    // Just dismiss the suggestion — keep user on picker
-    $('gpsSuggestion').classList.remove('visible');
-  });
-
-  /* =========================================================
-     WING DETAIL
-     ========================================================= */
-  function renderDetailScreen(){
-    if(!selectedContext) return;
-    const ctx = selectedContext;
-    const isGeneral = !!ctx.isGeneral;
-
-    $('detailHero').classList.toggle('general', isGeneral);
-    $('detailEyebrow').textContent = isGeneral ? 'Algemene gids' : 'Je bezoekt';
-    $('detailName').textContent = ctx.name;
-    $('detailFocus').textContent = ctx.variables.wing_focus;
-    $('aanraderText').textContent = ctx.aanrader || '—';
-
-    // Suggestions
-    const sugList = $('suggestionList');
-    sugList.innerHTML = '';
-    (ctx.suggestions || []).forEach(q => {
-      const chip = document.createElement('button');
-      chip.className = 'suggestion-chip';
-      chip.innerHTML = `
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
-          <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/>
-          <path d="M10 9C10 8 11 7 12 7C13 7 14 8 14 9C14 11 12 11 12 13M12 16V16.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
-        </svg>
-        <span class="suggestion-chip-text">${q}</span>
-      `;
-      chip.addEventListener('click', () => {
-        pendingInitialMessage = q;
-        startConversation();
-      });
-      sugList.appendChild(chip);
+  function updateChipStates(){
+    document.querySelectorAll('.chip').forEach(c => {
+      c.classList.toggle('active', c.dataset.id === activeContext.id);
+      const isSuggested = detectedWing && c.dataset.id === detectedWing.id && activeContext.id !== detectedWing.id;
+      c.classList.toggle('suggested', isSuggested);
     });
-
-    $('detailInput').value = '';
-    $('detailSend').disabled = true;
   }
-
-  $('detailInput').addEventListener('input', (e) => {
-    $('detailSend').disabled = !e.target.value.trim();
-  });
-  $('detailInput').addEventListener('keydown', (e) => {
-    if(e.key === 'Enter' && e.target.value.trim()){
-      submitDetailText();
-    }
-  });
-  $('detailSend').addEventListener('click', submitDetailText);
-
-  function submitDetailText(){
-    const val = $('detailInput').value.trim();
-    if(!val) return;
-    pendingInitialMessage = val;
-    startConversation();
-  }
-
-  $('startTalkBtn').addEventListener('click', () => {
-    pendingInitialMessage = null;
-    startConversation();
-  });
-
-  $('detailMapBtn').addEventListener('click', () => openMap());
-  $('openMapBtn').addEventListener('click', () => openMap());
 
   /* =========================================================
-     GPS TRACKING
+     CONTEXT SWITCHING
      ========================================================= */
-  function startGpsTracking(){
+  function setContext(ctx){
+    if(!ctx || ctx.id === activeContext.id){
+      // already there, no-op but still refresh UI
+      updateContextUI();
+      return;
+    }
+    const wasInConversation = !!conversation;
+    activeContext = ctx;
+    updateContextUI();
+    updateChipStates();
+    updateMapHighlights();
+    if(wasInConversation){
+      // End current conversation; new one starts on next tap with new context
+      stopConversation();
+      showTranscript('agent', 'Je bent nu bij ' + ctx.name + '. Tik op de orb om hier verder te praten.');
+    }
+  }
+
+  function updateContextUI(){
+    const ctx = activeContext;
+    const card = $('ctxCard');
+    card.classList.toggle('general', !!ctx.isGeneral);
+    $('ctxEyebrow').textContent = ctx.eyebrow;
+    $('ctxName').textContent = ctx.name;
+    // Suggestions
+    renderSuggestions();
+  }
+
+  /* =========================================================
+     SUGGESTIONS
+     ========================================================= */
+  function renderSuggestions(){
+    const row = $('suggestionRow');
+    row.innerHTML = '';
+    if(conversation){
+      // Hide suggestions while in conversation — transcript takes the space
+      row.style.display = 'none';
+      return;
+    }
+    row.style.display = 'flex';
+    (activeContext.suggestions || []).forEach(q => {
+      const btn = document.createElement('button');
+      btn.className = 'suggestion';
+      btn.textContent = q;
+      btn.addEventListener('click', () => {
+        startConversation(q);
+      });
+      row.appendChild(btn);
+    });
+  }
+
+  /* =========================================================
+     ORB / CONVERSATION
+     ========================================================= */
+  const orbWrap = $('orbWrap');
+  const orb = $('orb');
+  const orbStatus = $('orbStatus');
+  const waveform = $('waveform');
+
+  function setOrbState(state){
+    // state: 'locked', 'ready', 'connecting', 'listening', 'speaking', 'error'
+    if(state === 'locked'){
+      orbWrap.classList.add('locked');
+      orbStatus.className = 'orb-status locked';
+      orbStatus.textContent = 'Tik om te starten';
+      waveform.classList.remove('visible');
+      waveform.querySelectorAll('.wave-bar').forEach(b => b.classList.remove('speaking'));
+    } else {
+      orbWrap.classList.remove('locked');
+      if(state === 'ready'){
+        orbStatus.className = 'orb-status';
+        orbStatus.textContent = 'Tik om te praten';
+        waveform.classList.remove('visible');
+      } else if(state === 'connecting'){
+        orbStatus.className = 'orb-status';
+        orbStatus.textContent = 'Verbinden...';
+        waveform.classList.remove('visible');
+      } else if(state === 'listening'){
+        orbStatus.className = 'orb-status';
+        orbStatus.textContent = 'Luisteren...';
+        waveform.classList.add('visible');
+        waveform.querySelectorAll('.wave-bar').forEach(b => b.classList.remove('speaking'));
+        orb.classList.remove('speaking');
+      } else if(state === 'speaking'){
+        orbStatus.className = 'orb-status';
+        orbStatus.textContent = 'ADAM spreekt';
+        waveform.classList.add('visible');
+        waveform.querySelectorAll('.wave-bar').forEach(b => b.classList.add('speaking'));
+        orb.classList.add('speaking');
+      } else if(state === 'error'){
+        orbStatus.className = 'orb-status dim';
+        orbStatus.textContent = 'Fout — tik opnieuw';
+        waveform.classList.remove('visible');
+        orb.classList.remove('speaking');
+      }
+    }
+  }
+
+  async function startConversation(initialMessage){
+    if(isTransitioning || conversation) {
+      if(initialMessage) sendUserText(initialMessage);
+      return;
+    }
+    isTransitioning = true;
+    setOrbState('connecting');
+    const ctxForSession = activeContext;
+
+    if(initialMessage){
+      showTranscript('user', initialMessage);
+    }
+
+    try {
+      await navigator.mediaDevices.getUserMedia({
+        audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true }
+      });
+
+      conversation = await window.ElevenLabsConversation.startSession({
+        agentId: ctxForSession.agentId,
+        dynamicVariables: ctxForSession.variables,
+        onConnect: () => {
+          isTransitioning = false;
+          setOrbState('listening');
+          renderSuggestions();
+          requestWakeLock();
+          if(initialMessage){
+            setTimeout(() => sendUserText(initialMessage), 250);
+          }
+        },
+        onDisconnect: () => {
+          conversation = null;
+          isTransitioning = false;
+          setOrbState('ready');
+          renderSuggestions();
+          $('transcript').classList.remove('visible');
+          releaseWakeLock();
+        },
+        onModeChange: (m) => {
+          if(m.mode === 'speaking') setOrbState('speaking');
+          else setOrbState('listening');
+        },
+        onMessage: (message) => {
+          if(message.message){
+            showTranscript(message.source === 'user' ? 'user' : 'agent', message.message);
+          }
+        },
+        onError: (err) => {
+          console.error('Agent error:', err);
+          setOrbState('error');
+          conversation = null;
+          isTransitioning = false;
+        }
+      });
+    } catch (err) {
+      console.error('Start error:', err);
+      setOrbState('error');
+      conversation = null;
+      isTransitioning = false;
+    }
+  }
+
+  async function stopConversation(){
+    if(!conversation) return;
+    const current = conversation;
+    conversation = null;
+    try { await current.endSession(); } catch (err) {}
+  }
+
+  orbWrap.addEventListener('click', () => {
+    if(orbWrap.classList.contains('locked')) return;
+    if(isTransitioning) return;
+    if(!conversation) startConversation();
+    else stopConversation();
+  });
+
+  function showTranscript(role, text){
+    const t = $('transcript');
+    $('transcriptRole').textContent = role === 'user' ? 'Jij' : 'ADAM';
+    $('transcriptRole').className = 'transcript-role ' + (role === 'user' ? 'user' : '');
+    $('transcriptText').textContent = text;
+    t.classList.add('visible');
+    t.scrollTop = t.scrollHeight;
+    // Hide suggestions when transcript shows
+    $('suggestionRow').style.display = conversation ? 'none' : 'flex';
+  }
+
+  function sendUserText(text){
+    if(!conversation) return;
+    showTranscript('user', text);
+    try {
+      if(typeof conversation.sendUserMessage === 'function') conversation.sendUserMessage(text);
+      else if(typeof conversation.sendMessage === 'function') conversation.sendMessage(text);
+      else if(typeof conversation.sendContextualUpdate === 'function') conversation.sendContextualUpdate(text);
+      else console.warn('No send method on conversation:', Object.keys(conversation));
+    } catch (e) { console.error('Send text failed:', e); }
+  }
+
+  /* =========================================================
+     COMPOSER
+     ========================================================= */
+  const composerInput = $('composerInput');
+  const composerSend = $('composerSend');
+  composerInput.addEventListener('input', (e) => {
+    composerSend.disabled = !e.target.value.trim();
+  });
+  composerInput.addEventListener('keydown', (e) => {
+    if(e.key === 'Enter' && e.target.value.trim()) submitComposer();
+  });
+  composerSend.addEventListener('click', submitComposer);
+
+  function submitComposer(){
+    const val = composerInput.value.trim();
+    if(!val) return;
+    composerInput.value = '';
+    composerSend.disabled = true;
+    if(orbWrap.classList.contains('locked')) return;
+    if(!conversation) startConversation(val);
+    else sendUserText(val);
+  }
+
+  /* =========================================================
+     WELCOME POPUP
+     ========================================================= */
+  const overlay = $('welcomeOverlay');
+  // Show on first visit per session
+  const dismissed = sessionStorage.getItem('adam_demo_welcomed') === '1';
+  if(dismissed){
+    overlay.classList.add('hidden');
+    // start GPS immediately
+    setTimeout(() => startGps(), 200);
+  }
+
+  $('welcomeStart').addEventListener('click', () => {
+    sessionStorage.setItem('adam_demo_welcomed', '1');
+    overlay.classList.add('closing');
+    setTimeout(() => overlay.classList.add('hidden'), 300);
+    startGps();
+  });
+
+  $('navInfoBtn').addEventListener('click', () => {
+    overlay.classList.remove('hidden','closing');
+  });
+
+  /* =========================================================
+     GPS
+     ========================================================= */
+  function startGps(){
+    setOrbState('ready'); // unlock immediately — general context always works
     if(!('geolocation' in navigator)){
       updateDev({ gps: 'Niet ondersteund' });
       return;
@@ -1951,7 +1374,7 @@
         handlePositionUpdate();
       },
       (err) => {
-        console.warn('Geolocation error:', err);
+        console.warn('Geo error:', err);
         let msg = 'Niet beschikbaar';
         if(err.code === err.PERMISSION_DENIED) msg = 'Geweigerd';
         else if(err.code === err.POSITION_UNAVAILABLE) msg = 'Onbeschikbaar';
@@ -1966,107 +1389,82 @@
     if(!userPos) return;
     const acc = userPos.accuracy;
     const reliable = !acc || acc <= ACCURACY_MAX;
-    const det = detectWingForPosition(userPos.lat, userPos.lon);
+    const det = detectWing(userPos.lat, userPos.lon);
     detectedWing = (reliable && det.distance === 0) ? det.wing : null;
 
     updateDev({
       gps: reliable ? 'Actief' : 'Onnauwkeurig',
-      coords: userPos.lat.toFixed(5) + ', ' + userPos.lon.toFixed(5),
+      lat: userPos.lat.toFixed(5),
+      lon: userPos.lon.toFixed(5),
       acc: '± ' + Math.round(acc) + ' m',
       poly: detectedWing ? detectedWing.name : '—',
-      nearest: det.wing ? (det.wing.name + (det.distance === 0 ? ' (binnen)' : ' — ' + Math.round(det.distance) + 'm')) : '—'
+      near: det.wing ? det.wing.name + (det.distance === 0 ? ' (binnen)' : ' — ' + Math.round(det.distance) + 'm') : '—'
     });
 
-    // GPS suggestion (only on picker screen, only if reliable + in polygon, only if user hasn't picked yet)
-    if(currentScreen === 'picker' && detectedWing){
-      const sug = $('gpsSuggestion');
-      sug.classList.add('visible');
-      $('gpsSuggestionText').innerHTML =
-        'Op basis van je locatie zit je in <b>' + detectedWing.name + '</b>.';
+    // Auto-switch context: only if user hasn't manually overridden
+    if(!manualOverride){
+      if(detectedWing && detectedWing.id !== activeContext.id){
+        setContext(detectedWing);
+      } else if(!detectedWing && !activeContext.isGeneral){
+        // walked out of all wings -> general
+        setContext(GENERAL_CONTEXT);
+      }
     }
-
-    // Update map user marker if map open
-    if(mapInitialized && map){
-      updateMapUserPosition();
-    }
+    updateChipStates();
+    updateMapUserMarker();
   }
 
-  function updateDev(updates){
-    if(updates.gps !== undefined){
+  function updateDev(u){
+    if(u.gps !== undefined){
       const el = $('devGps');
-      el.textContent = updates.gps;
-      el.className = 'dev-row-value ' + (updates.gps === 'Actief' ? 'accent' : 'dim');
+      el.textContent = u.gps;
+      el.className = 'dev-stat-value' + (u.gps === 'Actief' ? ' accent' : '');
     }
-    if(updates.coords !== undefined){
-      $('devCoords').textContent = updates.coords;
-      $('devCoords').className = 'dev-row-value';
-    }
-    if(updates.acc !== undefined){
-      $('devAcc').textContent = updates.acc;
-      $('devAcc').className = 'dev-row-value';
-    }
-    if(updates.poly !== undefined){
+    if(u.lat !== undefined) $('devLat').textContent = u.lat;
+    if(u.lon !== undefined) $('devLon').textContent = u.lon;
+    if(u.acc !== undefined) $('devAcc').textContent = u.acc;
+    if(u.poly !== undefined){
       const el = $('devPoly');
-      el.textContent = updates.poly;
-      el.className = 'dev-row-value ' + (updates.poly === '—' ? 'dim' : 'accent');
+      el.textContent = u.poly;
+      el.className = 'dev-stat-value' + (u.poly !== '—' ? ' accent' : '');
     }
-    if(updates.nearest !== undefined){
-      $('devNearest').textContent = updates.nearest;
-      $('devNearest').className = 'dev-row-value';
-    }
+    if(u.near !== undefined) $('devNear').textContent = u.near;
   }
 
   function teleportToWing(w){
+    setManualOverride(true);
     const [lat, lon] = polygonCentroid(w.polygon);
     userPos = { lat: lat, lon: lon, accuracy: 5 };
     handlePositionUpdate();
+    setContext(w);
   }
   function teleportToOutside(){
-    // Place ~150m north
+    setManualOverride(true);
     const allLat = WINGS.flatMap(w => w.polygon.map(p => p[0]));
     const allLon = WINGS.flatMap(w => w.polygon.map(p => p[1]));
     const avgLat = allLat.reduce((s,v)=>s+v,0)/allLat.length;
     const avgLon = allLon.reduce((s,v)=>s+v,0)/allLon.length;
     userPos = { lat: avgLat + 0.0015, lon: avgLon, accuracy: 5 };
     handlePositionUpdate();
+    setContext(GENERAL_CONTEXT);
   }
 
   /* =========================================================
      MAP
      ========================================================= */
-  function openMap(){
-    $('mapOverlay').classList.add('open');
-    $('mapModal').classList.add('open');
-    if(!mapInitialized){
-      initMap();
-      mapInitialized = true;
-    }
-    setTimeout(() => {
-      if(map) map.invalidateSize();
-      // Center on user, fit if no user
-      if(userPos){
-        centerOnUser(true);
-      } else {
-        const bounds = L.latLngBounds(WINGS.flatMap(w => w.polygon.map(p => [p[0], p[1]])));
-        map.fitBounds(bounds, { padding: [30, 30] });
-      }
-    }, 320);
-  }
-  function closeMap(){
-    $('mapOverlay').classList.remove('open');
-    $('mapModal').classList.remove('open');
-  }
-  $('mapClose').addEventListener('click', closeMap);
-  $('mapOverlay').addEventListener('click', closeMap);
-
   function initMap(){
+    const allLat = WINGS.flatMap(w => w.polygon.map(p => p[0]));
+    const allLon = WINGS.flatMap(w => w.polygon.map(p => p[1]));
+    const cLat = allLat.reduce((s,v)=>s+v,0)/allLat.length;
+    const cLon = allLon.reduce((s,v)=>s+v,0)/allLon.length;
+
     map = L.map('map', {
       zoomControl: true,
       attributionControl: true,
-      scrollWheelZoom: true,
+      scrollWheelZoom: false,
       doubleClickZoom: true,
       touchZoom: true,
-    }).setView([53.1775, 6.6035], 17);
+    }).setView([cLat, cLon], 17);
 
     L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png', {
       attribution: '© OpenStreetMap © CARTO',
@@ -2094,54 +1492,39 @@
       wingLayers.set(w.id, { polygon: poly, label: label });
     });
 
-    updateMapHighlights();
+    const bounds = L.latLngBounds(WINGS.flatMap(w => w.polygon.map(p => [p[0], p[1]])));
+    map.fitBounds(bounds, { padding: [30, 30], maxZoom: 18 });
 
-    // Detect user interaction with map -> pause follow
-    map.on('dragstart', onUserMapInteract);
-    map.on('zoomstart', (e) => {
-      // Only count zoom as interaction if it's not programmatic
-      if(e.target._zoomAnimated !== undefined){
-        // can't reliably distinguish — use timestamp check below
-      }
-    });
-    // We'll track explicit user input via container events
-    const mapEl = map.getContainer();
-    ['mousedown','touchstart','wheel'].forEach(ev => {
-      mapEl.addEventListener(ev, onUserMapInteract, { passive: true });
-    });
+    // Track user interactions to pause follow mode
+    map.on('dragstart', () => { if(!suppressMapInteractionEvents) pauseFollow(); });
+    map.on('zoomstart', () => { if(!suppressMapInteractionEvents) pauseFollow(); });
+
+    updateMapHighlights();
   }
 
-  function onUserMapInteract(){
+  function pauseFollow(){
     if(!mapFollowMode) return;
     mapFollowMode = false;
-    mapUserInteractedAt = Date.now();
-    $('recenterBtn').classList.add('visible');
-    hideYouHere();
-    // After 30s of no further interaction, allow re-arming follow on next position update
-    clearTimeout(mapResumeFollowTimer);
-    mapResumeFollowTimer = setTimeout(() => {
-      // Don't auto-recenter, just allow the recenter button to remain — visitor can decide
-    }, 30000);
-  }
-
-  $('recenterBtn').addEventListener('click', () => {
     if(userPos){
-      mapFollowMode = true;
-      $('recenterBtn').classList.remove('visible');
-      centerOnUser(true);
+      $('recenterBtn').classList.add('visible');
     }
-  });
-
-  function centerOnUser(showLabel){
-    if(!userPos || !map) return;
-    const targetZoom = Math.max(map.getZoom(), 18);
-    map.setView([userPos.lat, userPos.lon], targetZoom, { animate: true });
-    if(showLabel) showYouHere();
+    hideYouHere();
   }
 
-  function updateMapUserPosition(){
+  function recenter(){
     if(!userPos || !map) return;
+    mapFollowMode = true;
+    $('recenterBtn').classList.remove('visible');
+    suppressMapInteractionEvents = true;
+    const z = Math.max(map.getZoom(), 18);
+    map.setView([userPos.lat, userPos.lon], z, { animate: true });
+    showYouHere();
+    setTimeout(() => { suppressMapInteractionEvents = false; }, 800);
+  }
+  $('recenterBtn').addEventListener('click', recenter);
 
+  function updateMapUserMarker(){
+    if(!map || !userPos) return;
     const isSimulated = userPos.accuracy === 5 && DEV_MODE;
     if(!userMarker){
       userMarker = L.marker([userPos.lat, userPos.lon], {
@@ -2150,14 +1533,16 @@
           html: '<div class="user-marker-dot"></div>',
           iconSize: [28,28], iconAnchor: [14,14],
         }),
-        keyboard: false,
-        interactive: false,
-        zIndexOffset: 1000,
+        keyboard: false, interactive: false, zIndexOffset: 1000,
       }).addTo(map);
+      // First fix: center on user with zoom
+      suppressMapInteractionEvents = true;
+      map.setView([userPos.lat, userPos.lon], 18, { animate: true });
+      showYouHere();
+      setTimeout(() => { suppressMapInteractionEvents = false; }, 800);
     } else {
       userMarker.setLatLng([userPos.lat, userPos.lon]);
     }
-
     if(userPos.accuracy && userPos.accuracy > 0 && userPos.accuracy < 200){
       if(!accCircle){
         accCircle = L.circle([userPos.lat, userPos.lon], {
@@ -2170,19 +1555,19 @@
         accCircle.setRadius(userPos.accuracy);
       }
     }
-
-    updateMapHighlights();
-
     if(mapFollowMode){
-      centerOnUser(false);
+      suppressMapInteractionEvents = true;
+      map.panTo([userPos.lat, userPos.lon], { animate: true });
+      setTimeout(() => { suppressMapInteractionEvents = false; }, 500);
     }
+    updateMapHighlights();
+    positionYouHere();
   }
 
   function updateMapHighlights(){
     if(!map) return;
-    const activeId = detectedWing ? detectedWing.id : (selectedContext && !selectedContext.isGeneral ? selectedContext.id : null);
     wingLayers.forEach((layer, id) => {
-      const isActive = id === activeId;
+      const isActive = id === activeContext.id;
       layer.polygon.setStyle({
         weight: isActive ? 2.5 : 1.5,
         opacity: isActive ? 1 : 0.55,
@@ -2193,199 +1578,46 @@
     });
   }
 
+  let youHereTimer = null;
   function showYouHere(){
     if(!userPos || !map) return;
-    const label = $('youHereLabel');
-    label.style.display = 'block';
-    label.classList.remove('fade-out');
-    youHereVisible = true;
+    const label = $('youHere');
+    label.classList.remove('hidden');
     positionYouHere();
-    setTimeout(() => {
-      label.classList.add('fade-out');
-      setTimeout(() => {
-        if(youHereVisible){
-          label.style.display = 'none';
-          youHereVisible = false;
-        }
-      }, 400);
-    }, 2500);
+    clearTimeout(youHereTimer);
+    youHereTimer = setTimeout(() => label.classList.add('hidden'), 2800);
   }
   function hideYouHere(){
-    const label = $('youHereLabel');
-    label.style.display = 'none';
-    youHereVisible = false;
+    $('youHere').classList.add('hidden');
   }
   function positionYouHere(){
     if(!userPos || !map) return;
+    const label = $('youHere');
+    if(label.classList.contains('hidden')) return;
     const pt = map.latLngToContainerPoint([userPos.lat, userPos.lon]);
-    const label = $('youHereLabel');
     label.style.left = pt.x + 'px';
     label.style.top = pt.y + 'px';
   }
 
   /* =========================================================
-     CONVERSATION
+     DEV TELEPORT BUTTONS
      ========================================================= */
-  async function startConversation(){
-    if(!selectedContext || isTransitioning || conversation) return;
-    isTransitioning = true;
-    const ctx = selectedContext;
-
-    setScreen('conv');
-    const isGeneral = !!ctx.isGeneral;
-    $('convHeader').classList.toggle('general', isGeneral);
-    $('convHeaderGlyph').textContent = ctx.short;
-    $('convHeaderName').textContent = ctx.name;
-    $('convHeaderStatus').textContent = 'Verbinden...';
-    $('convStatusLabel').textContent = 'Verbinden...';
-    $('convInput').value = '';
-    $('convSend').disabled = true;
-
-    // If a pending initial message exists, show it in transcript right away
-    if(pendingInitialMessage){
-      showTranscript('user', pendingInitialMessage);
-    } else {
-      $('convTranscript').classList.remove('visible');
-    }
-
-    try {
-      await navigator.mediaDevices.getUserMedia({
-        audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true }
-      });
-
-      conversation = await window.ElevenLabsConversation.startSession({
-        agentId: ctx.agentId,
-        dynamicVariables: ctx.variables,
-
-        onConnect: () => {
-          isTransitioning = false;
-          $('convHeaderStatus').textContent = 'Verbonden';
-          $('convStatusLabel').textContent = 'Luisteren...';
-          requestWakeLock();
-
-          // Send pending initial message as text after connect, if any
-          if(pendingInitialMessage){
-            const msg = pendingInitialMessage;
-            pendingInitialMessage = null;
-            // small delay to ensure session is fully ready
-            setTimeout(() => sendUserText(msg), 250);
-          }
-        },
-        onDisconnect: () => {
-          conversation = null;
-          isTransitioning = false;
-          releaseWakeLock();
-          $('convHeaderStatus').textContent = 'Beëindigd';
-          $('convStatusLabel').textContent = 'Gesprek beëindigd';
-        },
-        onModeChange: (m) => {
-          if(m.mode === 'speaking'){
-            $('convOrb').classList.add('speaking');
-            $('convStatusLabel').textContent = 'ADAM spreekt...';
-            $('convHeaderStatus').textContent = 'Spreekt';
-          } else {
-            $('convOrb').classList.remove('speaking');
-            $('convStatusLabel').textContent = 'Luisteren...';
-            $('convHeaderStatus').textContent = 'Luistert';
-          }
-        },
-        onMessage: (message) => {
-          if(message.message){
-            showTranscript(message.source === 'user' ? 'user' : 'agent', message.message);
-          }
-        },
-        onError: (error) => {
-          console.error('Agent error:', error);
-          $('convStatusLabel').textContent = 'Fout — probeer opnieuw';
-          $('convHeaderStatus').textContent = 'Fout';
-          conversation = null;
-          isTransitioning = false;
-        }
-      });
-    } catch (err) {
-      console.error('Start error:', err);
-      $('convStatusLabel').textContent = 'Microfoon toegang geweigerd';
-      $('convHeaderStatus').textContent = 'Geen toegang';
-      conversation = null;
-      isTransitioning = false;
-      pendingInitialMessage = null;
-    }
-  }
-
-  async function endConversation(){
-    if(!conversation){
-      // Already ended — go back to detail
-      setScreen(selectedContext ? 'detail' : 'picker');
-      return;
-    }
-    if(isTransitioning) return;
-    isTransitioning = true;
-    const current = conversation;
-    conversation = null;
-    try {
-      await current.endSession();
-    } catch (err) {
-      console.error('Stop error:', err);
-    }
-    isTransitioning = false;
-    setScreen(selectedContext ? 'detail' : 'picker');
-  }
-
-  $('convEndBtn').addEventListener('click', endConversation);
-
-  function showTranscript(role, text){
-    $('convTranscriptRole').textContent = role === 'user' ? 'Jij' : 'ADAM';
-    $('convTranscriptRole').className = 'conv-transcript-role ' + (role === 'user' ? '' : 'agent');
-    $('convTranscriptText').textContent = text;
-    $('convTranscript').classList.add('visible');
-    const t = $('convTranscript');
-    t.scrollTop = t.scrollHeight;
-  }
-
-  // Conversation text input
-  $('convInput').addEventListener('input', (e) => {
-    $('convSend').disabled = !e.target.value.trim();
-  });
-  $('convInput').addEventListener('keydown', (e) => {
-    if(e.key === 'Enter' && e.target.value.trim()){
-      submitConvText();
-    }
-  });
-  $('convSend').addEventListener('click', submitConvText);
-
-  function submitConvText(){
-    const val = $('convInput').value.trim();
-    if(!val) return;
-    if(!conversation){
-      // not connected yet — treat as pending initial
-      pendingInitialMessage = val;
-      $('convInput').value = '';
-      $('convSend').disabled = true;
-      return;
-    }
-    sendUserText(val);
-    $('convInput').value = '';
-    $('convSend').disabled = true;
-  }
-
-  function sendUserText(text){
-    if(!conversation) return;
-    // Show in transcript immediately
-    showTranscript('user', text);
-    // Try multiple known APIs on the conversation object
-    try {
-      if(typeof conversation.sendUserMessage === 'function'){
-        conversation.sendUserMessage(text);
-      } else if(typeof conversation.sendMessage === 'function'){
-        conversation.sendMessage(text);
-      } else if(typeof conversation.sendContextualUpdate === 'function'){
-        conversation.sendContextualUpdate(text);
-      } else {
-        console.warn('No sendUserMessage method found on Conversation object', Object.keys(conversation));
-      }
-    } catch (e) {
-      console.error('Failed to send text:', e);
-    }
+  function renderDevTeleport(){
+    const grid = $('devTeleport');
+    grid.innerHTML = '';
+    WINGS.forEach(w => {
+      const b = document.createElement('button');
+      b.className = 'dev-tp-btn';
+      b.textContent = w.short;
+      b.title = w.name;
+      b.addEventListener('click', () => teleportToWing(w));
+      grid.appendChild(b);
+    });
+    const o = document.createElement('button');
+    o.className = 'dev-tp-btn outside';
+    o.textContent = 'Buiten alle vleugels (algemeen)';
+    o.addEventListener('click', teleportToOutside);
+    grid.appendChild(o);
   }
 
   /* =========================================================
@@ -2394,128 +1626,138 @@
   async function requestWakeLock(){
     if(!('wakeLock' in navigator)) return;
     try { wakeLock = await navigator.wakeLock.request('screen'); }
-    catch (err) { console.warn('Wake lock denied:', err); }
+    catch (err) {}
   }
   function releaseWakeLock(){
-    if(wakeLock){
-      wakeLock.release().catch(()=>{});
-      wakeLock = null;
-    }
+    if(wakeLock){ wakeLock.release().catch(()=>{}); wakeLock = null; }
   }
   document.addEventListener('visibilitychange', () => {
-    if(wakeLock === null && document.visibilityState === 'visible' && conversation){
-      requestWakeLock();
-    }
+    if(wakeLock === null && document.visibilityState === 'visible' && conversation) requestWakeLock();
   });
 
   /* =========================================================
-     WELCOME BACKGROUND CANVAS
+     ORB CANVAS ANIMATION (the good one)
      ========================================================= */
   (function(){
-    const canvas = $('welcomeBg');
+    const canvas = document.getElementById('orbCanvas');
     if(!canvas) return;
     const ctx = canvas.getContext('2d');
     let W = 0, H = 0, t = 0;
-    const YR = 206, YG = 255, YB = 26;
+    let running = false;
 
-    function resize(){
-      W = canvas.parentElement.offsetWidth;
-      H = canvas.parentElement.offsetHeight;
-      canvas.width = W;
-      canvas.height = H;
-    }
-    function draw(){
-      t += 0.003;
-      ctx.fillStyle = '#080810';
-      ctx.fillRect(0,0,W,H);
-      const blobs = [
-        {x:.2,y:.25,r:.55,s:.3},
-        {x:.8,y:.6,r:.5,s:.2},
-        {x:.5,y:.9,r:.45,s:.5}
-      ];
-      blobs.forEach((b,i)=>{
-        const cx = (b.x + Math.sin(t*b.s+i*1.2)*0.1) * W;
-        const cy = (b.y + Math.cos(t*b.s*0.8+i)*0.12) * H;
-        const r = b.r * Math.min(W,H);
-        const g = ctx.createRadialGradient(cx,cy,0,cx,cy,r);
-        g.addColorStop(0, `rgba(${YR},${YG},${YB},.05)`);
-        g.addColorStop(.5, `rgba(${YR},${YG},${YB},.018)`);
-        g.addColorStop(1, `rgba(${YR},${YG},${YB},0)`);
-        ctx.beginPath();
-        ctx.arc(cx,cy,r,0,Math.PI*2);
-        ctx.fillStyle = g;
-        ctx.fill();
-      });
-      const bg = ctx.createRadialGradient(W*.5,H*.5,0,W*.5,H*.5,W*.4);
-      bg.addColorStop(0,'rgba(29,46,216,0.10)');
-      bg.addColorStop(1,'rgba(29,46,216,0)');
-      ctx.beginPath();
-      ctx.arc(W*.5,H*.5,W*.4,0,Math.PI*2);
-      ctx.fillStyle = bg;
-      ctx.fill();
-      requestAnimationFrame(draw);
-    }
-    window.addEventListener('resize', resize);
-    resize();
-    draw();
-  })();
-
-  /* =========================================================
-     CONVERSATION ORB CANVAS
-     ========================================================= */
-  (function(){
-    const canvas = $('convOrbCanvas');
-    if(!canvas) return;
-    const ctx = canvas.getContext('2d');
-    let W = 0, H = 0, t = 0;
     function resize(){
       W = canvas.offsetWidth;
       H = canvas.offsetHeight;
+      if(W === 0 || H === 0){
+        // canvas might not be laid out yet — try again next frame
+        requestAnimationFrame(resize);
+        return;
+      }
       canvas.width = W;
       canvas.height = H;
+      if(!running){ running = true; requestAnimationFrame(draw); }
     }
+
     function draw(){
       t += 0.008;
       ctx.clearRect(0,0,W,H);
-      const base = ctx.createRadialGradient(W*.5,H*.5,0,W*.5,H*.5,W*.5);
-      base.addColorStop(0,'#2a40f0');
-      base.addColorStop(1,'#1020c0');
+
+      // base blue radial
+      const base = ctx.createRadialGradient(W*.5, H*.5, 0, W*.5, H*.5, W*.5);
+      base.addColorStop(0, '#2a40f0');
+      base.addColorStop(1, '#1020c0');
       ctx.beginPath();
-      ctx.arc(W*.5,H*.5,W*.5,0,Math.PI*2);
+      ctx.arc(W*.5, H*.5, W*.5, 0, Math.PI*2);
       ctx.fillStyle = base;
       ctx.fill();
+
+      // shifting lime blobs
       const blobs = [
-        {x:.35,y:.4,r:.28,s:.7},
-        {x:.6,y:.55,r:.22,s:.5},
-        {x:.45,y:.65,r:.18,s:.9}
+        {x:.35, y:.4, r:.30, s:.7},
+        {x:.6,  y:.55, r:.24, s:.5},
+        {x:.45, y:.65, r:.20, s:.9},
+        {x:.55, y:.35, r:.18, s:.6},
       ];
-      blobs.forEach((b,i)=>{
-        const cx = (b.x + Math.sin(t*b.s+i)*0.15) * W;
-        const cy = (b.y + Math.cos(t*b.s+i)*0.12) * H;
+      blobs.forEach((b, i) => {
+        const cx = (b.x + Math.sin(t*b.s + i)*0.16) * W;
+        const cy = (b.y + Math.cos(t*b.s + i)*0.13) * H;
         const r = b.r * W;
-        const g = ctx.createRadialGradient(cx,cy,0,cx,cy,r);
-        g.addColorStop(0,'rgba(206,255,26,0.55)');
-        g.addColorStop(.4,'rgba(206,255,26,0.18)');
-        g.addColorStop(1,'rgba(206,255,26,0)');
+        const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+        g.addColorStop(0, 'rgba(206,255,26,0.58)');
+        g.addColorStop(0.4, 'rgba(206,255,26,0.18)');
+        g.addColorStop(1, 'rgba(206,255,26,0)');
         ctx.beginPath();
-        ctx.arc(cx,cy,r,0,Math.PI*2);
+        ctx.arc(cx, cy, r, 0, Math.PI*2);
         ctx.fillStyle = g;
         ctx.fill();
       });
+
+      // subtle gloss highlight top
+      const gloss = ctx.createRadialGradient(W*.5, H*.2, 0, W*.5, H*.2, W*.55);
+      gloss.addColorStop(0, 'rgba(255,255,255,0.18)');
+      gloss.addColorStop(0.5, 'rgba(255,255,255,0.04)');
+      gloss.addColorStop(1, 'rgba(255,255,255,0)');
+      ctx.beginPath();
+      ctx.arc(W*.5, H*.5, W*.5, 0, Math.PI*2);
+      ctx.fillStyle = gloss;
+      ctx.fill();
+
       requestAnimationFrame(draw);
     }
+
     window.addEventListener('resize', resize);
-    setTimeout(() => { resize(); draw(); }, 100);
+    // Use a ResizeObserver to be safe — canvas may resize before window
+    if(window.ResizeObserver){
+      const ro = new ResizeObserver(() => resize());
+      ro.observe(canvas);
+    }
+    // initial
+    resize();
   })();
+
+  /* =========================================================
+     MANUAL OVERRIDE
+     ========================================================= */
+  function setManualOverride(on){
+    manualOverride = on;
+    $('gpsResumeBtn').classList.toggle('visible', on);
+  }
+
+  function resumeGps(){
+    setManualOverride(false);
+    // Force an immediate re-evaluation based on current position
+    if(userPos){
+      handlePositionUpdate();
+    } else {
+      // No position yet — fall back to general until GPS catches up
+      setContext(GENERAL_CONTEXT);
+    }
+  }
+
+  $('gpsResumeBtn').addEventListener('click', resumeGps);
 
   /* =========================================================
      BOOT
      ========================================================= */
-  renderWingList();
-  // GPS only starts after user taps "Start" — respects privacy promise.
-  // In dev mode, start tracking immediately for convenience.
-  if(DEV_MODE){
-    setTimeout(() => startGpsTracking(), 200);
+  renderChips();
+  renderSuggestions();
+  updateContextUI();
+  renderDevTeleport();
+  initMap();
+
+  // Resize map shortly after boot to handle any layout race
+  setTimeout(() => map && map.invalidateSize(), 200);
+  setTimeout(() => map && map.invalidateSize(), 600);
+  window.addEventListener('resize', () => map && map.invalidateSize());
+
+  // Hide map "you here" label on pan
+  map && map.on('move', positionYouHere);
+
+  // Dev mode: start GPS immediately so testing is fluid
+  if(DEV_MODE && !sessionStorage.getItem('adam_demo_welcomed')){
+    sessionStorage.setItem('adam_demo_welcomed', '1');
+    $('welcomeOverlay').classList.add('hidden');
+    setTimeout(() => startGps(), 200);
   }
 </script>
 
