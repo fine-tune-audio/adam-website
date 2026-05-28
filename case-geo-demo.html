@@ -185,16 +185,16 @@
       gap:9px;
     }
 
-    /* Active context card */
+    /* Active context card — single line */
     .ctx-card{
       flex:0 0 auto;
       width:auto;
-      margin:12px 14px 4px;
-      padding:10px 14px;
+      margin:10px 14px 2px;
+      padding:8px 14px;
       background:rgba(206,255,26,0.06);
       border:1px solid rgba(206,255,26,0.25);
       border-radius:9px;
-      display:flex;align-items:center;gap:11px;
+      display:flex;align-items:center;gap:9px;
       transition:all 0.3s;
     }
     .ctx-card.general{
@@ -202,7 +202,7 @@
       border-color:rgba(122,138,255,0.25);
     }
     .ctx-card-dot{
-      width:8px;height:8px;border-radius:50%;
+      width:7px;height:7px;border-radius:50%;
       background:var(--yellow);flex-shrink:0;
       animation:pulse-soft 1.6s ease-in-out infinite;
       box-shadow:0 0 8px rgba(206,255,26,0.5);
@@ -212,16 +212,20 @@
       box-shadow:0 0 8px rgba(159,168,255,0.5);
     }
     @keyframes pulse-soft{0%,100%{opacity:0.6;}50%{opacity:1;}}
-    .ctx-card-body{flex:1;min-width:0;}
+    .ctx-card-body{
+      flex:1;min-width:0;
+      display:flex;align-items:baseline;gap:8px;
+    }
     .ctx-card-eyebrow{
-      font-size:9px;font-weight:700;letter-spacing:0.14em;
+      font-size:9px;font-weight:700;letter-spacing:0.12em;
       text-transform:uppercase;color:var(--yellow);
-      margin-bottom:1px;
+      flex-shrink:0;
     }
     .ctx-card.general .ctx-card-eyebrow{color:#9fa8ff;}
     .ctx-card-name{
       font-size:14px;font-weight:700;color:#fff;
       overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+      min-width:0;
     }
 
     /* Orb */
@@ -311,10 +315,13 @@
     .wave-bar.speaking{animation:wave-speak 0.4s ease-in-out infinite alternate;}
     @keyframes wave-speak{from{transform:scaleY(0.3);}to{transform:scaleY(1);}}
 
-    /* ========= INFO STRIP (suggestions OR transcript) ========= */
+    /* ========= INFO STRIP (suggestions + transcript) ========= */
     .info-strip{
       flex:0 0 auto;
       padding:6px 14px 10px;
+      display:flex;
+      flex-direction:column;
+      gap:8px;
     }
 
     /* Suggestion chips */
@@ -344,11 +351,11 @@
 
     /* Transcript bubble */
     .transcript{
-      padding:11px 14px;
+      padding:10px 13px;
       background:rgba(255,255,255,0.04);
       border:1px solid var(--border);
       border-radius:9px;
-      max-height:90px;overflow-y:auto;
+      max-height:72px;overflow-y:auto;
       display:none;
       scrollbar-width:thin;
       scrollbar-color:rgba(255,255,255,0.14) transparent;
@@ -392,7 +399,7 @@
 
     /* ========= MAP ========= */
     .map-section{
-      flex:1;min-height:300px;
+      flex:1 1 0;min-height:180px;
       position:relative;
       border-top:1px solid var(--border);
     }
@@ -655,11 +662,13 @@
     /* ========= SCALING ========= */
     @media (max-height: 740px){
       .nav{height:50px;}
-      .ctx-card{margin:10px 14px 2px;padding:8px 12px;}
+      .ctx-card{margin:8px 14px 2px;padding:7px 12px;}
       .orb-wrap{width:92px;height:92px;}
       .orb{width:92px;height:92px;}
       .orb-rings{inset:-14px;}
       .interaction-row{padding:4px 14px 8px;gap:14px;}
+      .transcript{max-height:62px;padding:9px 12px;}
+      .info-strip{padding:5px 14px 8px;}
     }
     @media (max-height: 640px){
       .orb-wrap{width:84px;height:84px;}
@@ -668,6 +677,8 @@
       .chip-bar{padding:8px 14px 4px;}
       .chip{height:28px;}
       .info-strip{padding:4px 14px 6px;}
+      .transcript{max-height:54px;}
+      .ctx-card{margin:6px 14px 2px;padding:6px 12px;}
     }
     @media (max-width: 360px){
       .nav-title{display:none;}
@@ -1228,18 +1239,19 @@
   function renderSuggestions(){
     const row = $('suggestionRow');
     row.innerHTML = '';
-    if(conversation){
-      // Hide suggestions while in conversation — transcript takes the space
-      row.style.display = 'none';
-      return;
-    }
     row.style.display = 'flex';
     (activeContext.suggestions || []).forEach(q => {
       const btn = document.createElement('button');
       btn.className = 'suggestion';
       btn.textContent = q;
       btn.addEventListener('click', () => {
-        startConversation(q);
+        if(conversation){
+          // Already talking — send the suggestion as a typed question
+          sendUserText(q);
+        } else {
+          // Not yet talking — start the conversation with this question
+          startConversation(q);
+        }
       });
       row.appendChild(btn);
     });
@@ -1382,8 +1394,8 @@
     $('transcriptText').textContent = text;
     t.classList.add('visible');
     t.scrollTop = t.scrollHeight;
-    // Hide suggestions when transcript shows
-    $('suggestionRow').style.display = conversation ? 'none' : 'flex';
+    // Suggestions stay visible (above the transcript) during the conversation too
+    $('suggestionRow').style.display = 'flex';
   }
 
   function sendUserText(text){
