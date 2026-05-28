@@ -1310,6 +1310,7 @@
 
       conversation = await window.ElevenLabsConversation.startSession({
         agentId: ctxForSession.agentId,
+        connectionType: 'websocket',
         dynamicVariables: ctxForSession.variables,
         onConnect: () => {
           isTransitioning = false;
