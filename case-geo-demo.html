@@ -17,7 +17,7 @@
     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
   <script type="module">
-    import { Conversation } from 'https://cdn.jsdelivr.net/npm/@11labs/client@0.0.5/+esm';
+    import { Conversation } from 'https://cdn.jsdelivr.net/npm/@elevenlabs/client@1.9.0/+esm';
     window.ElevenLabsConversation = Conversation;
   </script>
 
@@ -1387,10 +1387,13 @@
     if(!conversation) return;
     showTranscript('user', text);
     try {
-      if(typeof conversation.sendUserMessage === 'function') conversation.sendUserMessage(text);
-      else if(typeof conversation.sendMessage === 'function') conversation.sendMessage(text);
-      else if(typeof conversation.sendContextualUpdate === 'function') conversation.sendContextualUpdate(text);
-      else console.warn('No send method on conversation:', Object.keys(conversation));
+      if(typeof conversation.sendUserMessage === 'function'){
+        conversation.sendUserMessage(text);
+      } else {
+        // Fallback for older SDK builds — shouldn't happen on @elevenlabs/client
+        console.warn('sendUserMessage not available; SDK methods:',
+          (function(o){const s=new Set();let p=o;while(p&&p!==Object.prototype){Object.getOwnPropertyNames(p).forEach(n=>{try{if(typeof o[n]==='function')s.add(n);}catch(e){}});p=Object.getPrototypeOf(p);}return [...s].sort();})(conversation));
+      }
     } catch (e) { console.error('Send text failed:', e); }
   }
 
@@ -1401,6 +1404,10 @@
   const composerSend = $('composerSend');
   composerInput.addEventListener('input', (e) => {
     composerSend.disabled = !e.target.value.trim();
+    // Tell the agent the user is typing so it won't talk over them
+    if(conversation && typeof conversation.sendUserActivity === 'function'){
+      try { conversation.sendUserActivity(); } catch(err){}
+    }
   });
   composerInput.addEventListener('keydown', (e) => {
     if(e.key === 'Enter' && e.target.value.trim()) submitComposer();
