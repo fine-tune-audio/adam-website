@@ -127,45 +127,11 @@
       text-decoration:none;padding:15px 0;
       border-bottom:1px solid rgba(0,0,0,0.3);
       transition:border-color 0.2s,gap 0.2s;
-      letter-spacing:0.01em;    }
+      letter-spacing:0.01em;
+    }
     .btn-ghost:hover{border-color:var(--black);gap:12px;}
     .btn-ghost-arr{transition:transform 0.2s;}
     .btn-ghost:hover .btn-ghost-arr{transform:translateX(4px);}
-
-    /* Live demo CTA — visible on the hero, links to the geo demo */
-    .btn-live{
-      display:inline-flex;align-items:center;gap:10px;
-      background:#0A0A0A;color:#fff;
-      font-family:'Sora',sans-serif;font-size:15px;font-weight:700;
-      padding:15px 26px;border-radius:3px;text-decoration:none;
-      transition:background 0.2s, transform 0.15s;
-      border:1px solid rgba(255,255,255,0.12);
-    }
-    .btn-live:hover{background:#1a1a1a;}
-    .btn-live:active{transform:scale(0.98);}
-    .btn-live-badge{
-      display:inline-flex;align-items:center;gap:6px;
-      background:#ff3b30;color:#fff;
-      font-size:10px;font-weight:800;letter-spacing:0.14em;
-      padding:3px 8px 3px 7px;border-radius:3px;
-      text-transform:uppercase;
-    }
-    .btn-live-dot{
-      width:6px;height:6px;border-radius:50%;
-      background:#fff;
-      animation:livePulse 1.4s ease-in-out infinite;
-    }
-    @keyframes livePulse{
-      0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(255,255,255,0.7);}
-      50%{opacity:0.6;box-shadow:0 0 0 4px rgba(255,255,255,0);}
-    }
-    .nav-menu a.menu-live{
-      color:var(--yellow);
-      display:flex;align-items:center;gap:10px;
-    }
-    .nav-menu a.menu-live .btn-live-badge{
-      background:#ff3b30;color:#fff;
-    }
 
     @keyframes fadeUp{to{opacity:1;transform:translateY(0);}}
     @keyframes lineUp{to{opacity:1;transform:translateY(0);}}
@@ -608,9 +574,6 @@
     <p class="hero-sub">ADAM zorgt dat elk klantgesprek direct wordt afgehandeld, met agents die natuurlijk aanvoelen, afgestemd zijn op je processen en direct tot actie leiden.</p>
     <div class="hero-actions">
       <a class="btn-primary" href="demo.html">Bekijk hoe het werkt</a>
-      <a class="btn-live" href="case-geo-demo.html">
-        <span class="btn-live-badge"><span class="btn-live-dot"></span>Live</span>
-        <span>Open dag demo</span>
       </a>
     </div>
   </div>
@@ -620,10 +583,6 @@
   <a href="cases.html">Cases</a>
   <a href="about.html">Over ons</a>
   <a href="contact.html">Plan een demo</a>
-  <a href="case-geo-demo.html" class="menu-live">
-    <span class="btn-live-badge"><span class="btn-live-dot"></span>Live</span>
-    <span>Open dag demo</span>
-  </a>
 </div>
 
 <!-- TRUST BAR -->
