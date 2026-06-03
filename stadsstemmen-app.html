@@ -7,7 +7,13 @@
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
-<script src="https://unpkg.com/@elevenlabs/convai-widget-embed" async type="text/javascript"></script>
+<script type="module">
+  // ElevenLabs voice SDK — eigen interface, geen pop-up widget
+  try {
+    const m = await import("https://esm.sh/@elevenlabs/client@1.9.0");
+    window.ElevenLabsConversation = m.Conversation;
+  } catch (e) { console.warn("ElevenLabs SDK kon niet laden:", e); }
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@500;600;700;800;900&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -131,6 +137,9 @@
   .talk.speaking .ring{animation-duration:1.6s;filter:drop-shadow(0 4px 22px rgba(167,211,31,.8));}
   @keyframes spin{to{transform:rotate(360deg);}}
   .talk-label{font-size:12px;color:var(--muted);margin-top:12px;font-weight:600;}
+  .sheet.voice .sugs, .sheet.voice .composer{display:none;}
+  .talk.connecting .ring{animation-duration:1.1s;}
+  .talk.live .ring{animation-duration:3s;}
 
   .convo{flex:1;overflow-y:auto;padding:14px 20px 4px;display:flex;flex-direction:column;gap:11px;min-height:54px;}
   .convo::-webkit-scrollbar{width:6px;}.convo::-webkit-scrollbar-thumb{background:var(--line);border-radius:9px;}
@@ -219,7 +228,6 @@
       </div>
     </div>
 
-    <div id="widgetMount"></div>
   </div>
 </div>
 
@@ -348,22 +356,43 @@ function renderInfoFoot(z){ const foot=$('#iFoot');
     if(mode==='live'&&livePos&&z._center){ const d=Math.round(haversine(livePos.lat,livePos.lng,z._center.lat,z._center.lng)); txt='Kom dichterbij · nog ~'+d+' m'; }
     else if(mode==='live'&&!livePos){ txt='Locatie zoeken…'; }
     foot.innerHTML='<div class="talk-cta off">'+MIC+' '+txt+'</div>'; } }
-function openConvo(id){ const z=ZONES.find(x=>x.id===id); if(!z)return; active=id;
+function openConvo(id){ const z=ZONES.find(x=>x.id===id); if(!z)return; stopVoice(); active=id;
+  const aid=ELEVENLABS_AGENT_IDS[id];
   $('#sName').textContent=z.name; $('#sChar').textContent='\u201C'+z.character+'\u201D';
   $('#input').placeholder='Of typ je vraag aan '+z.name+'\u2026';
   const sg=$('#sugs'); sg.innerHTML=''; z.sugs.forEach(s=>{const b=document.createElement('div');b.className='sug';b.textContent=s;b.onclick=()=>{$('#input').value=s;sendMsg();};sg.appendChild(b);});
-  renderConvo(z); if(histories[id].length===0) pushThem(z,z.fallback[0]); mountVoice(z);
+  renderConvo(z); if(!aid && histories[id].length===0) pushThem(z,z.fallback[0]); mountVoice(z);
+  sheet.classList.toggle('voice', !!aid);
   if(map&&z._center) map.panTo(z._center,{animate:true});
   sheet.classList.remove('info'); sheet.classList.add('detail'); setH(snaps()[1]); }
-function closeToList(){ active=null; sheet.classList.remove('detail'); sheet.classList.remove('info'); clearWidget(); setH(snaps()[0]);
+function closeToList(){ stopVoice(); active=null; sheet.classList.remove('detail'); sheet.classList.remove('info'); sheet.classList.remove('voice'); setH(snaps()[0]);
   if(mode==='demo'){ $('#maphint').classList.remove('hide'); } }
 $('#back').onclick=closeToList; $('#backInfo').onclick=closeToList;
 
-/* ===== STEM / PREVIEW ===== */
-function clearWidget(){ $('#widgetMount').innerHTML=''; }
-function mountVoice(z){ clearWidget(); const aid=ELEVENLABS_AGENT_IDS[z.id];
-  if(aid){ const w=document.createElement('elevenlabs-convai'); w.setAttribute('agent-id',aid); $('#widgetMount').appendChild(w); $('#talkLabel').textContent='Stem actief · tik op de ElevenLabs-knop'; }
-  else $('#talkLabel').textContent='Preview · typ of tik een vraag'; }
+/* ===== STEM (ElevenLabs via eigen microfoonknop) ===== */
+let elSession=null, elConnecting=false;
+function setTalkLabel(t){ $('#talkLabel').textContent=t; }
+function mountVoice(z){ const aid=ELEVENLABS_AGENT_IDS[z.id];
+  setTalkLabel(aid?'Tik op de microfoon om te praten':'Preview · typ of tik een vraag'); }
+async function startVoice(z){
+  const Conv=window.ElevenLabsConversation;
+  if(!Conv){ setTalkLabel('Stem niet beschikbaar — typ je vraag'); sheet.classList.remove('voice'); return; }
+  if(elConnecting||elSession) return;
+  elConnecting=true; setTalkLabel('Verbinden…'); $('#talk').classList.add('connecting');
+  try{
+    elSession=await Conv.startSession({
+      agentId:ELEVENLABS_AGENT_IDS[z.id], connectionType:'websocket',
+      onConnect:()=>{ elConnecting=false; const t=$('#talk'); t.classList.remove('connecting'); t.classList.add('live'); setTalkLabel('Verbonden · stel je vraag (tik om te stoppen)'); },
+      onDisconnect:()=>resetVoiceUI(),
+      onError:(e)=>{ console.error('EL error',e); setTalkLabel('Verbinding mislukt'); resetVoiceUI(); },
+      onModeChange:(m)=>{ const md=(m&&m.mode)||m; const sp=md==='speaking'; $('#talk').classList.toggle('speaking',sp); if(elSession) setTalkLabel(sp?'Aan het praten…':'Aan het luisteren…'); },
+      onMessage:(p)=>{ const t=p&&(p.message||p.text); const src=p&&(p.source||p.role); if(!t)return; addBubble(src==='user'?'me':'them',t); }
+    });
+  }catch(e){ console.error(e); setTalkLabel('Geen verbinding — check microfoon & agent'); resetVoiceUI(); }
+}
+function stopVoice(){ if(elSession){ try{elSession.endSession();}catch(e){} } resetVoiceUI(); }
+function resetVoiceUI(){ elSession=null; elConnecting=false; const t=$('#talk'); if(t) t.classList.remove('speaking','live','connecting');
+  if(active){ const z=ZONES.find(x=>x.id===active); if(z&&ELEVENLABS_AGENT_IDS[z.id]) setTalkLabel('Tik op de microfoon om te praten'); } }
 
 /* ===== GESPREK ===== */
 function renderConvo(z){ const c=$('#convo'); c.innerHTML=''; histories[z.id].forEach(m=>addBubble(m.role==='assistant'?'them':'me',m.content)); c.scrollTop=c.scrollHeight; }
@@ -371,7 +400,9 @@ function addBubble(side,t){ const c=$('#convo'); const el=document.createElement
 function pushThem(z,t){ histories[z.id].push({role:'assistant',content:t}); addBubble('them',t); }
 function showTyping(){ const c=$('#convo'); const t=document.createElement('div'); t.className='typing';t.id='typing'; t.innerHTML='<i></i><i></i><i></i>'; c.appendChild(t); c.scrollTop=c.scrollHeight; }
 function hideTyping(){ const t=$('#typing'); if(t)t.remove(); }
-$('#talk').onclick=()=>$('#input').focus();
+$('#talk').onclick=()=>{ if(!active) return; const z=ZONES.find(x=>x.id===active); const aid=ELEVENLABS_AGENT_IDS[z.id];
+  if(!aid){ $('#input').focus(); return; }
+  if(elSession){ stopVoice(); } else { startVoice(z); } };
 async function sendMsg(){ if(!active)return; const z=ZONES.find(x=>x.id===active); const text=$('#input').value.trim(); if(!text)return;
   $('#input').value=''; $('#input').style.height='auto'; histories[z.id].push({role:'user',content:text}); addBubble('me',text);
   showTyping(); $('#send').disabled=true; $('#talk').classList.add('speaking');
