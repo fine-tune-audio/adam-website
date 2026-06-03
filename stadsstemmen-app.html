@@ -280,7 +280,7 @@ try{
     m.on('click',()=>openInfo(z.id));
     z._center=ctr; z.polygon.forEach(p=>bounds.push(p));
   });
-  L.polyline(path,{color:'#9fce1c',weight:3,dashArray:'2 9',lineCap:'round',opacity:.9}).addTo(map);
+  // (geen routelijn)
   const fit=()=>{try{map.invalidateSize();if(bounds.length)map.fitBounds(bounds,{paddingTopLeft:[60,110],paddingBottomRight:[60,380]});}catch(e){}};
   fit(); setTimeout(fit,300); window.addEventListener('load',()=>setTimeout(fit,200));
   window.addEventListener('resize',()=>{try{map.invalidateSize();}catch(e){}});
@@ -289,7 +289,10 @@ try{
 /* ===== SLIDE ===== */
 const sheet=$('#sheet'), dragEl=$('#drag');
 const appH=()=>sheet.parentElement.clientHeight;
-const snaps=()=>[0.42,0.92].map(f=>Math.round(f*appH()));
+function downH(){ const dr=document.querySelector('.drag'), lh=document.querySelector('.list-head');
+  if(lh && lh.offsetHeight>0) return (dr?dr.offsetHeight:38) + lh.offsetHeight;
+  return Math.round(0.18*appH()); }
+const snaps=()=>[downH(), Math.round(0.92*appH())];
 function nearest(h){return snaps().reduce((a,b)=>Math.abs(b-h)<Math.abs(a-h)?b:a);}
 function setH(h,anim=true){ sheet.style.transition=anim?'height .4s cubic-bezier(.22,1,.36,1)':'none'; sheet.style.height=h+'px'; syncSetup(); }
 let dragging=false,sy=0,sh=0;
