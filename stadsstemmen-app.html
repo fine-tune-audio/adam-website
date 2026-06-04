@@ -345,8 +345,12 @@ function updateVoiceFab(){ if(!voiceFab) return;
   const live=!!(elSession||elConnecting);
   const detail=sheet.classList.contains('detail');
   const atUp=sheet.offsetHeight > snaps()[1]-60;
-  voiceFab.classList.toggle('show', live && detail && !atUp); }
-voiceFab.onclick=()=>{ if(active){ sheet.classList.remove('info'); sheet.classList.add('detail'); } setH(snaps()[1]); };
+  voiceFab.classList.toggle('show', live && !(detail && atUp)); }
+function showConvoPanel(){ if(!active) return; const z=ZONES.find(x=>x.id===active);
+  sheet.classList.remove('info'); sheet.classList.add('detail');
+  if(map&&z&&z._center) map.panTo(z._center,{animate:true}); setH(snaps()[1]); }
+function minimizeConvo(){ sheet.classList.remove('detail'); sheet.classList.remove('info'); setH(snaps()[0]); updateVoiceFab(); }
+voiceFab.onclick=showConvoPanel;
 
 /* ===== KAARTEN ===== */
 const cardsEl=$('#cards');
@@ -376,6 +380,7 @@ function hideDemoMe(){ if(demoMe&&map){map.removeLayer(demoMe);demoMe=null;} dem
 /* ===== OPENEN / SLUITEN ===== */
 const MIC='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0M12 19v3"/></svg>';
 function openPlace(id){ const z=ZONES.find(x=>x.id===id); if(!z) return;
+  if(id===active && (elSession||elConnecting)){ showConvoPanel(); return; }
   const inside = mode==='demo' || (livePos && inPoly(livePos.lat,livePos.lng,z.polygon));
   if(inside) openConvo(id); else openInfo(id); }
 function openInfo(id){ const z=ZONES.find(x=>x.id===id); if(!z)return; active=id;
@@ -404,7 +409,8 @@ function openConvo(id){ const z=ZONES.find(x=>x.id===id); if(!z)return; stopVoic
   if(aid) startConversation(z); }
 function closeToList(){ stopVoice(); active=null; sheet.classList.remove('detail'); sheet.classList.remove('info'); sheet.classList.remove('voice'); setH(snaps()[0]);
   if(mode==='demo'){ $('#maphint').classList.remove('hide'); } }
-$('#back').onclick=closeToList; $('#backInfo').onclick=closeToList;
+$('#back').onclick=()=>{ if(elSession||elConnecting){ minimizeConvo(); } else { closeToList(); } };
+$('#backInfo').onclick=closeToList;
 
 /* ===== STEM + TEKST (één sessie — spraak en tekst door elkaar) ===== */
 let elSession=null, elConnecting=false, elGen=0, lastUserText=null, lastUserAt=0, micPrimed=false;
