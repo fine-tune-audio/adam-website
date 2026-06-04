@@ -38,11 +38,11 @@
   .leaflet-container{background:#e9eae5;font-family:inherit;}
   .leaflet-tile{filter:grayscale(.35) brightness(1.04) contrast(.96);}
   .leaflet-div-icon{background:transparent;border:none;}
-  .place-pin{position:relative;width:22px;height:22px;}
-  .place-pin .dot{position:absolute;inset:0;border-radius:50%;background:var(--lime);
-    border:3px solid var(--ink);box-shadow:0 3px 9px rgba(0,0,0,.28);box-sizing:border-box;}
-  .place-pin .pulse{position:absolute;inset:0;border-radius:50%;background:var(--lime);opacity:.55;animation:ppulse 2.1s ease-out infinite;}
-  @keyframes ppulse{0%{transform:scale(1);opacity:.5;}100%{transform:scale(2.7);opacity:0;}}
+  .place-pin{width:0;height:0;}
+  .place-pin .dot{position:absolute;left:0;top:0;transform:translate(-50%,-50%);width:22px;height:22px;border-radius:50%;
+    background:var(--lime);border:3px solid var(--ink);box-shadow:0 3px 9px rgba(0,0,0,.28);box-sizing:border-box;}
+  .place-pin .pulse{position:absolute;left:0;top:0;width:22px;height:22px;border-radius:50%;background:var(--lime);opacity:.55;animation:ppulse 2.1s ease-out infinite;}
+  @keyframes ppulse{0%{transform:translate(-50%,-50%) scale(1);opacity:.5;}100%{transform:translate(-50%,-50%) scale(2.7);opacity:0;}}
   .me-pin .d{display:block;width:30px;height:30px;border-radius:50%;background:#fff;border:3px solid var(--ink);
     box-shadow:0 5px 14px rgba(0,0,0,.32);box-sizing:border-box;position:relative;cursor:grab;}
   .me-pin .d::after{content:'';position:absolute;inset:6px;border-radius:50%;background:var(--blue);}
@@ -137,7 +137,6 @@
   .talk.speaking .ring{animation-duration:1.6s;filter:drop-shadow(0 4px 22px rgba(167,211,31,.8));}
   @keyframes spin{to{transform:rotate(360deg);}}
   .talk-label{font-size:12px;color:var(--muted);margin-top:12px;font-weight:600;}
-  .sheet.voice .sugs, .sheet.voice .composer{display:none;}
   .talk.connecting .ring{animation-duration:1.1s;}
   .talk.live .ring{animation-duration:3s;}
 
@@ -283,7 +282,7 @@ try{
   ZONES.forEach(z=>{
     const poly=L.polygon(z.polygon); // onzichtbaar: alleen voor geofence + midden
     const ctr=poly.getBounds().getCenter(); path.push(ctr);
-    const m=L.marker(ctr,{icon:L.divIcon({className:'place-pin',iconSize:[22,22],iconAnchor:[11,11],html:'<span class="pulse"></span><span class="dot"></span>'})}).addTo(map);
+    const m=L.marker(ctr,{icon:L.divIcon({className:'place-pin',iconSize:[0,0],iconAnchor:[0,0],html:'<span class="pulse"></span><span class="dot"></span>'})}).addTo(map);
     m.bindTooltip(z.name,{direction:'top',className:'lm-tip',offset:[0,-14]});
     m.on('click',()=>openInfo(z.id));
     z._center=ctr; z.polygon.forEach(p=>bounds.push(p));
@@ -362,37 +361,41 @@ function openConvo(id){ const z=ZONES.find(x=>x.id===id); if(!z)return; stopVoic
   $('#input').placeholder='Of typ je vraag aan '+z.name+'\u2026';
   const sg=$('#sugs'); sg.innerHTML=''; z.sugs.forEach(s=>{const b=document.createElement('div');b.className='sug';b.textContent=s;b.onclick=()=>{$('#input').value=s;sendMsg();};sg.appendChild(b);});
   renderConvo(z); if(!aid && histories[id].length===0) pushThem(z,z.fallback[0]); mountVoice(z);
-  sheet.classList.toggle('voice', !!aid);
   if(map&&z._center) map.panTo(z._center,{animate:true});
   sheet.classList.remove('info'); sheet.classList.add('detail'); setH(snaps()[1]); }
 function closeToList(){ stopVoice(); active=null; sheet.classList.remove('detail'); sheet.classList.remove('info'); sheet.classList.remove('voice'); setH(snaps()[0]);
   if(mode==='demo'){ $('#maphint').classList.remove('hide'); } }
 $('#back').onclick=closeToList; $('#backInfo').onclick=closeToList;
 
-/* ===== STEM (ElevenLabs via eigen microfoonknop) ===== */
-let elSession=null, elConnecting=false;
+/* ===== STEM + TEKST (ElevenLabs via eigen interface) ===== */
+let elSession=null, elConnecting=false, elTextOnly=false, lastUserText=null, lastUserAt=0;
 function setTalkLabel(t){ $('#talkLabel').textContent=t; }
 function mountVoice(z){ const aid=ELEVENLABS_AGENT_IDS[z.id];
-  setTalkLabel(aid?'Tik op de microfoon om te praten':'Preview · typ of tik een vraag'); }
-async function startVoice(z){
+  setTalkLabel(aid?'Tik op de microfoon \u2014 of typ je vraag':'Preview · typ of tik een vraag'); }
+function addUserText(t){ addBubble('me',t); lastUserText=t; lastUserAt=Date.now(); }
+async function ensureSession(z, textOnly){
+  if(elSession) return true;
   const Conv=window.ElevenLabsConversation;
-  if(!Conv){ setTalkLabel('Stem niet beschikbaar — typ je vraag'); sheet.classList.remove('voice'); return; }
-  if(elConnecting||elSession) return;
-  elConnecting=true; setTalkLabel('Verbinden…'); $('#talk').classList.add('connecting');
-  try{
-    elSession=await Conv.startSession({
-      agentId:ELEVENLABS_AGENT_IDS[z.id], connectionType:'websocket',
-      onConnect:()=>{ elConnecting=false; const t=$('#talk'); t.classList.remove('connecting'); t.classList.add('live'); setTalkLabel('Verbonden · stel je vraag (tik om te stoppen)'); },
-      onDisconnect:()=>resetVoiceUI(),
-      onError:(e)=>{ console.error('EL error',e); setTalkLabel('Verbinding mislukt'); resetVoiceUI(); },
-      onModeChange:(m)=>{ const md=(m&&m.mode)||m; const sp=md==='speaking'; $('#talk').classList.toggle('speaking',sp); if(elSession) setTalkLabel(sp?'Aan het praten…':'Aan het luisteren…'); },
-      onMessage:(p)=>{ const t=p&&(p.message||p.text); const src=p&&(p.source||p.role); if(!t)return; addBubble(src==='user'?'me':'them',t); }
-    });
-  }catch(e){ console.error(e); setTalkLabel('Geen verbinding — check microfoon & agent'); resetVoiceUI(); }
+  if(!Conv){ setTalkLabel('Stem niet beschikbaar'); return false; }
+  if(elConnecting) return false;
+  elConnecting=true; elTextOnly=!!textOnly; setTalkLabel('Verbinden\u2026'); $('#talk').classList.add('connecting');
+  const cfg={ agentId:ELEVENLABS_AGENT_IDS[z.id], connectionType:'websocket',
+    onConnect:()=>{ elConnecting=false; const t=$('#talk'); t.classList.remove('connecting'); if(!elTextOnly) t.classList.add('live'); setTalkLabel(elTextOnly?'Verbonden · typ je vraag':'Verbonden · stel je vraag (tik om te stoppen)'); },
+    onDisconnect:()=>resetVoiceUI(),
+    onError:(e)=>{ console.error('EL error',e); setTalkLabel('Verbinding mislukt'); resetVoiceUI(); },
+    onModeChange:(m)=>{ const md=(m&&m.mode)||m; const sp=md==='speaking'; $('#talk').classList.toggle('speaking',sp); if(elSession&&!elTextOnly) setTalkLabel(sp?'Aan het praten\u2026':'Aan het luisteren\u2026'); },
+    onMessage:(p)=>{ const t=p&&(p.message||p.text); const src=p&&(p.source||p.role); if(!t)return;
+      if(src==='user'){ if(t===lastUserText && Date.now()-lastUserAt<6000){ lastUserText=null; return; } addBubble('me',t); }
+      else addBubble('them',t); }
+  };
+  if(textOnly) cfg.overrides={ conversation:{ textOnly:true } };
+  try{ elSession=await Conv.startSession(cfg); return true; }
+  catch(e){ console.error(e); setTalkLabel('Geen verbinding \u2014 check agent/microfoon'); resetVoiceUI(); return false; }
 }
+function startVoice(z){ return ensureSession(z,false); }
 function stopVoice(){ if(elSession){ try{elSession.endSession();}catch(e){} } resetVoiceUI(); }
-function resetVoiceUI(){ elSession=null; elConnecting=false; const t=$('#talk'); if(t) t.classList.remove('speaking','live','connecting');
-  if(active){ const z=ZONES.find(x=>x.id===active); if(z&&ELEVENLABS_AGENT_IDS[z.id]) setTalkLabel('Tik op de microfoon om te praten'); } }
+function resetVoiceUI(){ elSession=null; elConnecting=false; elTextOnly=false; const t=$('#talk'); if(t) t.classList.remove('speaking','live','connecting');
+  if(active){ const z=ZONES.find(x=>x.id===active); if(z&&ELEVENLABS_AGENT_IDS[z.id]) setTalkLabel('Tik op de microfoon \u2014 of typ je vraag'); } }
 
 /* ===== GESPREK ===== */
 function renderConvo(z){ const c=$('#convo'); c.innerHTML=''; histories[z.id].forEach(m=>addBubble(m.role==='assistant'?'them':'me',m.content)); c.scrollTop=c.scrollHeight; }
@@ -402,9 +405,19 @@ function showTyping(){ const c=$('#convo'); const t=document.createElement('div'
 function hideTyping(){ const t=$('#typing'); if(t)t.remove(); }
 $('#talk').onclick=()=>{ if(!active) return; const z=ZONES.find(x=>x.id===active); const aid=ELEVENLABS_AGENT_IDS[z.id];
   if(!aid){ $('#input').focus(); return; }
-  if(elSession){ stopVoice(); } else { startVoice(z); } };
+  if(elSession && !elTextOnly){ stopVoice(); return; }
+  if(elSession && elTextOnly){ stopVoice(); }
+  startVoice(z); };
 async function sendMsg(){ if(!active)return; const z=ZONES.find(x=>x.id===active); const text=$('#input').value.trim(); if(!text)return;
-  $('#input').value=''; $('#input').style.height='auto'; histories[z.id].push({role:'user',content:text}); addBubble('me',text);
+  $('#input').value=''; $('#input').style.height='auto';
+  const aid=ELEVENLABS_AGENT_IDS[z.id];
+  if(aid){
+    if(!elSession){ const ok=await ensureSession(z,true); if(!ok) return; }
+    try{ if(elSession.sendUserActivity) elSession.sendUserActivity(); elSession.sendUserMessage(text); addUserText(text); }
+    catch(e){ console.error(e); setTalkLabel('Bericht versturen mislukt'); }
+    return;
+  }
+  histories[z.id].push({role:'user',content:text}); addBubble('me',text);
   showTyping(); $('#send').disabled=true; $('#talk').classList.add('speaking');
   let reply; try{ reply=await askAgent(z);}catch(e){ reply=z.fallback[Math.floor(Math.random()*z.fallback.length)]; }
   hideTyping(); $('#talk').classList.remove('speaking'); histories[z.id].push({role:'assistant',content:reply}); addBubble('them',reply); $('#send').disabled=false; }
