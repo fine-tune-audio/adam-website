@@ -72,6 +72,27 @@
   .maphint .b{width:13px;height:13px;border-radius:50%;background:#fff;border:2px solid var(--ink);position:relative;}
   .maphint .b::after{content:'';position:absolute;inset:2.5px;border-radius:50%;background:var(--blue);}
 
+  /* ===== ZWEVENDE SPRAAKKNOP ===== */
+  .voice-fab{position:absolute;z-index:7;top:70px;right:16px;width:56px;height:56px;border-radius:50%;
+    display:none;align-items:center;justify-content:center;cursor:pointer;color:var(--ink);
+    background:linear-gradient(135deg,var(--lime-l),var(--lime) 55%,var(--lime-d));
+    border:1px solid rgba(20,21,15,.16);
+    box-shadow:0 10px 26px rgba(159,206,28,.55),0 2px 8px rgba(0,0,0,.18);}
+  .voice-fab.show{display:flex;animation:vfin .28s ease both;}
+  @keyframes vfin{from{opacity:0;transform:scale(.55) translateY(-6px);}to{opacity:1;transform:none;}}
+  .voice-fab::before{content:'';position:absolute;inset:-3px;border-radius:50%;border:2px solid var(--lime);opacity:.6;animation:vfring 1.9s ease-out infinite;pointer-events:none;}
+  @keyframes vfring{0%{transform:scale(1);opacity:.55;}100%{transform:scale(1.55);opacity:0;}}
+  .voice-fab .vf-ico{display:flex;}
+  .voice-fab .vf-ico svg{width:25px;height:25px;}
+  .voice-fab .vf-wave{display:none;gap:3px;align-items:center;height:22px;}
+  .voice-fab.speaking .vf-wave{display:flex;}
+  .voice-fab.speaking .vf-ico{display:none;}
+  .voice-fab .vf-wave i{width:3.5px;height:8px;background:var(--ink);border-radius:3px;animation:vfbar .75s ease-in-out infinite;}
+  .voice-fab .vf-wave i:nth-child(2){animation-delay:.14s;}
+  .voice-fab .vf-wave i:nth-child(3){animation-delay:.28s;}
+  .voice-fab .vf-wave i:nth-child(4){animation-delay:.42s;}
+  @keyframes vfbar{0%,100%{height:7px;}50%{height:20px;}}
+
   /* ===== SLIDE-PANEEL ===== */
   .sheet{position:absolute;z-index:8;left:0;right:0;bottom:0;height:55%;
     background:var(--surface);backdrop-filter:blur(30px) saturate(1.4);-webkit-backdrop-filter:blur(30px) saturate(1.4);
@@ -185,6 +206,11 @@
     </div>
 
     <div class="maphint" id="maphint"><span class="b"></span>Sleep je locatie over een plek</div>
+
+    <button class="voice-fab" id="voiceFab" aria-label="Terug naar gesprek">
+      <span class="vf-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0M12 19v3"/></svg></span>
+      <span class="vf-wave"><i></i><i></i><i></i><i></i></span>
+    </button>
 
     <div class="setup" id="setup">
       <span>🎙️</span>
@@ -301,7 +327,7 @@ function downH(){ const dr=document.querySelector('.drag'), lh=document.querySel
   return Math.round(0.18*appH()); }
 const snaps=()=>[downH(), Math.round(0.92*appH())];
 function nearest(h){return snaps().reduce((a,b)=>Math.abs(b-h)<Math.abs(a-h)?b:a);}
-function setH(h,anim=true){ sheet.style.transition=anim?'height .4s cubic-bezier(.22,1,.36,1)':'none'; sheet.style.height=h+'px'; syncSetup(); }
+function setH(h,anim=true){ sheet.style.transition=anim?'height .4s cubic-bezier(.22,1,.36,1)':'none'; sheet.style.height=h+'px'; syncSetup(); updateVoiceFab(); }
 let dragging=false,sy=0,sh=0;
 function startDrag(e){dragging=true;sy=e.clientY;sh=sheet.offsetHeight;sheet.style.transition='none';try{e.currentTarget.setPointerCapture(e.pointerId);}catch(_){}}
 dragEl.addEventListener('pointerdown',startDrag);
@@ -312,6 +338,15 @@ function syncSetup(){ const sp=$('#setup'); if(sp&&!sp.classList.contains('hide'
 setTimeout(()=>setH(snaps()[0],false),60);
 window.addEventListener('resize',()=>setH(nearest(sheet.offsetHeight),false));
 if(map) map.on('click',()=>{ if(!sheet.classList.contains('detail') && !sheet.classList.contains('info')) setH(snaps()[0]); });
+
+/* ===== ZWEVENDE SPRAAKKNOP ===== */
+const voiceFab=$('#voiceFab');
+function updateVoiceFab(){ if(!voiceFab) return;
+  const live=!!(elSession||elConnecting);
+  const detail=sheet.classList.contains('detail');
+  const atUp=sheet.offsetHeight > snaps()[1]-60;
+  voiceFab.classList.toggle('show', live && detail && !atUp); }
+voiceFab.onclick=()=>{ if(active){ sheet.classList.remove('info'); sheet.classList.add('detail'); } setH(snaps()[1]); };
 
 /* ===== KAARTEN ===== */
 const cardsEl=$('#cards');
@@ -391,10 +426,10 @@ async function startConversation(z, initialMessage){
     try{ await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}}); micPrimed=true; }catch(e){}
     const s=await Conv.startSession({
       agentId:aid, connectionType:'websocket',
-      onConnect:()=>{ if(myGen!==elGen) return; elConnecting=false; const t=$('#talk'); t.classList.remove('connecting'); t.classList.add('live'); setTalkLabel('Aan het luisteren\u2026 (tik om te stoppen)'); if(initialMessage) setTimeout(()=>{ if(myGen===elGen && elSession){ try{elSession.sendUserMessage(initialMessage);}catch(e){} } },250); },
+      onConnect:()=>{ if(myGen!==elGen) return; elConnecting=false; const t=$('#talk'); t.classList.remove('connecting'); t.classList.add('live'); setTalkLabel('Aan het luisteren\u2026 (tik om te stoppen)'); updateVoiceFab(); if(initialMessage) setTimeout(()=>{ if(myGen===elGen && elSession){ try{elSession.sendUserMessage(initialMessage);}catch(e){} } },250); },
       onDisconnect:()=>{ if(myGen!==elGen) return; resetVoiceUI(); },
       onError:(e)=>{ if(myGen!==elGen) return; console.error('EL error',e); setTalkLabel('Verbinding mislukt'); resetVoiceUI(); },
-      onModeChange:(m)=>{ if(myGen!==elGen) return; const md=(m&&m.mode)||m; const sp=md==='speaking'; $('#talk').classList.toggle('speaking',sp); setTalkLabel(sp?'Aan het praten\u2026':'Aan het luisteren\u2026 (tik om te stoppen)'); },
+      onModeChange:(m)=>{ if(myGen!==elGen) return; const md=(m&&m.mode)||m; const sp=md==='speaking'; $('#talk').classList.toggle('speaking',sp); if(voiceFab) voiceFab.classList.toggle('speaking',sp); setTalkLabel(sp?'Aan het praten\u2026':'Aan het luisteren\u2026 (tik om te stoppen)'); },
       onMessage:(p)=>{ if(myGen!==elGen) return; const t=p&&(p.message||p.text); const src=p&&(p.source||p.role); if(!t)return;
         if(src==='user'){ if(t===lastUserText && Date.now()-lastUserAt<6000){ lastUserText=null; return; } addBubble('me',t); }
         else addBubble('them',t); }
@@ -404,7 +439,7 @@ async function startConversation(z, initialMessage){
   }catch(e){ if(myGen!==elGen) return; console.error(e); setTalkLabel('Geen verbinding \u2014 check agent/microfoon'); resetVoiceUI(); }
 }
 function stopVoice(){ elGen++; const c=elSession; elSession=null; elConnecting=false; if(c){ try{c.endSession();}catch(e){} } resetVoiceUI(); }
-function resetVoiceUI(){ elSession=null; elConnecting=false; const t=$('#talk'); if(t) t.classList.remove('speaking','live','connecting');
+function resetVoiceUI(){ elSession=null; elConnecting=false; const t=$('#talk'); if(t) t.classList.remove('speaking','live','connecting'); if(voiceFab) voiceFab.classList.remove('speaking'); updateVoiceFab();
   if(active){ const z=ZONES.find(x=>x.id===active); if(z&&ELEVENLABS_AGENT_IDS[z.id]) setTalkLabel('Tik om te praten'); } }
 
 /* ===== GESPREK ===== */
