@@ -284,7 +284,7 @@ try{
     const ctr=poly.getBounds().getCenter(); path.push(ctr);
     const m=L.marker(ctr,{icon:L.divIcon({className:'place-pin',iconSize:[0,0],iconAnchor:[0,0],html:'<span class="pulse"></span><span class="dot"></span>'})}).addTo(map);
     m.bindTooltip(z.name,{direction:'top',className:'lm-tip',offset:[0,-14]});
-    m.on('click',()=>openInfo(z.id));
+    m.on('click',()=>openPlace(z.id));
     z._center=ctr; z.polygon.forEach(p=>bounds.push(p));
   });
   // (geen routelijn)
@@ -318,13 +318,13 @@ const cardsEl=$('#cards');
 ZONES.forEach((z,i)=>{
   const c=document.createElement('div'); c.className='card';
   c.innerHTML=`<div class="meta"><div class="num">0${i+1}</div><div class="nm">${z.name}</div><div class="ch">“${z.character}”</div></div><div class="go"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h14"/><path d="M13 6l6 6-6 6"/></svg></div>`;
-  c.onclick=()=>openInfo(z.id); cardsEl.appendChild(c);
+  c.onclick=()=>openPlace(z.id); cardsEl.appendChild(c);
 });
 
 /* ===== MODUS ===== */
 function setMode(m){ mode=m; $('#mLive').classList.toggle('on',m==='live'); $('#mDemo').classList.toggle('on',m==='demo');
   $('#eyebrow').textContent=m==='live'?'Je staat bij':'Demo · je bezoekt';
-  if(m==='live'){ hideDemoMe(); $('#maphint').classList.add('hide'); startGeo(); }
+  if(m==='live'){ hideDemoMe(); $('#maphint').classList.add('hide'); primeMic(); startGeo(); }
   else { stopGeo(); if(liveMe&&map){map.removeLayer(liveMe);liveMe=null;} showDemoMe(); if(!active)$('#maphint').classList.remove('hide'); }
 }
 $('#mLive').onclick=()=>setMode('live'); $('#mDemo').onclick=()=>setMode('demo');
@@ -334,12 +334,15 @@ function showDemoMe(){
   if(!map||demoMe) return;
   demoMe=L.marker([53.2188,6.5677],{draggable:true,zIndexOffset:1000,
     icon:L.divIcon({className:'me-pin',iconSize:[30,30],iconAnchor:[15,15],html:'<span class="d"></span>'})}).addTo(map);
-  demoMe.on('dragend',()=>{ const p=demoMe.getLatLng(); const here=ZONES.find(z=>inPoly(p.lat,p.lng,z.polygon)); if(here) openInfo(here.id); });
+  demoMe.on('dragend',()=>{ const p=demoMe.getLatLng(); const here=ZONES.find(z=>inPoly(p.lat,p.lng,z.polygon)); if(here){ openConvo(here.id); } else if(active){ closeToList(); } });
 }
 function hideDemoMe(){ if(demoMe&&map){map.removeLayer(demoMe);demoMe=null;} demoZone=null; }
 
 /* ===== OPENEN / SLUITEN ===== */
 const MIC='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0M12 19v3"/></svg>';
+function openPlace(id){ const z=ZONES.find(x=>x.id===id); if(!z) return;
+  const inside = mode==='demo' || (livePos && inPoly(livePos.lat,livePos.lng,z.polygon));
+  if(inside) openConvo(id); else openInfo(id); }
 function openInfo(id){ const z=ZONES.find(x=>x.id===id); if(!z)return; active=id;
   $('#maphint').classList.add('hide');
   $('#iEyebrow').textContent = mode==='live'?'Je staat bij':'Demo · je bezoekt';
@@ -362,40 +365,47 @@ function openConvo(id){ const z=ZONES.find(x=>x.id===id); if(!z)return; stopVoic
   const sg=$('#sugs'); sg.innerHTML=''; z.sugs.forEach(s=>{const b=document.createElement('div');b.className='sug';b.textContent=s;b.onclick=()=>{$('#input').value=s;sendMsg();};sg.appendChild(b);});
   renderConvo(z); if(!aid && histories[id].length===0) pushThem(z,z.fallback[0]); mountVoice(z);
   if(map&&z._center) map.panTo(z._center,{animate:true});
-  sheet.classList.remove('info'); sheet.classList.add('detail'); setH(snaps()[1]); }
+  sheet.classList.remove('info'); sheet.classList.add('detail'); setH(snaps()[1]);
+  if(aid) startConversation(z); }
 function closeToList(){ stopVoice(); active=null; sheet.classList.remove('detail'); sheet.classList.remove('info'); sheet.classList.remove('voice'); setH(snaps()[0]);
   if(mode==='demo'){ $('#maphint').classList.remove('hide'); } }
 $('#back').onclick=closeToList; $('#backInfo').onclick=closeToList;
 
-/* ===== STEM + TEKST (ElevenLabs via eigen interface) ===== */
-let elSession=null, elConnecting=false, elTextOnly=false, lastUserText=null, lastUserAt=0;
+/* ===== STEM + TEKST (één sessie — spraak en tekst door elkaar) ===== */
+let elSession=null, elConnecting=false, elGen=0, lastUserText=null, lastUserAt=0, micPrimed=false;
 function setTalkLabel(t){ $('#talkLabel').textContent=t; }
 function mountVoice(z){ const aid=ELEVENLABS_AGENT_IDS[z.id];
-  setTalkLabel(aid?'Tik op de microfoon \u2014 of typ je vraag':'Preview · typ of tik een vraag'); }
+  setTalkLabel(aid?'Tik om te praten':'Preview · typ of tik een vraag'); }
 function addUserText(t){ addBubble('me',t); lastUserText=t; lastUserAt=Date.now(); }
-async function ensureSession(z, textOnly){
-  if(elSession) return true;
+async function primeMic(){ if(micPrimed) return; try{ const s=await navigator.mediaDevices.getUserMedia({audio:true}); s.getTracks().forEach(t=>t.stop()); micPrimed=true; }catch(e){ console.warn('mic vooraf niet toegestaan',e); } }
+function sendUserText(text){ if(!elSession) return; try{ if(elSession.sendUserActivity) elSession.sendUserActivity(); elSession.sendUserMessage(text); addUserText(text); }catch(e){ console.error(e); } }
+async function startConversation(z, initialMessage){
+  if(elConnecting) return;
+  if(elSession){ if(initialMessage) sendUserText(initialMessage); return; }
+  const aid=ELEVENLABS_AGENT_IDS[z.id]; if(!aid) return;
   const Conv=window.ElevenLabsConversation;
-  if(!Conv){ setTalkLabel('Stem niet beschikbaar'); return false; }
-  if(elConnecting) return false;
-  elConnecting=true; elTextOnly=!!textOnly; setTalkLabel('Verbinden\u2026'); $('#talk').classList.add('connecting');
-  const cfg={ agentId:ELEVENLABS_AGENT_IDS[z.id], connectionType:'websocket',
-    onConnect:()=>{ elConnecting=false; const t=$('#talk'); t.classList.remove('connecting'); if(!elTextOnly) t.classList.add('live'); setTalkLabel(elTextOnly?'Verbonden · typ je vraag':'Verbonden · stel je vraag (tik om te stoppen)'); },
-    onDisconnect:()=>resetVoiceUI(),
-    onError:(e)=>{ console.error('EL error',e); setTalkLabel('Verbinding mislukt'); resetVoiceUI(); },
-    onModeChange:(m)=>{ const md=(m&&m.mode)||m; const sp=md==='speaking'; $('#talk').classList.toggle('speaking',sp); if(elSession&&!elTextOnly) setTalkLabel(sp?'Aan het praten\u2026':'Aan het luisteren\u2026'); },
-    onMessage:(p)=>{ const t=p&&(p.message||p.text); const src=p&&(p.source||p.role); if(!t)return;
-      if(src==='user'){ if(t===lastUserText && Date.now()-lastUserAt<6000){ lastUserText=null; return; } addBubble('me',t); }
-      else addBubble('them',t); }
-  };
-  if(textOnly) cfg.overrides={ conversation:{ textOnly:true } };
-  try{ elSession=await Conv.startSession(cfg); return true; }
-  catch(e){ console.error(e); setTalkLabel('Geen verbinding \u2014 check agent/microfoon'); resetVoiceUI(); return false; }
+  if(!Conv){ setTalkLabel('Stem niet beschikbaar \u2014 typ je vraag'); return; }
+  const myGen=++elGen; elConnecting=true; setTalkLabel('Verbinden\u2026'); $('#talk').classList.add('connecting');
+  if(initialMessage) addUserText(initialMessage);
+  try{
+    try{ await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}}); micPrimed=true; }catch(e){}
+    const s=await Conv.startSession({
+      agentId:aid, connectionType:'websocket',
+      onConnect:()=>{ if(myGen!==elGen) return; elConnecting=false; const t=$('#talk'); t.classList.remove('connecting'); t.classList.add('live'); setTalkLabel('Aan het luisteren\u2026 (tik om te stoppen)'); if(initialMessage) setTimeout(()=>{ if(myGen===elGen && elSession){ try{elSession.sendUserMessage(initialMessage);}catch(e){} } },250); },
+      onDisconnect:()=>{ if(myGen!==elGen) return; resetVoiceUI(); },
+      onError:(e)=>{ if(myGen!==elGen) return; console.error('EL error',e); setTalkLabel('Verbinding mislukt'); resetVoiceUI(); },
+      onModeChange:(m)=>{ if(myGen!==elGen) return; const md=(m&&m.mode)||m; const sp=md==='speaking'; $('#talk').classList.toggle('speaking',sp); setTalkLabel(sp?'Aan het praten\u2026':'Aan het luisteren\u2026 (tik om te stoppen)'); },
+      onMessage:(p)=>{ if(myGen!==elGen) return; const t=p&&(p.message||p.text); const src=p&&(p.source||p.role); if(!t)return;
+        if(src==='user'){ if(t===lastUserText && Date.now()-lastUserAt<6000){ lastUserText=null; return; } addBubble('me',t); }
+        else addBubble('them',t); }
+    });
+    if(myGen!==elGen){ try{s.endSession();}catch(e){} return; }
+    elSession=s;
+  }catch(e){ if(myGen!==elGen) return; console.error(e); setTalkLabel('Geen verbinding \u2014 check agent/microfoon'); resetVoiceUI(); }
 }
-function startVoice(z){ return ensureSession(z,false); }
-function stopVoice(){ if(elSession){ try{elSession.endSession();}catch(e){} } resetVoiceUI(); }
-function resetVoiceUI(){ elSession=null; elConnecting=false; elTextOnly=false; const t=$('#talk'); if(t) t.classList.remove('speaking','live','connecting');
-  if(active){ const z=ZONES.find(x=>x.id===active); if(z&&ELEVENLABS_AGENT_IDS[z.id]) setTalkLabel('Tik op de microfoon \u2014 of typ je vraag'); } }
+function stopVoice(){ elGen++; const c=elSession; elSession=null; elConnecting=false; if(c){ try{c.endSession();}catch(e){} } resetVoiceUI(); }
+function resetVoiceUI(){ elSession=null; elConnecting=false; const t=$('#talk'); if(t) t.classList.remove('speaking','live','connecting');
+  if(active){ const z=ZONES.find(x=>x.id===active); if(z&&ELEVENLABS_AGENT_IDS[z.id]) setTalkLabel('Tik om te praten'); } }
 
 /* ===== GESPREK ===== */
 function renderConvo(z){ const c=$('#convo'); c.innerHTML=''; histories[z.id].forEach(m=>addBubble(m.role==='assistant'?'them':'me',m.content)); c.scrollTop=c.scrollHeight; }
@@ -405,25 +415,19 @@ function showTyping(){ const c=$('#convo'); const t=document.createElement('div'
 function hideTyping(){ const t=$('#typing'); if(t)t.remove(); }
 $('#talk').onclick=()=>{ if(!active) return; const z=ZONES.find(x=>x.id===active); const aid=ELEVENLABS_AGENT_IDS[z.id];
   if(!aid){ $('#input').focus(); return; }
-  if(elSession && !elTextOnly){ stopVoice(); return; }
-  if(elSession && elTextOnly){ stopVoice(); }
-  startVoice(z); };
+  if(elConnecting) return;
+  if(elSession){ stopVoice(); } else { startConversation(z); } };
 async function sendMsg(){ if(!active)return; const z=ZONES.find(x=>x.id===active); const text=$('#input').value.trim(); if(!text)return;
   $('#input').value=''; $('#input').style.height='auto';
   const aid=ELEVENLABS_AGENT_IDS[z.id];
-  if(aid){
-    if(!elSession){ const ok=await ensureSession(z,true); if(!ok) return; }
-    try{ if(elSession.sendUserActivity) elSession.sendUserActivity(); elSession.sendUserMessage(text); addUserText(text); }
-    catch(e){ console.error(e); setTalkLabel('Bericht versturen mislukt'); }
-    return;
-  }
+  if(aid){ if(!elSession){ startConversation(z, text); } else { sendUserText(text); } return; }
   histories[z.id].push({role:'user',content:text}); addBubble('me',text);
   showTyping(); $('#send').disabled=true; $('#talk').classList.add('speaking');
   let reply; try{ reply=await askAgent(z);}catch(e){ reply=z.fallback[Math.floor(Math.random()*z.fallback.length)]; }
   hideTyping(); $('#talk').classList.remove('speaking'); histories[z.id].push({role:'assistant',content:reply}); addBubble('them',reply); $('#send').disabled=false; }
 $('#send').onclick=sendMsg;
 $('#input').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg();}});
-$('#input').addEventListener('input',e=>{e.target.style.height='auto';e.target.style.height=Math.min(e.target.scrollHeight,90)+'px';});
+$('#input').addEventListener('input',e=>{e.target.style.height='auto';e.target.style.height=Math.min(e.target.scrollHeight,90)+'px'; if(elSession&&elSession.sendUserActivity){try{elSession.sendUserActivity();}catch(_){}}});
 async function askAgent(z){ const system=z.persona+`\n\nREGELS: Antwoord ALTIJD in het Nederlands, in karakter, kort (2-4 zinnen). Echte info over Groningen waar het kan; verzin geen onzekere feiten. Soms een wedervraag.`;
   const msgs=histories[z.id].slice(-10).map(m=>({role:m.role,content:m.content}));
   const res=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,system,messages:msgs})});
@@ -435,7 +439,9 @@ function haversine(la1,lo1,la2,lo2){ const R=6371e3,t=Math.PI/180; const dLa=(la
 function startGeo(){ if(!navigator.geolocation)return; watch=navigator.geolocation.watchPosition(pos=>{ const {latitude:la,longitude:lo}=pos.coords; livePos={lat:la,lng:lo};
   if(map){ if(!liveMe) liveMe=L.marker([la,lo],{icon:L.divIcon({className:'me-pin',iconSize:[30,30],iconAnchor:[15,15],html:'<span class="d"></span>'})}).addTo(map); else liveMe.setLatLng([la,lo]); }
   if(active && sheet.classList.contains('info')){ const az=ZONES.find(x=>x.id===active); if(az) renderInfoFoot(az); }
-  const here=ZONES.find(z=>inPoly(la,lo,z.polygon)); if(here&&active!==here.id) openInfo(here.id); },()=>{},{enableHighAccuracy:true,maximumAge:4000}); }
+  const here=ZONES.find(z=>inPoly(la,lo,z.polygon));
+  if(here){ if(active!==here.id) openConvo(here.id); }
+  else if(active){ closeToList(); } },()=>{},{enableHighAccuracy:true,maximumAge:4000}); }
 function stopGeo(){ if(watch!=null){ navigator.geolocation.clearWatch(watch); watch=null; } }
 
 /* ===== INIT ===== */
