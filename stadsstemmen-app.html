@@ -39,10 +39,13 @@
   .leaflet-tile{filter:grayscale(.35) brightness(1.04) contrast(.96);}
   .leaflet-div-icon{background:transparent;border:none;}
   .place-pin{width:0;height:0;}
-  .place-pin .dot{position:absolute;left:0;top:0;transform:translate(-50%,-50%);width:22px;height:22px;border-radius:50%;
-    background:var(--lime);border:3px solid var(--ink);box-shadow:0 3px 9px rgba(0,0,0,.28);box-sizing:border-box;}
-  .place-pin .pulse{position:absolute;left:0;top:0;width:22px;height:22px;border-radius:50%;background:var(--lime);opacity:.55;animation:ppulse 2.1s ease-out infinite;}
-  @keyframes ppulse{0%{transform:translate(-50%,-50%) scale(1);opacity:.5;}100%{transform:translate(-50%,-50%) scale(2.7);opacity:0;}}
+  .place-pin .ppin{position:absolute;left:0;top:0;transform:translate(-50%,-50%);width:50px;height:50px;border-radius:50%;box-sizing:border-box;
+    background:linear-gradient(135deg,var(--lime-l),var(--lime) 55%,var(--lime-d));padding:3px;box-shadow:0 4px 12px rgba(0,0,0,.3);transition:box-shadow .25s,transform .25s;}
+  .place-pin .ppin img{width:100%;height:100%;border-radius:50%;object-fit:cover;border:2px solid #fff;box-sizing:border-box;display:block;background:#cfd3c2;}
+  .place-pin .pulse{position:absolute;left:0;top:0;width:50px;height:50px;border-radius:50%;background:var(--lime);opacity:0;}
+  .place-pin.active .pulse{opacity:.5;animation:ppulse 2.1s ease-out infinite;}
+  .place-pin.active .ppin{box-shadow:0 4px 18px rgba(167,211,31,.75);transform:translate(-50%,-50%) scale(1.08);}
+  @keyframes ppulse{0%{transform:translate(-50%,-50%) scale(1);opacity:.45;}100%{transform:translate(-50%,-50%) scale(1.95);opacity:0;}}
   .me-pin .d{display:block;width:30px;height:30px;border-radius:50%;background:#fff;border:3px solid var(--ink);
     box-shadow:0 5px 14px rgba(0,0,0,.32);box-sizing:border-box;position:relative;cursor:grab;}
   .me-pin .d::after{content:'';position:absolute;inset:6px;border-radius:50%;background:var(--blue);}
@@ -142,24 +145,39 @@
   .cv-title .nm{font-family:'Schibsted Grotesk';font-weight:800;font-size:22px;letter-spacing:-.03em;line-height:1.05;margin-top:3px;}
   .cv-title .ch{font-size:12.5px;color:var(--ink-2);font-weight:600;margin-top:3px;}
 
-  /* ronde praatknop met gradient-ring */
-  .talk-wrap{display:flex;flex-direction:column;align-items:center;padding:18px 0 6px;}
-  .talk{position:relative;width:92px;height:92px;cursor:pointer;}
-  .talk .ring{position:absolute;inset:0;border-radius:50%;
-    background:conic-gradient(from 0deg, var(--lime-l), var(--lime), var(--lime-d), #6f9e10, var(--lime-d), var(--lime), var(--lime-l));
-    -webkit-mask:radial-gradient(closest-side, transparent 70%, #000 72%);
-            mask:radial-gradient(closest-side, transparent 70%, #000 72%);
-    animation:spin 5s linear infinite;filter:drop-shadow(0 4px 14px rgba(167,211,31,.45));}
-  .talk .btn{position:absolute;inset:11px;border-radius:50%;display:grid;place-items:center;
-    background:radial-gradient(120% 120% at 35% 25%, #ffffff 0%, #f4fbe2 30%, #e7f7b4 100%);
-    border:1px solid rgba(20,21,15,.10);box-shadow:0 6px 16px rgba(0,0,0,.14), 0 1px 0 rgba(255,255,255,.9) inset;}
-  .talk .btn svg{width:26px;height:26px;color:var(--ink);}
-  .talk:active .btn{transform:scale(.96);}
-  .talk.speaking .ring{animation-duration:1.6s;filter:drop-shadow(0 4px 22px rgba(167,211,31,.8));}
-  @keyframes spin{to{transform:rotate(360deg);}}
-  .talk-label{font-size:12px;color:var(--muted);margin-top:12px;font-weight:600;}
-  .talk.connecting .ring{animation-duration:1.1s;}
-  .talk.live .ring{animation-duration:3s;}
+  /* media / slideshow */
+  .media{position:relative;margin:10px 20px 2px;border-radius:18px;overflow:hidden;background:#e9eadf;aspect-ratio:4/3;flex-shrink:0;
+    box-shadow:0 6px 18px rgba(0,0,0,.12);transition:aspect-ratio .35s ease,height .35s ease,box-shadow .25s;}
+  .media.collapsed{aspect-ratio:auto;height:64px;cursor:pointer;}
+  .media .slides{position:absolute;inset:0;}
+  .media .slides img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .9s ease;}
+  .media .slides img.on{opacity:1;}
+  .media.speaking{box-shadow:0 0 0 3px var(--lime),0 8px 22px rgba(167,211,31,.5);}
+  .mdots{position:absolute;left:0;right:0;bottom:9px;display:flex;gap:6px;justify-content:center;z-index:2;}
+  .mdots i{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.55);transition:.25s;}
+  .mdots i.on{background:#fff;width:18px;border-radius:3px;}
+  .media.collapsed .mdots{display:none;}
+  .mcollapse{position:absolute;top:8px;right:8px;width:30px;height:30px;border-radius:50%;border:none;cursor:pointer;z-index:3;
+    background:rgba(20,21,15,.5);color:#fff;display:grid;place-items:center;-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);}
+  .mcollapse svg{width:16px;height:16px;transition:transform .3s;}
+  .media.collapsed .mcollapse svg{transform:rotate(180deg);}
+
+  /* compacte mic-knop met gele gradient */
+  .cstatus{font-size:11.5px;color:var(--muted);font-weight:600;padding:7px 20px 0;min-height:14px;}
+  .micbtn{width:46px;height:46px;border-radius:50%;border:1px solid rgba(20,21,15,.16);cursor:pointer;flex-shrink:0;position:relative;
+    display:grid;place-items:center;color:var(--ink);background:linear-gradient(135deg,var(--lime-l),var(--lime) 55%,var(--lime-d));
+    box-shadow:0 4px 14px rgba(159,206,28,.5);}
+  .micbtn:active{transform:scale(.95);}
+  .micbtn .m-ico{display:flex;}
+  .micbtn .m-ico svg{width:22px;height:22px;}
+  .micbtn .m-wave{display:none;gap:3px;align-items:center;height:20px;}
+  .micbtn.speaking .m-wave{display:flex;}
+  .micbtn.speaking .m-ico{display:none;}
+  .micbtn .m-wave i{width:3px;height:7px;background:var(--ink);border-radius:2px;animation:vfbar .75s ease-in-out infinite;}
+  .micbtn .m-wave i:nth-child(2){animation-delay:.14s;} .micbtn .m-wave i:nth-child(3){animation-delay:.28s;}
+  .micbtn.connecting{animation:micpulse 1s ease-in-out infinite;}
+  .micbtn.live::after{content:'';position:absolute;inset:-3px;border-radius:50%;border:2px solid var(--lime);opacity:.6;animation:vfring 1.9s ease-out infinite;pointer-events:none;}
+  @keyframes micpulse{0%,100%{box-shadow:0 4px 14px rgba(159,206,28,.5);}50%{box-shadow:0 4px 22px rgba(159,206,28,.95);}}
 
   .convo{flex:1;overflow-y:auto;padding:14px 20px 4px;display:flex;flex-direction:column;gap:11px;min-height:54px;}
   .convo::-webkit-scrollbar{width:6px;}.convo::-webkit-scrollbar-thumb{background:var(--line);border-radius:9px;}
@@ -177,7 +195,7 @@
   .sug{flex-shrink:0;font-size:12.5px;font-weight:700;padding:9px 15px;border-radius:999px;background:var(--surface-solid);
     border:1px solid var(--line);color:var(--ink-2);cursor:pointer;white-space:nowrap;transition:.15s;}
   .sug:hover{border-color:var(--ink);color:var(--ink);}
-  .composer{display:flex;gap:10px;padding:8px 18px calc(18px + env(safe-area-inset-bottom));align-items:flex-end;}
+  .composer{display:flex;gap:10px;padding:6px 18px calc(16px + env(safe-area-inset-bottom));align-items:center;}
   .field{flex:1;display:flex;align-items:center;background:var(--surface-solid);border:1px solid var(--line);border-radius:15px;padding:3px 4px 3px 17px;}
   .field:focus-within{border-color:var(--ink);}
   .field textarea{flex:1;background:none;border:none;outline:none;color:var(--ink);font-family:inherit;font-size:14.5px;resize:none;padding:12px 0;max-height:90px;line-height:1.35;}
@@ -241,15 +259,22 @@
           <button class="back" id="back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12H6"/><path d="M11 6l-6 6 6 6"/></svg></button>
           <div class="cv-title"><div class="eyebrow" id="eyebrow">Demo · je bezoekt</div><div class="nm" id="sName">—</div><div class="ch" id="sChar"></div></div>
         </div>
-        <div class="talk-wrap">
-          <div class="talk" id="talk"><div class="ring"></div>
-            <div class="btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0M12 19v3"/></svg></div>
-          </div>
-          <div class="talk-label" id="talkLabel">Tik om te praten</div>
+        <div class="media" id="media">
+          <div class="slides" id="slides"></div>
+          <div class="mdots" id="mdots"></div>
+          <button class="mcollapse" id="mcollapse" aria-label="Slideshow in-/uitklappen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 15l6-6 6 6"/></svg></button>
         </div>
         <div class="convo" id="convo"></div>
         <div class="sugs" id="sugs"></div>
-        <div class="composer"><div class="field"><textarea id="input" rows="1" placeholder="Of typ je vraag…"></textarea></div><button class="send" id="send"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V6"/><path d="M6 11l6-6 6 6"/></svg></button></div>
+        <div class="cstatus" id="talkLabel">Tik om te praten</div>
+        <div class="composer">
+          <button class="micbtn" id="talk" aria-label="Praten">
+            <span class="m-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0M12 19v3"/></svg></span>
+            <span class="m-wave"><i></i><i></i><i></i></span>
+          </button>
+          <div class="field"><textarea id="input" rows="1" placeholder="Typ je vraag…"></textarea></div>
+          <button class="send" id="send"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V6"/><path d="M6 11l6-6 6 6"/></svg></button>
+        </div>
       </div>
     </div>
 
@@ -259,28 +284,34 @@
 <script>
 const ELEVENLABS_AGENT_IDS = { martini:"agent_5601kt701gy7ftjavt6dcs7hmty0", provinciehuis:"agent_3201kt70k87cepvv3jywjyycmv9c", stadhuis:"agent_0101kt70xwhrej5bpdpythnm1k7a", forum:"agent_8501kt7155csezsrx9wv6yv1m5c3", vismarkt:"agent_3401kt71az19f0frxgyjcjjbx3e4" };
 
+const IMG='images/stadsstemmen/'; // pad naar je afbeeldingen; laat leeg als ze naast de html staan, of zet bv. 'img/'
 const ZONES = [
   { id:'martini', name:'Martinitoren & -kerk', character:"d'Olle Grieze",
+    pin:IMG+'martini.jpg', photos:[IMG+'martini.jpg',IMG+'martini_2.jpg',IMG+'martini_3.jpg'],
     polygon:[[53.219088,6.568073],[53.219408,6.569666],[53.219922,6.569382],[53.219571,6.567802]],
     sugs:['Waarom heet je d\u2019Olle Grieze?','Hoe hoog kom ik?','Wat heb je zien gebeuren?'],
     persona:`Jij BENT de Martinitoren \u00e9n de Martinikerk van Groningen, samen d'Olle Grieze. Ruim 500 jaar oud, 97 meter, het oudste oog van de stad. Statig, droog, een tikje belerend maar warm. In de kerk hangt het beroemde Schnitger-orgel. Je noemt de bezoeker "kleine".`,
     fallback:["Zo. Daar sta je dan, omhoog te turen zoals iedereen. Vijfhonderd jaar doe ik dat al andersom. Vraag gerust, kleine.","Hoor je het orgel beneden? Dat is m'n hart dat klopt. Zevenennegentig meter steen, en tóch blijft de muziek hangen."] },
   { id:'provinciehuis', name:'Provinciehuis', character:'De raadsheer',
+    pin:IMG+'provinciehuis.jpg', photos:[IMG+'provinciehuis.jpg',IMG+'provinciehuis_2.jpg',IMG+'provinciehuis_3.jpg'],
     polygon:[[53.219416,6.569728],[53.219565,6.570964],[53.220288,6.570221],[53.22024,6.569668],[53.219926,6.569478]],
     sugs:['Wat gebeurt hier?','Vertel over de provincie','Wat is de Statenzaal?'],
     persona:`Jij BENT het Provinciehuis van Groningen, eeuwenoude zetel van het provinciaal bestuur aan het Martinikerkhof, met de Statenzaal. Deftig, bedachtzaam, met gravitas. Trots op de provincie en de Ommelanden.`,
     fallback:["Welkom. Achter deze gevels wordt de provincie bestuurd \u2014 al eeuwen, in de Statenzaal. Neem de tijd; goede beslissingen ook.","De stad denkt graag dat zij Groningen \u00ed\u015b. Maar ik waak over de hele provincie: de Ommelanden, de wierden, het wijde land."] },
   { id:'stadhuis', name:'Stadhuis', character:'De officiële stem',
+    pin:IMG+'stadshuis.jpg', photos:[IMG+'stadshuis.jpg',IMG+'stadshuis_2.jpg',IMG+'stadshuis_3.jpg',IMG+'stadshuis_4.jpg'],
     polygon:[[53.218261,6.567762],[53.217985,6.566777],[53.218919,6.566179],[53.219136,6.567155],[53.21867,6.567491]],
     sugs:['Wie bestuurt de stad?','Wat gebeurde hier in de oorlog?','Hoe oud ben je?'],
     persona:`Jij BENT het Stadhuis van Groningen (neoclassicistisch, begin 19e eeuw) aan de Grote Markt. Formeel, civiel, ordelijk, droog. Je draagt het oorlogsverhaal: de oostkant van de Grote Markt werd in april 1945 verwoest bij de Slag om Groningen.`,
     fallback:["Goedendag. Hier zetelt het stadsbestuur, netjes en volgens de regels. Waarmee kan ik u van dienst zijn?","In april 1945 lag de oostkant van dit plein in puin. Wat u nu ziet is grotendeels weer opgebouwd. De stad herstelt; dat doet ze altijd."] },
   { id:'forum', name:'Forum Groningen', character:'De nieuwkomer',
+    pin:IMG+'forum.jpg', photos:[IMG+'forum.jpg',IMG+'forum_2.jpg',IMG+'forum_3.jpg'],
     polygon:[[53.218414,6.568695],[53.218881,6.56836],[53.219367,6.571009],[53.218622,6.571298]],
     sugs:['Wat kan ik bij jou doen?','Hoe is dat uitzicht?','Is de oude toren jaloers?'],
     persona:`Jij BENT het Forum Groningen (2019). Jong, modern, energiek, een beetje opschepperig over je dakterras en uitzicht. Vlotte taal. Je plaagt de oude Martinitoren.`,
     fallback:["Hey! Welkom. Ja, ik ben de nieuwe. Ga naar het dak \u2014 beste uitzicht van Groningen, en die ouwe toren is stiekem jaloers.","Bij mij? Boeken, films, exposities, koffie met uitzicht op het dak. Oud en nieuw onder \u00e9\u00e9n dak. Letterlijk."] },
   { id:'vismarkt', name:'Vismarkt', character:'De oude handelaar',
+    pin:IMG+'vismarkt.jpg', photos:[IMG+'vismarkt.jpg',IMG+'vismarkt_2.jpg',IMG+'vismarkt_3.jpg'],
     polygon:[[53.217866,6.565988],[53.217549,6.566433],[53.217058,6.565251],[53.216425,6.563148],[53.216045,6.561743],[53.21662,6.561517]],
     sugs:['Verkoop je nog vis?','Wat werd hier verhandeld?','Vertel een goeie deal'],
     persona:`Jij BENT de Vismarkt van Groningen, met de Korenbeurs en zicht op de A-kerk. Een gezouten oude koopman: praktisch, recht voor z'n raap, gek op handel, eten en een goeie deal. Droge grappen.`,
@@ -298,6 +329,8 @@ const INFO_TEXT = {
 const $=s=>document.querySelector(s);
 let active=null, mode='demo', watch=null, liveMe=null, demoMe=null, demoZone=null, livePos=null;
 const histories={}; ZONES.forEach(z=>histories[z.id]=[]);
+const markersById={};
+function setActiveMarker(id){ for(const k in markersById){ const el=markersById[k].getElement&&markersById[k].getElement(); if(el) el.classList.toggle('active', k===id); } }
 
 /* ===== KAART ===== */
 let map=null, bounds=[];
@@ -308,9 +341,10 @@ try{
   ZONES.forEach(z=>{
     const poly=L.polygon(z.polygon); // onzichtbaar: alleen voor geofence + midden
     const ctr=poly.getBounds().getCenter(); path.push(ctr);
-    const m=L.marker(ctr,{icon:L.divIcon({className:'place-pin',iconSize:[0,0],iconAnchor:[0,0],html:'<span class="pulse"></span><span class="dot"></span>'})}).addTo(map);
-    m.bindTooltip(z.name,{direction:'top',className:'lm-tip',offset:[0,-14]});
+    const m=L.marker(ctr,{icon:L.divIcon({className:'place-pin',iconSize:[0,0],iconAnchor:[0,0],html:'<span class="pulse"></span><span class="ppin"><img src="'+(z.pin||'')+'" alt="" onerror="this.style.display=\'none\'"></span>'})}).addTo(map);
+    m.bindTooltip(z.name,{direction:'top',className:'lm-tip',offset:[0,-28]});
     m.on('click',()=>openPlace(z.id));
+    markersById[z.id]=m;
     z._center=ctr; z.polygon.forEach(p=>bounds.push(p));
   });
   // (geen routelijn)
@@ -404,10 +438,11 @@ function openConvo(id){ const z=ZONES.find(x=>x.id===id); if(!z)return; stopVoic
   $('#input').placeholder='Of typ je vraag aan '+z.name+'\u2026';
   const sg=$('#sugs'); sg.innerHTML=''; z.sugs.forEach(s=>{const b=document.createElement('div');b.className='sug';b.textContent=s;b.onclick=()=>{$('#input').value=s;sendMsg();};sg.appendChild(b);});
   renderConvo(z); if(!aid && histories[id].length===0) pushThem(z,z.fallback[0]); mountVoice(z);
+  buildSlides(z); setActiveMarker(id);
   if(map&&z._center) map.panTo(z._center,{animate:true});
   sheet.classList.remove('info'); sheet.classList.add('detail'); setH(snaps()[1]);
   if(aid) startConversation(z); }
-function closeToList(){ stopVoice(); active=null; sheet.classList.remove('detail'); sheet.classList.remove('info'); sheet.classList.remove('voice'); setH(snaps()[0]);
+function closeToList(){ stopVoice(); stopSlides(); setActiveMarker(null); active=null; sheet.classList.remove('detail'); sheet.classList.remove('info'); sheet.classList.remove('voice'); setH(snaps()[0]);
   if(mode==='demo'){ $('#maphint').classList.remove('hide'); } }
 $('#back').onclick=()=>{ if(elSession||elConnecting){ minimizeConvo(); } else { closeToList(); } };
 $('#backInfo').onclick=closeToList;
@@ -435,7 +470,7 @@ async function startConversation(z, initialMessage){
       onConnect:()=>{ if(myGen!==elGen) return; elConnecting=false; const t=$('#talk'); t.classList.remove('connecting'); t.classList.add('live'); setTalkLabel('Aan het luisteren\u2026 (tik om te stoppen)'); updateVoiceFab(); if(initialMessage) setTimeout(()=>{ if(myGen===elGen && elSession){ try{elSession.sendUserMessage(initialMessage);}catch(e){} } },250); },
       onDisconnect:()=>{ if(myGen!==elGen) return; resetVoiceUI(); },
       onError:(e)=>{ if(myGen!==elGen) return; console.error('EL error',e); setTalkLabel('Verbinding mislukt'); resetVoiceUI(); },
-      onModeChange:(m)=>{ if(myGen!==elGen) return; const md=(m&&m.mode)||m; const sp=md==='speaking'; $('#talk').classList.toggle('speaking',sp); if(voiceFab) voiceFab.classList.toggle('speaking',sp); setTalkLabel(sp?'Aan het praten\u2026':'Aan het luisteren\u2026 (tik om te stoppen)'); },
+      onModeChange:(m)=>{ if(myGen!==elGen) return; const md=(m&&m.mode)||m; const sp=md==='speaking'; $('#talk').classList.toggle('speaking',sp); if(voiceFab) voiceFab.classList.toggle('speaking',sp); { const md2=$('#media'); if(md2) md2.classList.toggle('speaking',sp); } setTalkLabel(sp?'Aan het praten\u2026':'Aan het luisteren\u2026 (tik om te stoppen)'); },
       onMessage:(p)=>{ if(myGen!==elGen) return; const t=p&&(p.message||p.text); const src=p&&(p.source||p.role); if(!t)return;
         if(src==='user'){ if(t===lastUserText && Date.now()-lastUserAt<6000){ lastUserText=null; return; } addBubble('me',t); }
         else addBubble('them',t); }
@@ -445,12 +480,38 @@ async function startConversation(z, initialMessage){
   }catch(e){ if(myGen!==elGen) return; console.error(e); setTalkLabel('Geen verbinding \u2014 check agent/microfoon'); resetVoiceUI(); }
 }
 function stopVoice(){ elGen++; const c=elSession; elSession=null; elConnecting=false; if(c){ try{c.endSession();}catch(e){} } resetVoiceUI(); }
-function resetVoiceUI(){ elSession=null; elConnecting=false; const t=$('#talk'); if(t) t.classList.remove('speaking','live','connecting'); if(voiceFab) voiceFab.classList.remove('speaking'); updateVoiceFab();
+function resetVoiceUI(){ elSession=null; elConnecting=false; const t=$('#talk'); if(t) t.classList.remove('speaking','live','connecting'); if(voiceFab) voiceFab.classList.remove('speaking'); { const md=$('#media'); if(md) md.classList.remove('speaking'); } updateVoiceFab();
   if(active){ const z=ZONES.find(x=>x.id===active); if(z&&ELEVENLABS_AGENT_IDS[z.id]) setTalkLabel('Tik om te praten'); } }
 
 /* ===== GESPREK ===== */
 function renderConvo(z){ const c=$('#convo'); c.innerHTML=''; histories[z.id].forEach(m=>addBubble(m.role==='assistant'?'them':'me',m.content)); c.scrollTop=c.scrollHeight; }
-function addBubble(side,t){ const c=$('#convo'); const el=document.createElement('div'); el.className='msg '+side; el.textContent=t; c.appendChild(el); c.scrollTop=c.scrollHeight; }
+function addBubble(side,t){ const c=$('#convo'); const el=document.createElement('div'); el.className='msg '+side; el.textContent=t; c.appendChild(el); c.scrollTop=c.scrollHeight;
+  if(!mediaTouched && !mediaAutoDone && c.children.length>=2){ mediaAutoDone=true; collapseMedia(true); } }
+
+/* ===== SLIDESHOW ===== */
+let slideTimer=null, slideIdx=0, slideEls=[], mediaTouched=false, mediaAutoDone=false;
+function buildSlides(z){
+  const wrap=$('#slides'), dots=$('#mdots'); if(!wrap) return;
+  wrap.innerHTML=''; dots.innerHTML=''; slideEls=[]; slideIdx=0; mediaTouched=false; mediaAutoDone=false;
+  collapseMedia(false);
+  const imgs=z.photos||[];
+  imgs.forEach((src,i)=>{
+    const im=document.createElement('img'); im.src=src; im.alt=z.name; im.loading=i?'lazy':'eager';
+    im.onerror=()=>{ im.style.display='none'; };
+    if(i===0) im.classList.add('on'); wrap.appendChild(im); slideEls.push(im);
+    const d=document.createElement('i'); if(i===0) d.classList.add('on'); d.onclick=()=>{ showSlide(i); restartSlideTimer(); }; dots.appendChild(d);
+  });
+  restartSlideTimer();
+}
+function showSlide(n){ if(!slideEls.length) return; slideIdx=(n+slideEls.length)%slideEls.length;
+  slideEls.forEach((im,i)=>im.classList.toggle('on',i===slideIdx));
+  const dots=$('#mdots').children; for(let i=0;i<dots.length;i++) dots[i].classList.toggle('on',i===slideIdx); }
+function nextSlide(){ showSlide(slideIdx+1); }
+function restartSlideTimer(){ stopSlides(); if(slideEls.length>1) slideTimer=setInterval(nextSlide,4500); }
+function stopSlides(){ if(slideTimer){ clearInterval(slideTimer); slideTimer=null; } }
+function collapseMedia(c){ const m=$('#media'); if(m) m.classList.toggle('collapsed', c); }
+$('#mcollapse').onclick=(e)=>{ e.stopPropagation(); mediaTouched=true; collapseMedia(!$('#media').classList.contains('collapsed')); };
+$('#media').onclick=()=>{ if($('#media').classList.contains('collapsed')){ mediaTouched=true; collapseMedia(false); } };
 function pushThem(z,t){ histories[z.id].push({role:'assistant',content:t}); addBubble('them',t); }
 function showTyping(){ const c=$('#convo'); const t=document.createElement('div'); t.className='typing';t.id='typing'; t.innerHTML='<i></i><i></i><i></i>'; c.appendChild(t); c.scrollTop=c.scrollHeight; }
 function hideTyping(){ const t=$('#typing'); if(t)t.remove(); }
