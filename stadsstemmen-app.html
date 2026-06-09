@@ -46,10 +46,15 @@
   .place-pin.active .pulse{opacity:.5;animation:ppulse 2.1s ease-out infinite;}
   .place-pin.active .ppin{box-shadow:0 4px 18px rgba(167,211,31,.75);transform:translate(-50%,-50%) scale(1.08);}
   @keyframes ppulse{0%{transform:translate(-50%,-50%) scale(1);opacity:.45;}100%{transform:translate(-50%,-50%) scale(1.95);opacity:0;}}
-  .me-pin .d{display:block;width:30px;height:30px;border-radius:50%;background:#fff;border:3px solid var(--ink);
-    box-shadow:0 5px 14px rgba(0,0,0,.32);box-sizing:border-box;position:relative;cursor:grab;}
-  .me-pin .d::after{content:'';position:absolute;inset:6px;border-radius:50%;background:var(--blue);}
-  .me-pin .d:active{cursor:grabbing;}
+  .me-pin{will-change:transform;}
+  .me-pin .nav{display:block;width:34px;height:34px;transform:rotate(0deg);transform-origin:50% 50%;transition:transform .18s ease-out;}
+  .me-pin .nav svg{width:100%;height:100%;display:block;filter:drop-shadow(0 3px 6px rgba(0,0,0,.38));}
+  .me-pin .nav .body{fill:var(--blue);stroke:#fff;stroke-width:1.6;stroke-linejoin:round;}
+  .me-pin.demo .nav{cursor:grab;}
+  .me-pin.demo .nav .body{fill:var(--ink);}
+  .me-pin.demo .nav:active{cursor:grabbing;}
+  .me-pin .halo{position:absolute;left:50%;top:50%;width:16px;height:16px;transform:translate(-50%,-50%);border-radius:50%;background:rgba(93,184,255,.22);z-index:-1;}
+  .me-pin.demo .halo{background:rgba(20,21,15,.14);}
   .leaflet-tooltip.lm-tip{background:var(--ink);border:none;box-shadow:0 3px 10px rgba(0,0,0,.25);color:#fff;
     font-family:'Hanken Grotesk';font-size:11px;font-weight:700;padding:4px 9px;border-radius:8px;}
   .leaflet-tooltip.lm-tip::before{display:none;}
@@ -253,6 +258,62 @@
     font-family:'Schibsted Grotesk';font-weight:800;font-size:15.5px;letter-spacing:-.01em;color:var(--ink);
     background:linear-gradient(135deg,var(--lime-l),var(--lime) 55%,var(--lime-d));box-shadow:0 8px 22px rgba(159,206,28,.5);}
   .wstart:active{transform:scale(.99);}.wstart svg{width:19px;height:19px;}
+
+  /* ===== NIEUW: geluidsknop ===== */
+  .top-r{display:flex;align-items:center;gap:10px;}
+  .sndbtn{width:42px;height:42px;flex-shrink:0;border-radius:13px;border:1px solid var(--glass-brd);cursor:pointer;
+    display:grid;place-items:center;color:var(--ink);background:var(--surface);
+    backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);box-shadow:0 6px 18px rgba(0,0,0,.10);transition:.16s;}
+  .sndbtn:active{transform:scale(.94);}
+  .sndbtn svg{width:20px;height:20px;}
+  .sndbtn .on-ic{display:block;} .sndbtn .off-ic{display:none;}
+  .sndbtn.muted{color:var(--muted);} .sndbtn.muted .on-ic{display:none;} .sndbtn.muted .off-ic{display:block;}
+  .sndbtn.on{background:var(--ink);color:var(--lime);border-color:var(--ink);}
+  /* tekst-modus: geen microfoon, alleen typen */
+  body.text-only .micbtn{display:none;}
+  body.text-only #talkLabel{display:none;}
+
+  /* ===== NIEUW: voortgang in lijstkop ===== */
+  .list-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;}
+  .lh-prog{flex-shrink:0;margin-top:2px;display:flex;align-items:center;gap:9px;padding:8px 13px;border-radius:13px;
+    background:var(--surface-solid);border:1px solid var(--line);box-shadow:0 2px 8px rgba(0,0,0,.05);cursor:default;}
+  .lh-prog .ring{position:relative;width:30px;height:30px;flex-shrink:0;}
+  .lh-prog .ring svg{width:30px;height:30px;transform:rotate(-90deg);}
+  .lh-prog .ring .bg{fill:none;stroke:var(--line);stroke-width:3.5;}
+  .lh-prog .ring .fg{fill:none;stroke:var(--lime-d);stroke-width:3.5;stroke-linecap:round;transition:stroke-dashoffset .5s ease;}
+  .lh-prog .pt{font-family:'Schibsted Grotesk';font-weight:800;font-size:12.5px;letter-spacing:-.01em;line-height:1.15;color:var(--ink);}
+  .lh-prog .pt small{display:block;font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.02em;}
+
+  /* ===== NIEUW: bezocht-status op pin ===== */
+  .place-pin .check{position:absolute;left:13px;top:-21px;width:20px;height:20px;border-radius:50%;background:var(--ink);
+    display:none;place-items:center;color:var(--lime);box-shadow:0 2px 6px rgba(0,0,0,.35);z-index:2;}
+  .place-pin .check svg{width:12px;height:12px;}
+  .place-pin.visited .check{display:grid;}
+  .place-pin.visited .ppin img{filter:saturate(.62);}
+
+  /* ===== NIEUW: bezocht-status op kaart ===== */
+  .card{position:relative;}
+  .card .done{display:none;align-items:center;gap:5px;margin-top:6px;font-size:11px;font-weight:800;letter-spacing:.02em;color:var(--lime-d);}
+  .card .done svg{width:13px;height:13px;}
+  .card.visited{opacity:.82;}
+  .card.visited .done{display:inline-flex;}
+  .card.visited .num{color:var(--lime-d);}
+
+  /* ===== NIEUW: navigatie-HUD (richting + afstand) ===== */
+  .navhud{position:absolute;z-index:5;top:120px;left:50%;transform:translateX(-50%);display:none;align-items:center;gap:10px;
+    padding:8px 15px 8px 9px;border-radius:999px;background:var(--surface);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+    border:1px solid var(--glass-brd);box-shadow:0 6px 20px rgba(0,0,0,.12);max-width:84%;}
+  .navhud.show{display:flex;}
+  .navhud .arr{width:30px;height:30px;flex-shrink:0;border-radius:50%;background:var(--ink);display:grid;place-items:center;color:var(--lime);}
+  .navhud .arr svg{width:17px;height:17px;transition:transform .2s ease-out;}
+  .navhud .nt{font-size:12.5px;line-height:1.15;min-width:0;}
+  .navhud .nt b{font-family:'Schibsted Grotesk';font-weight:800;letter-spacing:-.01em;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .navhud .nt span{color:var(--muted);font-weight:700;font-size:11px;}
+  .navhud.done-all .arr{background:var(--lime-d);color:var(--ink);}
+
+  /* ===== NIEUW: koptelefoon-tip op welkomstscherm ===== */
+  .whead{display:flex;align-items:center;gap:8px;margin-top:11px;font-size:12px;color:var(--muted);font-weight:600;}
+  .whead svg{width:16px;height:16px;flex-shrink:0;stroke:var(--muted);}
 </style>
 </head>
 <body>
@@ -262,7 +323,21 @@
 
     <div class="top">
       <div class="chip"><span class="mk">Stads<b>stemmen</b></span></div>
-      <div class="seg"><button id="mDemo" class="on">Demo</button><button id="mLive">Live</button></div>
+      <div class="top-r">
+        <button class="sndbtn on" id="sndBtn" aria-label="Geluid aan/uit" title="Geluid aan/uit">
+          <span class="on-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M19 5a9 9 0 0 1 0 14"/></svg></span>
+          <span class="off-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="M22 9l-6 6"/><path d="M16 9l6 6"/></svg></span>
+        </button>
+        <button class="sndbtn" id="textBtn" aria-label="Tekst-modus (agents dempen)" title="Tekst-modus" style="display:none">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M8 9h8"/><path d="M8 13h5"/></svg>
+        </button>
+        <div class="seg"><button id="mDemo" class="on">Demo</button><button id="mLive">Live</button></div>
+      </div>
+    </div>
+
+    <div class="navhud" id="navHud">
+      <div class="arr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5"/><path d="M5 12l7-7 7 7"/></svg></div>
+      <div class="nt"><b id="navName">-</b><span id="navDist"></span></div>
     </div>
 
     <div class="maphint" id="maphint"><span class="b"></span><span data-i18n="maphint">Sleep je locatie over een plek</span></div>
@@ -298,6 +373,11 @@
           <p><b data-i18n="wPrivLabel">Privacy:</b> <span data-i18n="wPrivText">je locatie wordt alleen gebruikt om te herkennen bij welke plek je staat. Niets wordt opgeslagen.</span></p>
         </div>
 
+        <div class="whead">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 14v-2a9 9 0 0 1 18 0v2"/><path d="M21 16a2 2 0 0 1-2 2h-1v-6h1a2 2 0 0 1 2 2zM3 16a2 2 0 0 0 2 2h1v-6H5a2 2 0 0 0-2 2z"/></svg>
+          <span data-i18n="wHead">Werkt het best met een koptelefoon.</span>
+        </div>
+
         <div class="wlang">
           <div class="lab" data-i18n="wLangLabel">Taal van de gids</div>
           <div class="langrow" id="langRow">
@@ -315,12 +395,19 @@
       </div>
     </div>
 
+    <!-- Achtergrondmuziek welkomstscherm -->
+    <audio id="welcomeAudio" loop preload="auto" src="audio/welkom.mp3"></audio>
+
     <!-- SLEEPBAAR PANEEL -->
     <div class="sheet" id="sheet">
       <div class="drag" id="drag"><div class="grip"></div></div>
 
       <div class="list-view">
-        <div class="list-head"><div class="eb" data-i18n="listEb">5 stemmen · binnenstad</div><div class="ttl" data-i18n="listTtl">Plekken in de buurt</div></div>
+        <div class="list-head"><div><div class="eb" data-i18n="listEb">5 stemmen · binnenstad</div><div class="ttl" data-i18n="listTtl">Plekken in de buurt</div></div>
+          <div class="lh-prog" id="lhProg" title="Bezocht">
+            <div class="ring"><svg viewBox="0 0 36 36"><circle class="bg" cx="18" cy="18" r="15.5"></circle><circle class="fg" id="progRing" cx="18" cy="18" r="15.5" stroke-dasharray="97.4" stroke-dashoffset="97.4"></circle></svg></div>
+            <div class="pt"><span id="progCount">0</span>/<span id="progTotal">5</span><small data-i18n="progLabel">bezocht</small></div>
+          </div></div>
         <div class="cards" id="cards"></div>
       </div>
 
@@ -413,8 +500,12 @@ const INFO_TEXT = {
 
 const $=s=>document.querySelector(s);
 let active=null, mode='demo', watch=null, liveMe=null, demoMe=null, demoZone=null, livePos=null, canTalk=false;
+let musicEnabled=true, heading=null, headingOn=false, textOnly=false;
+const SHOW_TEXTONLY_TOGGLE=false;  // op true zetten om de tekst-modus-knop te tonen
+const visited=new Set(); const TOTAL=ZONES.length;
 const histories={}; ZONES.forEach(z=>histories[z.id]=[]);
 const markersById={};
+const ME_HTML='<span class="halo"></span><span class="nav"><svg viewBox="0 0 24 24"><path class="body" d="M12 2 L20 21 L12 16 L4 21 Z"/></svg></span>';
 function setActiveMarker(id){ for(const k in markersById){ const el=markersById[k].getElement&&markersById[k].getElement(); if(el) el.classList.toggle('active', k===id); } }
 
 /* ===== KAART ===== */
@@ -426,7 +517,7 @@ try{
   ZONES.forEach(z=>{
     const poly=L.polygon(z.polygon); // onzichtbaar: alleen voor geofence + midden
     const ctr=poly.getBounds().getCenter(); path.push(ctr);
-    const m=L.marker(ctr,{icon:L.divIcon({className:'place-pin',iconSize:[0,0],iconAnchor:[0,0],html:'<span class="pulse"></span><span class="ppin"><img src="'+(z.pin||'')+'" alt="" onerror="this.style.display=\'none\'"></span>'})}).addTo(map);
+    const m=L.marker(ctr,{icon:L.divIcon({className:'place-pin',iconSize:[0,0],iconAnchor:[0,0],html:'<span class="pulse"></span><span class="check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg></span><span class="ppin"><img src="'+(z.pin||'')+'" alt="" onerror="this.style.display=\'none\'"></span>'})}).addTo(map);
     m.bindTooltip(z.name,{direction:'top',className:'lm-tip',offset:[0,-28]});
     m.on('click',()=>openPlace(z.id));
     markersById[z.id]=m;
@@ -473,17 +564,19 @@ voiceFab.onclick=showConvoPanel;
 
 /* ===== KAARTEN ===== */
 const cardsEl=$('#cards');
+const cardById={};
 ZONES.forEach((z,i)=>{
   const c=document.createElement('div'); c.className='card';
-  c.innerHTML=`<div class="meta"><div class="num">0${i+1}</div><div class="nm">${z.name}</div><div class="ch">“${z.character}”</div></div><div class="go"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h14"/><path d="M13 6l6 6-6 6"/></svg></div>`;
-  c.onclick=()=>openPlace(z.id); cardsEl.appendChild(c);
+  c.innerHTML=`<div class="meta"><div class="num">0${i+1}</div><div class="nm">${z.name}</div><div class="ch">“${z.character}”</div><div class="done"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg><span data-i18n="cardDone">Bezocht</span></div></div><div class="go"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h14"/><path d="M13 6l6 6-6 6"/></svg></div>`;
+  c.onclick=()=>openPlace(z.id); cardsEl.appendChild(c); cardById[z.id]=c;
 });
 
 /* ===== MODUS ===== */
 function setMode(m){ mode=m; $('#mLive').classList.toggle('on',m==='live'); $('#mDemo').classList.toggle('on',m==='demo');
   $('#eyebrow').textContent=m==='live'?'Je staat bij':'Demo · je bezoekt';
-  if(m==='live'){ hideDemoMe(); $('#maphint').classList.add('hide'); primeMic(); startGeo(); }
+  if(m==='live'){ hideDemoMe(); $('#maphint').classList.add('hide'); primeMic(); startGeo(); startCompass(); }
   else { stopGeo(); if(liveMe&&map){map.removeLayer(liveMe);liveMe=null;} showDemoMe(); if(!active)$('#maphint').classList.remove('hide'); }
+  updateNavHud();
 }
 $('#mLive').onclick=()=>setMode('live'); $('#mDemo').onclick=()=>setMode('demo');
 
@@ -491,8 +584,9 @@ $('#mLive').onclick=()=>setMode('live'); $('#mDemo').onclick=()=>setMode('demo')
 function showDemoMe(){
   if(!map||demoMe) return;
   demoMe=L.marker([53.2188,6.5677],{draggable:true,zIndexOffset:1000,
-    icon:L.divIcon({className:'me-pin',iconSize:[30,30],iconAnchor:[15,15],html:'<span class="d"></span>'})}).addTo(map);
-  demoMe.on('dragend',()=>{ const p=demoMe.getLatLng(); const here=ZONES.find(z=>inPoly(p.lat,p.lng,z.polygon)); if(here){ openConvo(here.id); } else if(active){ closeToList(); } });
+    icon:L.divIcon({className:'me-pin demo',iconSize:[34,34],iconAnchor:[17,17],html:ME_HTML})}).addTo(map);
+  demoMe.on('drag',()=>updateNavHud());
+  demoMe.on('dragend',()=>{ const p=demoMe.getLatLng(); const here=ZONES.find(z=>inPoly(p.lat,p.lng,z.polygon)); if(here){ openConvo(here.id); } else if(active){ closeToList(); } updateNavHud(); });
 }
 function hideDemoMe(){ if(demoMe&&map){map.removeLayer(demoMe);demoMe=null;} demoZone=null; }
 
@@ -528,11 +622,48 @@ function openConvo(id){ const z=ZONES.find(x=>x.id===id); if(!z)return; stopVoic
   if(map&&z._center) map.panTo(z._center,{animate:true});
   sheet.classList.remove('info'); sheet.classList.add('detail'); setH(snaps()[1]);
   $('#talk').classList.toggle('off', !canTalk);
-  if(canTalk){ if(aid) startConversation(z); } else { setTalkLabel(distTxt(z)); } }
+  if(canTalk){ markVisited(id); if(aid) startConversation(z); } else { setTalkLabel(distTxt(z)); } }
 function closeToList(){ stopVoice(); stopSlides(); setActiveMarker(null); active=null; sheet.classList.remove('detail'); sheet.classList.remove('info'); sheet.classList.remove('voice'); setH(snaps()[0]);
-  if(mode==='demo'){ $('#maphint').classList.remove('hide'); } }
+  if(mode==='demo'){ $('#maphint').classList.remove('hide'); } updateNavHud(); }
 $('#back').onclick=()=>{ if(elSession||elConnecting){ minimizeConvo(); } else { closeToList(); } };
 $('#backInfo').onclick=closeToList;
+
+/* ===== PLEK-SPECIFIEKE INTROMUZIEK =====
+   Speelt zacht een muziekje zodra het welkomstbericht van een plek begint,
+   en fade-out automatisch tegen het einde van het fragment (of na de terugval-duur). */
+const ZONE_AUDIO = {
+  martini:       'audio/martini.mp3',
+  provinciehuis: 'audio/provinciehuis.mp3',
+  stadhuis:      'audio/stadhuis.mp3',
+  forum:         'audio/forum.mp3',
+  vismarkt:      'audio/vismarkt.mp3'
+};
+const ZONE_INTRO_VOLUME  = 0.16;    // volume van het muziekje (0 = stil, 1 = max)
+const ZONE_INTRO_FADE_MS = 4000;    // duur van de uitfade aan het einde
+const ZONE_INTRO_MS      = 90000;   // terugval-duur als de lengte onbekend is (1,5 min)
+const INTRO_ONCE_PER_SESSION = true;// elk muziekje max. één keer per plek per sessie
+
+let introAudio=null, introTimer=null, introFade=null;
+const introPlayed=new Set();
+
+function ensureIntroAudio(){ if(!introAudio){ introAudio=new Audio(); introAudio.preload='auto'; } return introAudio; }
+function clearIntroTimers(){ if(introTimer){ clearTimeout(introTimer); introTimer=null; } if(introFade){ clearInterval(introFade); introFade=null; } }
+function fadeIntroOut(ms){ const a=introAudio; if(!a) return; clearIntroTimers();
+  const start=a.volume, steps=Math.max(1,Math.round((ms||ZONE_INTRO_FADE_MS)/50)); let i=0;
+  introFade=setInterval(()=>{ i++; a.volume=Math.max(0,start*(1-i/steps));
+    if(i>=steps){ clearInterval(introFade); introFade=null; a.pause(); a.removeAttribute('src'); a.load(); } },50); }
+function stopZoneIntro(immediate){ const a=introAudio; if(!a){ clearIntroTimers(); return; }
+  if(immediate){ clearIntroTimers(); a.pause(); a.removeAttribute('src'); a.load(); a.volume=ZONE_INTRO_VOLUME; }
+  else { fadeIntroOut(600); } }
+function playZoneIntro(id){ const src=ZONE_AUDIO[id]; if(!src||!musicEnabled) return;
+  if(INTRO_ONCE_PER_SESSION && introPlayed.has(id)) return;
+  const a=ensureIntroAudio(); stopZoneIntro(true); introPlayed.add(id);
+  a.src=src; a.loop=false; a.volume=ZONE_INTRO_VOLUME;
+  a.onloadedmetadata=()=>{ const dur=a.duration; let delay=ZONE_INTRO_MS;
+    if(isFinite(dur)&&dur>0){ delay=Math.max(0, dur*1000 - ZONE_INTRO_FADE_MS); }
+    clearTimeout(introTimer); introTimer=setTimeout(()=>fadeIntroOut(ZONE_INTRO_FADE_MS), delay); };
+  a.onended=clearIntroTimers;
+  a.play().catch(()=>{ introPlayed.delete(id); }); } // geblokkeerd of bestand mist: opnieuw proberen mogelijk
 
 /* ===== STEM + TEKST (één sessie — spraak en tekst door elkaar) ===== */
 let elSession=null, elConnecting=false, elGen=0, lastUserText=null, lastUserAt=0, micPrimed=false;
@@ -549,25 +680,26 @@ async function startConversation(z, initialMessage){
   const Conv=window.ElevenLabsConversation;
   if(!Conv){ setTalkLabel(tr('voiceUnavail')); return; }
   const myGen=++elGen; elConnecting=true; setTalkLabel(tr('connecting')); $('#talk').classList.add('connecting');
+  try{ playZoneIntro(z.id); }catch(_){}
   if(initialMessage) addUserText(initialMessage);
   try{
-    try{ await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}}); micPrimed=true; }catch(e){}
+    try{ if(!textOnly) await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}}); micPrimed=true; }catch(e){}
     const s=await Conv.startSession({
       agentId:aid, connectionType:'websocket',
       overrides:(lang&&lang!=='nl')?{agent:{language:lang}}:undefined,
-      onConnect:()=>{ if(myGen!==elGen) return; elConnecting=false; const t=$('#talk'); t.classList.remove('connecting'); t.classList.add('live'); setTalkLabel(tr('listening')); updateVoiceFab(); if(initialMessage) setTimeout(()=>{ if(myGen===elGen && elSession){ try{elSession.sendUserMessage(initialMessage);}catch(e){} } },250); },
+      onConnect:()=>{ if(myGen!==elGen) return; elConnecting=false; const t=$('#talk'); t.classList.remove('connecting'); t.classList.add('live'); setTalkLabel(tr('listening')); updateVoiceFab(); if(textOnly && elSession) applyAgentMute(elSession); if(initialMessage) setTimeout(()=>{ if(myGen===elGen && elSession){ try{elSession.sendUserMessage(initialMessage);}catch(e){} } },250); },
       onDisconnect:()=>{ if(myGen!==elGen) return; resetVoiceUI(); },
       onError:(e)=>{ if(myGen!==elGen) return; console.error('EL error',e); setTalkLabel(tr('connectFailed')); resetVoiceUI(); },
-      onModeChange:(m)=>{ if(myGen!==elGen) return; const md=(m&&m.mode)||m; const sp=md==='speaking'; $('#talk').classList.toggle('speaking',sp); if(voiceFab) voiceFab.classList.toggle('speaking',sp); { const md2=$('#media'); if(md2) md2.classList.toggle('speaking',sp); } setTalkLabel(sp?tr('speaking'):tr('listening')); },
+      onModeChange:(m)=>{ if(myGen!==elGen) return; const md=(m&&m.mode)||m; const sp=md==='speaking'; if(sp && textOnly && elSession) applyAgentMute(elSession); $('#talk').classList.toggle('speaking',sp); if(voiceFab) voiceFab.classList.toggle('speaking',sp); { const md2=$('#media'); if(md2) md2.classList.toggle('speaking',sp); } setTalkLabel(sp?tr('speaking'):tr('listening')); },
       onMessage:(p)=>{ if(myGen!==elGen) return; const t=p&&(p.message||p.text); const src=p&&(p.source||p.role); if(!t)return;
         if(src==='user'){ if(t===lastUserText && Date.now()-lastUserAt<6000){ lastUserText=null; return; } addBubble('me',t); }
         else addBubble('them',t); }
     });
     if(myGen!==elGen){ try{s.endSession();}catch(e){} return; }
-    elSession=s;
+    elSession=s; if(textOnly) applyAgentMute(elSession);
   }catch(e){ if(myGen!==elGen) return; console.error(e); setTalkLabel(tr('noConnection')); resetVoiceUI(); }
 }
-function stopVoice(){ elGen++; const c=elSession; elSession=null; elConnecting=false; if(c){ try{c.endSession();}catch(e){} } resetVoiceUI(); }
+function stopVoice(){ elGen++; const c=elSession; elSession=null; elConnecting=false; if(c){ try{c.endSession();}catch(e){} } resetVoiceUI(); try{ stopZoneIntro(false); }catch(_){} }
 function resetVoiceUI(){ elSession=null; elConnecting=false; const t=$('#talk'); if(t) t.classList.remove('speaking','live','connecting'); if(voiceFab) voiceFab.classList.remove('speaking'); { const md=$('#media'); if(md) md.classList.remove('speaking'); } updateVoiceFab();
   if(active){ const z=ZONES.find(x=>x.id===active); if(z&&ELEVENLABS_AGENT_IDS[z.id]) setTalkLabel(tr('tapToTalk')); } }
 
@@ -643,7 +775,8 @@ async function askAgent(z){ const system=z.persona+`\n\nREGELS: Antwoord ALTIJD 
 function inPoly(lat,lng,poly){ let inside=false; for(let i=0,j=poly.length-1;i<poly.length;j=i++){ const yi=poly[i][0],xi=poly[i][1],yj=poly[j][0],xj=poly[j][1]; if(((yi>lat)!==(yj>lat))&&(lng<(xj-xi)*(lat-yi)/(yj-yi)+xi)) inside=!inside; } return inside; }
 function haversine(la1,lo1,la2,lo2){ const R=6371e3,t=Math.PI/180; const dLa=(la2-la1)*t,dLo=(lo2-lo1)*t; const a=Math.sin(dLa/2)**2+Math.cos(la1*t)*Math.cos(la2*t)*Math.sin(dLo/2)**2; return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a)); }
 function startGeo(){ if(!navigator.geolocation)return; watch=navigator.geolocation.watchPosition(pos=>{ const {latitude:la,longitude:lo}=pos.coords; livePos={lat:la,lng:lo};
-  if(map){ if(!liveMe) liveMe=L.marker([la,lo],{icon:L.divIcon({className:'me-pin',iconSize:[30,30],iconAnchor:[15,15],html:'<span class="d"></span>'})}).addTo(map); else liveMe.setLatLng([la,lo]); }
+  if(map){ if(!liveMe){ liveMe=L.marker([la,lo],{icon:L.divIcon({className:'me-pin',iconSize:[34,34],iconAnchor:[17,17],html:ME_HTML})}).addTo(map); applyHeading(); } else liveMe.setLatLng([la,lo]); }
+  updateNavHud();
   const here=ZONES.find(z=>inPoly(la,lo,z.polygon));
   if(here && active!==here.id){ openConvo(here.id); return; }
   if(active){ const az=ZONES.find(x=>x.id===active); const insideActive = here && here.id===active;
@@ -651,6 +784,57 @@ function startGeo(){ if(!navigator.geolocation)return; watch=navigator.geolocati
     else { if(canTalk){ canTalk=false; $('#talk').classList.add('off'); } if(elSession||elConnecting) stopVoice(); if(az && !elSession && !elConnecting) setTalkLabel(distTxt(az)); }
   } },()=>{},{enableHighAccuracy:true,maximumAge:4000}); }
 function stopGeo(){ if(watch!=null){ navigator.geolocation.clearWatch(watch); watch=null; } }
+
+/* ===== NIEUWE FEATURES: geluid · voortgang · richting · kompas ===== */
+function applyMusicState(){ const b=$('#sndBtn'); if(b) b.classList.toggle('muted',!musicEnabled);
+  if(!musicEnabled){ const w=$('#welcomeAudio'); if(w){ try{w.pause();}catch(_){} } try{ stopZoneIntro(true); }catch(_){} } }
+function toggleMusic(){ musicEnabled=!musicEnabled; applyMusicState(); }
+{ const sb=$('#sndBtn'); if(sb) sb.onclick=toggleMusic; }
+
+/* tekst-modus: dempt de stem van de agents, alleen typen (knop standaard verborgen) */
+function applyAgentMute(s){ if(!s) return; try{ s.setVolume({volume: textOnly?0:1}); }catch(_){} try{ s.setMicMuted(textOnly); }catch(_){} }
+function applyTextOnly(){ const b=$('#textBtn'); if(b) b.classList.toggle('on',textOnly);
+  document.body.classList.toggle('text-only',textOnly); if(elSession) applyAgentMute(elSession); }
+function toggleTextOnly(){ textOnly=!textOnly; applyTextOnly(); }
+{ const tb=$('#textBtn'); if(tb){ tb.onclick=toggleTextOnly; if(!SHOW_TEXTONLY_TOGGLE) tb.style.display='none'; } }
+
+function markVisited(id){ if(visited.has(id)) return; visited.add(id); updateProgress(); updatePinVisited(id); updateNavHud(); }
+function updatePinVisited(id){ const m=markersById[id]; const el=m&&m.getElement&&m.getElement(); if(el) el.classList.add('visited'); const c=cardById[id]; if(c) c.classList.add('visited'); }
+function updateProgress(){ const n=visited.size; const pc=$('#progCount'); if(pc) pc.textContent=n; const pt=$('#progTotal'); if(pt) pt.textContent=TOTAL;
+  const ring=$('#progRing'); if(ring){ const C=2*Math.PI*15.5; ring.setAttribute('stroke-dasharray',C.toFixed(1)); ring.setAttribute('stroke-dashoffset',(C*(1-n/TOTAL)).toFixed(1)); } }
+
+function curPos(){ if(mode==='live') return livePos; if(demoMe){ const p=demoMe.getLatLng(); return {lat:p.lat,lng:p.lng}; } return null; }
+function bearing(la1,lo1,la2,lo2){ const t=Math.PI/180; const y=Math.sin((lo2-lo1)*t)*Math.cos(la2*t);
+  const x=Math.cos(la1*t)*Math.sin(la2*t)-Math.sin(la1*t)*Math.cos(la2*t)*Math.cos((lo2-lo1)*t); return (Math.atan2(y,x)/t+360)%360; }
+function fmtDist(m){ if(m>=1000) return (m/1000).toFixed(m<10000?1:0)+' km'; return Math.max(0,Math.round(m/5)*5)+' m'; }
+function updateNavHud(){ const hud=$('#navHud'); if(!hud) return; const pos=curPos();
+  if(active||!pos){ hud.classList.remove('show'); return; }
+  const left=ZONES.filter(z=>!visited.has(z.id)&&z._center);
+  const a=hud.querySelector('.arr svg');
+  if(left.length===0){ const mh=$('#maphint'); if(mh) mh.classList.add('hide'); hud.classList.add('show','done-all'); $('#navName').textContent=tr('navDone')||'Alles bezocht'; $('#navDist').textContent=''; if(a) a.style.transform='rotate(0deg)'; return; }
+  hud.classList.remove('done-all');
+  let best=null,bd=Infinity; left.forEach(z=>{ const d=haversine(pos.lat,pos.lng,z._center.lat,z._center.lng); if(d<bd){bd=d;best=z;} });
+  if(!best){ hud.classList.remove('show'); return; }
+  hud.classList.add('show'); $('#navName').textContent=best.name; $('#navDist').textContent=fmtDist(bd);
+  const brg=bearing(pos.lat,pos.lng,best._center.lat,best._center.lng);
+  let rot=brg; if(mode==='live'&&heading!=null) rot=(brg-heading+360)%360;
+  if(a) a.style.transform='rotate('+rot.toFixed(0)+'deg)'; }
+
+function applyHeading(){ if(heading==null) return; const el=liveMe&&liveMe.getElement&&liveMe.getElement();
+  if(el){ const nav=el.querySelector('.nav'); if(nav) nav.style.transform='rotate('+heading.toFixed(0)+'deg)'; } updateNavHud(); }
+function onOrient(e){ let h=null;
+  if(typeof e.webkitCompassHeading==='number'&&!isNaN(e.webkitCompassHeading)) h=e.webkitCompassHeading;
+  else if(typeof e.alpha==='number') h=(360-e.alpha+360)%360;
+  if(h!=null){ heading=h; headingOn=true; applyHeading(); } }
+function startCompass(){ if(headingOn||!window.DeviceOrientationEvent) return;
+  const add=()=>{ window.addEventListener('deviceorientationabsolute',onOrient,true); window.addEventListener('deviceorientation',onOrient,true); };
+  if(typeof DeviceOrientationEvent.requestPermission==='function'){ DeviceOrientationEvent.requestPermission().then(s=>{ if(s==='granted') add(); }).catch(()=>{}); }
+  else add(); }
+
+/* accu: pauzeer locatie als de app naar de achtergrond gaat */
+document.addEventListener('visibilitychange',()=>{ if(document.hidden){ if(mode==='live') stopGeo(); } else { if(mode==='live'&&!watch) startGeo(); } });
+
+applyMusicState(); updateProgress();
 
 /* ===== INIT ===== */
 $('#setupX').onclick=()=>$('#setup').classList.add('hide');
@@ -676,6 +860,10 @@ const T={
   maphint:{nl:'Sleep je locatie over een plek',en:'Drag your location onto a place',de:'Zieh deinen Standort auf einen Ort',it:'Trascina la tua posizione su un luogo',pt:'Arrasta a tua localização para um lugar',es:'Arrastra tu ubicación sobre un lugar',pl:'Przeciągnij swoją lokalizację na miejsce',da:'Træk din placering hen på et sted',sv:'Dra din plats till en plats',no:'Dra posisjonen din til et sted',fi:'Vedä sijaintisi paikan päälle',el:'Σύρε την τοποθεσία σου πάνω σε ένα μέρος'},
   listEb:{nl:'5 stemmen · binnenstad',en:'5 voices · city centre',de:'5 Stimmen · Innenstadt',it:'5 voci · centro',pt:'5 vozes · centro',es:'5 voces · centro',pl:'5 głosów · centrum',da:'5 stemmer · bymidte',sv:'5 röster · centrum',no:'5 stemmer · sentrum',fi:'5 ääntä · keskusta',el:'5 φωνές · κέντρο'},
   listTtl:{nl:'Plekken in de buurt',en:'Places nearby',de:'Orte in der Nähe',it:'Luoghi vicini',pt:'Lugares por perto',es:'Lugares cercanos',pl:'Miejsca w pobliżu',da:'Steder i nærheden',sv:'Platser i närheten',no:'Steder i nærheten',fi:'Lähellä olevat paikat',el:'Κοντινά μέρη'},
+  progLabel:{nl:'bezocht',en:'visited',de:'besucht',it:'visitati',pt:'visitados',es:'visitados',pl:'odwiedzone',da:'besøgt',sv:'besökta',no:'besøkt',fi:'käyty',el:'επισκ.'},
+  cardDone:{nl:'Bezocht',en:'Visited',de:'Besucht',it:'Visitato',pt:'Visitado',es:'Visitado',pl:'Odwiedzone',da:'Besøgt',sv:'Besökt',no:'Besøkt',fi:'Käyty',el:'Επισκέφθηκες'},
+  wHead:{nl:'Werkt het best met een koptelefoon.',en:'Works best with headphones.',de:'Funktioniert am besten mit Kopfhörern.',it:'Funziona meglio con le cuffie.',pt:'Funciona melhor com auscultadores.',es:'Funciona mejor con auriculares.',pl:'Działa najlepiej ze słuchawkami.',da:'Fungerer bedst med høretelefoner.',sv:'Fungerar bäst med hörlurar.',no:'Fungerer best med hodetelefoner.',fi:'Toimii parhaiten kuulokkeilla.',el:'Λειτουργεί καλύτερα με ακουστικά.'},
+  navDone:{nl:'Alles bezocht',en:'All visited',de:'Alle besucht',it:'Tutto visitato',pt:'Tudo visitado',es:'Todo visitado',pl:'Wszystko odwiedzone',da:'Alt besøgt',sv:'Allt besökt',no:'Alt besøkt',fi:'Kaikki käyty',el:'Όλα ολοκληρώθηκαν'},
   tapToTalk:{nl:'Tik om te praten',en:'Tap to talk',de:'Zum Sprechen tippen',it:'Tocca per parlare',pt:'Toca para falar',es:'Toca para hablar',pl:'Dotknij, aby mówić',da:'Tryk for at tale',sv:'Tryck för att prata',no:'Trykk for å snakke',fi:'Napauta puhuaksesi',el:'Πάτα για να μιλήσεις'},
   preview:{nl:'Preview · typ of tik een vraag',en:'Preview · type or tap a question',de:'Vorschau · tippe oder wähle eine Frage',it:'Anteprima · scrivi o tocca una domanda',pt:'Pré-visualização · escreve ou toca numa pergunta',es:'Vista previa · escribe o toca una pregunta',pl:'Podgląd · wpisz lub dotknij pytania',da:'Forhåndsvisning · skriv eller tryk på et spørgsmål',sv:'Förhandsvisning · skriv eller tryck på en fråga',no:'Forhåndsvisning · skriv eller trykk på et spørsmål',fi:'Esikatselu · kirjoita tai napauta kysymystä',el:'Προεπισκόπηση · γράψε ή πάτα μια ερώτηση'},
   connecting:{nl:'Verbinden…',en:'Connecting…',de:'Verbinden…',it:'Connessione…',pt:'A ligar…',es:'Conectando…',pl:'Łączenie…',da:'Forbinder…',sv:'Ansluter…',no:'Kobler til…',fi:'Yhdistetään…',el:'Σύνδεση…'},
@@ -696,15 +884,37 @@ function applyI18n(){ uiLang=(lang==='pt-br')?'pt':(UI_LANGS.includes(lang)?lang
   document.querySelectorAll('[data-i18n]').forEach(el=>{ const s=tr(el.dataset.i18n); if(s!=null) el.textContent=s; });
   if(active){ const z=ZONES.find(x=>x.id===active); if(z){ $('#input').placeholder=tr('inputPh').replace('{name}',z.name); const sg=$('#sugs'); if(sg){ sg.innerHTML=''; sugsFor(z).forEach(s=>{const b=document.createElement('div');b.className='sug';b.textContent=s;b.onclick=()=>{$('#input').value=s;sendMsg();};sg.appendChild(b);}); } } } }
 (function(){ const sel=$('#wsel');
+  /* ===== Achtergrondmuziek welkomstscherm ===== */
+  const BG_VOLUME=0.18;            // doelvolume (0 = stil, 1 = max)
+  const bgAudio=$('#welcomeAudio');
+  let bgStarted=false;
+  function startBg(){
+    if(bgStarted||!bgAudio||!musicEnabled) return;
+    bgStarted=true;
+    bgAudio.volume=BG_VOLUME;
+    bgAudio.play().catch(()=>{ bgStarted=false; }); // geblokkeerd? probeer bij volgende tik opnieuw
+  }
+  function fadeOutBg(){
+    if(!bgAudio||!bgStarted) return;
+    const step=bgAudio.volume/12;
+    const t=setInterval(()=>{
+      bgAudio.volume=Math.max(0,bgAudio.volume-step);
+      if(bgAudio.volume<=0.001){ clearInterval(t); bgAudio.pause(); }
+    },50);
+  }
+  // Browsers blokkeren autoplay met geluid: start bij de eerste tik op het welkomstscherm.
+  const wEl=$('#welcome');
+  if(wEl) wEl.addEventListener('pointerdown',startBg,{once:false});
+
   const PRIORITY=['it','pt','es','pl','da','sv','no','fi','el'], SKIP=PRIORITY.concat(['nl','en','de']);
   if(sel){ const nameOf=c=>{ const f=LANGS.find(l=>l[0]===c); return f?f[1]:c; };
     PRIORITY.forEach((c,i)=>{ const o=document.createElement('option'); o.value=c; o.textContent=nameOf(c); if(i===0) o.selected=true; sel.appendChild(o); });
     const sep=document.createElement('option'); sep.disabled=true; sep.textContent='\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500'; sel.appendChild(sep);
     LANGS.forEach(([c,n])=>{ if(SKIP.includes(c)) return; const o=document.createElement('option'); o.value=c; o.textContent=n; sel.appendChild(o); }); }
   function paint(){ document.querySelectorAll('#langRow button').forEach(b=>{ const v=b.dataset.l; b.classList.toggle('on', otherMode ? v==='other' : v===lang); }); }
-  document.querySelectorAll('#langRow button').forEach(b=>{ b.onclick=()=>{ const v=b.dataset.l; if(v==='other'){ otherMode=true; $('#wsel').classList.add('show'); lang=$('#wsel').value; } else { otherMode=false; $('#wsel').classList.remove('show'); lang=v; } paint(); applyI18n(); }; });
-  if(sel) sel.onchange=e=>{ lang=e.target.value; otherMode=true; paint(); applyI18n(); };
-  const st=$('#wstart'); if(st) st.onclick=()=>{ $('#welcome').classList.add('hide'); primeMic(); };
+  document.querySelectorAll('#langRow button').forEach(b=>{ b.onclick=()=>{ startBg(); const v=b.dataset.l; if(v==='other'){ otherMode=true; $('#wsel').classList.add('show'); lang=$('#wsel').value; } else { otherMode=false; $('#wsel').classList.remove('show'); lang=v; } paint(); applyI18n(); }; });
+  if(sel) sel.onchange=e=>{ startBg(); lang=e.target.value; otherMode=true; paint(); applyI18n(); };
+  const st=$('#wstart'); if(st) st.onclick=()=>{ fadeOutBg(); $('#welcome').classList.add('hide'); primeMic(); };
   applyI18n();
 })();
 
