@@ -219,33 +219,33 @@
   .welcome{position:absolute;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;padding:16px;
     background:rgba(20,21,15,.55);-webkit-backdrop-filter:blur(7px);backdrop-filter:blur(7px);}
   .welcome.hide{display:none;}
-  .wcard{width:100%;max-width:430px;max-height:95%;overflow-y:auto;background:var(--surface-solid);border-radius:26px;
-    padding:26px 24px;box-shadow:0 30px 80px rgba(0,0,0,.45);border:1px solid var(--glass-brd);}
-  .wcard .eb{font-family:'Schibsted Grotesk';font-weight:800;font-size:11px;letter-spacing:.13em;color:var(--ink-2);text-transform:uppercase;}
-  .wcard h1{font-family:'Schibsted Grotesk';font-weight:800;font-size:31px;line-height:1.03;letter-spacing:-.02em;margin:11px 0 0;color:var(--ink);}
-  .wcard h1 span{color:var(--lime-d);}
-  .wcard .sub{color:var(--ink-2);font-size:14.5px;line-height:1.45;margin-top:12px;}
-  .wfeat{display:flex;gap:13px;align-items:flex-start;padding:14px;border:1px solid var(--line);border-radius:16px;margin-top:11px;}
-  .wfeat .ic{flex-shrink:0;width:38px;height:38px;border-radius:11px;background:var(--ink);color:var(--lime);display:grid;place-items:center;}
-  .wfeat .ic svg{width:19px;height:19px;}
-  .wfeat h3{font-family:'Schibsted Grotesk';font-weight:800;font-size:15px;color:var(--ink);}
-  .wfeat p{font-size:13px;color:var(--ink-2);line-height:1.4;margin-top:3px;}
-  .wpriv{display:flex;gap:11px;align-items:flex-start;padding:13px 14px;border-radius:14px;margin-top:11px;background:rgba(93,184,255,.1);border:1px solid rgba(93,184,255,.28);}
-  .wpriv .ic{flex-shrink:0;color:var(--blue);}.wpriv .ic svg{width:18px;height:18px;}
-  .wpriv p{font-size:12.5px;color:var(--ink-2);line-height:1.45;}.wpriv b{color:var(--ink);font-weight:800;}
-  .wlang{margin-top:18px;}
-  .wlang .lab{font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
-  .langrow{display:flex;gap:7px;}
-  .langrow button{flex:1;padding:11px 8px;border-radius:12px;border:1px solid var(--line);background:transparent;
-    font-family:'Hanken Grotesk';font-weight:700;font-size:13px;color:var(--ink);cursor:pointer;transition:.15s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .wcard{width:100%;max-width:420px;max-height:96%;overflow-y:auto;background:var(--surface-solid);border-radius:23px;
+    padding:21px 21px;box-shadow:0 30px 80px rgba(0,0,0,.45);border:1px solid var(--glass-brd);}
+  .wcard .eb{font-family:'Schibsted Grotesk';font-weight:800;font-size:10.5px;letter-spacing:.12em;color:var(--ink-2);text-transform:uppercase;}
+  .wcard h1{font-family:'Schibsted Grotesk';font-weight:800;font-size:26px;line-height:1.02;letter-spacing:-.02em;margin:8px 0 0;color:var(--ink);}
+  .wcard h1 .accent{color:var(--lime-d);}
+  .wcard .sub{color:var(--ink-2);font-size:13px;line-height:1.4;margin-top:9px;}
+  .wfeat{display:flex;gap:11px;align-items:flex-start;padding:11px;border:1px solid var(--line);border-radius:14px;margin-top:9px;}
+  .wfeat .ic{flex-shrink:0;width:34px;height:34px;border-radius:10px;background:var(--ink);color:var(--lime);display:grid;place-items:center;}
+  .wfeat .ic svg{width:17px;height:17px;}
+  .wfeat h3{font-family:'Schibsted Grotesk';font-weight:800;font-size:14px;color:var(--ink);}
+  .wfeat p{font-size:12px;color:var(--ink-2);line-height:1.35;margin-top:2px;}
+  .wpriv{display:flex;gap:10px;align-items:flex-start;padding:11px 12px;border-radius:13px;margin-top:9px;background:rgba(93,184,255,.1);border:1px solid rgba(93,184,255,.28);}
+  .wpriv .ic{flex-shrink:0;color:var(--blue);}.wpriv .ic svg{width:17px;height:17px;}
+  .wpriv p{font-size:11.5px;color:var(--ink-2);line-height:1.4;}.wpriv b{color:var(--ink);font-weight:800;}
+  .wlang{margin-top:14px;}
+  .wlang .lab{font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:7px;}
+  .langrow{display:flex;gap:6px;}
+  .langrow button{flex:1;padding:10px 6px;border-radius:11px;border:1px solid var(--line);background:transparent;
+    font-family:'Hanken Grotesk';font-weight:700;font-size:12.5px;color:var(--ink);cursor:pointer;transition:.15s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .langrow button.on{background:var(--ink);color:var(--lime);border-color:var(--ink);}
-  .wsel{margin-top:8px;width:100%;padding:12px;border-radius:12px;border:1px solid var(--line);background:#fff;
+  .wsel{margin-top:7px;width:100%;padding:10px;border-radius:11px;border:1px solid var(--line);background:#fff;
     font-family:'Hanken Grotesk';font-size:14px;color:var(--ink);display:none;}
   .wsel.show{display:block;}
-  .wstart{width:100%;margin-top:20px;display:flex;align-items:center;justify-content:center;gap:10px;padding:17px;border-radius:16px;border:none;cursor:pointer;
-    font-family:'Schibsted Grotesk';font-weight:800;font-size:16px;letter-spacing:-.01em;color:var(--ink);
+  .wstart{width:100%;margin-top:15px;display:flex;align-items:center;justify-content:center;gap:9px;padding:15px;border-radius:15px;border:none;cursor:pointer;
+    font-family:'Schibsted Grotesk';font-weight:800;font-size:15.5px;letter-spacing:-.01em;color:var(--ink);
     background:linear-gradient(135deg,var(--lime-l),var(--lime) 55%,var(--lime-d));box-shadow:0 8px 22px rgba(159,206,28,.5);}
-  .wstart:active{transform:scale(.99);}.wstart svg{width:20px;height:20px;}
+  .wstart:active{transform:scale(.99);}.wstart svg{width:19px;height:19px;}
 </style>
 </head>
 <body>
@@ -258,7 +258,7 @@
       <div class="seg"><button id="mDemo" class="on">Demo</button><button id="mLive">Live</button></div>
     </div>
 
-    <div class="maphint" id="maphint"><span class="b"></span>Sleep je locatie over een plek</div>
+    <div class="maphint" id="maphint"><span class="b"></span><span data-i18n="maphint">Sleep je locatie over een plek</span></div>
 
     <button class="voice-fab" id="voiceFab" aria-label="Terug naar gesprek">
       <span class="vf-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0M12 19v3"/></svg></span>
@@ -273,36 +273,36 @@
 
     <div class="welcome" id="welcome">
       <div class="wcard">
-        <div class="eb">Audio tour · Stadsstemmen</div>
-        <h1>Praat met de<br><span>stemmen van Groningen</span></h1>
-        <p class="sub">Ontdek de binnenstad met plekken die weten waar je staat — en die hun eigen verhaal aan jou vertellen.</p>
+        <div class="eb" data-i18n="wEyebrow">Audio tour · Stadsstemmen</div>
+        <h1><span data-i18n="wTitle1">Praat met de</span><br><span class="accent" data-i18n="wTitle2">stemmen van Groningen</span></h1>
+        <p class="sub" data-i18n="wSub">Ontdek de binnenstad met plekken die weten waar je staat — en je hun eigen verhaal vertellen.</p>
 
         <div class="wfeat">
           <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-5.2-7-11a7 7 0 0 1 14 0c0 5.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg></div>
-          <div><h3>Plek-bewust</h3><p>Loop door de stad; elke plek herkent waar je bent en vertelt wat hier te zien is.</p></div>
+          <div><h3 data-i18n="wF1t">Plek-bewust</h3><p data-i18n="wF1p">Loop door de stad; elke plek herkent waar je bent en vertelt wat hier te zien is.</p></div>
         </div>
         <div class="wfeat">
           <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0M12 19v3"/></svg></div>
-          <div><h3>Spreek of typ</h3><p>Tik op de microfoon en praat, of typ je vraag als het te druk is om te praten.</p></div>
+          <div><h3 data-i18n="wF2t">Spreek of typ</h3><p data-i18n="wF2p">Tik op de microfoon en praat, of typ je vraag als het te druk is.</p></div>
         </div>
 
         <div class="wpriv">
           <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 3v6c0 5-3.5 8.5-8 11-4.5-2.5-8-6-8-11V5z"/><path d="M9 12l2 2 4-4"/></svg></div>
-          <p><b>Privacy:</b> je locatie wordt alleen gebruikt om te herkennen bij welke plek je staat. Niets wordt opgeslagen. Je kunt ook handmatig een plek kiezen.</p>
+          <p><b data-i18n="wPrivLabel">Privacy:</b> <span data-i18n="wPrivText">je locatie wordt alleen gebruikt om te herkennen bij welke plek je staat. Niets wordt opgeslagen.</span></p>
         </div>
 
         <div class="wlang">
-          <div class="lab">Taal van de gids</div>
+          <div class="lab" data-i18n="wLangLabel">Taal van de gids</div>
           <div class="langrow" id="langRow">
             <button data-l="nl" class="on">Nederlands</button>
             <button data-l="en">English</button>
             <button data-l="de">Deutsch</button>
-            <button data-l="other">Andere…</button>
+            <button data-l="other" data-i18n="wOther">Andere…</button>
           </div>
           <select class="wsel" id="wsel"></select>
         </div>
 
-        <button class="wstart" id="wstart">Start de tour
+        <button class="wstart" id="wstart"><span data-i18n="wStart">Start de tour</span>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h14"/><path d="M13 6l6 6-6 6"/></svg>
         </button>
       </div>
@@ -313,7 +313,7 @@
       <div class="drag" id="drag"><div class="grip"></div></div>
 
       <div class="list-view">
-        <div class="list-head"><div class="eb">5 stemmen · binnenstad</div><div class="ttl">Plekken in de buurt</div></div>
+        <div class="list-head"><div class="eb" data-i18n="listEb">5 stemmen · binnenstad</div><div class="ttl" data-i18n="listTtl">Plekken in de buurt</div></div>
         <div class="cards" id="cards"></div>
       </div>
 
@@ -342,7 +342,7 @@
           </div>
         </div>
         <div class="sugs" id="sugs"></div>
-        <div class="cstatus" id="talkLabel">Tik om te praten</div>
+        <div class="cstatus" id="talkLabel" data-i18n="tapToTalk">Tik om te praten</div>
         <div class="composer">
           <button class="micbtn" id="talk" aria-label="Praten">
             <span class="m-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0M12 19v3"/></svg></span>
@@ -503,16 +503,16 @@ function openInfo(id){ const z=ZONES.find(x=>x.id===id); if(!z)return; active=id
 function renderInfoFoot(z){ const foot=$('#iFoot');
   const can=(mode==='demo')||(mode==='live'&&livePos&&inPoly(livePos.lat,livePos.lng,z.polygon));
   if(can){ foot.innerHTML='<button class="talk-cta" id="ctaTalk">'+MIC+' Praat met deze plek</button>'; $('#ctaTalk').onclick=()=>openConvo(z.id); }
-  else { let txt='Kom dichterbij om te praten';
-    if(mode==='live'&&livePos&&z._center){ const d=Math.round(haversine(livePos.lat,livePos.lng,z._center.lat,z._center.lng)); txt='Kom dichterbij · nog ~'+d+' m'; }
-    else if(mode==='live'&&!livePos){ txt='Locatie zoeken…'; }
+  else { let txt=tr('comeCloser');
+    if(mode==='live'&&livePos&&z._center){ const d=Math.round(haversine(livePos.lat,livePos.lng,z._center.lat,z._center.lng)); txt=tr('comeCloserDist').replace('{m}',d); }
+    else if(mode==='live'&&!livePos){ txt=tr('locating'); }
     foot.innerHTML='<div class="talk-cta off">'+MIC+' '+txt+'</div>'; } }
-function distTxt(z){ if(mode==='live'&&livePos&&z._center){ const d=Math.round(haversine(livePos.lat,livePos.lng,z._center.lat,z._center.lng)); return 'Kom dichterbij · nog ~'+d+' m'; } if(mode==='live'&&!livePos) return 'Locatie zoeken\u2026'; return 'Kom dichterbij om te praten'; }
+function distTxt(z){ if(mode==='live'&&livePos&&z._center){ const d=Math.round(haversine(livePos.lat,livePos.lng,z._center.lat,z._center.lng)); return tr('comeCloserDist').replace('{m}',d); } if(mode==='live'&&!livePos) return tr('locating'); return tr('comeCloser'); }
 function openConvo(id){ const z=ZONES.find(x=>x.id===id); if(!z)return; stopVoice(); active=id;
   const aid=ELEVENLABS_AGENT_IDS[id];
   canTalk=(mode==='demo')||(!!livePos && inPoly(livePos.lat,livePos.lng,z.polygon));
   $('#sName').textContent=z.name; $('#sChar').textContent='\u201C'+z.character+'\u201D';
-  $('#input').placeholder='Typ je vraag aan '+z.name+'\u2026';
+  $('#input').placeholder=tr('inputPh').replace('{name}',z.name);
   const sg=$('#sugs'); sg.innerHTML=''; z.sugs.forEach(s=>{const b=document.createElement('div');b.className='sug';b.textContent=s;b.onclick=()=>{$('#input').value=s;sendMsg();};sg.appendChild(b);});
   renderConvo(z); if(!aid && histories[id].length===0) pushThem(z,z.fallback[0]); mountVoice(z);
   buildSlides(z); setActiveMarker(id);
@@ -529,7 +529,7 @@ $('#backInfo').onclick=closeToList;
 let elSession=null, elConnecting=false, elGen=0, lastUserText=null, lastUserAt=0, micPrimed=false;
 function setTalkLabel(t){ $('#talkLabel').textContent=t; }
 function mountVoice(z){ const aid=ELEVENLABS_AGENT_IDS[z.id];
-  setTalkLabel(aid?'Tik om te praten':'Preview · typ of tik een vraag'); }
+  setTalkLabel(aid?tr('tapToTalk'):tr('preview')); }
 function addUserText(t){ addBubble('me',t); lastUserText=t; lastUserAt=Date.now(); }
 async function primeMic(){ if(micPrimed) return; try{ const s=await navigator.mediaDevices.getUserMedia({audio:true}); s.getTracks().forEach(t=>t.stop()); micPrimed=true; }catch(e){ console.warn('mic vooraf niet toegestaan',e); } }
 function sendUserText(text){ if(!elSession) return; try{ if(elSession.sendUserActivity) elSession.sendUserActivity(); elSession.sendUserMessage(text); addUserText(text); }catch(e){ console.error(e); } }
@@ -538,29 +538,29 @@ async function startConversation(z, initialMessage){
   if(elSession){ if(initialMessage) sendUserText(initialMessage); return; }
   const aid=ELEVENLABS_AGENT_IDS[z.id]; if(!aid) return;
   const Conv=window.ElevenLabsConversation;
-  if(!Conv){ setTalkLabel('Stem niet beschikbaar \u2014 typ je vraag'); return; }
-  const myGen=++elGen; elConnecting=true; setTalkLabel('Verbinden\u2026'); $('#talk').classList.add('connecting');
+  if(!Conv){ setTalkLabel(tr('voiceUnavail')); return; }
+  const myGen=++elGen; elConnecting=true; setTalkLabel(tr('connecting')); $('#talk').classList.add('connecting');
   if(initialMessage) addUserText(initialMessage);
   try{
     try{ await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}}); micPrimed=true; }catch(e){}
     const s=await Conv.startSession({
       agentId:aid, connectionType:'websocket',
       overrides:(lang&&lang!=='nl')?{agent:{language:lang}}:undefined,
-      onConnect:()=>{ if(myGen!==elGen) return; elConnecting=false; const t=$('#talk'); t.classList.remove('connecting'); t.classList.add('live'); setTalkLabel('Aan het luisteren\u2026 (tik om te stoppen)'); updateVoiceFab(); if(initialMessage) setTimeout(()=>{ if(myGen===elGen && elSession){ try{elSession.sendUserMessage(initialMessage);}catch(e){} } },250); },
+      onConnect:()=>{ if(myGen!==elGen) return; elConnecting=false; const t=$('#talk'); t.classList.remove('connecting'); t.classList.add('live'); setTalkLabel(tr('listening')); updateVoiceFab(); if(initialMessage) setTimeout(()=>{ if(myGen===elGen && elSession){ try{elSession.sendUserMessage(initialMessage);}catch(e){} } },250); },
       onDisconnect:()=>{ if(myGen!==elGen) return; resetVoiceUI(); },
-      onError:(e)=>{ if(myGen!==elGen) return; console.error('EL error',e); setTalkLabel('Verbinding mislukt'); resetVoiceUI(); },
-      onModeChange:(m)=>{ if(myGen!==elGen) return; const md=(m&&m.mode)||m; const sp=md==='speaking'; $('#talk').classList.toggle('speaking',sp); if(voiceFab) voiceFab.classList.toggle('speaking',sp); { const md2=$('#media'); if(md2) md2.classList.toggle('speaking',sp); } setTalkLabel(sp?'Aan het praten\u2026':'Aan het luisteren\u2026 (tik om te stoppen)'); },
+      onError:(e)=>{ if(myGen!==elGen) return; console.error('EL error',e); setTalkLabel(tr('connectFailed')); resetVoiceUI(); },
+      onModeChange:(m)=>{ if(myGen!==elGen) return; const md=(m&&m.mode)||m; const sp=md==='speaking'; $('#talk').classList.toggle('speaking',sp); if(voiceFab) voiceFab.classList.toggle('speaking',sp); { const md2=$('#media'); if(md2) md2.classList.toggle('speaking',sp); } setTalkLabel(sp?tr('speaking'):tr('listening')); },
       onMessage:(p)=>{ if(myGen!==elGen) return; const t=p&&(p.message||p.text); const src=p&&(p.source||p.role); if(!t)return;
         if(src==='user'){ if(t===lastUserText && Date.now()-lastUserAt<6000){ lastUserText=null; return; } addBubble('me',t); }
         else addBubble('them',t); }
     });
     if(myGen!==elGen){ try{s.endSession();}catch(e){} return; }
     elSession=s;
-  }catch(e){ if(myGen!==elGen) return; console.error(e); setTalkLabel('Geen verbinding \u2014 check agent/microfoon'); resetVoiceUI(); }
+  }catch(e){ if(myGen!==elGen) return; console.error(e); setTalkLabel(tr('noConnection')); resetVoiceUI(); }
 }
 function stopVoice(){ elGen++; const c=elSession; elSession=null; elConnecting=false; if(c){ try{c.endSession();}catch(e){} } resetVoiceUI(); }
 function resetVoiceUI(){ elSession=null; elConnecting=false; const t=$('#talk'); if(t) t.classList.remove('speaking','live','connecting'); if(voiceFab) voiceFab.classList.remove('speaking'); { const md=$('#media'); if(md) md.classList.remove('speaking'); } updateVoiceFab();
-  if(active){ const z=ZONES.find(x=>x.id===active); if(z&&ELEVENLABS_AGENT_IDS[z.id]) setTalkLabel('Tik om te praten'); } }
+  if(active){ const z=ZONES.find(x=>x.id===active); if(z&&ELEVENLABS_AGENT_IDS[z.id]) setTalkLabel(tr('tapToTalk')); } }
 
 /* ===== GESPREK ===== */
 function renderConvo(z){ const c=$('#convo'); c.innerHTML=''; histories[z.id].forEach(m=>addBubble(m.role==='assistant'?'them':'me',m.content)); c.scrollTop=c.scrollHeight; }
@@ -642,14 +642,49 @@ function stopGeo(){ if(watch!=null){ navigator.geolocation.clearWatch(watch); wa
 $('#setupX').onclick=()=>$('#setup').classList.add('hide');
 if(Object.values(ELEVENLABS_AGENT_IDS).every(v=>v)) $('#setup').classList.add('hide');
 
-/* welkom + taalkiezer */
-let lang='nl', otherMode=false;
-const LANGS=[['nl','Nederlands'],['en','English'],['de','Deutsch'],['fr','Français'],['es','Español'],['it','Italiano'],['pt','Português'],['pl','Polski'],['sv','Svenska'],['da','Dansk'],['nb','Norsk'],['fi','Suomi'],['tr','Türkçe'],['ru','Русский'],['uk','Українська'],['cs','Čeština'],['el','Ελληνικά'],['ro','Română'],['hu','Magyar'],['bg','Български'],['hr','Hrvatski'],['sk','Slovenčina'],['ar','العربية'],['hi','हिन्दी'],['ja','日本語'],['ko','한국어'],['zh','中文'],['id','Bahasa Indonesia'],['ms','Bahasa Melayu'],['ta','தமிழ்'],['fil','Filipino']];
+/* ===== i18n + welkom + taalkiezer ===== */
+let lang='nl', uiLang='nl', otherMode=false;
+const LANGS=[['af','Afrikaans'],['ar','العربية'],['hy','Հայերեն'],['as','অসমীয়া'],['ast','Asturianu'],['az','Azərbaycan'],['be','Беларуская'],['bn','বাংলা'],['bs','Bosanski'],['bg','Български'],['my','မြန်မာ'],['yue','粵語'],['ca','Català'],['zh','中文'],['hr','Hrvatski'],['cs','Čeština'],['da','Dansk'],['nl','Nederlands'],['en','English'],['et','Eesti'],['fil','Filipino'],['fi','Suomi'],['fr','Français'],['gl','Galego'],['ka','ქართული'],['de','Deutsch'],['el','Ελληνικά'],['gu','ગુજરાતી'],['ha','Hausa'],['he','עברית'],['hi','हिन्दी'],['hu','Magyar'],['is','Íslenska'],['id','Bahasa Indonesia'],['ga','Gaeilge'],['it','Italiano'],['ja','日本語'],['jv','Basa Jawa'],['kn','ಕನ್ನಡ'],['kk','Қазақша'],['ky','Кыргызча'],['ko','한국어'],['lv','Latviešu'],['lt','Lietuvių'],['lb','Lëtzebuergesch'],['mk','Македонски'],['ms','Bahasa Melayu'],['ml','മലയാളം'],['mt','Malti'],['mi','Māori'],['mr','मराठी'],['mn','Монгол'],['ne','नेपाली'],['no','Norsk'],['oc','Occitan'],['or','ଓଡ଼ିଆ'],['ps','پښتو'],['fa','فارسی'],['pl','Polski'],['pt-br','Português (Brasil)'],['pt','Português'],['pa','ਪੰਜਾਬੀ'],['ro','Română'],['ru','Русский'],['sr','Српски'],['sd','سنڌي'],['sk','Slovenčina'],['sl','Slovenščina'],['so','Soomaali'],['es','Español'],['sw','Kiswahili'],['sv','Svenska'],['tg','Тоҷикӣ'],['ta','தமிழ்'],['te','తెలుగు'],['th','ไทย'],['tr','Türkçe'],['uk','Українська'],['ur','اردو'],['uz','Oʻzbek'],['vi','Tiếng Việt'],['cy','Cymraeg'],['yo','Yorùbá']];
+const T={
+  wEyebrow:{nl:'Audio tour · Stadsstemmen',en:'Audio tour · Stadsstemmen',de:'Audiotour · Stadsstemmen'},
+  wTitle1:{nl:'Praat met de',en:'Talk to the',de:'Sprich mit den'},
+  wTitle2:{nl:'stemmen van Groningen',en:'voices of Groningen',de:'Stimmen von Groningen'},
+  wSub:{nl:'Ontdek de binnenstad met plekken die weten waar je staat — en je hun eigen verhaal vertellen.',en:'Explore the old city with places that know where you are — and tell you their own story.',de:'Entdecke die Innenstadt mit Orten, die wissen, wo du bist — und dir ihre Geschichte erzählen.'},
+  wF1t:{nl:'Plek-bewust',en:'Location-aware',de:'Ortsbewusst'},
+  wF1p:{nl:'Loop door de stad; elke plek herkent waar je bent en vertelt wat hier te zien is.',en:'Walk through the city; each place knows where you are and tells you what to see.',de:'Geh durch die Stadt; jeder Ort weiß, wo du bist, und erzählt, was es zu sehen gibt.'},
+  wF2t:{nl:'Spreek of typ',en:'Speak or type',de:'Sprechen oder tippen'},
+  wF2p:{nl:'Tik op de microfoon en praat, of typ je vraag als het te druk is.',en:'Tap the microphone and talk, or type your question if it’s too busy.',de:'Tippe aufs Mikrofon und sprich, oder tippe deine Frage, wenn es zu laut ist.'},
+  wPrivLabel:{nl:'Privacy:',en:'Privacy:',de:'Datenschutz:'},
+  wPrivText:{nl:'je locatie wordt alleen gebruikt om te herkennen bij welke plek je staat. Niets wordt opgeslagen.',en:'your location is only used to recognise which place you’re at. Nothing is stored.',de:'dein Standort wird nur genutzt, um zu erkennen, an welchem Ort du bist. Nichts wird gespeichert.'},
+  wLangLabel:{nl:'Taal van de gids',en:'Guide language',de:'Sprache des Guides'},
+  wOther:{nl:'Andere…',en:'Other…',de:'Andere…'},
+  wStart:{nl:'Start de tour',en:'Start the tour',de:'Tour starten'},
+  maphint:{nl:'Sleep je locatie over een plek',en:'Drag your location onto a place',de:'Zieh deinen Standort auf einen Ort'},
+  listEb:{nl:'5 stemmen · binnenstad',en:'5 voices · city centre',de:'5 Stimmen · Innenstadt'},
+  listTtl:{nl:'Plekken in de buurt',en:'Places nearby',de:'Orte in der Nähe'},
+  tapToTalk:{nl:'Tik om te praten',en:'Tap to talk',de:'Zum Sprechen tippen'},
+  preview:{nl:'Preview · typ of tik een vraag',en:'Preview · type or tap a question',de:'Vorschau · tippe oder wähle eine Frage'},
+  connecting:{nl:'Verbinden…',en:'Connecting…',de:'Verbinden…'},
+  listening:{nl:'Aan het luisteren… (tik om te stoppen)',en:'Listening… (tap to stop)',de:'Hört zu… (zum Stoppen tippen)'},
+  speaking:{nl:'Aan het praten…',en:'Speaking…',de:'Spricht…'},
+  connectFailed:{nl:'Verbinding mislukt',en:'Connection failed',de:'Verbindung fehlgeschlagen'},
+  voiceUnavail:{nl:'Stem niet beschikbaar — typ je vraag',en:'Voice unavailable — type your question',de:'Stimme nicht verfügbar — tippe deine Frage'},
+  noConnection:{nl:'Geen verbinding — check agent/microfoon',en:'No connection — check agent/microphone',de:'Keine Verbindung — prüfe Agent/Mikrofon'},
+  comeCloser:{nl:'Kom dichterbij om te praten',en:'Come closer to talk',de:'Komm näher zum Sprechen'},
+  comeCloserDist:{nl:'Kom dichterbij · nog ~{m} m',en:'Come closer · ~{m} m to go',de:'Komm näher · noch ~{m} m'},
+  locating:{nl:'Locatie zoeken…',en:'Finding location…',de:'Standort wird gesucht…'},
+  inputPh:{nl:'Typ je vraag aan {name}…',en:'Type your question to {name}…',de:'Tippe deine Frage an {name}…'}
+};
+function tr(k){ const e=T[k]; if(!e) return null; return e[uiLang]||e.en||e.nl; }
+function applyI18n(){ uiLang=(lang==='nl')?'nl':(lang==='de')?'de':'en';
+  document.querySelectorAll('[data-i18n]').forEach(el=>{ const s=tr(el.dataset.i18n); if(s!=null) el.textContent=s; });
+  if(active){ const z=ZONES.find(x=>x.id===active); if(z) $('#input').placeholder=tr('inputPh').replace('{name}',z.name); } }
 (function(){ const sel=$('#wsel'); if(sel){ LANGS.forEach(([c,n])=>{ const o=document.createElement('option'); o.value=c; o.textContent=n; if(c==='fr') o.selected=true; sel.appendChild(o); }); }
   function paint(){ document.querySelectorAll('#langRow button').forEach(b=>{ const v=b.dataset.l; b.classList.toggle('on', otherMode ? v==='other' : v===lang); }); }
-  document.querySelectorAll('#langRow button').forEach(b=>{ b.onclick=()=>{ const v=b.dataset.l; if(v==='other'){ otherMode=true; $('#wsel').classList.add('show'); lang=$('#wsel').value; } else { otherMode=false; $('#wsel').classList.remove('show'); lang=v; } paint(); }; });
-  if(sel) sel.onchange=e=>{ lang=e.target.value; otherMode=true; paint(); };
+  document.querySelectorAll('#langRow button').forEach(b=>{ b.onclick=()=>{ const v=b.dataset.l; if(v==='other'){ otherMode=true; $('#wsel').classList.add('show'); lang=$('#wsel').value; } else { otherMode=false; $('#wsel').classList.remove('show'); lang=v; } paint(); applyI18n(); }; });
+  if(sel) sel.onchange=e=>{ lang=e.target.value; otherMode=true; paint(); applyI18n(); };
   const st=$('#wstart'); if(st) st.onclick=()=>{ $('#welcome').classList.add('hide'); primeMic(); };
+  applyI18n();
 })();
 
 setMode('demo');
