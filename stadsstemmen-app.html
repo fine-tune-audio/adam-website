@@ -268,7 +268,7 @@
   .sndbtn svg{width:20px;height:20px;}
   .sndbtn .on-ic{display:block;} .sndbtn .off-ic{display:none;}
   .sndbtn.muted{color:var(--muted);} .sndbtn.muted .on-ic{display:none;} .sndbtn.muted .off-ic{display:block;}
-  .sndbtn.on{background:var(--ink);color:var(--lime);border-color:var(--ink);}
+  #textBtn.on{background:var(--ink);color:var(--lime);border-color:var(--ink);}
   /* tekst-modus: geen microfoon, alleen typen */
   body.text-only .micbtn{display:none;}
   body.text-only #talkLabel{display:none;}
@@ -324,7 +324,7 @@
     <div class="top">
       <div class="chip"><span class="mk">Stads<b>stemmen</b></span></div>
       <div class="top-r">
-        <button class="sndbtn on" id="sndBtn" aria-label="Geluid aan/uit" title="Geluid aan/uit">
+        <button class="sndbtn" id="sndBtn" aria-label="Geluid aan/uit" title="Geluid aan/uit">
           <span class="on-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M19 5a9 9 0 0 1 0 14"/></svg></span>
           <span class="off-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="M22 9l-6 6"/><path d="M16 9l6 6"/></svg></span>
         </button>
@@ -500,8 +500,9 @@ const INFO_TEXT = {
 
 const $=s=>document.querySelector(s);
 let active=null, mode='demo', watch=null, liveMe=null, demoMe=null, demoZone=null, livePos=null, canTalk=false;
-let musicEnabled=true, heading=null, headingOn=false, textOnly=false;
-const SHOW_TEXTONLY_TOGGLE=true;  // op true zetten om de tekst-modus-knop te tonen
+let soundOn=true, heading=null, headingOn=false, textOnly=false;
+const SHOW_TEXTONLY_TOGGLE=false;  // op true zetten om de tekst-modus-knop te tonen
+const SHOW_SOUND_TOGGLE=false;     // op true zetten om de geluidsknop (muziek + stem) te tonen
 const visited=new Set(); const TOTAL=ZONES.length;
 const histories={}; ZONES.forEach(z=>histories[z.id]=[]);
 const markersById={};
@@ -655,7 +656,7 @@ function fadeIntroOut(ms){ const a=introAudio; if(!a) return; clearIntroTimers()
 function stopZoneIntro(immediate){ const a=introAudio; if(!a){ clearIntroTimers(); return; }
   if(immediate){ clearIntroTimers(); a.pause(); a.removeAttribute('src'); a.load(); a.volume=ZONE_INTRO_VOLUME; }
   else { fadeIntroOut(600); } }
-function playZoneIntro(id){ const src=ZONE_AUDIO[id]; if(!src||!musicEnabled) return;
+function playZoneIntro(id){ const src=ZONE_AUDIO[id]; if(!src||!soundOn) return;
   if(INTRO_ONCE_PER_SESSION && introPlayed.has(id)) return;
   const a=ensureIntroAudio(); stopZoneIntro(true); introPlayed.add(id);
   a.src=src; a.loop=false; a.volume=ZONE_INTRO_VOLUME;
@@ -687,16 +688,16 @@ async function startConversation(z, initialMessage){
     const s=await Conv.startSession({
       agentId:aid, connectionType:'websocket',
       overrides:(lang&&lang!=='nl')?{agent:{language:lang}}:undefined,
-      onConnect:()=>{ if(myGen!==elGen) return; elConnecting=false; const t=$('#talk'); t.classList.remove('connecting'); t.classList.add('live'); setTalkLabel(tr('listening')); updateVoiceFab(); if(textOnly && elSession) applyAgentMute(elSession); if(initialMessage) setTimeout(()=>{ if(myGen===elGen && elSession){ try{elSession.sendUserMessage(initialMessage);}catch(e){} } },250); },
+      onConnect:()=>{ if(myGen!==elGen) return; elConnecting=false; const t=$('#talk'); t.classList.remove('connecting'); t.classList.add('live'); setTalkLabel(tr('listening')); updateVoiceFab(); if(elSession) applyAgentMute(elSession); if(initialMessage) setTimeout(()=>{ if(myGen===elGen && elSession){ try{elSession.sendUserMessage(initialMessage);}catch(e){} } },250); },
       onDisconnect:()=>{ if(myGen!==elGen) return; resetVoiceUI(); },
       onError:(e)=>{ if(myGen!==elGen) return; console.error('EL error',e); setTalkLabel(tr('connectFailed')); resetVoiceUI(); },
-      onModeChange:(m)=>{ if(myGen!==elGen) return; const md=(m&&m.mode)||m; const sp=md==='speaking'; if(sp && textOnly && elSession) applyAgentMute(elSession); $('#talk').classList.toggle('speaking',sp); if(voiceFab) voiceFab.classList.toggle('speaking',sp); { const md2=$('#media'); if(md2) md2.classList.toggle('speaking',sp); } setTalkLabel(sp?tr('speaking'):tr('listening')); },
+      onModeChange:(m)=>{ if(myGen!==elGen) return; const md=(m&&m.mode)||m; const sp=md==='speaking'; if(sp && elSession) applyAgentMute(elSession); $('#talk').classList.toggle('speaking',sp); if(voiceFab) voiceFab.classList.toggle('speaking',sp); { const md2=$('#media'); if(md2) md2.classList.toggle('speaking',sp); } setTalkLabel(sp?tr('speaking'):tr('listening')); },
       onMessage:(p)=>{ if(myGen!==elGen) return; const t=p&&(p.message||p.text); const src=p&&(p.source||p.role); if(!t)return;
         if(src==='user'){ if(t===lastUserText && Date.now()-lastUserAt<6000){ lastUserText=null; return; } addBubble('me',t); }
         else addBubble('them',t); }
     });
     if(myGen!==elGen){ try{s.endSession();}catch(e){} return; }
-    elSession=s; if(textOnly) applyAgentMute(elSession);
+    elSession=s; applyAgentMute(elSession);
   }catch(e){ if(myGen!==elGen) return; console.error(e); setTalkLabel(tr('noConnection')); resetVoiceUI(); }
 }
 function stopVoice(){ elGen++; const c=elSession; elSession=null; elConnecting=false; if(c){ try{c.endSession();}catch(e){} } resetVoiceUI(); try{ stopZoneIntro(false); }catch(_){} }
@@ -786,13 +787,15 @@ function startGeo(){ if(!navigator.geolocation)return; watch=navigator.geolocati
 function stopGeo(){ if(watch!=null){ navigator.geolocation.clearWatch(watch); watch=null; } }
 
 /* ===== NIEUWE FEATURES: geluid · voortgang · richting · kompas ===== */
-function applyMusicState(){ const b=$('#sndBtn'); if(b) b.classList.toggle('muted',!musicEnabled);
-  if(!musicEnabled){ const w=$('#welcomeAudio'); if(w){ try{w.pause();}catch(_){} } try{ stopZoneIntro(true); }catch(_){} } }
-function toggleMusic(){ musicEnabled=!musicEnabled; applyMusicState(); }
-{ const sb=$('#sndBtn'); if(sb) sb.onclick=toggleMusic; }
+function applySound(){ const b=$('#sndBtn'); if(b) b.classList.toggle('muted',!soundOn);
+  if(!soundOn){ const w=$('#welcomeAudio'); if(w){ try{w.pause();}catch(_){} } try{ stopZoneIntro(true); }catch(_){} }
+  if(elSession) applyAgentMute(elSession); }
+function toggleSound(){ soundOn=!soundOn; applySound(); }
+{ const sb=$('#sndBtn'); if(sb){ if(SHOW_SOUND_TOGGLE){ sb.onclick=toggleSound; } else { sb.style.display='none'; } } }
 
 /* tekst-modus: dempt de stem van de agents, alleen typen (knop standaard verborgen) */
-function applyAgentMute(s){ if(!s) return; try{ s.setVolume({volume: textOnly?0:1}); }catch(_){} try{ s.setMicMuted(textOnly); }catch(_){} }
+function agentVolume(){ return (soundOn && !textOnly) ? 1 : 0; }
+function applyAgentMute(s){ if(!s) return; try{ s.setVolume({volume: agentVolume()}); }catch(_){} try{ s.setMicMuted(textOnly); }catch(_){} }
 function applyTextOnly(){ const b=$('#textBtn'); if(b) b.classList.toggle('on',textOnly);
   document.body.classList.toggle('text-only',textOnly); if(elSession) applyAgentMute(elSession); }
 function toggleTextOnly(){ textOnly=!textOnly; applyTextOnly(); }
@@ -834,7 +837,7 @@ function startCompass(){ if(headingOn||!window.DeviceOrientationEvent) return;
 /* accu: pauzeer locatie als de app naar de achtergrond gaat */
 document.addEventListener('visibilitychange',()=>{ if(document.hidden){ if(mode==='live') stopGeo(); } else { if(mode==='live'&&!watch) startGeo(); } });
 
-applyMusicState(); updateProgress();
+applySound(); updateProgress();
 
 /* ===== INIT ===== */
 $('#setupX').onclick=()=>$('#setup').classList.add('hide');
@@ -889,7 +892,7 @@ function applyI18n(){ uiLang=(lang==='pt-br')?'pt':(UI_LANGS.includes(lang)?lang
   const bgAudio=$('#welcomeAudio');
   let bgStarted=false;
   function startBg(){
-    if(bgStarted||!bgAudio||!musicEnabled) return;
+    if(bgStarted||!bgAudio||!soundOn) return;
     bgStarted=true;
     bgAudio.volume=BG_VOLUME;
     bgAudio.play().catch(()=>{ bgStarted=false; }); // geblokkeerd? probeer bij volgende tik opnieuw
