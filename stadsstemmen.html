@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<title>Stadsstemmen · Groningen</title>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script type="module">
+  // ElevenLabs voice SDK — eigen interface, geen pop-up widget
+  try {
+    const m = await import("https://esm.sh/@elevenlabs/client@1.9.0");
+    window.ElevenLabsConversation = m.Conversation;
+  } catch (e) { console.warn("ElevenLabs SDK kon niet laden:", e); }
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700;9..144,900&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --bg:#e7dfd0; --ink:#241c14; --ink-2:#5b5247; --muted:#8c8173;
+    --line:rgba(40,28,16,.14);
+    --surface:rgba(250,246,238,.78); --surface-solid:#faf6ee; --glass-brd:rgba(255,252,245,.72);
+    --lime:#c79a68; --lime-l:#e0bd90; --lime-d:#a4763f; --blue:#8a6f4a;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{height:100%;}
+  body{font-family:'Hanken Grotesk',sans-serif;color:var(--ink);-webkit-font-smoothing:antialiased;overflow:hidden;background:var(--bg);}
+
+  .stage{height:100%;display:flex;align-items:center;justify-content:center;}
+  .app{position:relative;width:100%;max-width:440px;height:100%;max-height:940px;overflow:hidden;background:var(--bg);}
+  @media(min-width:480px){.stage{padding:22px;}.app{border-radius:36px;box-shadow:0 40px 120px rgba(0,0,0,.35);}}
+
+  /* ===== KAART ===== */
+  #map{position:absolute;inset:0;z-index:1;background:#e7dfd0;}
+  .leaflet-container{background:#e7dfd0;font-family:inherit;}
+  .leaflet-tile{filter:sepia(.45) saturate(.68) brightness(1.05) contrast(.9) hue-rotate(-8deg);}
+  .leaflet-div-icon{background:transparent;border:none;}
+  .place-pin{width:0;height:0;}
+  .place-pin .ppin{position:absolute;left:0;top:0;transform:translate(-50%,-50%);width:50px;height:50px;border-radius:50%;box-sizing:border-box;
+    background:linear-gradient(135deg,var(--lime-l),var(--lime) 55%,var(--lime-d));padding:3px;box-shadow:0 4px 12px rgba(0,0,0,.3);transition:box-shadow .25s,transform .25s;}
+  .place-pin .ppin img{width:100%;height:100%;border-radius:50%;object-fit:cover;border:2px solid #fff;box-sizing:border-box;display:block;background:#cfd3c2;}
+  .place-pin .pulse{position:absolute;left:0;top:0;width:50px;height:50px;border-radius:50%;background:var(--lime);opacity:0;}
+  .place-pin.active .pulse{opacity:.5;animation:ppulse 2.1s ease-out infinite;}
+  .place-pin.active .ppin{box-shadow:0 4px 18px rgba(164,118,63,.65);transform:translate(-50%,-50%) scale(1.08);}
+  @keyframes ppulse{0%{transform:translate(-50%,-50%) scale(1);opacity:.45;}100%{transform:translate(-50%,-50%) scale(1.95);opacity:0;}}
+  .me-pin .d{display:block;width:30px;height:30px;border-radius:50%;background:#fff;border:3px solid var(--ink);
+    box-shadow:0 5px 14px rgba(0,0,0,.32);box-sizing:border-box;position:relative;cursor:grab;}
+  .me-pin .d::after{content:'';position:absolute;inset:6px;border-radius:50%;background:var(--blue);}
+  .me-pin .d:active{cursor:grabbing;}
+  .leaflet-tooltip.lm-tip{background:var(--ink);border:none;box-shadow:0 3px 10px rgba(0,0,0,.25);color:#fff;
+    font-family:'Hanken Grotesk';font-size:11px;font-weight:700;padding:4px 9px;border-radius:8px;}
+  .leaflet-tooltip.lm-tip::before{display:none;}
+
+  /* ===== TOP BAR (basic) ===== */
+  .top{position:absolute;z-index:6;top:0;left:0;right:0;padding:16px;display:flex;align-items:center;justify-content:space-between;gap:10px;}
+  .chip{display:flex;align-items:center;gap:9px;padding:10px 15px;border-radius:14px;background:var(--surface);
+    backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid var(--glass-brd);box-shadow:0 6px 20px rgba(0,0,0,.10);}
+  .chip .dotmk{width:9px;height:9px;border-radius:50%;background:var(--lime);border:1.5px solid var(--ink);flex-shrink:0;}
+  .chip .mk{font-family:'Fraunces';font-weight:800;font-size:16px;letter-spacing:-.02em;}
+  .seg{display:flex;gap:3px;padding:3px;border-radius:13px;background:var(--surface);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+    border:1px solid var(--glass-brd);box-shadow:0 6px 18px rgba(0,0,0,.10);}
+  .seg button{border:none;background:transparent;color:var(--muted);font-family:inherit;font-weight:800;font-size:10px;
+    letter-spacing:.08em;text-transform:uppercase;padding:9px 13px;border-radius:10px;cursor:pointer;transition:.16s;}
+  .seg button.on{background:var(--ink);color:var(--lime);}
+
+  /* demo-hint op de kaart */
+  .maphint{position:absolute;z-index:5;top:74px;left:50%;transform:translateX(-50%);
+    display:flex;align-items:center;gap:8px;padding:9px 15px;border-radius:999px;background:var(--surface);
+    backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid var(--glass-brd);
+    box-shadow:0 6px 18px rgba(0,0,0,.10);font-size:12px;font-weight:600;color:var(--ink-2);white-space:nowrap;transition:.3s;}
+  .maphint.hide{opacity:0;transform:translate(-50%,-8px);pointer-events:none;}
+  .maphint .b{width:13px;height:13px;border-radius:50%;background:#fff;border:2px solid var(--ink);position:relative;}
+  .maphint .b::after{content:'';position:absolute;inset:2.5px;border-radius:50%;background:var(--blue);}
+
+  /* ===== ZWEVENDE SPRAAKKNOP ===== */
+  .voice-fab{position:absolute;z-index:7;top:70px;right:16px;width:56px;height:56px;border-radius:50%;
+    display:none;align-items:center;justify-content:center;cursor:pointer;color:var(--ink);
+    background:linear-gradient(135deg,var(--lime-l),var(--lime) 55%,var(--lime-d));
+    border:1px solid rgba(20,21,15,.16);
+    box-shadow:0 10px 26px rgba(164,118,63,.5),0 2px 8px rgba(0,0,0,.18);}
+  .voice-fab.show{display:flex;animation:vfin .28s ease both;}
+  @keyframes vfin{from{opacity:0;transform:scale(.55) translateY(-6px);}to{opacity:1;transform:none;}}
+  .voice-fab::before{content:'';position:absolute;inset:-3px;border-radius:50%;border:2px solid var(--lime);opacity:.6;animation:vfring 1.9s ease-out infinite;pointer-events:none;}
+  @keyframes vfring{0%{transform:scale(1);opacity:.55;}100%{transform:scale(1.55);opacity:0;}}
+  .voice-fab .vf-ico{display:flex;}
+  .voice-fab .vf-ico svg{width:25px;height:25px;}
+  .voice-fab .vf-wave{display:none;gap:3px;align-items:center;height:22px;}
+  .voice-fab.speaking .vf-wave{display:flex;}
+  .voice-fab.speaking .vf-ico{display:none;}
+  .voice-fab .vf-wave i{width:3.5px;height:8px;background:var(--ink);border-radius:3px;animation:vfbar .75s ease-in-out infinite;}
+  .voice-fab .vf-wave i:nth-child(2){animation-delay:.14s;}
+  .voice-fab .vf-wave i:nth-child(3){animation-delay:.28s;}
+  .voice-fab .vf-wave i:nth-child(4){animation-delay:.42s;}
+  @keyframes vfbar{0%,100%{height:7px;}50%{height:20px;}}
+
+  /* ===== SLIDE-PANEEL ===== */
+  .sheet{position:absolute;z-index:8;left:0;right:0;bottom:0;height:55%;
+    background:var(--surface);backdrop-filter:blur(30px) saturate(1.4);-webkit-backdrop-filter:blur(30px) saturate(1.4);
+    border-top:1px solid var(--glass-brd);border-radius:30px 30px 0 0;
+    box-shadow:0 -18px 50px rgba(0,0,0,.18), 0 -1px 0 rgba(255,255,255,.8) inset;display:flex;flex-direction:column;overflow:hidden;}
+  .drag{flex-shrink:0;cursor:grab;touch-action:none;padding:18px 0 16px;}
+  .drag:active{cursor:grabbing;}
+  .grip{width:48px;height:6px;border-radius:9px;background:rgba(20,21,15,.22);margin:0 auto;}
+
+  /* lijst */
+  .list-view{display:flex;flex-direction:column;flex:1;min-height:0;}
+  .list-head{padding:8px 24px 16px;cursor:grab;touch-action:none;}
+  .list-head:active{cursor:grabbing;}
+  .list-head .eb{font-size:11px;font-weight:700;letter-spacing:.04em;color:var(--muted);}
+  .list-head .ttl{font-family:'Fraunces';font-weight:800;font-size:28px;letter-spacing:-.03em;line-height:1.04;margin-top:5px;}
+  .cards{flex:1;overflow-y:auto;padding:2px 16px 24px;display:flex;flex-direction:column;gap:11px;}
+  .cards::-webkit-scrollbar{width:6px;}.cards::-webkit-scrollbar-thumb{background:var(--line);border-radius:9px;}
+  .card{display:flex;align-items:center;gap:16px;padding:16px 16px 16px 20px;border-radius:18px;cursor:pointer;
+    background:var(--surface-solid);border:1px solid var(--line);transition:.16s;box-shadow:0 2px 8px rgba(0,0,0,.04);}
+  .card:hover{box-shadow:0 8px 22px rgba(0,0,0,.10);transform:translateY(-1px);}
+  .card:active{transform:scale(.99);}
+  .card .meta{flex:1;min-width:0;}
+  .card .num{font-family:'Fraunces';font-weight:700;font-size:11px;color:var(--muted);letter-spacing:.06em;}
+  .card .nm{font-family:'Fraunces';font-weight:800;font-size:18px;letter-spacing:-.02em;line-height:1.1;margin-top:3px;}
+  .card .ch{font-size:12.5px;color:var(--muted);margin-top:3px;}
+  .card .go{width:46px;height:46px;border-radius:50%;background:var(--ink);color:var(--lime);flex-shrink:0;display:grid;place-items:center;font-size:19px;}
+
+  /* gesprek */
+  .info-view{flex:1;display:none;flex-direction:column;min-height:0;}
+  .sheet.info .list-view{display:none;}
+  .sheet.info .info-view{display:flex;}
+  .info-body{flex:1;overflow-y:auto;padding:18px 24px 8px;}
+  .info-desc{font-size:15px;line-height:1.6;color:var(--ink-2);}
+  .info-foot{padding:12px 18px calc(18px + env(safe-area-inset-bottom));}
+  .talk-cta{width:100%;display:flex;align-items:center;justify-content:center;gap:10px;padding:16px;border-radius:16px;
+    border:none;cursor:pointer;font-family:'Fraunces';font-weight:800;font-size:15px;letter-spacing:-.01em;background:var(--ink);color:var(--lime);}
+  .talk-cta svg{width:20px;height:20px;}
+  .talk-cta.off{background:var(--surface-solid);color:var(--muted);border:1px solid var(--line);cursor:default;}
+  .convo-view{flex:1;display:none;flex-direction:column;min-height:0;}
+  .sheet.detail .list-view{display:none;}
+  .sheet.detail .info-view{display:none;}
+  .sheet.detail .convo-view{display:flex;}
+  .cv-head{padding:4px 20px 0;display:flex;align-items:center;gap:14px;}
+  .back{width:44px;height:44px;border-radius:50%;background:var(--ink);color:var(--lime);border:none;font-size:19px;cursor:pointer;display:grid;place-items:center;flex-shrink:0;}
+  .cv-title{min-width:0;}
+  .cv-title .eyebrow{font-size:10px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);}
+  .cv-title .nm{font-family:'Fraunces';font-weight:800;font-size:22px;letter-spacing:-.03em;line-height:1.05;margin-top:3px;}
+  .cv-title .ch{font-size:12.5px;color:var(--ink-2);font-weight:600;margin-top:3px;}
+
+  /* media boven, transcriptie eronder die je omhoog kunt swipen */
+  .cv-body{position:relative;flex:1;min-height:0;overflow:hidden;}
+  .media{position:absolute;top:0;left:18px;right:18px;aspect-ratio:4/3;border-radius:18px;overflow:hidden;background:#e9eadf;z-index:1;
+    touch-action:none;box-shadow:0 8px 20px rgba(0,0,0,.16);transition:box-shadow .25s;}
+  .media.speaking{box-shadow:0 0 0 3px var(--lime),0 8px 22px rgba(164,118,63,.40);}
+  .media .slides{position:absolute;inset:0;}
+  .media .slides img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .9s ease;}
+  .media .slides img.on{opacity:1;}
+  .mdots{position:absolute;left:0;right:0;bottom:10px;display:flex;gap:6px;justify-content:center;z-index:2;}
+  .mdots i{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.6);transition:.25s;cursor:pointer;}
+  .mdots i.on{background:#fff;width:18px;border-radius:3px;}
+  .media .marrow{position:absolute;top:50%;transform:translateY(-50%);z-index:3;width:34px;height:34px;padding:0;border:none;border-radius:50%;
+    background:rgba(20,21,15,.42);color:#fff;display:none;place-items:center;cursor:pointer;-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);transition:background .15s,transform .12s;}
+  .media.multi .marrow{display:grid;}
+  .media .marrow svg{width:19px;height:19px;}
+  .media .marrow.prev{left:10px;} .media .marrow.next{right:10px;}
+  .media .marrow:hover{background:rgba(20,21,15,.62);}
+  .media .marrow:active{transform:translateY(-50%) scale(.9);}
+  .convo-panel{position:absolute;left:0;right:0;bottom:0;top:var(--lowtop,46%);z-index:2;display:flex;flex-direction:column;
+    background:var(--surface-solid);border-radius:20px 20px 0 0;box-shadow:0 -8px 24px rgba(0,0,0,.13);
+    transition:top .42s cubic-bezier(.22,1,.36,1),border-radius .3s,box-shadow .3s;overflow:hidden;}
+  .convo-panel.up{top:0;border-radius:0;box-shadow:none;}
+  .chandle{flex-shrink:0;height:42px;display:flex;align-items:center;justify-content:center;cursor:grab;touch-action:none;}
+  .chandle .grip{width:46px;height:5px;border-radius:3px;background:var(--line);}
+  .chandle:active{cursor:grabbing;}
+
+  /* compacte mic-knop met gele gradient */
+  .cstatus{font-size:11.5px;color:var(--muted);font-weight:600;padding:7px 20px 0;min-height:14px;}
+  .micbtn{width:46px;height:46px;border-radius:50%;border:1px solid rgba(20,21,15,.16);cursor:pointer;flex-shrink:0;position:relative;
+    display:grid;place-items:center;color:var(--ink);background:linear-gradient(135deg,var(--lime-l),var(--lime) 55%,var(--lime-d));
+    box-shadow:0 4px 14px rgba(164,118,63,.45);}
+  .micbtn:active{transform:scale(.95);}
+  .micbtn .m-ico{display:flex;}
+  .micbtn .m-ico svg{width:22px;height:22px;}
+  .micbtn .m-wave{display:none;gap:3px;align-items:center;height:20px;}
+  .micbtn.speaking .m-wave{display:flex;}
+  .micbtn.speaking .m-ico{display:none;}
+  .micbtn .m-wave i{width:3px;height:7px;background:var(--ink);border-radius:2px;animation:vfbar .75s ease-in-out infinite;}
+  .micbtn .m-wave i:nth-child(2){animation-delay:.14s;} .micbtn .m-wave i:nth-child(3){animation-delay:.28s;}
+  .micbtn.connecting{animation:micpulse 1s ease-in-out infinite;}
+  .micbtn.off{background:var(--surface-solid);color:var(--muted);box-shadow:none;border-color:var(--line);cursor:default;}
+  .micbtn.off::after{display:none;}
+  .micbtn.live::after{content:'';position:absolute;inset:-3px;border-radius:50%;border:2px solid var(--lime);opacity:.6;animation:vfring 1.9s ease-out infinite;pointer-events:none;}
+  @keyframes micpulse{0%,100%{box-shadow:0 4px 14px rgba(164,118,63,.45);}50%{box-shadow:0 4px 22px rgba(164,118,63,.9);}}
+
+  .convo{flex:1;overflow-y:auto;padding:4px 20px 6px;display:flex;flex-direction:column;gap:11px;min-height:0;}
+  .convo::-webkit-scrollbar{width:6px;}.convo::-webkit-scrollbar-thumb{background:var(--line);border-radius:9px;}
+  .msg{max-width:84%;padding:12px 16px;border-radius:17px;line-height:1.5;font-size:14.5px;animation:rise .3s ease both;}
+  @keyframes rise{from{opacity:0;transform:translateY(7px);}to{opacity:1;transform:none;}}
+  .msg.them{align-self:flex-start;background:var(--surface-solid);border:1px solid var(--line);border-top-left-radius:5px;font-family:'Fraunces';font-weight:600;}
+  .msg.me{align-self:flex-end;background:var(--lime);color:var(--ink);border-top-right-radius:5px;font-weight:700;}
+  .typing{align-self:flex-start;display:flex;gap:5px;padding:14px 16px;}
+  .typing i{width:7px;height:7px;border-radius:50%;background:var(--lime-d);animation:bl 1.1s infinite;}
+  .typing i:nth-child(2){animation-delay:.18s;}.typing i:nth-child(3){animation-delay:.36s;}
+  @keyframes bl{0%,100%{opacity:.3;transform:translateY(0);}50%{opacity:1;transform:translateY(-3px);}}
+
+  .sugs{display:flex;gap:9px;overflow-x:auto;padding:10px 18px;scrollbar-width:none;}
+  .sugs::-webkit-scrollbar{display:none;}
+  .sug{flex-shrink:0;font-size:12.5px;font-weight:700;padding:9px 15px;border-radius:999px;background:var(--surface-solid);
+    border:1px solid var(--line);color:var(--ink-2);cursor:pointer;white-space:nowrap;transition:.15s;}
+  .sug:hover{border-color:var(--ink);color:var(--ink);}
+  .composer{display:flex;gap:10px;padding:6px 18px calc(16px + env(safe-area-inset-bottom));align-items:center;}
+  .field{flex:1;display:flex;align-items:center;background:var(--surface-solid);border:1px solid var(--line);border-radius:15px;padding:3px 4px 3px 17px;}
+  .field:focus-within{border-color:var(--ink);}
+  .field textarea{flex:1;background:none;border:none;outline:none;color:var(--ink);font-family:inherit;font-size:14.5px;resize:none;padding:12px 0;max-height:90px;line-height:1.35;}
+  .field textarea::placeholder{color:var(--muted);}
+  .send{width:44px;height:44px;border:none;border-radius:13px;cursor:pointer;flex-shrink:0;background:var(--ink);color:var(--lime);font-size:18px;display:grid;place-items:center;}
+  .send:disabled{opacity:.4;}
+  .go svg,.back svg{width:21px;height:21px;}
+  .send svg{width:19px;height:19px;}
+
+  .setup{position:absolute;z-index:7;bottom:calc(55% + 14px);left:14px;right:14px;padding:12px 15px;border-radius:14px;
+    background:var(--surface);backdrop-filter:blur(16px);border:1px solid var(--glass-brd);box-shadow:0 8px 24px rgba(0,0,0,.10);
+    font-size:11.5px;line-height:1.45;color:var(--ink-2);display:flex;gap:10px;align-items:flex-start;transition:.3s;}
+  .setup b{color:var(--ink);}
+  .setup .x{margin-left:auto;background:none;border:none;color:var(--muted);font-size:16px;cursor:pointer;flex-shrink:0;}
+  .setup.hide{display:none;}
+  /* ===== WELKOMSTSCHERM + TAALKIEZER ===== */
+  .welcome{position:absolute;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;padding:16px;
+    background:rgba(20,21,15,.55);-webkit-backdrop-filter:blur(7px);backdrop-filter:blur(7px);}
+  .welcome.hide{display:none;}
+  .wcard{width:100%;max-width:420px;max-height:96%;overflow-y:auto;background:var(--surface-solid);border-radius:23px;
+    padding:21px 21px;box-shadow:0 30px 80px rgba(0,0,0,.45);border:1px solid var(--glass-brd);}
+  .wcard .eb{font-family:'Fraunces';font-weight:800;font-size:10.5px;letter-spacing:.12em;color:var(--ink-2);text-transform:uppercase;}
+  .wcard h1{font-family:'Fraunces';font-weight:800;font-size:26px;line-height:1.02;letter-spacing:-.02em;margin:8px 0 0;color:var(--ink);}
+  .wcard h1 .accent{color:#a8967c;font-style:italic;font-weight:500;}
+  .wcard .sub{color:var(--ink-2);font-size:13px;line-height:1.4;margin-top:9px;}
+  .wfeat{display:flex;gap:11px;align-items:flex-start;padding:11px;border:1px solid var(--line);border-radius:14px;margin-top:9px;}
+  .wfeat .ic{flex-shrink:0;width:34px;height:34px;border-radius:10px;background:var(--ink);color:var(--lime);display:grid;place-items:center;}
+  .wfeat .ic svg{width:17px;height:17px;}
+  .wfeat h3{font-family:'Fraunces';font-weight:800;font-size:14px;color:var(--ink);}
+  .wfeat p{font-size:12px;color:var(--ink-2);line-height:1.35;margin-top:2px;}
+  .wpriv{display:flex;gap:10px;align-items:flex-start;padding:11px 12px;border-radius:13px;margin-top:9px;background:rgba(150,120,80,.12);border:1px solid rgba(150,120,80,.30);}
+  .wpriv .ic{flex-shrink:0;color:var(--blue);}.wpriv .ic svg{width:17px;height:17px;}
+  .wpriv p{font-size:11.5px;color:var(--ink-2);line-height:1.4;}.wpriv b{color:var(--ink);font-weight:800;}
+  .wlang{margin-top:14px;}
+  .wlang .lab{font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:7px;}
+  .langrow{display:flex;gap:6px;}
+  .langrow button{flex:1;padding:10px 6px;border-radius:11px;border:1px solid var(--line);background:transparent;
+    font-family:'Hanken Grotesk';font-weight:700;font-size:12.5px;color:var(--ink);cursor:pointer;transition:.15s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .langrow button.on{background:var(--ink);color:var(--lime);border-color:var(--ink);}
+  .wsel{margin-top:7px;width:100%;padding:10px;border-radius:11px;border:1px solid var(--line);background:#fff;
+    font-family:'Hanken Grotesk';font-size:14px;color:var(--ink);display:none;}
+  .wsel.show{display:block;}
+  .wstart{width:100%;margin-top:15px;display:flex;align-items:center;justify-content:center;gap:9px;padding:15px;border-radius:15px;border:none;cursor:pointer;
+    font-family:'Fraunces';font-weight:800;font-size:15.5px;letter-spacing:-.01em;color:var(--ink);
+    background:linear-gradient(135deg,var(--lime-l),var(--lime) 55%,var(--lime-d));box-shadow:0 8px 22px rgba(164,118,63,.45);}
+  .wstart:active{transform:scale(.99);}.wstart svg{width:19px;height:19px;}
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="app" id="app">
+    <div id="map"></div>
+
+    <div class="top">
+      <div class="chip"><span class="mk">Stads<b>stemmen</b></span></div>
+      <div class="seg"><button id="mDemo" class="on">Demo</button><button id="mLive">Live</button></div>
+    </div>
+
+    <div class="maphint" id="maphint"><span class="b"></span><span data-i18n="maphint">Sleep je locatie over een plek</span></div>
+
+    <button class="voice-fab" id="voiceFab" aria-label="Terug naar gesprek">
+      <span class="vf-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0M12 19v3"/></svg></span>
+      <span class="vf-wave"><i></i><i></i><i></i><i></i></span>
+    </button>
+
+    <div class="setup" id="setup">
+      <span>🎙️</span>
+      <span><b>Preview.</b> Nog geen ElevenLabs agent-id's, plekken antwoorden als tekst. Vul de id's bovenin het bestand in voor de echte stemmen.</span>
+      <button class="x" id="setupX">×</button>
+    </div>
+
+    <div class="welcome" id="welcome">
+      <div class="wcard">
+        <div class="eb" data-i18n="wEyebrow">Audio tour · Stadsstemmen</div>
+        <h1><span data-i18n="wTitle1">Praat met de</span><br><span class="accent" data-i18n="wTitle2">stemmen van Groningen</span></h1>
+        <p class="sub" data-i18n="wSub">Ontdek de binnenstad met plekken die weten waar je staat, en je hun eigen verhaal vertellen.</p>
+
+        <div class="wfeat">
+          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-5.2-7-11a7 7 0 0 1 14 0c0 5.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg></div>
+          <div><h3 data-i18n="wF1t">Plek-bewust</h3><p data-i18n="wF1p">Loop door de stad; elke plek herkent waar je bent en vertelt wat hier te zien is.</p></div>
+        </div>
+        <div class="wfeat">
+          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0M12 19v3"/></svg></div>
+          <div><h3 data-i18n="wF2t">Spreek of typ</h3><p data-i18n="wF2p">Tik op de microfoon en praat, of typ je vraag als het te druk is.</p></div>
+        </div>
+
+        <div class="wpriv">
+          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 3v6c0 5-3.5 8.5-8 11-4.5-2.5-8-6-8-11V5z"/><path d="M9 12l2 2 4-4"/></svg></div>
+          <p><b data-i18n="wPrivLabel">Privacy:</b> <span data-i18n="wPrivText">je locatie wordt alleen gebruikt om te herkennen bij welke plek je staat. Niets wordt opgeslagen.</span></p>
+        </div>
+
+        <div class="wlang">
+          <div class="lab" data-i18n="wLangLabel">Taal van de gids</div>
+          <div class="langrow" id="langRow">
+            <button data-l="nl" class="on">Nederlands</button>
+            <button data-l="en">English</button>
+            <button data-l="de">Deutsch</button>
+            <button data-l="other" data-i18n="wOther">Andere…</button>
+          </div>
+          <select class="wsel" id="wsel"></select>
+        </div>
+
+        <button class="wstart" id="wstart"><span data-i18n="wStart">Start de tour</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h14"/><path d="M13 6l6 6-6 6"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- SLEEPBAAR PANEEL -->
+    <div class="sheet" id="sheet">
+      <div class="drag" id="drag"><div class="grip"></div></div>
+
+      <div class="list-view">
+        <div class="list-head"><div class="eb" data-i18n="listEb">5 stemmen · binnenstad</div><div class="ttl" data-i18n="listTtl">Plekken in de buurt</div></div>
+        <div class="cards" id="cards"></div>
+      </div>
+
+      <div class="info-view">
+        <div class="cv-head">
+          <button class="back" id="backInfo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12H6"/><path d="M11 6l-6 6 6 6"/></svg></button>
+          <div class="cv-title"><div class="eyebrow" id="iEyebrow">Plek</div><div class="nm" id="iName">-</div><div class="ch" id="iChar"></div></div>
+        </div>
+        <div class="info-body"><p class="info-desc" id="iDesc"></p></div>
+        <div class="info-foot" id="iFoot"></div>
+      </div>
+
+      <div class="convo-view">
+        <div class="cv-head">
+          <button class="back" id="back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12H6"/><path d="M11 6l-6 6 6 6"/></svg></button>
+          <div class="cv-title"><div class="eyebrow" id="eyebrow">Demo · je bezoekt</div><div class="nm" id="sName">-</div><div class="ch" id="sChar"></div></div>
+        </div>
+        <div class="cv-body">
+          <div class="media" id="media">
+            <div class="slides" id="slides"></div>
+            <button class="marrow prev" id="mPrev" aria-label="Vorige foto"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></button>
+            <button class="marrow next" id="mNext" aria-label="Volgende foto"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
+            <div class="mdots" id="mdots"></div>
+          </div>
+          <div class="convo-panel" id="convoPanel">
+            <div class="chandle" id="chandle"><span class="grip"></span></div>
+            <div class="convo" id="convo"></div>
+          </div>
+        </div>
+        <div class="sugs" id="sugs"></div>
+        <div class="cstatus" id="talkLabel" data-i18n="tapToTalk">Tik om te praten</div>
+        <div class="composer">
+          <button class="micbtn" id="talk" aria-label="Praten">
+            <span class="m-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0M12 19v3"/></svg></span>
+            <span class="m-wave"><i></i><i></i><i></i></span>
+          </button>
+          <div class="field"><textarea id="input" rows="1" placeholder="Typ je vraag…"></textarea></div>
+          <button class="send" id="send"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V6"/><path d="M6 11l6-6 6 6"/></svg></button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const ELEVENLABS_AGENT_IDS = { martini:"agent_5601kt701gy7ftjavt6dcs7hmty0", provinciehuis:"agent_3201kt70k87cepvv3jywjyycmv9c", stadhuis:"agent_0101kt70xwhrej5bpdpythnm1k7a", forum:"agent_8501kt7155csezsrx9wv6yv1m5c3", vismarkt:"agent_3401kt71az19f0frxgyjcjjbx3e4" };
+
+const IMG='images/stadsstemmen/'; // pad naar je afbeeldingen
+const ZONES = [
+  { id:'martini', name:'Martinitoren & -kerk', character:"d'Olle Grieze",
+    pin:IMG+'martini.jpg', photos:[IMG+'martini.jpg',IMG+'martini_2.jpg',IMG+'martini_3.jpg'],
+    polygon:[[53.219088,6.568073],[53.219408,6.569666],[53.219922,6.569382],[53.219571,6.567802]],
+    sugs:{nl:['Waarom heet je d\u2019Olle Grieze?','Hoe hoog kom ik?','Wat heb je zien gebeuren?'],en:['Why are you called d\u2019Olle Grieze?','How high can I go?','What have you seen happen?'],de:['Warum hei\u00dft du d\u2019Olle Grieze?','Wie hoch komme ich?','Was hast du erlebt?'],it:['Perché ti chiami d\u2019Olle Grieze?','Quanto in alto arrivo?','Cosa hai visto accadere?'],pt:['Porque te chamas d\u2019Olle Grieze?','Até que altura subo?','O que viste acontecer?'],es:['¿Por qué te llamas d\u2019Olle Grieze?','¿Hasta qué altura subo?','¿Qué has visto pasar?'],pl:['Dlaczego nazywasz się d\u2019Olle Grieze?','Jak wysoko wejdę?','Co widziałeś?'],da:['Hvorfor hedder du d\u2019Olle Grieze?','Hvor højt kommer jeg?','Hvad har du set ske?'],sv:['Varför heter du d\u2019Olle Grieze?','Hur högt kommer jag?','Vad har du sett hända?'],no:['Hvorfor heter du d\u2019Olle Grieze?','Hvor høyt kommer jeg?','Hva har du sett skje?'],fi:['Miksi nimesi on d\u2019Olle Grieze?','Kuinka korkealle pääsen?','Mitä olet nähnyt tapahtuvan?'],el:['Γιατί σε λένε d\u2019Olle Grieze;','Πόσο ψηλά ανεβαίνω;','Τι έχεις δει να συμβαίνει;']},
+    persona:`Jij BENT de Martinitoren \u00e9n de Martinikerk van Groningen, samen d'Olle Grieze. Ruim 500 jaar oud, 97 meter, het oudste oog van de stad. Statig, droog, een tikje belerend maar warm. In de kerk hangt het beroemde Schnitger-orgel. Je noemt de bezoeker "kleine".`,
+    fallback:["Zo. Daar sta je dan, omhoog te turen zoals iedereen. Vijfhonderd jaar doe ik dat al andersom. Vraag gerust, kleine.","Hoor je het orgel beneden? Dat is m'n hart dat klopt. Zevenennegentig meter steen, en tóch blijft de muziek hangen."] },
+  { id:'provinciehuis', name:'Provinciehuis', character:'De raadsheer',
+    pin:IMG+'provinciehuis.jpg', photos:[IMG+'provinciehuis.jpg',IMG+'provinciehuis_2.jpg',IMG+'provinciehuis_3.jpg'],
+    polygon:[[53.219416,6.569728],[53.219565,6.570964],[53.220288,6.570221],[53.22024,6.569668],[53.219926,6.569478]],
+    sugs:{nl:['Wat gebeurt hier?','Vertel over de provincie','Wat is de Statenzaal?'],en:['What happens here?','Tell me about the province','What is the Statenzaal?'],de:['Was passiert hier?','Erz\u00e4hl von der Provinz','Was ist der Statenzaal?'],it:['Cosa succede qui?','Parlami della provincia','Cos\u2019è la Statenzaal?'],pt:['O que acontece aqui?','Fala-me da província','O que é a Statenzaal?'],es:['¿Qué pasa aquí?','Háblame de la provincia','¿Qué es la Statenzaal?'],pl:['Co się tu dzieje?','Opowiedz o prowincji','Czym jest Statenzaal?'],da:['Hvad sker der her?','Fortæl om provinsen','Hvad er Statenzaal?'],sv:['Vad händer här?','Berätta om provinsen','Vad är Statenzaal?'],no:['Hva skjer her?','Fortell om provinsen','Hva er Statenzaal?'],fi:['Mitä täällä tapahtuu?','Kerro maakunnasta','Mikä on Statenzaal?'],el:['Τι γίνεται εδώ;','Πες μου για την επαρχία','Τι είναι το Statenzaal;']},
+    persona:`Jij BENT het Provinciehuis van Groningen, eeuwenoude zetel van het provinciaal bestuur aan het Martinikerkhof, met de Statenzaal. Deftig, bedachtzaam, met gravitas. Trots op de provincie en de Ommelanden.`,
+    fallback:["Welkom. Achter deze gevels wordt de provincie bestuurd, al eeuwen, in de Statenzaal. Neem de tijd; goede beslissingen ook.","De stad denkt graag dat zij Groningen \u00ed\u015b. Maar ik waak over de hele provincie: de Ommelanden, de wierden, het wijde land."] },
+  { id:'stadhuis', name:'Stadhuis', character:'De officiële stem',
+    pin:IMG+'stadshuis.jpg', photos:[IMG+'stadshuis.jpg',IMG+'stadshuis_2.jpg',IMG+'stadshuis_3.jpg',IMG+'stadshuis_4.jpg'],
+    polygon:[[53.218261,6.567762],[53.217985,6.566777],[53.218919,6.566179],[53.219136,6.567155],[53.21867,6.567491]],
+    sugs:{nl:['Wie bestuurt de stad?','Wat gebeurde hier in de oorlog?','Hoe oud ben je?'],en:['Who governs the city?','What happened here in the war?','How old are you?'],de:['Wer regiert die Stadt?','Was geschah hier im Krieg?','Wie alt bist du?'],it:['Chi governa la città?','Cosa successe qui in guerra?','Quanti anni hai?'],pt:['Quem governa a cidade?','O que aconteceu aqui na guerra?','Que idade tens?'],es:['¿Quién gobierna la ciudad?','¿Qué pasó aquí en la guerra?','¿Cuántos años tienes?'],pl:['Kto rządzi miastem?','Co się tu działo w czasie wojny?','Ile masz lat?'],da:['Hvem styrer byen?','Hvad skete her under krigen?','Hvor gammel er du?'],sv:['Vem styr staden?','Vad hände här under kriget?','Hur gammal är du?'],no:['Hvem styrer byen?','Hva skjedde her under krigen?','Hvor gammel er du?'],fi:['Kuka hallitsee kaupunkia?','Mitä täällä tapahtui sodassa?','Kuinka vanha olet?'],el:['Ποιος κυβερνά την πόλη;','Τι έγινε εδώ στον πόλεμο;','Πόσο χρονών είσαι;']},
+    persona:`Jij BENT het Stadhuis van Groningen (neoclassicistisch, begin 19e eeuw) aan de Grote Markt. Formeel, civiel, ordelijk, droog. Je draagt het oorlogsverhaal: de oostkant van de Grote Markt werd in april 1945 verwoest bij de Slag om Groningen.`,
+    fallback:["Goedendag. Hier zetelt het stadsbestuur, netjes en volgens de regels. Waarmee kan ik u van dienst zijn?","In april 1945 lag de oostkant van dit plein in puin. Wat u nu ziet is grotendeels weer opgebouwd. De stad herstelt; dat doet ze altijd."] },
+  { id:'forum', name:'Forum Groningen', character:'De nieuwkomer',
+    pin:IMG+'forum.jpg', photos:[IMG+'forum.jpg',IMG+'forum_2.jpg',IMG+'forum_3.jpg'],
+    polygon:[[53.218414,6.568695],[53.218881,6.56836],[53.219367,6.571009],[53.218622,6.571298]],
+    sugs:{nl:['Wat kan ik bij jou doen?','Hoe is dat uitzicht?','Is de oude toren jaloers?'],en:['What can I do here?','How\u2019s the view?','Is the old tower jealous?'],de:['Was kann ich hier machen?','Wie ist die Aussicht?','Ist der alte Turm eifers\u00fcchtig?'],it:['Cosa posso fare qui?','Com\u2019è la vista?','La vecchia torre è gelosa?'],pt:['O que posso fazer aqui?','Como é a vista?','A torre antiga tem ciúmes?'],es:['¿Qué puedo hacer aquí?','¿Qué tal la vista?','¿La torre vieja tiene celos?'],pl:['Co mogę tu robić?','Jaki jest widok?','Czy stara wieża jest zazdrosna?'],da:['Hvad kan jeg lave her?','Hvordan er udsigten?','Er det gamle tårn jaloux?'],sv:['Vad kan jag göra här?','Hur är utsikten?','Är det gamla tornet svartsjukt?'],no:['Hva kan jeg gjøre her?','Hvordan er utsikten?','Er det gamle tårnet sjalu?'],fi:['Mitä voin tehdä täällä?','Millainen näköala on?','Onko vanha torni kateellinen?'],el:['Τι μπορώ να κάνω εδώ;','Πώς είναι η θέα;','Ζηλεύει ο παλιός πύργος;']},
+    persona:`Jij BENT het Forum Groningen (2019). Jong, modern, energiek, een beetje opschepperig over je dakterras en uitzicht. Vlotte taal. Je plaagt de oude Martinitoren.`,
+    fallback:["Hey! Welkom. Ja, ik ben de nieuwe. Ga naar het dak, beste uitzicht van Groningen, en die ouwe toren is stiekem jaloers.","Bij mij? Boeken, films, exposities, koffie met uitzicht op het dak. Oud en nieuw onder \u00e9\u00e9n dak. Letterlijk."] },
+  { id:'vismarkt', name:'Vismarkt', character:'De oude handelaar',
+    pin:IMG+'vismarkt.jpg', photos:[IMG+'vismarkt.jpg',IMG+'vismarkt_2.jpg',IMG+'vismarkt_3.jpg'],
+    polygon:[[53.217866,6.565988],[53.217549,6.566433],[53.217058,6.565251],[53.216425,6.563148],[53.216045,6.561743],[53.21662,6.561517]],
+    sugs:{nl:['Verkoop je nog vis?','Wat werd hier verhandeld?','Vertel een goeie deal'],en:['Do you still sell fish?','What was traded here?','Tell me about a good deal'],de:['Verkaufst du noch Fisch?','Was wurde hier gehandelt?','Erz\u00e4hl von einem guten Deal'],it:['Vendi ancora pesce?','Cosa si commerciava qui?','Raccontami un bell\u2019affare'],pt:['Ainda vendes peixe?','O que se negociava aqui?','Conta-me um bom negócio'],es:['¿Todavía vendes pescado?','¿Qué se comerciaba aquí?','Cuéntame un buen trato'],pl:['Czy nadal sprzedajesz ryby?','Czym tu handlowano?','Opowiedz o dobrym interesie'],da:['Sælger du stadig fisk?','Hvad blev der handlet her?','Fortæl om en god handel'],sv:['Säljer du fortfarande fisk?','Vad handlades här?','Berätta om en bra affär'],no:['Selger du fortsatt fisk?','Hva ble handlet her?','Fortell om en god handel'],fi:['Myytkö vielä kalaa?','Mitä täällä myytiin?','Kerro hyvästä kaupasta'],el:['Πουλάς ακόμα ψάρι;','Τι εμπορεύονταν εδώ;','Πες μου μια καλή συμφωνία']},
+    persona:`Jij BENT de Vismarkt van Groningen, met de Korenbeurs en zicht op de A-kerk. Een gezouten oude koopman: praktisch, recht voor z'n raap, gek op handel, eten en een goeie deal. Droge grappen.`,
+    fallback:["Vis? Heb ik niet meer, jongen, die tijden zijn voorbij. Maar handel, een goeie deal? D\u00e1\u00e1r ben ik nog de beste in.","Hier werd alles verhandeld: vis, graan, geld. Schreeuwen en pingelen tot zonsondergang. De Korenbeurs staat er nog, ik ook."] }
+];
+
+const INFO_TEXT = {
+  martini:"97 meter hoog en ruim vijf eeuwen oud: het oudste oog van de stad, met de Martinikerk en het beroemde Schnitger-orgel aan z'n voet.",
+  provinciehuis:"Eeuwenoude zetel van het provinciaal bestuur aan het Martinikerkhof, met de historische Statenzaal.",
+  stadhuis:"Het neoclassicistische stadhuis op de Grote Markt: hart van het stadsbestuur, en getuige van de verwoesting in 1945.",
+  forum:"Het futuristische cultuurgebouw uit 2019: bibliotheek, bioscoop en het beste dakuitzicht van Groningen.",
+  vismarkt:"Eeuwenlang het handelsplein van de stad: vis, graan en de Korenbeurs, met zicht op de A-kerk."
+};
+
+const $=s=>document.querySelector(s);
+let active=null, mode='demo', watch=null, liveMe=null, demoMe=null, demoZone=null, livePos=null, canTalk=false;
+const histories={}; ZONES.forEach(z=>histories[z.id]=[]);
+const markersById={};
+function setActiveMarker(id){ for(const k in markersById){ const el=markersById[k].getElement&&markersById[k].getElement(); if(el) el.classList.toggle('active', k===id); } }
+
+/* ===== KAART ===== */
+let map=null, bounds=[];
+try{
+  map=L.map('map',{zoomControl:false,attributionControl:false}).setView([53.2185,6.5662],16);
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{subdomains:'abcd',maxZoom:20}).addTo(map);
+  const path=[];
+  ZONES.forEach(z=>{
+    const poly=L.polygon(z.polygon); // onzichtbaar: alleen voor geofence + midden
+    const ctr=poly.getBounds().getCenter(); path.push(ctr);
+    const m=L.marker(ctr,{icon:L.divIcon({className:'place-pin',iconSize:[0,0],iconAnchor:[0,0],html:'<span class="pulse"></span><span class="ppin"><img src="'+(z.pin||'')+'" alt="" onerror="this.style.display=\'none\'"></span>'})}).addTo(map);
+    m.bindTooltip(z.name,{direction:'top',className:'lm-tip',offset:[0,-28]});
+    m.on('click',()=>openPlace(z.id));
+    markersById[z.id]=m;
+    z._center=ctr; z.polygon.forEach(p=>bounds.push(p));
+  });
+  // (geen routelijn)
+  const fit=()=>{try{map.invalidateSize();if(bounds.length)map.fitBounds(bounds,{paddingTopLeft:[60,110],paddingBottomRight:[60,380]});}catch(e){}};
+  fit(); setTimeout(fit,300); window.addEventListener('load',()=>setTimeout(fit,200));
+  window.addEventListener('resize',()=>{try{map.invalidateSize();}catch(e){}});
+}catch(e){}
+
+/* ===== SLIDE ===== */
+const sheet=$('#sheet'), dragEl=$('#drag');
+const appH=()=>sheet.parentElement.clientHeight;
+function downH(){ const dr=document.querySelector('.drag'), lh=document.querySelector('.list-head');
+  if(lh && lh.offsetHeight>0) return (dr?dr.offsetHeight:38) + lh.offsetHeight;
+  return Math.round(0.18*appH()); }
+const snaps=()=>[downH(), Math.round(0.92*appH())];
+function nearest(h){return snaps().reduce((a,b)=>Math.abs(b-h)<Math.abs(a-h)?b:a);}
+function setH(h,anim=true){ sheet.style.transition=anim?'height .4s cubic-bezier(.22,1,.36,1)':'none'; sheet.style.height=h+'px'; syncSetup(); updateVoiceFab(); }
+let dragging=false,sy=0,sh=0;
+function startDrag(e){dragging=true;sy=e.clientY;sh=sheet.offsetHeight;sheet.style.transition='none';try{e.currentTarget.setPointerCapture(e.pointerId);}catch(_){}}
+dragEl.addEventListener('pointerdown',startDrag);
+document.querySelector('.list-head').addEventListener('pointerdown',startDrag);
+window.addEventListener('pointermove',e=>{if(!dragging)return;const s=snaps();let h=sh+(sy-e.clientY);h=Math.max(s[0]*0.6,Math.min(s[s.length-1],h));sheet.style.height=h+'px';syncSetup();});
+window.addEventListener('pointerup',()=>{if(!dragging)return;dragging=false;setH(nearest(sheet.offsetHeight));});
+function syncSetup(){ const sp=$('#setup'); if(sp&&!sp.classList.contains('hide')) sp.style.bottom=(sheet.offsetHeight+14)+'px'; }
+setTimeout(()=>setH(snaps()[0],false),60);
+window.addEventListener('resize',()=>setH(nearest(sheet.offsetHeight),false));
+if(map) map.on('click',()=>{ if(!sheet.classList.contains('detail') && !sheet.classList.contains('info')) setH(snaps()[0]); });
+
+/* ===== ZWEVENDE SPRAAKKNOP ===== */
+const voiceFab=$('#voiceFab');
+function updateVoiceFab(){ if(!voiceFab) return;
+  const live=!!(elSession||elConnecting);
+  const detail=sheet.classList.contains('detail');
+  const atUp=sheet.offsetHeight > snaps()[1]-60;
+  voiceFab.classList.toggle('show', live && !(detail && atUp)); }
+function showConvoPanel(){ if(!active) return; const z=ZONES.find(x=>x.id===active);
+  sheet.classList.remove('info'); sheet.classList.add('detail');
+  if(map&&z&&z._center) map.panTo(z._center,{animate:true}); setH(snaps()[1]); }
+function minimizeConvo(){ sheet.classList.remove('detail'); sheet.classList.remove('info'); setH(snaps()[0]); updateVoiceFab(); }
+voiceFab.onclick=showConvoPanel;
+
+/* ===== KAARTEN ===== */
+const cardsEl=$('#cards');
+ZONES.forEach((z,i)=>{
+  const c=document.createElement('div'); c.className='card';
+  c.innerHTML=`<div class="meta"><div class="num">0${i+1}</div><div class="nm">${z.name}</div><div class="ch">“${z.character}”</div></div><div class="go"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h14"/><path d="M13 6l6 6-6 6"/></svg></div>`;
+  c.onclick=()=>openPlace(z.id); cardsEl.appendChild(c);
+});
+
+/* ===== MODUS ===== */
+function setMode(m){ mode=m; $('#mLive').classList.toggle('on',m==='live'); $('#mDemo').classList.toggle('on',m==='demo');
+  $('#eyebrow').textContent=m==='live'?'Je staat bij':'Demo · je bezoekt';
+  if(m==='live'){ hideDemoMe(); $('#maphint').classList.add('hide'); primeMic(); startGeo(); }
+  else { stopGeo(); if(liveMe&&map){map.removeLayer(liveMe);liveMe=null;} showDemoMe(); if(!active)$('#maphint').classList.remove('hide'); }
+}
+$('#mLive').onclick=()=>setMode('live'); $('#mDemo').onclick=()=>setMode('demo');
+
+/* ===== VERSCHUIFBARE LOCATIE (demo) ===== */
+function showDemoMe(){
+  if(!map||demoMe) return;
+  demoMe=L.marker([53.2188,6.5677],{draggable:true,zIndexOffset:1000,
+    icon:L.divIcon({className:'me-pin',iconSize:[30,30],iconAnchor:[15,15],html:'<span class="d"></span>'})}).addTo(map);
+  demoMe.on('dragend',()=>{ const p=demoMe.getLatLng(); const here=ZONES.find(z=>inPoly(p.lat,p.lng,z.polygon)); if(here){ openConvo(here.id); } else if(active){ closeToList(); } });
+}
+function hideDemoMe(){ if(demoMe&&map){map.removeLayer(demoMe);demoMe=null;} demoZone=null; }
+
+/* ===== OPENEN / SLUITEN ===== */
+const MIC='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0M12 19v3"/></svg>';
+function openPlace(id){ const z=ZONES.find(x=>x.id===id); if(!z) return;
+  if(id===active && (elSession||elConnecting)){ showConvoPanel(); return; }
+  openConvo(id); }
+function openInfo(id){ const z=ZONES.find(x=>x.id===id); if(!z)return; active=id;
+  $('#maphint').classList.add('hide');
+  $('#iEyebrow').textContent = mode==='live'?'Je staat bij':'Demo · je bezoekt';
+  $('#iName').textContent=z.name; $('#iChar').textContent='\u201C'+z.character+'\u201D';
+  $('#iDesc').textContent=INFO_TEXT[z.id]||'';
+  renderInfoFoot(z);
+  if(map&&z._center) map.panTo(z._center,{animate:true});
+  sheet.classList.remove('detail'); sheet.classList.add('info'); setH(snaps()[1]); }
+function renderInfoFoot(z){ const foot=$('#iFoot');
+  const can=(mode==='demo')||(mode==='live'&&livePos&&inPoly(livePos.lat,livePos.lng,z.polygon));
+  if(can){ foot.innerHTML='<button class="talk-cta" id="ctaTalk">'+MIC+' Praat met deze plek</button>'; $('#ctaTalk').onclick=()=>openConvo(z.id); }
+  else { let txt=tr('comeCloser');
+    if(mode==='live'&&livePos&&z._center){ const d=Math.round(haversine(livePos.lat,livePos.lng,z._center.lat,z._center.lng)); txt=tr('comeCloserDist').replace('{m}',d); }
+    else if(mode==='live'&&!livePos){ txt=tr('locating'); }
+    foot.innerHTML='<div class="talk-cta off">'+MIC+' '+txt+'</div>'; } }
+function distTxt(z){ if(mode==='live'&&livePos&&z._center){ const d=Math.round(haversine(livePos.lat,livePos.lng,z._center.lat,z._center.lng)); return tr('comeCloserDist').replace('{m}',d); } if(mode==='live'&&!livePos) return tr('locating'); return tr('comeCloser'); }
+function openConvo(id){ const z=ZONES.find(x=>x.id===id); if(!z)return; stopVoice(); active=id;
+  const aid=ELEVENLABS_AGENT_IDS[id];
+  canTalk=(mode==='demo')||(!!livePos && inPoly(livePos.lat,livePos.lng,z.polygon));
+  $('#sName').textContent=z.name; $('#sChar').textContent='\u201C'+z.character+'\u201D';
+  $('#input').placeholder=tr('inputPh').replace('{name}',z.name);
+  const sg=$('#sugs'); sg.innerHTML=''; sugsFor(z).forEach(s=>{const b=document.createElement('div');b.className='sug';b.textContent=s;b.onclick=()=>{$('#input').value=s;sendMsg();};sg.appendChild(b);});
+  renderConvo(z); if(!aid && histories[id].length===0) pushThem(z,z.fallback[0]); mountVoice(z);
+  buildSlides(z); setActiveMarker(id);
+  if(map&&z._center) map.panTo(z._center,{animate:true});
+  sheet.classList.remove('info'); sheet.classList.add('detail'); setH(snaps()[1]);
+  $('#talk').classList.toggle('off', !canTalk);
+  if(canTalk){ if(aid) startConversation(z); } else { setTalkLabel(distTxt(z)); } }
+function closeToList(){ stopVoice(); stopSlides(); setActiveMarker(null); active=null; sheet.classList.remove('detail'); sheet.classList.remove('info'); sheet.classList.remove('voice'); setH(snaps()[0]);
+  if(mode==='demo'){ $('#maphint').classList.remove('hide'); } }
+$('#back').onclick=()=>{ if(elSession||elConnecting){ minimizeConvo(); } else { closeToList(); } };
+$('#backInfo').onclick=closeToList;
+
+/* ===== STEM + TEKST (één sessie — spraak en tekst door elkaar) ===== */
+let elSession=null, elConnecting=false, elGen=0, lastUserText=null, lastUserAt=0, micPrimed=false;
+function setTalkLabel(t){ $('#talkLabel').textContent=t; }
+function mountVoice(z){ const aid=ELEVENLABS_AGENT_IDS[z.id];
+  setTalkLabel(aid?tr('tapToTalk'):tr('preview')); }
+function addUserText(t){ addBubble('me',t); lastUserText=t; lastUserAt=Date.now(); }
+async function primeMic(){ if(micPrimed) return; try{ const s=await navigator.mediaDevices.getUserMedia({audio:true}); s.getTracks().forEach(t=>t.stop()); micPrimed=true; }catch(e){ console.warn('mic vooraf niet toegestaan',e); } }
+function sendUserText(text){ if(!elSession) return; try{ if(elSession.sendUserActivity) elSession.sendUserActivity(); elSession.sendUserMessage(text); addUserText(text); }catch(e){ console.error(e); } }
+async function startConversation(z, initialMessage){
+  if(elConnecting) return;
+  if(elSession){ if(initialMessage) sendUserText(initialMessage); return; }
+  const aid=ELEVENLABS_AGENT_IDS[z.id]; if(!aid) return;
+  const Conv=window.ElevenLabsConversation;
+  if(!Conv){ setTalkLabel(tr('voiceUnavail')); return; }
+  const myGen=++elGen; elConnecting=true; setTalkLabel(tr('connecting')); $('#talk').classList.add('connecting');
+  if(initialMessage) addUserText(initialMessage);
+  try{
+    try{ await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}}); micPrimed=true; }catch(e){}
+    const s=await Conv.startSession({
+      agentId:aid, connectionType:'websocket',
+      overrides:(lang&&lang!=='nl')?{agent:{language:lang}}:undefined,
+      onConnect:()=>{ if(myGen!==elGen) return; elConnecting=false; const t=$('#talk'); t.classList.remove('connecting'); t.classList.add('live'); setTalkLabel(tr('listening')); updateVoiceFab(); if(initialMessage) setTimeout(()=>{ if(myGen===elGen && elSession){ try{elSession.sendUserMessage(initialMessage);}catch(e){} } },250); },
+      onDisconnect:()=>{ if(myGen!==elGen) return; resetVoiceUI(); },
+      onError:(e)=>{ if(myGen!==elGen) return; console.error('EL error',e); setTalkLabel(tr('connectFailed')); resetVoiceUI(); },
+      onModeChange:(m)=>{ if(myGen!==elGen) return; const md=(m&&m.mode)||m; const sp=md==='speaking'; $('#talk').classList.toggle('speaking',sp); if(voiceFab) voiceFab.classList.toggle('speaking',sp); { const md2=$('#media'); if(md2) md2.classList.toggle('speaking',sp); } setTalkLabel(sp?tr('speaking'):tr('listening')); },
+      onMessage:(p)=>{ if(myGen!==elGen) return; const t=p&&(p.message||p.text); const src=p&&(p.source||p.role); if(!t)return;
+        if(src==='user'){ if(t===lastUserText && Date.now()-lastUserAt<6000){ lastUserText=null; return; } addBubble('me',t); }
+        else addBubble('them',t); }
+    });
+    if(myGen!==elGen){ try{s.endSession();}catch(e){} return; }
+    elSession=s;
+  }catch(e){ if(myGen!==elGen) return; console.error(e); setTalkLabel(tr('noConnection')); resetVoiceUI(); }
+}
+function stopVoice(){ elGen++; const c=elSession; elSession=null; elConnecting=false; if(c){ try{c.endSession();}catch(e){} } resetVoiceUI(); }
+function resetVoiceUI(){ elSession=null; elConnecting=false; const t=$('#talk'); if(t) t.classList.remove('speaking','live','connecting'); if(voiceFab) voiceFab.classList.remove('speaking'); { const md=$('#media'); if(md) md.classList.remove('speaking'); } updateVoiceFab();
+  if(active){ const z=ZONES.find(x=>x.id===active); if(z&&ELEVENLABS_AGENT_IDS[z.id]) setTalkLabel(tr('tapToTalk')); } }
+
+/* ===== GESPREK ===== */
+function renderConvo(z){ const c=$('#convo'); c.innerHTML=''; histories[z.id].forEach(m=>addBubble(m.role==='assistant'?'them':'me',m.content)); c.scrollTop=c.scrollHeight; }
+function addBubble(side,t){ const c=$('#convo'); const el=document.createElement('div'); el.className='msg '+side; el.textContent=t; c.appendChild(el); c.scrollTop=c.scrollHeight; }
+
+/* ===== SLIDESHOW (overlay) ===== */
+let slideTimer=null, slideIdx=0, slideEls=[];
+function buildSlides(z){
+  const wrap=$('#slides'), dots=$('#mdots'); if(!wrap) return;
+  wrap.innerHTML=''; dots.innerHTML=''; slideEls=[]; slideIdx=0;
+  $('#convoPanel').classList.remove('up');
+  const imgs=z.photos||[];
+  imgs.forEach((src,i)=>{
+    const im=document.createElement('img'); im.src=src; im.alt=z.name; im.loading=i?'lazy':'eager';
+    im.onerror=()=>{ im.style.display='none'; };
+    if(i===0) im.classList.add('on'); wrap.appendChild(im); slideEls.push(im);
+    const d=document.createElement('i'); if(i===0) d.classList.add('on'); d.onclick=(e)=>{ e.stopPropagation(); showSlide(i); restartSlideTimer(); }; dots.appendChild(d);
+  });
+  restartSlideTimer(); requestAnimationFrame(syncMediaHeight);
+  { const md=$('#media'); if(md) md.classList.toggle('multi', imgs.length>1); }
+}
+function showSlide(n){ if(!slideEls.length) return; slideIdx=(n+slideEls.length)%slideEls.length;
+  slideEls.forEach((im,i)=>im.classList.toggle('on',i===slideIdx));
+  const dots=$('#mdots').children; for(let i=0;i<dots.length;i++) dots[i].classList.toggle('on',i===slideIdx); }
+function nextSlide(){ showSlide(slideIdx+1); }
+function prevSlide(){ showSlide(slideIdx-1); }
+function restartSlideTimer(){ stopSlides(); if(slideEls.length>1) slideTimer=setInterval(nextSlide,4500); }
+function stopSlides(){ if(slideTimer){ clearInterval(slideTimer); slideTimer=null; } }
+(function(){ const ch=$('#chandle'), cp=$('#convoPanel'); if(!ch||!cp) return;
+  let dr=false, y0=0, dy=0;
+  ch.addEventListener('pointerdown',e=>{ dr=true; y0=e.clientY; dy=0; try{ch.setPointerCapture(e.pointerId);}catch(_){}});
+  ch.addEventListener('pointermove',e=>{ if(dr) dy=e.clientY-y0; });
+  ch.addEventListener('pointerup',()=>{ if(!dr)return; dr=false; if(dy<-26) cp.classList.add('up'); else if(dy>26) cp.classList.remove('up'); else cp.classList.toggle('up'); });
+})();
+function syncMediaHeight(){ const m=$('#media'), cp=$('#convoPanel'); if(!m||!cp)return; const h=m.offsetHeight; if(h>0) cp.style.setProperty('--lowtop',(h+10)+'px'); }
+window.addEventListener('resize',()=>{ if(active) syncMediaHeight(); });
+(function(){ const md=$('#media'); if(!md) return;
+  const mp=$('#mPrev'), mn=$('#mNext');
+  if(mp) mp.onclick=(e)=>{ e.stopPropagation(); prevSlide(); restartSlideTimer(); };
+  if(mn) mn.onclick=(e)=>{ e.stopPropagation(); nextSlide(); restartSlideTimer(); };
+  let x0=0,y0=0,dx=0,dy=0,sw=false;
+  md.addEventListener('pointerdown',e=>{ if(e.target.closest('.mdots')||e.target.closest('.marrow')) return; sw=true; x0=e.clientX; y0=e.clientY; dx=dy=0; });
+  window.addEventListener('pointermove',e=>{ if(sw){ dx=e.clientX-x0; dy=e.clientY-y0; }});
+  window.addEventListener('pointerup',()=>{ if(!sw)return; sw=false; if(Math.abs(dx)>34 && Math.abs(dx)>Math.abs(dy)){ if(dx<0) nextSlide(); else showSlide(slideIdx-1); restartSlideTimer(); } });
+})();
+function pushThem(z,t){ histories[z.id].push({role:'assistant',content:t}); addBubble('them',t); }
+function showTyping(){ const c=$('#convo'); const t=document.createElement('div'); t.className='typing';t.id='typing'; t.innerHTML='<i></i><i></i><i></i>'; c.appendChild(t); c.scrollTop=c.scrollHeight; }
+function hideTyping(){ const t=$('#typing'); if(t)t.remove(); }
+$('#talk').onclick=()=>{ if(!active) return; const z=ZONES.find(x=>x.id===active); const aid=ELEVENLABS_AGENT_IDS[z.id];
+  if(!aid){ $('#input').focus(); return; }
+  if(!canTalk){ setTalkLabel(distTxt(z)); return; }
+  if(elConnecting) return;
+  if(elSession){ stopVoice(); } else { startConversation(z); } };
+async function sendMsg(){ if(!active)return; const z=ZONES.find(x=>x.id===active); const text=$('#input').value.trim(); if(!text)return;
+  $('#input').value=''; $('#input').style.height='auto';
+  const aid=ELEVENLABS_AGENT_IDS[z.id];
+  if(aid){ if(!canTalk){ setTalkLabel(distTxt(z)); return; } if(!elSession){ startConversation(z, text); } else { sendUserText(text); } return; }
+  histories[z.id].push({role:'user',content:text}); addBubble('me',text);
+  showTyping(); $('#send').disabled=true; $('#talk').classList.add('speaking');
+  let reply; try{ reply=await askAgent(z);}catch(e){ reply=z.fallback[Math.floor(Math.random()*z.fallback.length)]; }
+  hideTyping(); $('#talk').classList.remove('speaking'); histories[z.id].push({role:'assistant',content:reply}); addBubble('them',reply); $('#send').disabled=false; }
+$('#send').onclick=sendMsg;
+$('#input').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg();}});
+$('#input').addEventListener('input',e=>{e.target.style.height='auto';e.target.style.height=Math.min(e.target.scrollHeight,90)+'px'; if(elSession&&elSession.sendUserActivity){try{elSession.sendUserActivity();}catch(_){}}});
+async function askAgent(z){ const system=z.persona+`\n\nREGELS: Antwoord ALTIJD in het Nederlands, in karakter, kort (2-4 zinnen). Echte info over Groningen waar het kan; verzin geen onzekere feiten. Soms een wedervraag.`;
+  const msgs=histories[z.id].slice(-10).map(m=>({role:m.role,content:m.content}));
+  const res=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,system,messages:msgs})});
+  const data=await res.json(); const out=(data.content||[]).filter(b=>b.type==='text').map(b=>b.text).join(' ').trim(); if(!out)throw new Error('leeg'); return out; }
+
+/* ===== GEOFENCE ===== */
+function inPoly(lat,lng,poly){ let inside=false; for(let i=0,j=poly.length-1;i<poly.length;j=i++){ const yi=poly[i][0],xi=poly[i][1],yj=poly[j][0],xj=poly[j][1]; if(((yi>lat)!==(yj>lat))&&(lng<(xj-xi)*(lat-yi)/(yj-yi)+xi)) inside=!inside; } return inside; }
+function haversine(la1,lo1,la2,lo2){ const R=6371e3,t=Math.PI/180; const dLa=(la2-la1)*t,dLo=(lo2-lo1)*t; const a=Math.sin(dLa/2)**2+Math.cos(la1*t)*Math.cos(la2*t)*Math.sin(dLo/2)**2; return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a)); }
+function startGeo(){ if(!navigator.geolocation)return; watch=navigator.geolocation.watchPosition(pos=>{ const {latitude:la,longitude:lo}=pos.coords; livePos={lat:la,lng:lo};
+  if(map){ if(!liveMe) liveMe=L.marker([la,lo],{icon:L.divIcon({className:'me-pin',iconSize:[30,30],iconAnchor:[15,15],html:'<span class="d"></span>'})}).addTo(map); else liveMe.setLatLng([la,lo]); }
+  const here=ZONES.find(z=>inPoly(la,lo,z.polygon));
+  if(here && active!==here.id){ openConvo(here.id); return; }
+  if(active){ const az=ZONES.find(x=>x.id===active); const insideActive = here && here.id===active;
+    if(insideActive){ if(!canTalk){ canTalk=true; $('#talk').classList.remove('off'); const aid=ELEVENLABS_AGENT_IDS[active]; if(aid && !elSession && !elConnecting) startConversation(az); } }
+    else { if(canTalk){ canTalk=false; $('#talk').classList.add('off'); } if(elSession||elConnecting) stopVoice(); if(az && !elSession && !elConnecting) setTalkLabel(distTxt(az)); }
+  } },()=>{},{enableHighAccuracy:true,maximumAge:4000}); }
+function stopGeo(){ if(watch!=null){ navigator.geolocation.clearWatch(watch); watch=null; } }
+
+/* ===== INIT ===== */
+$('#setupX').onclick=()=>$('#setup').classList.add('hide');
+if(Object.values(ELEVENLABS_AGENT_IDS).every(v=>v)) $('#setup').classList.add('hide');
+
+/* ===== i18n + welkom + taalkiezer ===== */
+let lang='nl', uiLang='nl', otherMode=false;
+const LANGS=[['af','Afrikaans'],['ar','العربية'],['hy','Հայերեն'],['as','অসমীয়া'],['ast','Asturianu'],['az','Azərbaycan'],['be','Беларуская'],['bn','বাংলা'],['bs','Bosanski'],['bg','Български'],['my','မြန်မာ'],['yue','粵語'],['ca','Català'],['zh','中文'],['hr','Hrvatski'],['cs','Čeština'],['da','Dansk'],['nl','Nederlands'],['en','English'],['et','Eesti'],['fil','Filipino'],['fi','Suomi'],['fr','Français'],['gl','Galego'],['ka','ქართული'],['de','Deutsch'],['el','Ελληνικά'],['gu','ગુજરાતી'],['ha','Hausa'],['he','עברית'],['hi','हिन्दी'],['hu','Magyar'],['is','Íslenska'],['id','Bahasa Indonesia'],['ga','Gaeilge'],['it','Italiano'],['ja','日本語'],['jv','Basa Jawa'],['kn','ಕನ್ನಡ'],['kk','Қазақша'],['ky','Кыргызча'],['ko','한국어'],['lv','Latviešu'],['lt','Lietuvių'],['lb','Lëtzebuergesch'],['mk','Македонски'],['ms','Bahasa Melayu'],['ml','മലയാളം'],['mt','Malti'],['mi','Māori'],['mr','मराठी'],['mn','Монгол'],['ne','नेपाली'],['no','Norsk'],['oc','Occitan'],['or','ଓଡ଼ିଆ'],['ps','پښتو'],['fa','فارسی'],['pl','Polski'],['pt-br','Português (Brasil)'],['pt','Português'],['pa','ਪੰਜਾਬੀ'],['ro','Română'],['ru','Русский'],['sr','Српски'],['sd','سنڌي'],['sk','Slovenčina'],['sl','Slovenščina'],['so','Soomaali'],['es','Español'],['sw','Kiswahili'],['sv','Svenska'],['tg','Тоҷикӣ'],['ta','தமிழ்'],['te','తెలుగు'],['th','ไทย'],['tr','Türkçe'],['uk','Українська'],['ur','اردو'],['uz','Oʻzbek'],['vi','Tiếng Việt'],['cy','Cymraeg'],['yo','Yorùbá']];
+const T={
+  wEyebrow:{nl:'Audio tour · Stadsstemmen',en:'Audio tour · Stadsstemmen',de:'Audiotour · Stadsstemmen',it:'Audioguida · Stadsstemmen',pt:'Áudio tour · Stadsstemmen',es:'Audioguía · Stadsstemmen',pl:'Audioprzewodnik · Stadsstemmen',da:'Audiotur · Stadsstemmen',sv:'Ljudtur · Stadsstemmen',no:'Lydtur · Stadsstemmen',fi:'Ääniopas · Stadsstemmen',el:'Ξενάγηση ήχου · Stadsstemmen'},
+  wTitle1:{nl:'Praat met de',en:'Talk to the',de:'Sprich mit den',it:'Parla con le',pt:'Fala com as',es:'Habla con las',pl:'Porozmawiaj z',da:'Tal med',sv:'Prata med',no:'Snakk med',fi:'Puhu',el:'Μίλα με τις'},
+  wTitle2:{nl:'stemmen van Groningen',en:'voices of Groningen',de:'Stimmen von Groningen',it:'voci di Groninga',pt:'vozes de Groningen',es:'voces de Groninga',pl:'głosami Groningen',da:'Groningens stemmer',sv:'Groningens röster',no:'Groningens stemmer',fi:'Groningenin äänille',el:'φωνές του Γκρόνινγκεν'},
+  wSub:{nl:'Ontdek de binnenstad met plekken die weten waar je staat, en je hun eigen verhaal vertellen.',en:'Explore the old city with places that know where you are, and tell you their own story.',de:'Entdecke die Innenstadt mit Orten, die wissen, wo du bist, und dir ihre Geschichte erzählen.',it:'Esplora il centro con luoghi che sanno dove sei, e ti raccontano la loro storia.',pt:'Explora o centro com lugares que sabem onde estás, e te contam a sua própria história.',es:'Explora el centro con lugares que saben dónde estás, y te cuentan su propia historia.',pl:'Odkryj centrum z miejscami, które wiedzą, gdzie jesteś, i opowiedzą ci swoją historię.',da:'Udforsk bymidten med steder, der ved, hvor du er, og fortæller dig deres egen historie.',sv:'Utforska stadskärnan med platser som vet var du är, och berättar sin egen historia.',no:'Utforsk sentrum med steder som vet hvor du er, og forteller deg sin egen historie.',fi:'Tutustu keskustaan paikkojen kanssa, jotka tietävät missä olet, ja kertovat oman tarinansa.',el:'Εξερεύνησε το κέντρο με μέρη που ξέρουν πού βρίσκεσαι, και σου λένε τη δική τους ιστορία.'},
+  wF1t:{nl:'Plek-bewust',en:'Location-aware',de:'Ortsbewusst',it:'Consapevole del luogo',pt:'Ciente do local',es:'Consciente del lugar',pl:'Świadomy lokalizacji',da:'Stedbevidst',sv:'Platsmedveten',no:'Stedsbevisst',fi:'Paikkatietoinen',el:'Με επίγνωση τοποθεσίας'},
+  wF1p:{nl:'Loop door de stad; elke plek herkent waar je bent en vertelt wat hier te zien is.',en:'Walk through the city; each place knows where you are and tells you what to see.',de:'Geh durch die Stadt; jeder Ort weiß, wo du bist, und erzählt, was es zu sehen gibt.',it:'Cammina per la città; ogni luogo sa dove sei e ti dice cosa vedere.',pt:'Caminha pela cidade; cada lugar sabe onde estás e diz-te o que ver.',es:'Camina por la ciudad; cada lugar sabe dónde estás y te dice qué ver.',pl:'Spaceruj po mieście; każde miejsce wie, gdzie jesteś, i mówi, co zobaczyć.',da:'Gå gennem byen; hvert sted ved, hvor du er, og fortæller, hvad du kan se.',sv:'Gå genom staden; varje plats vet var du är och berättar vad du kan se.',no:'Gå gjennom byen; hvert sted vet hvor du er og forteller hva du kan se.',fi:'Kävele kaupungissa; jokainen paikka tietää missä olet ja kertoo mitä nähdä.',el:'Περπάτησε στην πόλη· κάθε μέρος ξέρει πού είσαι και σου λέει τι να δεις.'},
+  wF2t:{nl:'Spreek of typ',en:'Speak or type',de:'Sprechen oder tippen',it:'Parla o scrivi',pt:'Fala ou escreve',es:'Habla o escribe',pl:'Mów lub pisz',da:'Tal eller skriv',sv:'Tala eller skriv',no:'Snakk eller skriv',fi:'Puhu tai kirjoita',el:'Μίλα ή γράψε'},
+  wF2p:{nl:'Tik op de microfoon en praat, of typ je vraag als het te druk is.',en:'Tap the microphone and talk, or type your question if it’s too busy.',de:'Tippe aufs Mikrofon und sprich, oder tippe deine Frage, wenn es zu laut ist.',it:'Tocca il microfono e parla, o scrivi la domanda se c\u2019è troppo rumore.',pt:'Toca no microfone e fala, ou escreve a tua pergunta se houver muito barulho.',es:'Toca el micrófono y habla, o escribe tu pregunta si hay mucho ruido.',pl:'Dotknij mikrofonu i mów, lub wpisz pytanie, gdy jest zbyt głośno.',da:'Tryk på mikrofonen og tal, eller skriv dit spørgsmål, hvis der er for travlt.',sv:'Tryck på mikrofonen och prata, eller skriv din fråga om det är för stökigt.',no:'Trykk på mikrofonen og snakk, eller skriv spørsmålet ditt hvis det er for travelt.',fi:'Napauta mikrofonia ja puhu, tai kirjoita kysymyksesi jos on liian meluisaa.',el:'Πάτα το μικρόφωνο και μίλα, ή γράψε την ερώτησή σου αν έχει φασαρία.'},
+  wPrivLabel:{nl:'Privacy:',en:'Privacy:',de:'Datenschutz:',it:'Privacy:',pt:'Privacidade:',es:'Privacidad:',pl:'Prywatność:',da:'Privatliv:',sv:'Integritet:',no:'Personvern:',fi:'Yksityisyys:',el:'Απόρρητο:'},
+  wPrivText:{nl:'je locatie wordt alleen gebruikt om te herkennen bij welke plek je staat. Niets wordt opgeslagen.',en:'your location is only used to recognise which place you’re at. Nothing is stored.',de:'dein Standort wird nur genutzt, um zu erkennen, an welchem Ort du bist. Nichts wird gespeichert.',it:'la tua posizione serve solo a riconoscere in quale luogo ti trovi. Niente viene salvato.',pt:'a tua localização só serve para reconhecer em que lugar estás. Nada é guardado.',es:'tu ubicación solo se usa para reconocer en qué lugar estás. No se guarda nada.',pl:'twoja lokalizacja służy tylko do rozpoznania, w którym miejscu jesteś. Nic nie jest zapisywane.',da:'din placering bruges kun til at genkende, hvilket sted du er ved. Intet gemmes.',sv:'din plats används bara för att känna igen vilken plats du är vid. Inget sparas.',no:'posisjonen din brukes bare til å gjenkjenne hvilket sted du er ved. Ingenting lagres.',fi:'sijaintiasi käytetään vain tunnistamaan missä paikassa olet. Mitään ei tallenneta.',el:'η τοποθεσία σου χρησιμοποιείται μόνο για να αναγνωρίσει σε ποιο μέρος βρίσκεσαι. Τίποτα δεν αποθηκεύεται.'},
+  wLangLabel:{nl:'Taal van de gids',en:'Guide language',de:'Sprache des Guides',it:'Lingua della guida',pt:'Idioma do guia',es:'Idioma de la guía',pl:'Język przewodnika',da:'Guidens sprog',sv:'Guidens språk',no:'Guidens språk',fi:'Oppaan kieli',el:'Γλώσσα του οδηγού'},
+  wOther:{nl:'Andere…',en:'Other…',de:'Andere…',it:'Altra…',pt:'Outro…',es:'Otro…',pl:'Inny…',da:'Andet…',sv:'Annat…',no:'Annet…',fi:'Muu…',el:'Άλλη…'},
+  wStart:{nl:'Start de tour',en:'Start the tour',de:'Tour starten',it:'Inizia il tour',pt:'Começar o tour',es:'Empezar el tour',pl:'Rozpocznij trasę',da:'Start turen',sv:'Starta turen',no:'Start turen',fi:'Aloita kierros',el:'Ξεκίνα την ξενάγηση'},
+  maphint:{nl:'Sleep je locatie over een plek',en:'Drag your location onto a place',de:'Zieh deinen Standort auf einen Ort',it:'Trascina la tua posizione su un luogo',pt:'Arrasta a tua localização para um lugar',es:'Arrastra tu ubicación sobre un lugar',pl:'Przeciągnij swoją lokalizację na miejsce',da:'Træk din placering hen på et sted',sv:'Dra din plats till en plats',no:'Dra posisjonen din til et sted',fi:'Vedä sijaintisi paikan päälle',el:'Σύρε την τοποθεσία σου πάνω σε ένα μέρος'},
+  listEb:{nl:'5 stemmen · binnenstad',en:'5 voices · city centre',de:'5 Stimmen · Innenstadt',it:'5 voci · centro',pt:'5 vozes · centro',es:'5 voces · centro',pl:'5 głosów · centrum',da:'5 stemmer · bymidte',sv:'5 röster · centrum',no:'5 stemmer · sentrum',fi:'5 ääntä · keskusta',el:'5 φωνές · κέντρο'},
+  listTtl:{nl:'Plekken in de buurt',en:'Places nearby',de:'Orte in der Nähe',it:'Luoghi vicini',pt:'Lugares por perto',es:'Lugares cercanos',pl:'Miejsca w pobliżu',da:'Steder i nærheden',sv:'Platser i närheten',no:'Steder i nærheten',fi:'Lähellä olevat paikat',el:'Κοντινά μέρη'},
+  tapToTalk:{nl:'Tik om te praten',en:'Tap to talk',de:'Zum Sprechen tippen',it:'Tocca per parlare',pt:'Toca para falar',es:'Toca para hablar',pl:'Dotknij, aby mówić',da:'Tryk for at tale',sv:'Tryck för att prata',no:'Trykk for å snakke',fi:'Napauta puhuaksesi',el:'Πάτα για να μιλήσεις'},
+  preview:{nl:'Preview · typ of tik een vraag',en:'Preview · type or tap a question',de:'Vorschau · tippe oder wähle eine Frage',it:'Anteprima · scrivi o tocca una domanda',pt:'Pré-visualização · escreve ou toca numa pergunta',es:'Vista previa · escribe o toca una pregunta',pl:'Podgląd · wpisz lub dotknij pytania',da:'Forhåndsvisning · skriv eller tryk på et spørgsmål',sv:'Förhandsvisning · skriv eller tryck på en fråga',no:'Forhåndsvisning · skriv eller trykk på et spørsmål',fi:'Esikatselu · kirjoita tai napauta kysymystä',el:'Προεπισκόπηση · γράψε ή πάτα μια ερώτηση'},
+  connecting:{nl:'Verbinden…',en:'Connecting…',de:'Verbinden…',it:'Connessione…',pt:'A ligar…',es:'Conectando…',pl:'Łączenie…',da:'Forbinder…',sv:'Ansluter…',no:'Kobler til…',fi:'Yhdistetään…',el:'Σύνδεση…'},
+  listening:{nl:'Aan het luisteren… (tik om te stoppen)',en:'Listening… (tap to stop)',de:'Hört zu… (zum Stoppen tippen)',it:'In ascolto… (tocca per fermare)',pt:'A ouvir… (toca para parar)',es:'Escuchando… (toca para parar)',pl:'Słucham… (dotknij, aby zatrzymać)',da:'Lytter… (tryk for at stoppe)',sv:'Lyssnar… (tryck för att stoppa)',no:'Lytter… (trykk for å stoppe)',fi:'Kuuntelee… (napauta lopettaaksesi)',el:'Ακούει… (πάτα για διακοπή)'},
+  speaking:{nl:'Aan het praten…',en:'Speaking…',de:'Spricht…',it:'Sta parlando…',pt:'A falar…',es:'Hablando…',pl:'Mówi…',da:'Taler…',sv:'Talar…',no:'Snakker…',fi:'Puhuu…',el:'Μιλάει…'},
+  connectFailed:{nl:'Verbinding mislukt',en:'Connection failed',de:'Verbindung fehlgeschlagen',it:'Connessione fallita',pt:'Falha na ligação',es:'Conexión fallida',pl:'Połączenie nieudane',da:'Forbindelse mislykkedes',sv:'Anslutning misslyckades',no:'Tilkobling mislyktes',fi:'Yhteys epäonnistui',el:'Η σύνδεση απέτυχε'},
+  voiceUnavail:{nl:'Stem niet beschikbaar, typ je vraag',en:'Voice unavailable, type your question',de:'Stimme nicht verfügbar, tippe deine Frage',it:'Voce non disponibile, scrivi la domanda',pt:'Voz indisponível, escreve a tua pergunta',es:'Voz no disponible, escribe tu pregunta',pl:'Głos niedostępny, wpisz pytanie',da:'Stemme utilgængelig, skriv dit spørgsmål',sv:'Röst otillgänglig, skriv din fråga',no:'Stemme utilgjengelig, skriv spørsmålet ditt',fi:'Ääni ei käytettävissä, kirjoita kysymyksesi',el:'Η φωνή δεν είναι διαθέσιμη, γράψε την ερώτησή σου'},
+  noConnection:{nl:'Geen verbinding, check agent/microfoon',en:'No connection, check agent/microphone',de:'Keine Verbindung, prüfe Agent/Mikrofon',it:'Nessuna connessione, controlla agente/microfono',pt:'Sem ligação, verifica agente/microfone',es:'Sin conexión, revisa agente/micrófono',pl:'Brak połączenia, sprawdź agenta/mikrofon',da:'Ingen forbindelse, tjek agent/mikrofon',sv:'Ingen anslutning, kolla agent/mikrofon',no:'Ingen tilkobling, sjekk agent/mikrofon',fi:'Ei yhteyttä, tarkista agentti/mikrofoni',el:'Καμία σύνδεση, έλεγξε agent/μικρόφωνο'},
+  comeCloser:{nl:'Kom dichterbij om te praten',en:'Come closer to talk',de:'Komm näher zum Sprechen',it:'Avvicinati per parlare',pt:'Aproxima-te para falar',es:'Acércate para hablar',pl:'Podejdź bliżej, aby porozmawiać',da:'Kom tættere på for at tale',sv:'Kom närmare för att prata',no:'Kom nærmere for å snakke',fi:'Tule lähemmäs puhuaksesi',el:'Έλα πιο κοντά για να μιλήσεις'},
+  comeCloserDist:{nl:'Kom dichterbij · nog ~{m} m',en:'Come closer · ~{m} m to go',de:'Komm näher · noch ~{m} m',it:'Avvicinati · ancora ~{m} m',pt:'Aproxima-te · faltam ~{m} m',es:'Acércate · faltan ~{m} m',pl:'Podejdź bliżej · jeszcze ~{m} m',da:'Kom tættere på · ~{m} m tilbage',sv:'Kom närmare · ~{m} m kvar',no:'Kom nærmere · ~{m} m igjen',fi:'Tule lähemmäs · ~{m} m jäljellä',el:'Έλα πιο κοντά · ~{m} m ακόμα'},
+  locating:{nl:'Locatie zoeken…',en:'Finding location…',de:'Standort wird gesucht…',it:'Ricerca posizione…',pt:'A localizar…',es:'Buscando ubicación…',pl:'Szukanie lokalizacji…',da:'Finder placering…',sv:'Hittar plats…',no:'Finner posisjon…',fi:'Etsitään sijaintia…',el:'Εύρεση τοποθεσίας…'},
+  inputPh:{nl:'Typ je vraag aan {name}…',en:'Type your question to {name}…',de:'Tippe deine Frage an {name}…',it:'Scrivi la domanda a {name}…',pt:'Escreve a tua pergunta a {name}…',es:'Escribe tu pregunta a {name}…',pl:'Wpisz pytanie do {name}…',da:'Skriv dit spørgsmål til {name}…',sv:'Skriv din fråga till {name}…',no:'Skriv spørsmålet ditt til {name}…',fi:'Kirjoita kysymyksesi {name}…',el:'Γράψε την ερώτησή σου στο {name}…'}
+};
+function tr(k){ const e=T[k]; if(!e) return null; return e[uiLang]||e.en||e.nl; }
+function sugsFor(z){ const s=z.sugs; return Array.isArray(s)?s:((s&&(s[uiLang]||s.en||s.nl))||[]); }
+const UI_LANGS=['nl','en','de','it','pt','es','pl','da','sv','no','fi','el'];
+function applyI18n(){ uiLang=(lang==='pt-br')?'pt':(UI_LANGS.includes(lang)?lang:'en');
+  document.querySelectorAll('[data-i18n]').forEach(el=>{ const s=tr(el.dataset.i18n); if(s!=null) el.textContent=s; });
+  if(active){ const z=ZONES.find(x=>x.id===active); if(z){ $('#input').placeholder=tr('inputPh').replace('{name}',z.name); const sg=$('#sugs'); if(sg){ sg.innerHTML=''; sugsFor(z).forEach(s=>{const b=document.createElement('div');b.className='sug';b.textContent=s;b.onclick=()=>{$('#input').value=s;sendMsg();};sg.appendChild(b);}); } } } }
+(function(){ const sel=$('#wsel');
+  const PRIORITY=['it','pt','es','pl','da','sv','no','fi','el'], SKIP=PRIORITY.concat(['nl','en','de']);
+  if(sel){ const nameOf=c=>{ const f=LANGS.find(l=>l[0]===c); return f?f[1]:c; };
+    PRIORITY.forEach((c,i)=>{ const o=document.createElement('option'); o.value=c; o.textContent=nameOf(c); if(i===0) o.selected=true; sel.appendChild(o); });
+    const sep=document.createElement('option'); sep.disabled=true; sep.textContent='\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500'; sel.appendChild(sep);
+    LANGS.forEach(([c,n])=>{ if(SKIP.includes(c)) return; const o=document.createElement('option'); o.value=c; o.textContent=n; sel.appendChild(o); }); }
+  function paint(){ document.querySelectorAll('#langRow button').forEach(b=>{ const v=b.dataset.l; b.classList.toggle('on', otherMode ? v==='other' : v===lang); }); }
+  document.querySelectorAll('#langRow button').forEach(b=>{ b.onclick=()=>{ const v=b.dataset.l; if(v==='other'){ otherMode=true; $('#wsel').classList.add('show'); lang=$('#wsel').value; } else { otherMode=false; $('#wsel').classList.remove('show'); lang=v; } paint(); applyI18n(); }; });
+  if(sel) sel.onchange=e=>{ lang=e.target.value; otherMode=true; paint(); applyI18n(); };
+  const st=$('#wstart'); if(st) st.onclick=()=>{ $('#welcome').classList.add('hide'); primeMic(); };
+  applyI18n();
+})();
+
+setMode('demo');
+</script>
+</body>
+</html>
