@@ -156,6 +156,13 @@
   .mdots{position:absolute;left:0;right:0;bottom:10px;display:flex;gap:6px;justify-content:center;z-index:2;}
   .mdots i{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.6);transition:.25s;cursor:pointer;}
   .mdots i.on{background:#fff;width:18px;border-radius:3px;}
+  .media .marrow{position:absolute;top:50%;transform:translateY(-50%);z-index:3;width:34px;height:34px;padding:0;border:none;border-radius:50%;
+    background:rgba(20,21,15,.42);color:#fff;display:none;place-items:center;cursor:pointer;-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);transition:background .15s,transform .12s;}
+  .media.multi .marrow{display:grid;}
+  .media .marrow svg{width:19px;height:19px;}
+  .media .marrow.prev{left:10px;} .media .marrow.next{right:10px;}
+  .media .marrow:hover{background:rgba(20,21,15,.62);}
+  .media .marrow:active{transform:translateY(-50%) scale(.9);}
   .convo-panel{position:absolute;left:0;right:0;bottom:0;top:var(--lowtop,46%);z-index:2;display:flex;flex-direction:column;
     background:var(--surface-solid);border-radius:20px 20px 0 0;box-shadow:0 -8px 24px rgba(0,0,0,.13);
     transition:top .42s cubic-bezier(.22,1,.36,1),border-radius .3s,box-shadow .3s;overflow:hidden;}
@@ -267,7 +274,7 @@
 
     <div class="setup" id="setup">
       <span>🎙️</span>
-      <span><b>Preview.</b> Nog geen ElevenLabs agent-id's — plekken antwoorden als tekst. Vul de id's bovenin het bestand in voor de echte stemmen.</span>
+      <span><b>Preview.</b> Nog geen ElevenLabs agent-id's, plekken antwoorden als tekst. Vul de id's bovenin het bestand in voor de echte stemmen.</span>
       <button class="x" id="setupX">×</button>
     </div>
 
@@ -275,7 +282,7 @@
       <div class="wcard">
         <div class="eb" data-i18n="wEyebrow">Audio tour · Stadsstemmen</div>
         <h1><span data-i18n="wTitle1">Praat met de</span><br><span class="accent" data-i18n="wTitle2">stemmen van Groningen</span></h1>
-        <p class="sub" data-i18n="wSub">Ontdek de binnenstad met plekken die weten waar je staat — en je hun eigen verhaal vertellen.</p>
+        <p class="sub" data-i18n="wSub">Ontdek de binnenstad met plekken die weten waar je staat, en je hun eigen verhaal vertellen.</p>
 
         <div class="wfeat">
           <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-5.2-7-11a7 7 0 0 1 14 0c0 5.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg></div>
@@ -320,7 +327,7 @@
       <div class="info-view">
         <div class="cv-head">
           <button class="back" id="backInfo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12H6"/><path d="M11 6l-6 6 6 6"/></svg></button>
-          <div class="cv-title"><div class="eyebrow" id="iEyebrow">Plek</div><div class="nm" id="iName">—</div><div class="ch" id="iChar"></div></div>
+          <div class="cv-title"><div class="eyebrow" id="iEyebrow">Plek</div><div class="nm" id="iName">-</div><div class="ch" id="iChar"></div></div>
         </div>
         <div class="info-body"><p class="info-desc" id="iDesc"></p></div>
         <div class="info-foot" id="iFoot"></div>
@@ -329,11 +336,13 @@
       <div class="convo-view">
         <div class="cv-head">
           <button class="back" id="back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12H6"/><path d="M11 6l-6 6 6 6"/></svg></button>
-          <div class="cv-title"><div class="eyebrow" id="eyebrow">Demo · je bezoekt</div><div class="nm" id="sName">—</div><div class="ch" id="sChar"></div></div>
+          <div class="cv-title"><div class="eyebrow" id="eyebrow">Demo · je bezoekt</div><div class="nm" id="sName">-</div><div class="ch" id="sChar"></div></div>
         </div>
         <div class="cv-body">
           <div class="media" id="media">
             <div class="slides" id="slides"></div>
+            <button class="marrow prev" id="mPrev" aria-label="Vorige foto"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></button>
+            <button class="marrow next" id="mNext" aria-label="Volgende foto"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
             <div class="mdots" id="mdots"></div>
           </div>
           <div class="convo-panel" id="convoPanel">
@@ -365,41 +374,41 @@ const ZONES = [
   { id:'martini', name:'Martinitoren & -kerk', character:"d'Olle Grieze",
     pin:IMG+'martini.jpg', photos:[IMG+'martini.jpg',IMG+'martini_2.jpg',IMG+'martini_3.jpg'],
     polygon:[[53.219088,6.568073],[53.219408,6.569666],[53.219922,6.569382],[53.219571,6.567802]],
-    sugs:{nl:['Waarom heet je d\u2019Olle Grieze?','Hoe hoog kom ik?','Wat heb je zien gebeuren?'],en:['Why are you called d\u2019Olle Grieze?','How high can I go?','What have you seen happen?'],de:['Warum hei\u00dft du d\u2019Olle Grieze?','Wie hoch komme ich?','Was hast du erlebt?']},
+    sugs:{nl:['Waarom heet je d\u2019Olle Grieze?','Hoe hoog kom ik?','Wat heb je zien gebeuren?'],en:['Why are you called d\u2019Olle Grieze?','How high can I go?','What have you seen happen?'],de:['Warum hei\u00dft du d\u2019Olle Grieze?','Wie hoch komme ich?','Was hast du erlebt?'],it:['Perché ti chiami d\u2019Olle Grieze?','Quanto in alto arrivo?','Cosa hai visto accadere?'],pt:['Porque te chamas d\u2019Olle Grieze?','Até que altura subo?','O que viste acontecer?'],es:['¿Por qué te llamas d\u2019Olle Grieze?','¿Hasta qué altura subo?','¿Qué has visto pasar?'],pl:['Dlaczego nazywasz się d\u2019Olle Grieze?','Jak wysoko wejdę?','Co widziałeś?'],da:['Hvorfor hedder du d\u2019Olle Grieze?','Hvor højt kommer jeg?','Hvad har du set ske?'],sv:['Varför heter du d\u2019Olle Grieze?','Hur högt kommer jag?','Vad har du sett hända?'],no:['Hvorfor heter du d\u2019Olle Grieze?','Hvor høyt kommer jeg?','Hva har du sett skje?'],fi:['Miksi nimesi on d\u2019Olle Grieze?','Kuinka korkealle pääsen?','Mitä olet nähnyt tapahtuvan?'],el:['Γιατί σε λένε d\u2019Olle Grieze;','Πόσο ψηλά ανεβαίνω;','Τι έχεις δει να συμβαίνει;']},
     persona:`Jij BENT de Martinitoren \u00e9n de Martinikerk van Groningen, samen d'Olle Grieze. Ruim 500 jaar oud, 97 meter, het oudste oog van de stad. Statig, droog, een tikje belerend maar warm. In de kerk hangt het beroemde Schnitger-orgel. Je noemt de bezoeker "kleine".`,
     fallback:["Zo. Daar sta je dan, omhoog te turen zoals iedereen. Vijfhonderd jaar doe ik dat al andersom. Vraag gerust, kleine.","Hoor je het orgel beneden? Dat is m'n hart dat klopt. Zevenennegentig meter steen, en tóch blijft de muziek hangen."] },
   { id:'provinciehuis', name:'Provinciehuis', character:'De raadsheer',
     pin:IMG+'provinciehuis.jpg', photos:[IMG+'provinciehuis.jpg',IMG+'provinciehuis_2.jpg',IMG+'provinciehuis_3.jpg'],
     polygon:[[53.219416,6.569728],[53.219565,6.570964],[53.220288,6.570221],[53.22024,6.569668],[53.219926,6.569478]],
-    sugs:{nl:['Wat gebeurt hier?','Vertel over de provincie','Wat is de Statenzaal?'],en:['What happens here?','Tell me about the province','What is the Statenzaal?'],de:['Was passiert hier?','Erz\u00e4hl von der Provinz','Was ist der Statenzaal?']},
+    sugs:{nl:['Wat gebeurt hier?','Vertel over de provincie','Wat is de Statenzaal?'],en:['What happens here?','Tell me about the province','What is the Statenzaal?'],de:['Was passiert hier?','Erz\u00e4hl von der Provinz','Was ist der Statenzaal?'],it:['Cosa succede qui?','Parlami della provincia','Cos\u2019è la Statenzaal?'],pt:['O que acontece aqui?','Fala-me da província','O que é a Statenzaal?'],es:['¿Qué pasa aquí?','Háblame de la provincia','¿Qué es la Statenzaal?'],pl:['Co się tu dzieje?','Opowiedz o prowincji','Czym jest Statenzaal?'],da:['Hvad sker der her?','Fortæl om provinsen','Hvad er Statenzaal?'],sv:['Vad händer här?','Berätta om provinsen','Vad är Statenzaal?'],no:['Hva skjer her?','Fortell om provinsen','Hva er Statenzaal?'],fi:['Mitä täällä tapahtuu?','Kerro maakunnasta','Mikä on Statenzaal?'],el:['Τι γίνεται εδώ;','Πες μου για την επαρχία','Τι είναι το Statenzaal;']},
     persona:`Jij BENT het Provinciehuis van Groningen, eeuwenoude zetel van het provinciaal bestuur aan het Martinikerkhof, met de Statenzaal. Deftig, bedachtzaam, met gravitas. Trots op de provincie en de Ommelanden.`,
-    fallback:["Welkom. Achter deze gevels wordt de provincie bestuurd \u2014 al eeuwen, in de Statenzaal. Neem de tijd; goede beslissingen ook.","De stad denkt graag dat zij Groningen \u00ed\u015b. Maar ik waak over de hele provincie: de Ommelanden, de wierden, het wijde land."] },
+    fallback:["Welkom. Achter deze gevels wordt de provincie bestuurd, al eeuwen, in de Statenzaal. Neem de tijd; goede beslissingen ook.","De stad denkt graag dat zij Groningen \u00ed\u015b. Maar ik waak over de hele provincie: de Ommelanden, de wierden, het wijde land."] },
   { id:'stadhuis', name:'Stadhuis', character:'De officiële stem',
     pin:IMG+'stadshuis.jpg', photos:[IMG+'stadshuis.jpg',IMG+'stadshuis_2.jpg',IMG+'stadshuis_3.jpg',IMG+'stadshuis_4.jpg'],
     polygon:[[53.218261,6.567762],[53.217985,6.566777],[53.218919,6.566179],[53.219136,6.567155],[53.21867,6.567491]],
-    sugs:{nl:['Wie bestuurt de stad?','Wat gebeurde hier in de oorlog?','Hoe oud ben je?'],en:['Who governs the city?','What happened here in the war?','How old are you?'],de:['Wer regiert die Stadt?','Was geschah hier im Krieg?','Wie alt bist du?']},
+    sugs:{nl:['Wie bestuurt de stad?','Wat gebeurde hier in de oorlog?','Hoe oud ben je?'],en:['Who governs the city?','What happened here in the war?','How old are you?'],de:['Wer regiert die Stadt?','Was geschah hier im Krieg?','Wie alt bist du?'],it:['Chi governa la città?','Cosa successe qui in guerra?','Quanti anni hai?'],pt:['Quem governa a cidade?','O que aconteceu aqui na guerra?','Que idade tens?'],es:['¿Quién gobierna la ciudad?','¿Qué pasó aquí en la guerra?','¿Cuántos años tienes?'],pl:['Kto rządzi miastem?','Co się tu działo w czasie wojny?','Ile masz lat?'],da:['Hvem styrer byen?','Hvad skete her under krigen?','Hvor gammel er du?'],sv:['Vem styr staden?','Vad hände här under kriget?','Hur gammal är du?'],no:['Hvem styrer byen?','Hva skjedde her under krigen?','Hvor gammel er du?'],fi:['Kuka hallitsee kaupunkia?','Mitä täällä tapahtui sodassa?','Kuinka vanha olet?'],el:['Ποιος κυβερνά την πόλη;','Τι έγινε εδώ στον πόλεμο;','Πόσο χρονών είσαι;']},
     persona:`Jij BENT het Stadhuis van Groningen (neoclassicistisch, begin 19e eeuw) aan de Grote Markt. Formeel, civiel, ordelijk, droog. Je draagt het oorlogsverhaal: de oostkant van de Grote Markt werd in april 1945 verwoest bij de Slag om Groningen.`,
     fallback:["Goedendag. Hier zetelt het stadsbestuur, netjes en volgens de regels. Waarmee kan ik u van dienst zijn?","In april 1945 lag de oostkant van dit plein in puin. Wat u nu ziet is grotendeels weer opgebouwd. De stad herstelt; dat doet ze altijd."] },
   { id:'forum', name:'Forum Groningen', character:'De nieuwkomer',
     pin:IMG+'forum.jpg', photos:[IMG+'forum.jpg',IMG+'forum_2.jpg',IMG+'forum_3.jpg'],
     polygon:[[53.218414,6.568695],[53.218881,6.56836],[53.219367,6.571009],[53.218622,6.571298]],
-    sugs:{nl:['Wat kan ik bij jou doen?','Hoe is dat uitzicht?','Is de oude toren jaloers?'],en:['What can I do here?','How\u2019s the view?','Is the old tower jealous?'],de:['Was kann ich hier machen?','Wie ist die Aussicht?','Ist der alte Turm eifers\u00fcchtig?']},
+    sugs:{nl:['Wat kan ik bij jou doen?','Hoe is dat uitzicht?','Is de oude toren jaloers?'],en:['What can I do here?','How\u2019s the view?','Is the old tower jealous?'],de:['Was kann ich hier machen?','Wie ist die Aussicht?','Ist der alte Turm eifers\u00fcchtig?'],it:['Cosa posso fare qui?','Com\u2019è la vista?','La vecchia torre è gelosa?'],pt:['O que posso fazer aqui?','Como é a vista?','A torre antiga tem ciúmes?'],es:['¿Qué puedo hacer aquí?','¿Qué tal la vista?','¿La torre vieja tiene celos?'],pl:['Co mogę tu robić?','Jaki jest widok?','Czy stara wieża jest zazdrosna?'],da:['Hvad kan jeg lave her?','Hvordan er udsigten?','Er det gamle tårn jaloux?'],sv:['Vad kan jag göra här?','Hur är utsikten?','Är det gamla tornet svartsjukt?'],no:['Hva kan jeg gjøre her?','Hvordan er utsikten?','Er det gamle tårnet sjalu?'],fi:['Mitä voin tehdä täällä?','Millainen näköala on?','Onko vanha torni kateellinen?'],el:['Τι μπορώ να κάνω εδώ;','Πώς είναι η θέα;','Ζηλεύει ο παλιός πύργος;']},
     persona:`Jij BENT het Forum Groningen (2019). Jong, modern, energiek, een beetje opschepperig over je dakterras en uitzicht. Vlotte taal. Je plaagt de oude Martinitoren.`,
-    fallback:["Hey! Welkom. Ja, ik ben de nieuwe. Ga naar het dak \u2014 beste uitzicht van Groningen, en die ouwe toren is stiekem jaloers.","Bij mij? Boeken, films, exposities, koffie met uitzicht op het dak. Oud en nieuw onder \u00e9\u00e9n dak. Letterlijk."] },
+    fallback:["Hey! Welkom. Ja, ik ben de nieuwe. Ga naar het dak, beste uitzicht van Groningen, en die ouwe toren is stiekem jaloers.","Bij mij? Boeken, films, exposities, koffie met uitzicht op het dak. Oud en nieuw onder \u00e9\u00e9n dak. Letterlijk."] },
   { id:'vismarkt', name:'Vismarkt', character:'De oude handelaar',
     pin:IMG+'vismarkt.jpg', photos:[IMG+'vismarkt.jpg',IMG+'vismarkt_2.jpg',IMG+'vismarkt_3.jpg'],
     polygon:[[53.217866,6.565988],[53.217549,6.566433],[53.217058,6.565251],[53.216425,6.563148],[53.216045,6.561743],[53.21662,6.561517]],
-    sugs:{nl:['Verkoop je nog vis?','Wat werd hier verhandeld?','Vertel een goeie deal'],en:['Do you still sell fish?','What was traded here?','Tell me about a good deal'],de:['Verkaufst du noch Fisch?','Was wurde hier gehandelt?','Erz\u00e4hl von einem guten Deal']},
+    sugs:{nl:['Verkoop je nog vis?','Wat werd hier verhandeld?','Vertel een goeie deal'],en:['Do you still sell fish?','What was traded here?','Tell me about a good deal'],de:['Verkaufst du noch Fisch?','Was wurde hier gehandelt?','Erz\u00e4hl von einem guten Deal'],it:['Vendi ancora pesce?','Cosa si commerciava qui?','Raccontami un bell\u2019affare'],pt:['Ainda vendes peixe?','O que se negociava aqui?','Conta-me um bom negócio'],es:['¿Todavía vendes pescado?','¿Qué se comerciaba aquí?','Cuéntame un buen trato'],pl:['Czy nadal sprzedajesz ryby?','Czym tu handlowano?','Opowiedz o dobrym interesie'],da:['Sælger du stadig fisk?','Hvad blev der handlet her?','Fortæl om en god handel'],sv:['Säljer du fortfarande fisk?','Vad handlades här?','Berätta om en bra affär'],no:['Selger du fortsatt fisk?','Hva ble handlet her?','Fortell om en god handel'],fi:['Myytkö vielä kalaa?','Mitä täällä myytiin?','Kerro hyvästä kaupasta'],el:['Πουλάς ακόμα ψάρι;','Τι εμπορεύονταν εδώ;','Πες μου μια καλή συμφωνία']},
     persona:`Jij BENT de Vismarkt van Groningen, met de Korenbeurs en zicht op de A-kerk. Een gezouten oude koopman: praktisch, recht voor z'n raap, gek op handel, eten en een goeie deal. Droge grappen.`,
-    fallback:["Vis? Heb ik niet meer, jongen \u2014 die tijden zijn voorbij. Maar handel, een goeie deal? D\u00e1\u00e1r ben ik nog de beste in.","Hier werd alles verhandeld: vis, graan, geld. Schreeuwen en pingelen tot zonsondergang. De Korenbeurs staat er nog \u2014 ik ook."] }
+    fallback:["Vis? Heb ik niet meer, jongen, die tijden zijn voorbij. Maar handel, een goeie deal? D\u00e1\u00e1r ben ik nog de beste in.","Hier werd alles verhandeld: vis, graan, geld. Schreeuwen en pingelen tot zonsondergang. De Korenbeurs staat er nog, ik ook."] }
 ];
 
 const INFO_TEXT = {
-  martini:"97 meter hoog en ruim vijf eeuwen oud — het oudste oog van de stad, met de Martinikerk en het beroemde Schnitger-orgel aan z'n voet.",
+  martini:"97 meter hoog en ruim vijf eeuwen oud: het oudste oog van de stad, met de Martinikerk en het beroemde Schnitger-orgel aan z'n voet.",
   provinciehuis:"Eeuwenoude zetel van het provinciaal bestuur aan het Martinikerkhof, met de historische Statenzaal.",
-  stadhuis:"Het neoclassicistische stadhuis op de Grote Markt — hart van het stadsbestuur, en getuige van de verwoesting in 1945.",
+  stadhuis:"Het neoclassicistische stadhuis op de Grote Markt: hart van het stadsbestuur, en getuige van de verwoesting in 1945.",
   forum:"Het futuristische cultuurgebouw uit 2019: bibliotheek, bioscoop en het beste dakuitzicht van Groningen.",
-  vismarkt:"Eeuwenlang het handelsplein van de stad — vis, graan en de Korenbeurs, met zicht op de A-kerk."
+  vismarkt:"Eeuwenlang het handelsplein van de stad: vis, graan en de Korenbeurs, met zicht op de A-kerk."
 };
 
 const $=s=>document.querySelector(s);
@@ -580,11 +589,13 @@ function buildSlides(z){
     const d=document.createElement('i'); if(i===0) d.classList.add('on'); d.onclick=(e)=>{ e.stopPropagation(); showSlide(i); restartSlideTimer(); }; dots.appendChild(d);
   });
   restartSlideTimer(); requestAnimationFrame(syncMediaHeight);
+  { const md=$('#media'); if(md) md.classList.toggle('multi', imgs.length>1); }
 }
 function showSlide(n){ if(!slideEls.length) return; slideIdx=(n+slideEls.length)%slideEls.length;
   slideEls.forEach((im,i)=>im.classList.toggle('on',i===slideIdx));
   const dots=$('#mdots').children; for(let i=0;i<dots.length;i++) dots[i].classList.toggle('on',i===slideIdx); }
 function nextSlide(){ showSlide(slideIdx+1); }
+function prevSlide(){ showSlide(slideIdx-1); }
 function restartSlideTimer(){ stopSlides(); if(slideEls.length>1) slideTimer=setInterval(nextSlide,4500); }
 function stopSlides(){ if(slideTimer){ clearInterval(slideTimer); slideTimer=null; } }
 (function(){ const ch=$('#chandle'), cp=$('#convoPanel'); if(!ch||!cp) return;
@@ -596,8 +607,11 @@ function stopSlides(){ if(slideTimer){ clearInterval(slideTimer); slideTimer=nul
 function syncMediaHeight(){ const m=$('#media'), cp=$('#convoPanel'); if(!m||!cp)return; const h=m.offsetHeight; if(h>0) cp.style.setProperty('--lowtop',(h+10)+'px'); }
 window.addEventListener('resize',()=>{ if(active) syncMediaHeight(); });
 (function(){ const md=$('#media'); if(!md) return;
+  const mp=$('#mPrev'), mn=$('#mNext');
+  if(mp) mp.onclick=(e)=>{ e.stopPropagation(); prevSlide(); restartSlideTimer(); };
+  if(mn) mn.onclick=(e)=>{ e.stopPropagation(); nextSlide(); restartSlideTimer(); };
   let x0=0,y0=0,dx=0,dy=0,sw=false;
-  md.addEventListener('pointerdown',e=>{ if(e.target.closest('.mdots')) return; sw=true; x0=e.clientX; y0=e.clientY; dx=dy=0; });
+  md.addEventListener('pointerdown',e=>{ if(e.target.closest('.mdots')||e.target.closest('.marrow')) return; sw=true; x0=e.clientX; y0=e.clientY; dx=dy=0; });
   window.addEventListener('pointermove',e=>{ if(sw){ dx=e.clientX-x0; dy=e.clientY-y0; }});
   window.addEventListener('pointerup',()=>{ if(!sw)return; sw=false; if(Math.abs(dx)>34 && Math.abs(dx)>Math.abs(dy)){ if(dx<0) nextSlide(); else showSlide(slideIdx-1); restartSlideTimer(); } });
 })();
@@ -646,41 +660,47 @@ if(Object.values(ELEVENLABS_AGENT_IDS).every(v=>v)) $('#setup').classList.add('h
 let lang='nl', uiLang='nl', otherMode=false;
 const LANGS=[['af','Afrikaans'],['ar','العربية'],['hy','Հայերեն'],['as','অসমীয়া'],['ast','Asturianu'],['az','Azərbaycan'],['be','Беларуская'],['bn','বাংলা'],['bs','Bosanski'],['bg','Български'],['my','မြန်မာ'],['yue','粵語'],['ca','Català'],['zh','中文'],['hr','Hrvatski'],['cs','Čeština'],['da','Dansk'],['nl','Nederlands'],['en','English'],['et','Eesti'],['fil','Filipino'],['fi','Suomi'],['fr','Français'],['gl','Galego'],['ka','ქართული'],['de','Deutsch'],['el','Ελληνικά'],['gu','ગુજરાતી'],['ha','Hausa'],['he','עברית'],['hi','हिन्दी'],['hu','Magyar'],['is','Íslenska'],['id','Bahasa Indonesia'],['ga','Gaeilge'],['it','Italiano'],['ja','日本語'],['jv','Basa Jawa'],['kn','ಕನ್ನಡ'],['kk','Қазақша'],['ky','Кыргызча'],['ko','한국어'],['lv','Latviešu'],['lt','Lietuvių'],['lb','Lëtzebuergesch'],['mk','Македонски'],['ms','Bahasa Melayu'],['ml','മലയാളം'],['mt','Malti'],['mi','Māori'],['mr','मराठी'],['mn','Монгол'],['ne','नेपाली'],['no','Norsk'],['oc','Occitan'],['or','ଓଡ଼ିଆ'],['ps','پښتو'],['fa','فارسی'],['pl','Polski'],['pt-br','Português (Brasil)'],['pt','Português'],['pa','ਪੰਜਾਬੀ'],['ro','Română'],['ru','Русский'],['sr','Српски'],['sd','سنڌي'],['sk','Slovenčina'],['sl','Slovenščina'],['so','Soomaali'],['es','Español'],['sw','Kiswahili'],['sv','Svenska'],['tg','Тоҷикӣ'],['ta','தமிழ்'],['te','తెలుగు'],['th','ไทย'],['tr','Türkçe'],['uk','Українська'],['ur','اردو'],['uz','Oʻzbek'],['vi','Tiếng Việt'],['cy','Cymraeg'],['yo','Yorùbá']];
 const T={
-  wEyebrow:{nl:'Audio tour · Stadsstemmen',en:'Audio tour · Stadsstemmen',de:'Audiotour · Stadsstemmen'},
-  wTitle1:{nl:'Praat met de',en:'Talk to the',de:'Sprich mit den'},
-  wTitle2:{nl:'stemmen van Groningen',en:'voices of Groningen',de:'Stimmen von Groningen'},
-  wSub:{nl:'Ontdek de binnenstad met plekken die weten waar je staat — en je hun eigen verhaal vertellen.',en:'Explore the old city with places that know where you are — and tell you their own story.',de:'Entdecke die Innenstadt mit Orten, die wissen, wo du bist — und dir ihre Geschichte erzählen.'},
-  wF1t:{nl:'Plek-bewust',en:'Location-aware',de:'Ortsbewusst'},
-  wF1p:{nl:'Loop door de stad; elke plek herkent waar je bent en vertelt wat hier te zien is.',en:'Walk through the city; each place knows where you are and tells you what to see.',de:'Geh durch die Stadt; jeder Ort weiß, wo du bist, und erzählt, was es zu sehen gibt.'},
-  wF2t:{nl:'Spreek of typ',en:'Speak or type',de:'Sprechen oder tippen'},
-  wF2p:{nl:'Tik op de microfoon en praat, of typ je vraag als het te druk is.',en:'Tap the microphone and talk, or type your question if it’s too busy.',de:'Tippe aufs Mikrofon und sprich, oder tippe deine Frage, wenn es zu laut ist.'},
-  wPrivLabel:{nl:'Privacy:',en:'Privacy:',de:'Datenschutz:'},
-  wPrivText:{nl:'je locatie wordt alleen gebruikt om te herkennen bij welke plek je staat. Niets wordt opgeslagen.',en:'your location is only used to recognise which place you’re at. Nothing is stored.',de:'dein Standort wird nur genutzt, um zu erkennen, an welchem Ort du bist. Nichts wird gespeichert.'},
-  wLangLabel:{nl:'Taal van de gids',en:'Guide language',de:'Sprache des Guides'},
-  wOther:{nl:'Andere…',en:'Other…',de:'Andere…'},
-  wStart:{nl:'Start de tour',en:'Start the tour',de:'Tour starten'},
-  maphint:{nl:'Sleep je locatie over een plek',en:'Drag your location onto a place',de:'Zieh deinen Standort auf einen Ort'},
-  listEb:{nl:'5 stemmen · binnenstad',en:'5 voices · city centre',de:'5 Stimmen · Innenstadt'},
-  listTtl:{nl:'Plekken in de buurt',en:'Places nearby',de:'Orte in der Nähe'},
-  tapToTalk:{nl:'Tik om te praten',en:'Tap to talk',de:'Zum Sprechen tippen'},
-  preview:{nl:'Preview · typ of tik een vraag',en:'Preview · type or tap a question',de:'Vorschau · tippe oder wähle eine Frage'},
-  connecting:{nl:'Verbinden…',en:'Connecting…',de:'Verbinden…'},
-  listening:{nl:'Aan het luisteren… (tik om te stoppen)',en:'Listening… (tap to stop)',de:'Hört zu… (zum Stoppen tippen)'},
-  speaking:{nl:'Aan het praten…',en:'Speaking…',de:'Spricht…'},
-  connectFailed:{nl:'Verbinding mislukt',en:'Connection failed',de:'Verbindung fehlgeschlagen'},
-  voiceUnavail:{nl:'Stem niet beschikbaar — typ je vraag',en:'Voice unavailable — type your question',de:'Stimme nicht verfügbar — tippe deine Frage'},
-  noConnection:{nl:'Geen verbinding — check agent/microfoon',en:'No connection — check agent/microphone',de:'Keine Verbindung — prüfe Agent/Mikrofon'},
-  comeCloser:{nl:'Kom dichterbij om te praten',en:'Come closer to talk',de:'Komm näher zum Sprechen'},
-  comeCloserDist:{nl:'Kom dichterbij · nog ~{m} m',en:'Come closer · ~{m} m to go',de:'Komm näher · noch ~{m} m'},
-  locating:{nl:'Locatie zoeken…',en:'Finding location…',de:'Standort wird gesucht…'},
-  inputPh:{nl:'Typ je vraag aan {name}…',en:'Type your question to {name}…',de:'Tippe deine Frage an {name}…'}
+  wEyebrow:{nl:'Audio tour · Stadsstemmen',en:'Audio tour · Stadsstemmen',de:'Audiotour · Stadsstemmen',it:'Audioguida · Stadsstemmen',pt:'Áudio tour · Stadsstemmen',es:'Audioguía · Stadsstemmen',pl:'Audioprzewodnik · Stadsstemmen',da:'Audiotur · Stadsstemmen',sv:'Ljudtur · Stadsstemmen',no:'Lydtur · Stadsstemmen',fi:'Ääniopas · Stadsstemmen',el:'Ξενάγηση ήχου · Stadsstemmen'},
+  wTitle1:{nl:'Praat met de',en:'Talk to the',de:'Sprich mit den',it:'Parla con le',pt:'Fala com as',es:'Habla con las',pl:'Porozmawiaj z',da:'Tal med',sv:'Prata med',no:'Snakk med',fi:'Puhu',el:'Μίλα με τις'},
+  wTitle2:{nl:'stemmen van Groningen',en:'voices of Groningen',de:'Stimmen von Groningen',it:'voci di Groninga',pt:'vozes de Groningen',es:'voces de Groninga',pl:'głosami Groningen',da:'Groningens stemmer',sv:'Groningens röster',no:'Groningens stemmer',fi:'Groningenin äänille',el:'φωνές του Γκρόνινγκεν'},
+  wSub:{nl:'Ontdek de binnenstad met plekken die weten waar je staat, en je hun eigen verhaal vertellen.',en:'Explore the old city with places that know where you are, and tell you their own story.',de:'Entdecke die Innenstadt mit Orten, die wissen, wo du bist, und dir ihre Geschichte erzählen.',it:'Esplora il centro con luoghi che sanno dove sei, e ti raccontano la loro storia.',pt:'Explora o centro com lugares que sabem onde estás, e te contam a sua própria história.',es:'Explora el centro con lugares que saben dónde estás, y te cuentan su propia historia.',pl:'Odkryj centrum z miejscami, które wiedzą, gdzie jesteś, i opowiedzą ci swoją historię.',da:'Udforsk bymidten med steder, der ved, hvor du er, og fortæller dig deres egen historie.',sv:'Utforska stadskärnan med platser som vet var du är, och berättar sin egen historia.',no:'Utforsk sentrum med steder som vet hvor du er, og forteller deg sin egen historie.',fi:'Tutustu keskustaan paikkojen kanssa, jotka tietävät missä olet, ja kertovat oman tarinansa.',el:'Εξερεύνησε το κέντρο με μέρη που ξέρουν πού βρίσκεσαι, και σου λένε τη δική τους ιστορία.'},
+  wF1t:{nl:'Plek-bewust',en:'Location-aware',de:'Ortsbewusst',it:'Consapevole del luogo',pt:'Ciente do local',es:'Consciente del lugar',pl:'Świadomy lokalizacji',da:'Stedbevidst',sv:'Platsmedveten',no:'Stedsbevisst',fi:'Paikkatietoinen',el:'Με επίγνωση τοποθεσίας'},
+  wF1p:{nl:'Loop door de stad; elke plek herkent waar je bent en vertelt wat hier te zien is.',en:'Walk through the city; each place knows where you are and tells you what to see.',de:'Geh durch die Stadt; jeder Ort weiß, wo du bist, und erzählt, was es zu sehen gibt.',it:'Cammina per la città; ogni luogo sa dove sei e ti dice cosa vedere.',pt:'Caminha pela cidade; cada lugar sabe onde estás e diz-te o que ver.',es:'Camina por la ciudad; cada lugar sabe dónde estás y te dice qué ver.',pl:'Spaceruj po mieście; każde miejsce wie, gdzie jesteś, i mówi, co zobaczyć.',da:'Gå gennem byen; hvert sted ved, hvor du er, og fortæller, hvad du kan se.',sv:'Gå genom staden; varje plats vet var du är och berättar vad du kan se.',no:'Gå gjennom byen; hvert sted vet hvor du er og forteller hva du kan se.',fi:'Kävele kaupungissa; jokainen paikka tietää missä olet ja kertoo mitä nähdä.',el:'Περπάτησε στην πόλη· κάθε μέρος ξέρει πού είσαι και σου λέει τι να δεις.'},
+  wF2t:{nl:'Spreek of typ',en:'Speak or type',de:'Sprechen oder tippen',it:'Parla o scrivi',pt:'Fala ou escreve',es:'Habla o escribe',pl:'Mów lub pisz',da:'Tal eller skriv',sv:'Tala eller skriv',no:'Snakk eller skriv',fi:'Puhu tai kirjoita',el:'Μίλα ή γράψε'},
+  wF2p:{nl:'Tik op de microfoon en praat, of typ je vraag als het te druk is.',en:'Tap the microphone and talk, or type your question if it’s too busy.',de:'Tippe aufs Mikrofon und sprich, oder tippe deine Frage, wenn es zu laut ist.',it:'Tocca il microfono e parla, o scrivi la domanda se c\u2019è troppo rumore.',pt:'Toca no microfone e fala, ou escreve a tua pergunta se houver muito barulho.',es:'Toca el micrófono y habla, o escribe tu pregunta si hay mucho ruido.',pl:'Dotknij mikrofonu i mów, lub wpisz pytanie, gdy jest zbyt głośno.',da:'Tryk på mikrofonen og tal, eller skriv dit spørgsmål, hvis der er for travlt.',sv:'Tryck på mikrofonen och prata, eller skriv din fråga om det är för stökigt.',no:'Trykk på mikrofonen og snakk, eller skriv spørsmålet ditt hvis det er for travelt.',fi:'Napauta mikrofonia ja puhu, tai kirjoita kysymyksesi jos on liian meluisaa.',el:'Πάτα το μικρόφωνο και μίλα, ή γράψε την ερώτησή σου αν έχει φασαρία.'},
+  wPrivLabel:{nl:'Privacy:',en:'Privacy:',de:'Datenschutz:',it:'Privacy:',pt:'Privacidade:',es:'Privacidad:',pl:'Prywatność:',da:'Privatliv:',sv:'Integritet:',no:'Personvern:',fi:'Yksityisyys:',el:'Απόρρητο:'},
+  wPrivText:{nl:'je locatie wordt alleen gebruikt om te herkennen bij welke plek je staat. Niets wordt opgeslagen.',en:'your location is only used to recognise which place you’re at. Nothing is stored.',de:'dein Standort wird nur genutzt, um zu erkennen, an welchem Ort du bist. Nichts wird gespeichert.',it:'la tua posizione serve solo a riconoscere in quale luogo ti trovi. Niente viene salvato.',pt:'a tua localização só serve para reconhecer em que lugar estás. Nada é guardado.',es:'tu ubicación solo se usa para reconocer en qué lugar estás. No se guarda nada.',pl:'twoja lokalizacja służy tylko do rozpoznania, w którym miejscu jesteś. Nic nie jest zapisywane.',da:'din placering bruges kun til at genkende, hvilket sted du er ved. Intet gemmes.',sv:'din plats används bara för att känna igen vilken plats du är vid. Inget sparas.',no:'posisjonen din brukes bare til å gjenkjenne hvilket sted du er ved. Ingenting lagres.',fi:'sijaintiasi käytetään vain tunnistamaan missä paikassa olet. Mitään ei tallenneta.',el:'η τοποθεσία σου χρησιμοποιείται μόνο για να αναγνωρίσει σε ποιο μέρος βρίσκεσαι. Τίποτα δεν αποθηκεύεται.'},
+  wLangLabel:{nl:'Taal van de gids',en:'Guide language',de:'Sprache des Guides',it:'Lingua della guida',pt:'Idioma do guia',es:'Idioma de la guía',pl:'Język przewodnika',da:'Guidens sprog',sv:'Guidens språk',no:'Guidens språk',fi:'Oppaan kieli',el:'Γλώσσα του οδηγού'},
+  wOther:{nl:'Andere…',en:'Other…',de:'Andere…',it:'Altra…',pt:'Outro…',es:'Otro…',pl:'Inny…',da:'Andet…',sv:'Annat…',no:'Annet…',fi:'Muu…',el:'Άλλη…'},
+  wStart:{nl:'Start de tour',en:'Start the tour',de:'Tour starten',it:'Inizia il tour',pt:'Começar o tour',es:'Empezar el tour',pl:'Rozpocznij trasę',da:'Start turen',sv:'Starta turen',no:'Start turen',fi:'Aloita kierros',el:'Ξεκίνα την ξενάγηση'},
+  maphint:{nl:'Sleep je locatie over een plek',en:'Drag your location onto a place',de:'Zieh deinen Standort auf einen Ort',it:'Trascina la tua posizione su un luogo',pt:'Arrasta a tua localização para um lugar',es:'Arrastra tu ubicación sobre un lugar',pl:'Przeciągnij swoją lokalizację na miejsce',da:'Træk din placering hen på et sted',sv:'Dra din plats till en plats',no:'Dra posisjonen din til et sted',fi:'Vedä sijaintisi paikan päälle',el:'Σύρε την τοποθεσία σου πάνω σε ένα μέρος'},
+  listEb:{nl:'5 stemmen · binnenstad',en:'5 voices · city centre',de:'5 Stimmen · Innenstadt',it:'5 voci · centro',pt:'5 vozes · centro',es:'5 voces · centro',pl:'5 głosów · centrum',da:'5 stemmer · bymidte',sv:'5 röster · centrum',no:'5 stemmer · sentrum',fi:'5 ääntä · keskusta',el:'5 φωνές · κέντρο'},
+  listTtl:{nl:'Plekken in de buurt',en:'Places nearby',de:'Orte in der Nähe',it:'Luoghi vicini',pt:'Lugares por perto',es:'Lugares cercanos',pl:'Miejsca w pobliżu',da:'Steder i nærheden',sv:'Platser i närheten',no:'Steder i nærheten',fi:'Lähellä olevat paikat',el:'Κοντινά μέρη'},
+  tapToTalk:{nl:'Tik om te praten',en:'Tap to talk',de:'Zum Sprechen tippen',it:'Tocca per parlare',pt:'Toca para falar',es:'Toca para hablar',pl:'Dotknij, aby mówić',da:'Tryk for at tale',sv:'Tryck för att prata',no:'Trykk for å snakke',fi:'Napauta puhuaksesi',el:'Πάτα για να μιλήσεις'},
+  preview:{nl:'Preview · typ of tik een vraag',en:'Preview · type or tap a question',de:'Vorschau · tippe oder wähle eine Frage',it:'Anteprima · scrivi o tocca una domanda',pt:'Pré-visualização · escreve ou toca numa pergunta',es:'Vista previa · escribe o toca una pregunta',pl:'Podgląd · wpisz lub dotknij pytania',da:'Forhåndsvisning · skriv eller tryk på et spørgsmål',sv:'Förhandsvisning · skriv eller tryck på en fråga',no:'Forhåndsvisning · skriv eller trykk på et spørsmål',fi:'Esikatselu · kirjoita tai napauta kysymystä',el:'Προεπισκόπηση · γράψε ή πάτα μια ερώτηση'},
+  connecting:{nl:'Verbinden…',en:'Connecting…',de:'Verbinden…',it:'Connessione…',pt:'A ligar…',es:'Conectando…',pl:'Łączenie…',da:'Forbinder…',sv:'Ansluter…',no:'Kobler til…',fi:'Yhdistetään…',el:'Σύνδεση…'},
+  listening:{nl:'Aan het luisteren… (tik om te stoppen)',en:'Listening… (tap to stop)',de:'Hört zu… (zum Stoppen tippen)',it:'In ascolto… (tocca per fermare)',pt:'A ouvir… (toca para parar)',es:'Escuchando… (toca para parar)',pl:'Słucham… (dotknij, aby zatrzymać)',da:'Lytter… (tryk for at stoppe)',sv:'Lyssnar… (tryck för att stoppa)',no:'Lytter… (trykk for å stoppe)',fi:'Kuuntelee… (napauta lopettaaksesi)',el:'Ακούει… (πάτα για διακοπή)'},
+  speaking:{nl:'Aan het praten…',en:'Speaking…',de:'Spricht…',it:'Sta parlando…',pt:'A falar…',es:'Hablando…',pl:'Mówi…',da:'Taler…',sv:'Talar…',no:'Snakker…',fi:'Puhuu…',el:'Μιλάει…'},
+  connectFailed:{nl:'Verbinding mislukt',en:'Connection failed',de:'Verbindung fehlgeschlagen',it:'Connessione fallita',pt:'Falha na ligação',es:'Conexión fallida',pl:'Połączenie nieudane',da:'Forbindelse mislykkedes',sv:'Anslutning misslyckades',no:'Tilkobling mislyktes',fi:'Yhteys epäonnistui',el:'Η σύνδεση απέτυχε'},
+  voiceUnavail:{nl:'Stem niet beschikbaar, typ je vraag',en:'Voice unavailable, type your question',de:'Stimme nicht verfügbar, tippe deine Frage',it:'Voce non disponibile, scrivi la domanda',pt:'Voz indisponível, escreve a tua pergunta',es:'Voz no disponible, escribe tu pregunta',pl:'Głos niedostępny, wpisz pytanie',da:'Stemme utilgængelig, skriv dit spørgsmål',sv:'Röst otillgänglig, skriv din fråga',no:'Stemme utilgjengelig, skriv spørsmålet ditt',fi:'Ääni ei käytettävissä, kirjoita kysymyksesi',el:'Η φωνή δεν είναι διαθέσιμη, γράψε την ερώτησή σου'},
+  noConnection:{nl:'Geen verbinding, check agent/microfoon',en:'No connection, check agent/microphone',de:'Keine Verbindung, prüfe Agent/Mikrofon',it:'Nessuna connessione, controlla agente/microfono',pt:'Sem ligação, verifica agente/microfone',es:'Sin conexión, revisa agente/micrófono',pl:'Brak połączenia, sprawdź agenta/mikrofon',da:'Ingen forbindelse, tjek agent/mikrofon',sv:'Ingen anslutning, kolla agent/mikrofon',no:'Ingen tilkobling, sjekk agent/mikrofon',fi:'Ei yhteyttä, tarkista agentti/mikrofoni',el:'Καμία σύνδεση, έλεγξε agent/μικρόφωνο'},
+  comeCloser:{nl:'Kom dichterbij om te praten',en:'Come closer to talk',de:'Komm näher zum Sprechen',it:'Avvicinati per parlare',pt:'Aproxima-te para falar',es:'Acércate para hablar',pl:'Podejdź bliżej, aby porozmawiać',da:'Kom tættere på for at tale',sv:'Kom närmare för att prata',no:'Kom nærmere for å snakke',fi:'Tule lähemmäs puhuaksesi',el:'Έλα πιο κοντά για να μιλήσεις'},
+  comeCloserDist:{nl:'Kom dichterbij · nog ~{m} m',en:'Come closer · ~{m} m to go',de:'Komm näher · noch ~{m} m',it:'Avvicinati · ancora ~{m} m',pt:'Aproxima-te · faltam ~{m} m',es:'Acércate · faltan ~{m} m',pl:'Podejdź bliżej · jeszcze ~{m} m',da:'Kom tættere på · ~{m} m tilbage',sv:'Kom närmare · ~{m} m kvar',no:'Kom nærmere · ~{m} m igjen',fi:'Tule lähemmäs · ~{m} m jäljellä',el:'Έλα πιο κοντά · ~{m} m ακόμα'},
+  locating:{nl:'Locatie zoeken…',en:'Finding location…',de:'Standort wird gesucht…',it:'Ricerca posizione…',pt:'A localizar…',es:'Buscando ubicación…',pl:'Szukanie lokalizacji…',da:'Finder placering…',sv:'Hittar plats…',no:'Finner posisjon…',fi:'Etsitään sijaintia…',el:'Εύρεση τοποθεσίας…'},
+  inputPh:{nl:'Typ je vraag aan {name}…',en:'Type your question to {name}…',de:'Tippe deine Frage an {name}…',it:'Scrivi la domanda a {name}…',pt:'Escreve a tua pergunta a {name}…',es:'Escribe tu pregunta a {name}…',pl:'Wpisz pytanie do {name}…',da:'Skriv dit spørgsmål til {name}…',sv:'Skriv din fråga till {name}…',no:'Skriv spørsmålet ditt til {name}…',fi:'Kirjoita kysymyksesi {name}…',el:'Γράψε την ερώτησή σου στο {name}…'}
 };
 function tr(k){ const e=T[k]; if(!e) return null; return e[uiLang]||e.en||e.nl; }
 function sugsFor(z){ const s=z.sugs; return Array.isArray(s)?s:((s&&(s[uiLang]||s.en||s.nl))||[]); }
-function applyI18n(){ uiLang=(lang==='nl')?'nl':(lang==='de')?'de':'en';
+const UI_LANGS=['nl','en','de','it','pt','es','pl','da','sv','no','fi','el'];
+function applyI18n(){ uiLang=(lang==='pt-br')?'pt':(UI_LANGS.includes(lang)?lang:'en');
   document.querySelectorAll('[data-i18n]').forEach(el=>{ const s=tr(el.dataset.i18n); if(s!=null) el.textContent=s; });
-  if(active){ const z=ZONES.find(x=>x.id===active); if(z) $('#input').placeholder=tr('inputPh').replace('{name}',z.name); } }
-(function(){ const sel=$('#wsel'); if(sel){ LANGS.forEach(([c,n])=>{ const o=document.createElement('option'); o.value=c; o.textContent=n; if(c==='fr') o.selected=true; sel.appendChild(o); }); }
+  if(active){ const z=ZONES.find(x=>x.id===active); if(z){ $('#input').placeholder=tr('inputPh').replace('{name}',z.name); const sg=$('#sugs'); if(sg){ sg.innerHTML=''; sugsFor(z).forEach(s=>{const b=document.createElement('div');b.className='sug';b.textContent=s;b.onclick=()=>{$('#input').value=s;sendMsg();};sg.appendChild(b);}); } } } }
+(function(){ const sel=$('#wsel');
+  const PRIORITY=['it','pt','es','pl','da','sv','no','fi','el'], SKIP=PRIORITY.concat(['nl','en','de']);
+  if(sel){ const nameOf=c=>{ const f=LANGS.find(l=>l[0]===c); return f?f[1]:c; };
+    PRIORITY.forEach((c,i)=>{ const o=document.createElement('option'); o.value=c; o.textContent=nameOf(c); if(i===0) o.selected=true; sel.appendChild(o); });
+    const sep=document.createElement('option'); sep.disabled=true; sep.textContent='\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500'; sel.appendChild(sep);
+    LANGS.forEach(([c,n])=>{ if(SKIP.includes(c)) return; const o=document.createElement('option'); o.value=c; o.textContent=n; sel.appendChild(o); }); }
   function paint(){ document.querySelectorAll('#langRow button').forEach(b=>{ const v=b.dataset.l; b.classList.toggle('on', otherMode ? v==='other' : v===lang); }); }
   document.querySelectorAll('#langRow button').forEach(b=>{ b.onclick=()=>{ const v=b.dataset.l; if(v==='other'){ otherMode=true; $('#wsel').classList.add('show'); lang=$('#wsel').value; } else { otherMode=false; $('#wsel').classList.remove('show'); lang=v; } paint(); applyI18n(); }; });
   if(sel) sel.onchange=e=>{ lang=e.target.value; otherMode=true; paint(); applyI18n(); };
