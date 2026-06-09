@@ -365,31 +365,31 @@ const ZONES = [
   { id:'martini', name:'Martinitoren & -kerk', character:"d'Olle Grieze",
     pin:IMG+'martini.jpg', photos:[IMG+'martini.jpg',IMG+'martini_2.jpg',IMG+'martini_3.jpg'],
     polygon:[[53.219088,6.568073],[53.219408,6.569666],[53.219922,6.569382],[53.219571,6.567802]],
-    sugs:['Waarom heet je d\u2019Olle Grieze?','Hoe hoog kom ik?','Wat heb je zien gebeuren?'],
+    sugs:{nl:['Waarom heet je d\u2019Olle Grieze?','Hoe hoog kom ik?','Wat heb je zien gebeuren?'],en:['Why are you called d\u2019Olle Grieze?','How high can I go?','What have you seen happen?'],de:['Warum hei\u00dft du d\u2019Olle Grieze?','Wie hoch komme ich?','Was hast du erlebt?']},
     persona:`Jij BENT de Martinitoren \u00e9n de Martinikerk van Groningen, samen d'Olle Grieze. Ruim 500 jaar oud, 97 meter, het oudste oog van de stad. Statig, droog, een tikje belerend maar warm. In de kerk hangt het beroemde Schnitger-orgel. Je noemt de bezoeker "kleine".`,
     fallback:["Zo. Daar sta je dan, omhoog te turen zoals iedereen. Vijfhonderd jaar doe ik dat al andersom. Vraag gerust, kleine.","Hoor je het orgel beneden? Dat is m'n hart dat klopt. Zevenennegentig meter steen, en tóch blijft de muziek hangen."] },
   { id:'provinciehuis', name:'Provinciehuis', character:'De raadsheer',
     pin:IMG+'provinciehuis.jpg', photos:[IMG+'provinciehuis.jpg',IMG+'provinciehuis_2.jpg',IMG+'provinciehuis_3.jpg'],
     polygon:[[53.219416,6.569728],[53.219565,6.570964],[53.220288,6.570221],[53.22024,6.569668],[53.219926,6.569478]],
-    sugs:['Wat gebeurt hier?','Vertel over de provincie','Wat is de Statenzaal?'],
+    sugs:{nl:['Wat gebeurt hier?','Vertel over de provincie','Wat is de Statenzaal?'],en:['What happens here?','Tell me about the province','What is the Statenzaal?'],de:['Was passiert hier?','Erz\u00e4hl von der Provinz','Was ist der Statenzaal?']},
     persona:`Jij BENT het Provinciehuis van Groningen, eeuwenoude zetel van het provinciaal bestuur aan het Martinikerkhof, met de Statenzaal. Deftig, bedachtzaam, met gravitas. Trots op de provincie en de Ommelanden.`,
     fallback:["Welkom. Achter deze gevels wordt de provincie bestuurd \u2014 al eeuwen, in de Statenzaal. Neem de tijd; goede beslissingen ook.","De stad denkt graag dat zij Groningen \u00ed\u015b. Maar ik waak over de hele provincie: de Ommelanden, de wierden, het wijde land."] },
   { id:'stadhuis', name:'Stadhuis', character:'De officiële stem',
     pin:IMG+'stadshuis.jpg', photos:[IMG+'stadshuis.jpg',IMG+'stadshuis_2.jpg',IMG+'stadshuis_3.jpg',IMG+'stadshuis_4.jpg'],
     polygon:[[53.218261,6.567762],[53.217985,6.566777],[53.218919,6.566179],[53.219136,6.567155],[53.21867,6.567491]],
-    sugs:['Wie bestuurt de stad?','Wat gebeurde hier in de oorlog?','Hoe oud ben je?'],
+    sugs:{nl:['Wie bestuurt de stad?','Wat gebeurde hier in de oorlog?','Hoe oud ben je?'],en:['Who governs the city?','What happened here in the war?','How old are you?'],de:['Wer regiert die Stadt?','Was geschah hier im Krieg?','Wie alt bist du?']},
     persona:`Jij BENT het Stadhuis van Groningen (neoclassicistisch, begin 19e eeuw) aan de Grote Markt. Formeel, civiel, ordelijk, droog. Je draagt het oorlogsverhaal: de oostkant van de Grote Markt werd in april 1945 verwoest bij de Slag om Groningen.`,
     fallback:["Goedendag. Hier zetelt het stadsbestuur, netjes en volgens de regels. Waarmee kan ik u van dienst zijn?","In april 1945 lag de oostkant van dit plein in puin. Wat u nu ziet is grotendeels weer opgebouwd. De stad herstelt; dat doet ze altijd."] },
   { id:'forum', name:'Forum Groningen', character:'De nieuwkomer',
     pin:IMG+'forum.jpg', photos:[IMG+'forum.jpg',IMG+'forum_2.jpg',IMG+'forum_3.jpg'],
     polygon:[[53.218414,6.568695],[53.218881,6.56836],[53.219367,6.571009],[53.218622,6.571298]],
-    sugs:['Wat kan ik bij jou doen?','Hoe is dat uitzicht?','Is de oude toren jaloers?'],
+    sugs:{nl:['Wat kan ik bij jou doen?','Hoe is dat uitzicht?','Is de oude toren jaloers?'],en:['What can I do here?','How\u2019s the view?','Is the old tower jealous?'],de:['Was kann ich hier machen?','Wie ist die Aussicht?','Ist der alte Turm eifers\u00fcchtig?']},
     persona:`Jij BENT het Forum Groningen (2019). Jong, modern, energiek, een beetje opschepperig over je dakterras en uitzicht. Vlotte taal. Je plaagt de oude Martinitoren.`,
     fallback:["Hey! Welkom. Ja, ik ben de nieuwe. Ga naar het dak \u2014 beste uitzicht van Groningen, en die ouwe toren is stiekem jaloers.","Bij mij? Boeken, films, exposities, koffie met uitzicht op het dak. Oud en nieuw onder \u00e9\u00e9n dak. Letterlijk."] },
   { id:'vismarkt', name:'Vismarkt', character:'De oude handelaar',
     pin:IMG+'vismarkt.jpg', photos:[IMG+'vismarkt.jpg',IMG+'vismarkt_2.jpg',IMG+'vismarkt_3.jpg'],
     polygon:[[53.217866,6.565988],[53.217549,6.566433],[53.217058,6.565251],[53.216425,6.563148],[53.216045,6.561743],[53.21662,6.561517]],
-    sugs:['Verkoop je nog vis?','Wat werd hier verhandeld?','Vertel een goeie deal'],
+    sugs:{nl:['Verkoop je nog vis?','Wat werd hier verhandeld?','Vertel een goeie deal'],en:['Do you still sell fish?','What was traded here?','Tell me about a good deal'],de:['Verkaufst du noch Fisch?','Was wurde hier gehandelt?','Erz\u00e4hl von einem guten Deal']},
     persona:`Jij BENT de Vismarkt van Groningen, met de Korenbeurs en zicht op de A-kerk. Een gezouten oude koopman: praktisch, recht voor z'n raap, gek op handel, eten en een goeie deal. Droge grappen.`,
     fallback:["Vis? Heb ik niet meer, jongen \u2014 die tijden zijn voorbij. Maar handel, een goeie deal? D\u00e1\u00e1r ben ik nog de beste in.","Hier werd alles verhandeld: vis, graan, geld. Schreeuwen en pingelen tot zonsondergang. De Korenbeurs staat er nog \u2014 ik ook."] }
 ];
@@ -513,7 +513,7 @@ function openConvo(id){ const z=ZONES.find(x=>x.id===id); if(!z)return; stopVoic
   canTalk=(mode==='demo')||(!!livePos && inPoly(livePos.lat,livePos.lng,z.polygon));
   $('#sName').textContent=z.name; $('#sChar').textContent='\u201C'+z.character+'\u201D';
   $('#input').placeholder=tr('inputPh').replace('{name}',z.name);
-  const sg=$('#sugs'); sg.innerHTML=''; z.sugs.forEach(s=>{const b=document.createElement('div');b.className='sug';b.textContent=s;b.onclick=()=>{$('#input').value=s;sendMsg();};sg.appendChild(b);});
+  const sg=$('#sugs'); sg.innerHTML=''; sugsFor(z).forEach(s=>{const b=document.createElement('div');b.className='sug';b.textContent=s;b.onclick=()=>{$('#input').value=s;sendMsg();};sg.appendChild(b);});
   renderConvo(z); if(!aid && histories[id].length===0) pushThem(z,z.fallback[0]); mountVoice(z);
   buildSlides(z); setActiveMarker(id);
   if(map&&z._center) map.panTo(z._center,{animate:true});
@@ -676,6 +676,7 @@ const T={
   inputPh:{nl:'Typ je vraag aan {name}…',en:'Type your question to {name}…',de:'Tippe deine Frage an {name}…'}
 };
 function tr(k){ const e=T[k]; if(!e) return null; return e[uiLang]||e.en||e.nl; }
+function sugsFor(z){ const s=z.sugs; return Array.isArray(s)?s:((s&&(s[uiLang]||s.en||s.nl))||[]); }
 function applyI18n(){ uiLang=(lang==='nl')?'nl':(lang==='de')?'de':'en';
   document.querySelectorAll('[data-i18n]').forEach(el=>{ const s=tr(el.dataset.i18n); if(s!=null) el.textContent=s; });
   if(active){ const z=ZONES.find(x=>x.id===active); if(z) $('#input').placeholder=tr('inputPh').replace('{name}',z.name); } }
