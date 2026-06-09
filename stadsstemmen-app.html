@@ -215,6 +215,37 @@
   .setup b{color:var(--ink);}
   .setup .x{margin-left:auto;background:none;border:none;color:var(--muted);font-size:16px;cursor:pointer;flex-shrink:0;}
   .setup.hide{display:none;}
+  /* ===== WELKOMSTSCHERM + TAALKIEZER ===== */
+  .welcome{position:absolute;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;padding:16px;
+    background:rgba(20,21,15,.55);-webkit-backdrop-filter:blur(7px);backdrop-filter:blur(7px);}
+  .welcome.hide{display:none;}
+  .wcard{width:100%;max-width:430px;max-height:95%;overflow-y:auto;background:var(--surface-solid);border-radius:26px;
+    padding:26px 24px;box-shadow:0 30px 80px rgba(0,0,0,.45);border:1px solid var(--glass-brd);}
+  .wcard .eb{font-family:'Schibsted Grotesk';font-weight:800;font-size:11px;letter-spacing:.13em;color:var(--ink-2);text-transform:uppercase;}
+  .wcard h1{font-family:'Schibsted Grotesk';font-weight:800;font-size:31px;line-height:1.03;letter-spacing:-.02em;margin:11px 0 0;color:var(--ink);}
+  .wcard h1 span{color:var(--lime-d);}
+  .wcard .sub{color:var(--ink-2);font-size:14.5px;line-height:1.45;margin-top:12px;}
+  .wfeat{display:flex;gap:13px;align-items:flex-start;padding:14px;border:1px solid var(--line);border-radius:16px;margin-top:11px;}
+  .wfeat .ic{flex-shrink:0;width:38px;height:38px;border-radius:11px;background:var(--ink);color:var(--lime);display:grid;place-items:center;}
+  .wfeat .ic svg{width:19px;height:19px;}
+  .wfeat h3{font-family:'Schibsted Grotesk';font-weight:800;font-size:15px;color:var(--ink);}
+  .wfeat p{font-size:13px;color:var(--ink-2);line-height:1.4;margin-top:3px;}
+  .wpriv{display:flex;gap:11px;align-items:flex-start;padding:13px 14px;border-radius:14px;margin-top:11px;background:rgba(93,184,255,.1);border:1px solid rgba(93,184,255,.28);}
+  .wpriv .ic{flex-shrink:0;color:var(--blue);}.wpriv .ic svg{width:18px;height:18px;}
+  .wpriv p{font-size:12.5px;color:var(--ink-2);line-height:1.45;}.wpriv b{color:var(--ink);font-weight:800;}
+  .wlang{margin-top:18px;}
+  .wlang .lab{font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
+  .langrow{display:flex;gap:7px;}
+  .langrow button{flex:1;padding:11px 8px;border-radius:12px;border:1px solid var(--line);background:transparent;
+    font-family:'Hanken Grotesk';font-weight:700;font-size:13px;color:var(--ink);cursor:pointer;transition:.15s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .langrow button.on{background:var(--ink);color:var(--lime);border-color:var(--ink);}
+  .wsel{margin-top:8px;width:100%;padding:12px;border-radius:12px;border:1px solid var(--line);background:#fff;
+    font-family:'Hanken Grotesk';font-size:14px;color:var(--ink);display:none;}
+  .wsel.show{display:block;}
+  .wstart{width:100%;margin-top:20px;display:flex;align-items:center;justify-content:center;gap:10px;padding:17px;border-radius:16px;border:none;cursor:pointer;
+    font-family:'Schibsted Grotesk';font-weight:800;font-size:16px;letter-spacing:-.01em;color:var(--ink);
+    background:linear-gradient(135deg,var(--lime-l),var(--lime) 55%,var(--lime-d));box-shadow:0 8px 22px rgba(159,206,28,.5);}
+  .wstart:active{transform:scale(.99);}.wstart svg{width:20px;height:20px;}
 </style>
 </head>
 <body>
@@ -238,6 +269,43 @@
       <span>🎙️</span>
       <span><b>Preview.</b> Nog geen ElevenLabs agent-id's — plekken antwoorden als tekst. Vul de id's bovenin het bestand in voor de echte stemmen.</span>
       <button class="x" id="setupX">×</button>
+    </div>
+
+    <div class="welcome" id="welcome">
+      <div class="wcard">
+        <div class="eb">Audio tour · Stadsstemmen</div>
+        <h1>Praat met de<br><span>stemmen van Groningen</span></h1>
+        <p class="sub">Ontdek de binnenstad met plekken die weten waar je staat — en die hun eigen verhaal aan jou vertellen.</p>
+
+        <div class="wfeat">
+          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-5.2-7-11a7 7 0 0 1 14 0c0 5.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg></div>
+          <div><h3>Plek-bewust</h3><p>Loop door de stad; elke plek herkent waar je bent en vertelt wat hier te zien is.</p></div>
+        </div>
+        <div class="wfeat">
+          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0M12 19v3"/></svg></div>
+          <div><h3>Spreek of typ</h3><p>Tik op de microfoon en praat, of typ je vraag als het te druk is om te praten.</p></div>
+        </div>
+
+        <div class="wpriv">
+          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 3v6c0 5-3.5 8.5-8 11-4.5-2.5-8-6-8-11V5z"/><path d="M9 12l2 2 4-4"/></svg></div>
+          <p><b>Privacy:</b> je locatie wordt alleen gebruikt om te herkennen bij welke plek je staat. Niets wordt opgeslagen. Je kunt ook handmatig een plek kiezen.</p>
+        </div>
+
+        <div class="wlang">
+          <div class="lab">Taal van de gids</div>
+          <div class="langrow" id="langRow">
+            <button data-l="nl" class="on">Nederlands</button>
+            <button data-l="en">English</button>
+            <button data-l="de">Deutsch</button>
+            <button data-l="other">Andere…</button>
+          </div>
+          <select class="wsel" id="wsel"></select>
+        </div>
+
+        <button class="wstart" id="wstart">Start de tour
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h14"/><path d="M13 6l6 6-6 6"/></svg>
+        </button>
+      </div>
     </div>
 
     <!-- SLEEPBAAR PANEEL -->
@@ -477,6 +545,7 @@ async function startConversation(z, initialMessage){
     try{ await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}}); micPrimed=true; }catch(e){}
     const s=await Conv.startSession({
       agentId:aid, connectionType:'websocket',
+      overrides:(lang&&lang!=='nl')?{agent:{language:lang}}:undefined,
       onConnect:()=>{ if(myGen!==elGen) return; elConnecting=false; const t=$('#talk'); t.classList.remove('connecting'); t.classList.add('live'); setTalkLabel('Aan het luisteren\u2026 (tik om te stoppen)'); updateVoiceFab(); if(initialMessage) setTimeout(()=>{ if(myGen===elGen && elSession){ try{elSession.sendUserMessage(initialMessage);}catch(e){} } },250); },
       onDisconnect:()=>{ if(myGen!==elGen) return; resetVoiceUI(); },
       onError:(e)=>{ if(myGen!==elGen) return; console.error('EL error',e); setTalkLabel('Verbinding mislukt'); resetVoiceUI(); },
@@ -572,6 +641,17 @@ function stopGeo(){ if(watch!=null){ navigator.geolocation.clearWatch(watch); wa
 /* ===== INIT ===== */
 $('#setupX').onclick=()=>$('#setup').classList.add('hide');
 if(Object.values(ELEVENLABS_AGENT_IDS).every(v=>v)) $('#setup').classList.add('hide');
+
+/* welkom + taalkiezer */
+let lang='nl', otherMode=false;
+const LANGS=[['nl','Nederlands'],['en','English'],['de','Deutsch'],['fr','Français'],['es','Español'],['it','Italiano'],['pt','Português'],['pl','Polski'],['sv','Svenska'],['da','Dansk'],['nb','Norsk'],['fi','Suomi'],['tr','Türkçe'],['ru','Русский'],['uk','Українська'],['cs','Čeština'],['el','Ελληνικά'],['ro','Română'],['hu','Magyar'],['bg','Български'],['hr','Hrvatski'],['sk','Slovenčina'],['ar','العربية'],['hi','हिन्दी'],['ja','日本語'],['ko','한국어'],['zh','中文'],['id','Bahasa Indonesia'],['ms','Bahasa Melayu'],['ta','தமிழ்'],['fil','Filipino']];
+(function(){ const sel=$('#wsel'); if(sel){ LANGS.forEach(([c,n])=>{ const o=document.createElement('option'); o.value=c; o.textContent=n; if(c==='fr') o.selected=true; sel.appendChild(o); }); }
+  function paint(){ document.querySelectorAll('#langRow button').forEach(b=>{ const v=b.dataset.l; b.classList.toggle('on', otherMode ? v==='other' : v===lang); }); }
+  document.querySelectorAll('#langRow button').forEach(b=>{ b.onclick=()=>{ const v=b.dataset.l; if(v==='other'){ otherMode=true; $('#wsel').classList.add('show'); lang=$('#wsel').value; } else { otherMode=false; $('#wsel').classList.remove('show'); lang=v; } paint(); }; });
+  if(sel) sel.onchange=e=>{ lang=e.target.value; otherMode=true; paint(); };
+  const st=$('#wstart'); if(st) st.onclick=()=>{ $('#welcome').classList.add('hide'); primeMic(); };
+})();
+
 setMode('demo');
 </script>
 </body>
