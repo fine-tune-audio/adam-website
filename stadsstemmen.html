@@ -36,7 +36,7 @@
   /* ===== KAART ===== */
   #map{position:absolute;inset:0;z-index:1;background:#e7dfd0;}
   .leaflet-container{background:#e7dfd0;font-family:inherit;}
-  .leaflet-tile{filter:sepia(.4) saturate(.72) brightness(.97) contrast(1.18) hue-rotate(-8deg);}
+  .leaflet-tile{filter:sepia(.34) saturate(.62) brightness(.99) contrast(1.06) hue-rotate(-8deg);}
   .leaflet-div-icon{background:transparent;border:none;}
   .place-pin{width:0;height:0;}
   .place-pin .ppin{position:absolute;left:0;top:0;transform:translate(-50%,-50%);width:50px;height:50px;border-radius:50%;box-sizing:border-box;
@@ -421,7 +421,7 @@ function setActiveMarker(id){ for(const k in markersById){ const el=markersById[
 let map=null, bounds=[];
 try{
   map=L.map('map',{zoomControl:false,attributionControl:false}).setView([53.2185,6.5662],16);
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{subdomains:'abcd',maxZoom:20}).addTo(map);
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',{subdomains:'abcd',maxZoom:20}).addTo(map);
   const path=[];
   ZONES.forEach(z=>{
     const poly=L.polygon(z.polygon); // onzichtbaar: alleen voor geofence + midden
