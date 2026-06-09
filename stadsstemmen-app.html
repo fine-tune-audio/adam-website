@@ -501,7 +501,7 @@ const INFO_TEXT = {
 const $=s=>document.querySelector(s);
 let active=null, mode='demo', watch=null, liveMe=null, demoMe=null, demoZone=null, livePos=null, canTalk=false;
 let musicEnabled=true, heading=null, headingOn=false, textOnly=false;
-const SHOW_TEXTONLY_TOGGLE=false;  // op true zetten om de tekst-modus-knop te tonen
+const SHOW_TEXTONLY_TOGGLE=true;  // op true zetten om de tekst-modus-knop te tonen
 const visited=new Set(); const TOTAL=ZONES.length;
 const histories={}; ZONES.forEach(z=>histories[z.id]=[]);
 const markersById={};
