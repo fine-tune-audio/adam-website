@@ -1,0 +1,1119 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<title>Stadsstemmen · Groningen</title>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script type="module">
+  // ElevenLabs voice SDK — eigen interface, geen pop-up widget
+  try {
+    const m = await import("https://esm.sh/@elevenlabs/client@1.9.0");
+    window.ElevenLabsConversation = m.Conversation;
+  } catch (e) { console.warn("ElevenLabs SDK kon niet laden:", e); }
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@500;600;700;800;900&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --bg:#e9eae5; --ink:#14150f; --ink-2:#4a4c44; --muted:#76786e;
+    --line:rgba(20,21,15,.12);
+    --surface:rgba(255,255,255,.74); --surface-solid:#fbfbf8; --glass-brd:rgba(255,255,255,.7);
+    --lime:#c8f23c; --lime-l:#e6ff86; --lime-d:#9fce1c; --blue:#5db8ff;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{height:100%;}
+  body{font-family:'Hanken Grotesk',sans-serif;color:var(--ink);-webkit-font-smoothing:antialiased;overflow:hidden;background:var(--bg);}
+
+  .stage{height:100%;display:flex;align-items:center;justify-content:center;}
+  .app{position:relative;width:100%;max-width:440px;height:100%;max-height:940px;overflow:hidden;background:var(--bg);}
+  @media(min-width:480px){.stage{padding:22px;}.app{border-radius:36px;box-shadow:0 40px 120px rgba(0,0,0,.35);}}
+
+  /* ===== KAART ===== */
+  #map{position:absolute;inset:0;z-index:1;background:#e9eae5;}
+  .leaflet-container{background:#e9eae5;font-family:inherit;}
+  .leaflet-tile{filter:grayscale(.35) brightness(1.04) contrast(.96);}
+  .leaflet-div-icon{background:transparent;border:none;}
+  .place-pin{width:0;height:0;}
+  .place-pin .ppin{position:absolute;left:0;top:0;transform:translate(-50%,-50%);width:50px;height:50px;border-radius:50%;box-sizing:border-box;
+    background:linear-gradient(135deg,var(--lime-l),var(--lime) 55%,var(--lime-d));padding:3px;box-shadow:0 4px 12px rgba(0,0,0,.3);transition:box-shadow .25s,transform .25s;}
+  .place-pin .ppin img{width:100%;height:100%;border-radius:50%;object-fit:cover;border:2px solid #fff;box-sizing:border-box;display:block;background:#cfd3c2;}
+  .place-pin .pulse{position:absolute;left:0;top:0;width:50px;height:50px;border-radius:50%;background:var(--lime);opacity:0;}
+  .place-pin.active .pulse{opacity:.5;animation:ppulse 2.1s ease-out infinite;}
+  .place-pin.active .ppin{box-shadow:0 4px 18px rgba(167,211,31,.75);transform:translate(-50%,-50%) scale(1.08);}
+  @keyframes ppulse{0%{transform:translate(-50%,-50%) scale(1);opacity:.45;}100%{transform:translate(-50%,-50%) scale(1.95);opacity:0;}}
+  .me-pin{will-change:transform;}
+  .me-pin .nav{display:block;width:34px;height:34px;transform:rotate(0deg);transform-origin:50% 50%;transition:transform .18s ease-out;}
+  .me-pin .nav svg{width:100%;height:100%;display:block;filter:drop-shadow(0 3px 6px rgba(0,0,0,.38));}
+  .me-pin .nav .body{fill:var(--blue);stroke:#fff;stroke-width:1.6;stroke-linejoin:round;}
+  .me-pin.demo .nav{cursor:grab;animation:mearrow 1.7s ease-in-out infinite;}
+  .me-pin.demo .nav .body{fill:var(--ink);stroke-width:2;}
+  .me-pin.demo .nav:active{cursor:grabbing;}
+  .me-pin .halo{position:absolute;left:50%;top:50%;width:16px;height:16px;transform:translate(-50%,-50%);border-radius:50%;background:rgba(93,184,255,.22);z-index:-1;}
+  .me-pin.demo .halo{background:rgba(159,206,28,.5);animation:mepulse 1.7s ease-out infinite;}
+  @keyframes mepulse{0%{transform:translate(-50%,-50%) scale(.7);opacity:.65;}80%{opacity:0;}100%{transform:translate(-50%,-50%) scale(3.6);opacity:0;}}
+  @keyframes mearrow{0%,100%{transform:scale(1);}50%{transform:scale(1.16);}}
+  .leaflet-tooltip.lm-tip{background:var(--ink);border:none;box-shadow:0 3px 10px rgba(0,0,0,.25);color:#fff;
+    font-family:'Hanken Grotesk';font-size:11px;font-weight:700;padding:4px 9px;border-radius:8px;}
+  .leaflet-tooltip.lm-tip::before{display:none;}
+
+  /* ===== TOP BAR (basic) ===== */
+  .top{position:absolute;z-index:6;top:0;left:0;right:0;padding:16px;display:flex;align-items:center;justify-content:space-between;gap:10px;}
+  .chip{display:flex;align-items:center;gap:9px;padding:10px 15px;border-radius:14px;background:var(--surface);
+    backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid var(--glass-brd);box-shadow:0 6px 20px rgba(0,0,0,.10);}
+  .chip .dotmk{width:9px;height:9px;border-radius:50%;background:var(--lime);border:1.5px solid var(--ink);flex-shrink:0;}
+  .chip .mk{font-family:'Schibsted Grotesk';font-weight:800;font-size:16px;letter-spacing:-.02em;}
+  .seg{display:flex;gap:3px;padding:3px;border-radius:13px;background:var(--surface);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+    border:1px solid var(--glass-brd);box-shadow:0 6px 18px rgba(0,0,0,.10);}
+  .seg button{border:none;background:transparent;color:var(--muted);font-family:inherit;font-weight:800;font-size:10px;
+    letter-spacing:.08em;text-transform:uppercase;padding:9px 13px;border-radius:10px;cursor:pointer;transition:.16s;}
+  .seg button.on{background:var(--ink);color:var(--lime);}
+
+  /* demo-hint op de kaart */
+  .maphint{position:absolute;z-index:5;bottom:160px;left:50%;transform:translateX(-50%);
+    display:flex;align-items:center;gap:8px;padding:9px 15px;border-radius:999px;background:var(--surface);
+    backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid var(--glass-brd);
+    box-shadow:0 6px 18px rgba(0,0,0,.10);font-size:12px;font-weight:600;color:var(--ink-2);white-space:nowrap;transition:.3s;}
+  .maphint.hide{opacity:0;transform:translate(-50%,-8px);pointer-events:none;}
+  .maphint .b{width:13px;height:13px;border-radius:50%;background:#fff;border:2px solid var(--ink);position:relative;}
+  .maphint .b::after{content:'';position:absolute;inset:2.5px;border-radius:50%;background:var(--blue);}
+
+  /* ===== ZWEVENDE SPRAAKKNOP ===== */
+  .voice-fab{position:absolute;z-index:7;top:70px;right:16px;width:56px;height:56px;border-radius:50%;
+    display:none;align-items:center;justify-content:center;cursor:pointer;color:var(--ink);
+    background:linear-gradient(135deg,var(--lime-l),var(--lime) 55%,var(--lime-d));
+    border:1px solid rgba(20,21,15,.16);
+    box-shadow:0 10px 26px rgba(159,206,28,.55),0 2px 8px rgba(0,0,0,.18);}
+  .voice-fab.show{display:flex;animation:vfin .28s ease both;}  @keyframes vfin{from{opacity:0;transform:scale(.55) translateY(-6px);}to{opacity:1;transform:none;}}
+  .voice-fab::before{content:'';position:absolute;inset:-3px;border-radius:50%;border:2px solid var(--lime);opacity:.6;animation:vfring 1.9s ease-out infinite;pointer-events:none;}
+  @keyframes vfring{0%{transform:scale(1);opacity:.55;}100%{transform:scale(1.55);opacity:0;}}
+  .voice-fab .vf-ico{display:flex;}
+  .voice-fab .vf-ico svg{width:25px;height:25px;}
+  .voice-fab .vf-wave{display:none;gap:3px;align-items:center;height:22px;}
+  .voice-fab.speaking .vf-wave{display:flex;}
+  .voice-fab.speaking .vf-ico{display:none;}
+  .voice-fab .vf-wave i{width:3.5px;height:8px;background:var(--ink);border-radius:3px;animation:vfbar .75s ease-in-out infinite;}
+  .voice-fab .vf-wave i:nth-child(2){animation-delay:.14s;}
+  .voice-fab .vf-wave i:nth-child(3){animation-delay:.28s;}
+  .voice-fab .vf-wave i:nth-child(4){animation-delay:.42s;}
+  @keyframes vfbar{0%,100%{height:7px;}50%{height:20px;}}
+
+  /* ===== SLIDE-PANEEL ===== */
+  .sheet{position:absolute;z-index:8;left:0;right:0;bottom:0;height:55%;
+    background:var(--surface);backdrop-filter:blur(30px) saturate(1.4);-webkit-backdrop-filter:blur(30px) saturate(1.4);
+    border-top:1px solid var(--glass-brd);border-radius:30px 30px 0 0;
+    box-shadow:0 -18px 50px rgba(0,0,0,.18), 0 -1px 0 rgba(255,255,255,.8) inset;display:flex;flex-direction:column;overflow:hidden;}
+  .drag{flex-shrink:0;cursor:grab;touch-action:none;padding:18px 0 16px;}
+  .drag:active{cursor:grabbing;}
+  .grip{width:48px;height:6px;border-radius:9px;background:rgba(20,21,15,.22);margin:0 auto;}
+
+  /* lijst */
+  .list-view{display:flex;flex-direction:column;flex:1;min-height:0;}
+  .list-head{padding:8px 24px 16px;cursor:grab;touch-action:none;}
+  .list-head:active{cursor:grabbing;}
+  .list-head .eb{font-size:11px;font-weight:700;letter-spacing:.04em;color:var(--muted);}
+  .list-head .ttl{font-family:'Schibsted Grotesk';font-weight:800;font-size:28px;letter-spacing:-.03em;line-height:1.04;margin-top:5px;}
+  .cards{flex:1;overflow-y:auto;padding:2px 16px 24px;display:flex;flex-direction:column;gap:11px;}
+  .cards::-webkit-scrollbar{width:6px;}.cards::-webkit-scrollbar-thumb{background:var(--line);border-radius:9px;}
+  .card{display:flex;align-items:center;gap:16px;padding:16px 16px 16px 20px;border-radius:18px;cursor:pointer;
+    background:var(--surface-solid);border:1px solid var(--line);transition:.16s;box-shadow:0 2px 8px rgba(0,0,0,.04);}
+  .card:hover{box-shadow:0 8px 22px rgba(0,0,0,.10);transform:translateY(-1px);}
+  .card:active{transform:scale(.99);}
+  .card .meta{flex:1;min-width:0;}
+  .card .num{font-family:'Schibsted Grotesk';font-weight:700;font-size:11px;color:var(--muted);letter-spacing:.06em;}
+  .card .nm{font-family:'Schibsted Grotesk';font-weight:800;font-size:18px;letter-spacing:-.02em;line-height:1.1;margin-top:3px;}
+  .card .ch{font-size:12.5px;color:var(--muted);margin-top:3px;}
+  .card .go{width:46px;height:46px;border-radius:50%;background:var(--ink);color:var(--lime);flex-shrink:0;display:grid;place-items:center;font-size:19px;}
+
+  /* gesprek */
+  .info-view{flex:1;display:none;flex-direction:column;min-height:0;}
+  .sheet.info .list-view{display:none;}
+  .sheet.info .info-view{display:flex;}
+  .info-body{flex:1;overflow-y:auto;padding:18px 24px 8px;}
+  .info-desc{font-size:15px;line-height:1.6;color:var(--ink-2);}
+  .info-foot{padding:12px 18px calc(18px + env(safe-area-inset-bottom));}
+  .talk-cta{width:100%;display:flex;align-items:center;justify-content:center;gap:10px;padding:16px;border-radius:16px;
+    border:none;cursor:pointer;font-family:'Schibsted Grotesk';font-weight:800;font-size:15px;letter-spacing:-.01em;background:var(--ink);color:var(--lime);}
+  .talk-cta svg{width:20px;height:20px;}
+  .talk-cta.off{background:var(--surface-solid);color:var(--muted);border:1px solid var(--line);cursor:default;}
+  .convo-view{flex:1;display:none;flex-direction:column;min-height:0;}
+  .sheet.detail .list-view{display:none;}
+  .sheet.detail .info-view{display:none;}
+  .sheet.detail .convo-view{display:flex;}
+  .cv-head{padding:4px 20px 0;display:flex;align-items:center;gap:14px;}
+  .back{width:44px;height:44px;border-radius:50%;background:var(--ink);color:var(--lime);border:none;font-size:19px;cursor:pointer;display:grid;place-items:center;flex-shrink:0;}
+  .cv-title{min-width:0;}
+  .cv-title .eyebrow{font-size:10px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);}
+  .cv-title .nm{font-family:'Schibsted Grotesk';font-weight:800;font-size:22px;letter-spacing:-.03em;line-height:1.05;margin-top:3px;}
+  .cv-title .ch{font-size:12.5px;color:var(--ink-2);font-weight:600;margin-top:3px;}
+
+  /* media boven, transcriptie eronder die je omhoog kunt swipen */
+  .cv-body{position:relative;flex:1;min-height:0;overflow:hidden;}
+  .media{position:absolute;top:0;left:18px;right:18px;aspect-ratio:4/3;border-radius:18px;overflow:hidden;background:#e9eadf;z-index:1;
+    touch-action:none;box-shadow:0 8px 20px rgba(0,0,0,.16);transition:box-shadow .25s;}
+  .media.speaking{box-shadow:0 0 0 3px var(--lime),0 8px 22px rgba(167,211,31,.45);}
+  .media .slides{position:absolute;inset:0;}
+  .media .slides img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .9s ease;}
+  .media .slides img.on{opacity:1;}
+  .mdots{position:absolute;left:0;right:0;bottom:10px;display:flex;gap:6px;justify-content:center;z-index:2;}
+  .mdots i{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.6);transition:.25s;cursor:pointer;}
+  .mdots i.on{background:#fff;width:18px;border-radius:3px;}
+  .media .marrow{position:absolute;top:50%;transform:translateY(-50%);z-index:3;width:34px;height:34px;padding:0;border:none;border-radius:50%;
+    background:rgba(20,21,15,.42);color:#fff;display:none;place-items:center;cursor:pointer;-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);transition:background .15s,transform .12s;}
+  .media.multi .marrow{display:grid;}
+  .media .marrow svg{width:19px;height:19px;}
+  .media .marrow.prev{left:10px;} .media .marrow.next{right:10px;}
+  .media .marrow:hover{background:rgba(20,21,15,.62);}
+  .media .marrow:active{transform:translateY(-50%) scale(.9);}
+  .convo-panel{position:absolute;left:0;right:0;bottom:0;top:var(--lowtop,46%);z-index:2;display:flex;flex-direction:column;
+    background:var(--surface-solid);border-radius:20px 20px 0 0;box-shadow:0 -8px 24px rgba(0,0,0,.13);
+    transition:top .42s cubic-bezier(.22,1,.36,1),border-radius .3s,box-shadow .3s;overflow:hidden;}
+  .convo-panel.up{top:0;border-radius:0;box-shadow:none;}
+  .chandle{flex-shrink:0;height:42px;display:flex;align-items:center;justify-content:center;cursor:grab;touch-action:none;}
+  .chandle .grip{width:46px;height:5px;border-radius:3px;background:var(--line);}
+  .chandle:active{cursor:grabbing;}
+
+  /* compacte mic-knop met gele gradient */
+  .cstatus{font-size:11.5px;color:var(--muted);font-weight:600;padding:7px 20px 0;min-height:14px;}
+  .micbtn{width:46px;height:46px;border-radius:50%;border:1px solid rgba(20,21,15,.16);cursor:pointer;flex-shrink:0;position:relative;
+    display:grid;place-items:center;color:var(--ink);background:linear-gradient(135deg,var(--lime-l),var(--lime) 55%,var(--lime-d));
+    box-shadow:0 4px 14px rgba(159,206,28,.5);}
+  .micbtn:active{transform:scale(.95);}
+  .micbtn .m-ico{display:flex;}
+  .micbtn .m-ico svg{width:22px;height:22px;}
+  .micbtn .m-wave{display:none;gap:3px;align-items:center;height:20px;}
+  .micbtn.speaking .m-wave{display:flex;}
+  .micbtn.speaking .m-ico{display:none;}
+  .micbtn .m-wave i{width:3px;height:7px;background:var(--ink);border-radius:2px;animation:vfbar .75s ease-in-out infinite;}
+  .micbtn .m-wave i:nth-child(2){animation-delay:.14s;} .micbtn .m-wave i:nth-child(3){animation-delay:.28s;}
+  .micbtn.connecting{animation:micpulse 1s ease-in-out infinite;}
+  .micbtn.off{background:var(--surface-solid);color:var(--muted);box-shadow:none;border-color:var(--line);cursor:default;}
+  .micbtn.off::after{display:none;}
+  .micbtn.live::after{content:'';position:absolute;inset:-3px;border-radius:50%;border:2px solid var(--lime);opacity:.6;animation:vfring 1.9s ease-out infinite;pointer-events:none;}
+  @keyframes micpulse{0%,100%{box-shadow:0 4px 14px rgba(159,206,28,.5);}50%{box-shadow:0 4px 22px rgba(159,206,28,.95);}}
+
+  .convo{flex:1;overflow-y:auto;padding:4px 20px 6px;display:flex;flex-direction:column;gap:11px;min-height:0;}
+  .convo::-webkit-scrollbar{width:6px;}.convo::-webkit-scrollbar-thumb{background:var(--line);border-radius:9px;}
+  .msg{max-width:84%;padding:12px 16px;border-radius:17px;line-height:1.5;font-size:14.5px;animation:rise .3s ease both;}
+  @keyframes rise{from{opacity:0;transform:translateY(7px);}to{opacity:1;transform:none;}}
+  .msg.them{align-self:flex-start;background:var(--surface-solid);border:1px solid var(--line);border-top-left-radius:5px;font-family:'Schibsted Grotesk';font-weight:600;}
+  .msg.me{align-self:flex-end;background:var(--lime);color:var(--ink);border-top-right-radius:5px;font-weight:700;}
+  .typing{align-self:flex-start;display:flex;gap:5px;padding:14px 16px;}
+  .typing i{width:7px;height:7px;border-radius:50%;background:var(--lime-d);animation:bl 1.1s infinite;}
+  .typing i:nth-child(2){animation-delay:.18s;}.typing i:nth-child(3){animation-delay:.36s;}
+  @keyframes bl{0%,100%{opacity:.3;transform:translateY(0);}50%{opacity:1;transform:translateY(-3px);}}
+
+  .sugs{display:flex;gap:9px;overflow-x:auto;padding:10px 18px;scrollbar-width:none;}
+  .sugs::-webkit-scrollbar{display:none;}
+  .sug{flex-shrink:0;font-size:12.5px;font-weight:700;padding:9px 15px;border-radius:999px;background:var(--surface-solid);
+    border:1px solid var(--line);color:var(--ink-2);cursor:pointer;white-space:nowrap;transition:.15s;}
+  .sug:hover{border-color:var(--ink);color:var(--ink);}
+  .composer{display:flex;gap:10px;padding:6px 18px calc(16px + env(safe-area-inset-bottom));align-items:center;}
+  .field{flex:1;display:flex;align-items:center;background:var(--surface-solid);border:1px solid var(--line);border-radius:15px;padding:3px 4px 3px 17px;}
+  .field:focus-within{border-color:var(--ink);}
+  .field textarea{flex:1;background:none;border:none;outline:none;color:var(--ink);font-family:inherit;font-size:14.5px;resize:none;padding:12px 0;max-height:90px;line-height:1.35;}
+  .field textarea::placeholder{color:var(--muted);}
+  .send{width:44px;height:44px;border:none;border-radius:13px;cursor:pointer;flex-shrink:0;background:var(--ink);color:var(--lime);font-size:18px;display:grid;place-items:center;}
+  .send:disabled{opacity:.4;}
+  .go svg,.back svg{width:21px;height:21px;}
+  .send svg{width:19px;height:19px;}
+
+  .setup{position:absolute;z-index:7;bottom:calc(55% + 14px);left:14px;right:14px;padding:12px 15px;border-radius:14px;
+    background:var(--surface);backdrop-filter:blur(16px);border:1px solid var(--glass-brd);box-shadow:0 8px 24px rgba(0,0,0,.10);
+    font-size:11.5px;line-height:1.45;color:var(--ink-2);display:flex;gap:10px;align-items:flex-start;transition:.3s;}
+  .setup b{color:var(--ink);}
+  .setup .x{margin-left:auto;background:none;border:none;color:var(--muted);font-size:16px;cursor:pointer;flex-shrink:0;}
+  .setup.hide{display:none;}
+  /* ===== WELKOMSTSCHERM + TAALKIEZER ===== */
+  .welcome{position:absolute;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;padding:16px;
+    background:rgba(20,21,15,.55);-webkit-backdrop-filter:blur(7px);backdrop-filter:blur(7px);}
+  .welcome.hide{display:none;}
+  .wcard{width:100%;max-width:420px;max-height:96%;overflow-y:auto;background:var(--surface-solid);border-radius:23px;
+    padding:21px 21px;box-shadow:0 30px 80px rgba(0,0,0,.45);border:1px solid var(--glass-brd);}
+  .wcard .eb{font-family:'Schibsted Grotesk';font-weight:800;font-size:10.5px;letter-spacing:.12em;color:var(--ink-2);text-transform:uppercase;}
+  .wcard h1{font-family:'Schibsted Grotesk';font-weight:800;font-size:26px;line-height:1.02;letter-spacing:-.02em;margin:8px 0 0;color:var(--ink);}
+  .wcard h1 .accent{color:var(--lime-d);}
+  .wcard .sub{color:var(--ink-2);font-size:13px;line-height:1.4;margin-top:9px;}
+  .wfeat{display:flex;gap:11px;align-items:flex-start;padding:11px;border:1px solid var(--line);border-radius:14px;margin-top:9px;}
+  .wfeat .ic{flex-shrink:0;width:34px;height:34px;border-radius:10px;background:var(--ink);color:var(--lime);display:grid;place-items:center;}
+  .wfeat .ic svg{width:17px;height:17px;}
+  .wfeat h3{font-family:'Schibsted Grotesk';font-weight:800;font-size:14px;color:var(--ink);}
+  .wfeat p{font-size:12px;color:var(--ink-2);line-height:1.35;margin-top:2px;}
+  .wpriv{display:flex;gap:10px;align-items:flex-start;padding:11px 12px;border-radius:13px;margin-top:9px;background:rgba(93,184,255,.1);border:1px solid rgba(93,184,255,.28);}
+  .wpriv .ic{flex-shrink:0;color:var(--blue);}.wpriv .ic svg{width:17px;height:17px;}
+  .wpriv p{font-size:11.5px;color:var(--ink-2);line-height:1.4;}.wpriv b{color:var(--ink);font-weight:800;}
+  .wlang{margin-top:14px;}
+  .wlang .lab{font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:7px;}
+  .langrow{display:flex;gap:6px;}
+  .langrow button{flex:1;padding:10px 6px;border-radius:11px;border:1px solid var(--line);background:transparent;
+    font-family:'Hanken Grotesk';font-weight:700;font-size:12.5px;color:var(--ink);cursor:pointer;transition:.15s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .langrow button.on{background:var(--ink);color:var(--lime);border-color:var(--ink);}
+  .wsel{margin-top:7px;width:100%;padding:10px;border-radius:11px;border:1px solid var(--line);background:#fff;
+    font-family:'Hanken Grotesk';font-size:14px;color:var(--ink);display:none;}
+  .wsel.show{display:block;}
+  .wstart{width:100%;margin-top:15px;display:flex;align-items:center;justify-content:center;gap:9px;padding:15px;border-radius:15px;border:none;cursor:pointer;
+    font-family:'Schibsted Grotesk';font-weight:800;font-size:15.5px;letter-spacing:-.01em;color:var(--ink);
+    background:linear-gradient(135deg,var(--lime-l),var(--lime) 55%,var(--lime-d));box-shadow:0 8px 22px rgba(159,206,28,.5);}
+  .wstart:active{transform:scale(.99);}.wstart svg{width:19px;height:19px;}
+
+  /* ===== NIEUW: geluidsknop ===== */
+  .top-r{display:flex;align-items:center;gap:10px;}
+  .sndbtn{width:42px;height:42px;flex-shrink:0;border-radius:13px;border:1px solid var(--glass-brd);cursor:pointer;
+    display:grid;place-items:center;color:var(--ink);background:var(--surface);
+    backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);box-shadow:0 6px 18px rgba(0,0,0,.10);transition:.16s;}
+  .sndbtn:active{transform:scale(.94);}
+  .sndbtn svg{width:20px;height:20px;}
+  .sndbtn .on-ic{display:block;} .sndbtn .off-ic{display:none;}
+  .sndbtn.muted{color:var(--muted);} .sndbtn.muted .on-ic{display:none;} .sndbtn.muted .off-ic{display:block;}
+  #textBtn.on{background:var(--ink);color:var(--lime);border-color:var(--ink);}
+  /* tekst-modus: geen microfoon, alleen typen */
+  body.text-only .micbtn{display:none;}
+  body.text-only #talkLabel{display:none;}
+
+  /* ===== NIEUW: voortgang in lijstkop ===== */
+  .list-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;}
+  .lh-prog{flex-shrink:0;margin-top:2px;display:flex;align-items:center;gap:9px;padding:8px 13px;border-radius:13px;
+    background:var(--surface-solid);border:1px solid var(--line);box-shadow:0 2px 8px rgba(0,0,0,.05);cursor:default;}
+  .lh-prog .ring{position:relative;width:30px;height:30px;flex-shrink:0;}
+  .lh-prog .ring svg{width:30px;height:30px;transform:rotate(-90deg);}
+  .lh-prog .ring .bg{fill:none;stroke:var(--line);stroke-width:3.5;}
+  .lh-prog .ring .fg{fill:none;stroke:var(--lime-d);stroke-width:3.5;stroke-linecap:round;transition:stroke-dashoffset .5s ease;}
+  .lh-prog .pt{font-family:'Schibsted Grotesk';font-weight:800;font-size:12.5px;letter-spacing:-.01em;line-height:1.15;color:var(--ink);}
+  .lh-prog .pt small{display:block;font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.02em;}
+
+  /* ===== NIEUW: bezocht-status op pin ===== */
+  .place-pin .check{position:absolute;left:13px;top:-21px;width:20px;height:20px;border-radius:50%;background:var(--ink);
+    display:none;place-items:center;color:var(--lime);box-shadow:0 2px 6px rgba(0,0,0,.35);z-index:2;}
+  .place-pin .check svg{width:12px;height:12px;}
+  .place-pin.visited .check{display:grid;}
+  .place-pin.visited .ppin img{filter:saturate(.62);}
+
+  /* ===== NIEUW: bezocht-status op kaart ===== */
+  .card{position:relative;}
+  .card .done{display:none;align-items:center;gap:5px;margin-top:6px;font-size:11px;font-weight:800;letter-spacing:.02em;color:var(--lime-d);}
+  .card .done svg{width:13px;height:13px;}
+  .card.visited{opacity:.82;}
+  .card.visited .done{display:inline-flex;}
+  .card.visited .num{color:var(--lime-d);}
+
+  /* ===== NIEUW: navigatie-HUD (richting + afstand) ===== */
+  .navhud{position:absolute;z-index:5;top:120px;left:50%;transform:translateX(-50%);display:none;align-items:center;gap:10px;
+    padding:8px 15px 8px 9px;border-radius:999px;background:var(--surface);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+    border:1px solid var(--glass-brd);box-shadow:0 6px 20px rgba(0,0,0,.12);max-width:84%;}
+  .navhud.show{display:flex;}
+  .navhud .arr{width:30px;height:30px;flex-shrink:0;border-radius:50%;background:var(--ink);display:grid;place-items:center;color:var(--lime);}
+  .navhud .arr svg{width:17px;height:17px;transition:transform .2s ease-out;}
+  .navhud .nt{font-size:12.5px;line-height:1.15;min-width:0;}
+  .navhud .nt b{font-family:'Schibsted Grotesk';font-weight:800;letter-spacing:-.01em;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .navhud .nt span{color:var(--muted);font-weight:700;font-size:11px;}
+  .navhud.done-all .arr{background:var(--lime-d);color:var(--ink);}
+
+  /* ===== NIEUW: koptelefoon-tip op welkomstscherm ===== */
+  .whead{display:flex;align-items:center;gap:8px;margin-top:11px;font-size:12px;color:var(--muted);font-weight:600;}
+  .whead svg{width:16px;height:16px;flex-shrink:0;stroke:var(--muted);}
+
+  /* ===== NIEUW: centreer-knop (live) ===== */
+  .recenter{position:absolute;z-index:7;top:138px;right:16px;width:46px;height:46px;border-radius:50%;
+    display:none;align-items:center;justify-content:center;cursor:pointer;color:var(--ink);
+    background:var(--surface);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+    border:1px solid var(--glass-brd);box-shadow:0 6px 18px rgba(0,0,0,.14);transition:transform .16s;}
+  .recenter.show{display:flex;animation:vfin .24s ease both;}
+  .recenter:active{transform:scale(.92);}
+  .recenter svg{width:22px;height:22px;}
+
+  /* ===== NIEUW: markers losse plekken ===== */
+  .spot-hit{position:absolute;transform:translate(-50%,-50%);width:46px;height:46px;display:grid;place-items:center;cursor:pointer;}
+  .spot-pin{position:relative;border-radius:50%;border:2px solid #fff;
+    box-shadow:0 2px 6px rgba(0,0,0,.32);display:grid;place-items:center;transition:transform .12s;}
+  .spot-hit:hover .spot-pin{transform:scale(1.14);}
+  .spot-pin.sight{width:18px;height:18px;background:#f5c518;}
+  .spot-pin.horeca{width:26px;height:26px;background:#e8772e;color:#fff;}
+  .spot-pin.horeca svg{width:15px;height:15px;}
+  .spot-pin.unlocked{box-shadow:0 0 0 2px var(--lime),0 2px 6px rgba(0,0,0,.32);}
+  /* 4:3-galerij in het info-paneel (zelfde stijl als de agents) */
+  .media.media-info{position:relative;top:auto;left:auto;right:auto;width:100%;margin-bottom:14px;}
+  .info-desc.locked-note{color:var(--ink-2);font-style:italic;}
+  /* twee knoppen onder de foto's: beluister audio + lees het verhaal */
+  .spot-actions{display:flex;gap:10px;margin-bottom:14px;}
+  .spot-actions button{flex:1;display:flex;align-items:center;justify-content:center;gap:9px;padding:14px 12px;border-radius:15px;
+    cursor:pointer;font-family:'Schibsted Grotesk';font-weight:800;font-size:14px;letter-spacing:-.01em;transition:.16s;}
+  .spot-actions button:active{transform:scale(.98);}
+  .spot-actions .sa-audio{border:none;color:var(--ink);background:linear-gradient(135deg,var(--lime-l),var(--lime) 55%,var(--lime-d));box-shadow:0 6px 16px rgba(159,206,28,.45);}
+  .spot-actions .sa-audio.playing{box-shadow:0 0 0 2px var(--lime-d),0 6px 16px rgba(159,206,28,.5);}
+  .spot-actions .sa-story{background:var(--surface-solid);color:var(--ink);border:1px solid var(--line);}
+  .spot-actions .sa-story.on{background:var(--ink);color:var(--lime);border-color:var(--ink);}
+  .spot-actions button svg{width:18px;height:18px;flex-shrink:0;}
+  .spot-actions .sa-audio .wave{display:none;gap:3px;align-items:center;height:16px;}
+  .spot-actions .sa-audio.playing .wave{display:flex;}
+  .spot-actions .sa-audio.playing .ico{display:none;}
+  .spot-actions .sa-audio .wave i{width:3px;height:6px;background:var(--ink);border-radius:2px;animation:vfbar .75s ease-in-out infinite;}
+  .spot-actions .sa-audio .wave i:nth-child(2){animation-delay:.14s;} .spot-actions .sa-audio .wave i:nth-child(3){animation-delay:.28s;}
+  .info-desc.collapsed{display:none;}
+
+  /* ===== NIEUW: filter ===== */
+  .filter{position:absolute;z-index:6;top:70px;left:16px;width:max-content;}
+  .filter-head{display:flex;align-items:center;gap:8px;padding:9px 13px;border-radius:13px;cursor:pointer;
+    font-family:inherit;font-weight:700;font-size:13px;color:var(--ink);border:1px solid var(--glass-brd);
+    background:var(--surface);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);box-shadow:0 6px 18px rgba(0,0,0,.1);}
+  .filter-head:active{transform:scale(.98);}
+  .filter-head .fi{width:16px;height:16px;}
+  .filter-head .chev{width:15px;height:15px;transition:transform .2s;}
+  .filter.open .filter-head .chev{transform:rotate(180deg);}
+  .filter-body{display:none;margin-top:8px;padding:6px;border-radius:13px;border:1px solid var(--glass-brd);
+    background:var(--surface);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);box-shadow:0 6px 18px rgba(0,0,0,.1);}
+  .filter.open .filter-body{display:block;}
+  .filter-body label{display:flex;align-items:center;gap:9px;padding:7px 9px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;border-radius:9px;}
+  .filter-body label:active{background:rgba(0,0,0,.04);}
+  .filter-body input{accent-color:var(--lime-d);width:16px;height:16px;flex-shrink:0;}
+  .filter-body .fdot{width:12px;height:12px;border-radius:50%;border:1.5px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.18);flex-shrink:0;}
+  .fdot.agent{background:var(--ink);} .fdot.sight{background:#f5c518;} .fdot.horeca{background:#e8772e;}
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="app" id="app">
+    <div id="map"></div>
+
+    <div class="top">
+      <div class="chip"><span class="mk">Stads<b>stemmen</b></span></div>
+      <div class="top-r">
+        <button class="sndbtn" id="sndBtn" aria-label="Geluid aan/uit" title="Geluid aan/uit">
+          <span class="on-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M19 5a9 9 0 0 1 0 14"/></svg></span>
+          <span class="off-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="M22 9l-6 6"/><path d="M16 9l6 6"/></svg></span>
+        </button>
+        <button class="sndbtn" id="textBtn" aria-label="Tekst-modus (agents dempen)" title="Tekst-modus" style="display:none">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M8 9h8"/><path d="M8 13h5"/></svg>
+        </button>
+        <div class="seg"><button id="mDemo" class="on">Demo</button><button id="mLive">Live</button></div>
+      </div>
+    </div>
+
+    <div class="filter" id="filter">
+      <button class="filter-head" id="filterHead">
+        <svg class="fi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5h18M6 12h12M10 19h4"/></svg>
+        <span data-i18n="filterTitle">Filter</span>
+        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
+      <div class="filter-body">
+        <label><input type="checkbox" data-cat="agent" checked><span class="fdot agent"></span><span data-i18n="filterAgents">Stemmen</span></label>
+        <label><input type="checkbox" data-cat="sight" checked><span class="fdot sight"></span><span data-i18n="filterSights">Bezienswaardigheden</span></label>
+        <label><input type="checkbox" data-cat="horeca" checked><span class="fdot horeca"></span><span data-i18n="filterHoreca">Horeca</span></label>
+      </div>
+    </div>
+
+    <div class="navhud" id="navHud">
+      <div class="arr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5"/><path d="M5 12l7-7 7 7"/></svg></div>
+      <div class="nt"><b id="navName">-</b><span id="navDist"></span></div>
+    </div>
+
+    <div class="maphint" id="maphint"><span class="b"></span><span data-i18n="maphint">Sleep je locatie over een plek</span></div>
+
+    <button class="recenter" id="recenterBtn" aria-label="Centreer op mijn locatie" title="Centreer op mijn locatie">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="7"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="2.4" fill="currentColor" stroke="none"/></svg>
+    </button>
+
+    <button class="voice-fab" id="voiceFab" aria-label="Terug naar gesprek">
+      <span class="vf-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0M12 19v3"/></svg></span>
+      <span class="vf-wave"><i></i><i></i><i></i><i></i></span>
+    </button>
+
+    <div class="welcome" id="welcome">
+      <div class="wcard">
+        <div class="eb" data-i18n="wEyebrow">Audio tour · Stadsstemmen</div>
+        <h1><span data-i18n="wTitle1">Praat met de</span><br><span class="accent" data-i18n="wTitle2">stemmen van Groningen</span></h1>
+        <p class="sub" data-i18n="wSub">Ontdek de binnenstad met plekken die weten waar je staat, en je hun eigen verhaal vertellen.</p>
+
+        <div class="wfeat">
+          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-5.2-7-11a7 7 0 0 1 14 0c0 5.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg></div>
+          <div><h3 data-i18n="wF1t">Plek-bewust</h3><p data-i18n="wF1p">Loop door de stad; elke plek herkent waar je bent en vertelt wat hier te zien is.</p></div>
+        </div>
+        <div class="wfeat">
+          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0M12 19v3"/></svg></div>
+          <div><h3 data-i18n="wF2t">Spreek of typ</h3><p data-i18n="wF2p">Tik op de microfoon en praat, of typ je vraag als het te druk is.</p></div>
+        </div>
+
+        <div class="wpriv">
+          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 3v6c0 5-3.5 8.5-8 11-4.5-2.5-8-6-8-11V5z"/><path d="M9 12l2 2 4-4"/></svg></div>
+          <p><b data-i18n="wPrivLabel">Privacy:</b> <span data-i18n="wPrivText">je locatie wordt alleen gebruikt om te herkennen bij welke plek je staat. Niets wordt opgeslagen.</span></p>
+        </div>
+
+        <div class="whead">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 14v-2a9 9 0 0 1 18 0v2"/><path d="M21 16a2 2 0 0 1-2 2h-1v-6h1a2 2 0 0 1 2 2zM3 16a2 2 0 0 0 2 2h1v-6H5a2 2 0 0 0-2 2z"/></svg>
+          <span data-i18n="wHead">Werkt het best met een koptelefoon.</span>
+        </div>
+
+        <div class="wlang">
+          <div class="lab" data-i18n="wLangLabel">Taal van de gids</div>
+          <div class="langrow" id="langRow">
+            <button data-l="nl" class="on">Nederlands</button>
+            <button data-l="en">English</button>
+            <button data-l="de">Deutsch</button>
+            <button data-l="other" data-i18n="wOther">Andere…</button>
+          </div>
+          <select class="wsel" id="wsel"></select>
+        </div>
+
+        <button class="wstart" id="wstart"><span data-i18n="wStart">Start de tour</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h14"/><path d="M13 6l6 6-6 6"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Achtergrondmuziek welkomstscherm -->
+    <audio id="welcomeAudio" loop preload="auto" src="audio/welkom.mp3"></audio>
+
+    <!-- SLEEPBAAR PANEEL -->
+    <div class="sheet" id="sheet">
+      <div class="drag" id="drag"><div class="grip"></div></div>
+
+      <div class="list-view">
+        <div class="list-head"><div><div class="eb" data-i18n="listEb">5 stemmen · binnenstad</div><div class="ttl" data-i18n="listTtl">Plekken in de buurt</div></div>
+          <div class="lh-prog" id="lhProg" title="Bezocht">
+            <div class="ring"><svg viewBox="0 0 36 36"><circle class="bg" cx="18" cy="18" r="15.5"></circle><circle class="fg" id="progRing" cx="18" cy="18" r="15.5" stroke-dasharray="97.4" stroke-dashoffset="97.4"></circle></svg></div>
+            <div class="pt"><span id="progCount">0</span>/<span id="progTotal">5</span><small data-i18n="progLabel">bezocht</small></div>
+          </div></div>
+        <div class="cards" id="cards"></div>
+      </div>
+
+      <div class="info-view">
+        <div class="cv-head">
+          <button class="back" id="backInfo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12H6"/><path d="M11 6l-6 6 6 6"/></svg></button>
+          <div class="cv-title"><div class="eyebrow" id="iEyebrow">Plek</div><div class="nm" id="iName">-</div><div class="ch" id="iChar"></div></div>
+        </div>
+        <div class="info-body">
+          <div class="media media-info" id="iMedia" style="display:none">
+            <div class="slides" id="iSlides"></div>
+            <button class="marrow prev" id="iPrev" aria-label="Vorige foto"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></button>
+            <button class="marrow next" id="iNext" aria-label="Volgende foto"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
+            <div class="mdots" id="iDots"></div>
+          </div>
+          <div class="spot-actions" id="iActions" style="display:none">
+            <button class="sa-audio" id="iAudioBtn">
+              <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 5v14l11-7z" fill="currentColor" stroke="none"/></svg></span>
+              <span class="wave"><i></i><i></i><i></i></span>
+              <span id="iAudioLbl" data-i18n="spotListen">Beluister audio</span>
+            </button>
+            <button class="sa-story" id="iStoryBtn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16M4 12h16M4 19h10"/></svg>
+              <span data-i18n="spotStory">Lees het verhaal</span>
+            </button>
+          </div>
+          <p class="info-desc collapsed" id="iDesc"></p>
+        </div>
+        <div class="info-foot" id="iFoot"></div>
+      </div>
+
+      <div class="convo-view">
+        <div class="cv-head">
+          <button class="back" id="back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12H6"/><path d="M11 6l-6 6 6 6"/></svg></button>
+          <div class="cv-title"><div class="eyebrow" id="eyebrow">Demo · je bezoekt</div><div class="nm" id="sName">-</div><div class="ch" id="sChar"></div></div>
+        </div>
+        <div class="cv-body">
+          <div class="media" id="media">
+            <div class="slides" id="slides"></div>
+            <button class="marrow prev" id="mPrev" aria-label="Vorige foto"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></button>
+            <button class="marrow next" id="mNext" aria-label="Volgende foto"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
+            <div class="mdots" id="mdots"></div>
+          </div>
+          <div class="convo-panel" id="convoPanel">
+            <div class="chandle" id="chandle"><span class="grip"></span></div>
+            <div class="convo" id="convo"></div>
+          </div>
+        </div>
+        <div class="sugs" id="sugs"></div>
+        <div class="cstatus" id="talkLabel" data-i18n="tapToTalk">Tik om te praten</div>
+        <div class="composer">
+          <button class="micbtn" id="talk" aria-label="Praten">
+            <span class="m-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0M12 19v3"/></svg></span>
+            <span class="m-wave"><i></i><i></i><i></i></span>
+          </button>
+          <div class="field"><textarea id="input" rows="1" placeholder="Typ je vraag…"></textarea></div>
+          <button class="send" id="send"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V6"/><path d="M6 11l6-6 6 6"/></svg></button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script src="stadsstemmen-content.js"></script>
+<script>
+const CONTENT = window.STADSSTEMMEN_CONTENT || {paths:{},agents:[],sights:[],horeca:[]};
+// Plekken, agent-id's en teksten komen nu allemaal uit stadsstemmen-content.js
+const APATH=(CONTENT.paths&&CONTENT.paths.agent)||'imgstad/';
+const ZONES = (CONTENT.agents||[]).map(a=>{ const ph=(a.photos||[]).map(n=>APATH+n+'.jpg');
+  return { id:a.id, name:a.name, character:a.character||a.name, pin:ph[0]||'', photos:ph,
+    video:a.video?APATH+a.video+'.mp4':'', polygon:a.polygon, sugs:a.sugs||{}, persona:a.persona||'',
+    fallback:(a.fallback&&a.fallback.length)?a.fallback:['(De stem van deze plek volgt binnenkort.)'] }; });
+const ELEVENLABS_AGENT_IDS = {}; (CONTENT.agents||[]).forEach(a=>{ ELEVENLABS_AGENT_IDS[a.id]=a.agentId||''; });
+const INFO_TEXT = {}; (CONTENT.agents||[]).forEach(a=>{ INFO_TEXT[a.id]=a.info||''; });
+
+/* ===== Losse plekken (bezienswaardigheden + horeca): tekst en foto bij aankomst ===== */
+const SPOTS = [].concat(
+  (CONTENT.sights||[]).map(s=>Object.assign({},s,{type:'sight',photos:(s.photos||[]).map(n=>((CONTENT.paths&&CONTENT.paths.sight)||'images/sub/')+n+'.jpg')})),
+  (CONTENT.horeca||[]).map(s=>Object.assign({},s,{type:'horeca',photos:(s.photos||[]).map(n=>((CONTENT.paths&&CONTENT.paths.horeca)||'images/horeca/')+n+'.jpg')}))
+);
+const spotById={}; SPOTS.forEach(s=>spotById[s.id]=s);
+const spotMarkers={}; const unlockedSpots=new Set();
+const SPOT_RADIUS=40;   // meters: binnen deze afstand 'arriveer' je bij een losse plek en zie je foto's + tekst
+let activeSpot=null;
+
+const $=s=>document.querySelector(s);
+let active=null, mode='demo', watch=null, liveMe=null, demoMe=null, demoZone=null, livePos=null, canTalk=false;
+let soundOn=true, heading=null, headingOn=false, textOnly=false, liveNeedsCenter=false;
+const SHOW_TEXTONLY_TOGGLE=false;  // op true zetten om de tekst-modus-knop te tonen
+const SHOW_SOUND_TOGGLE=false;     // op true zetten om de geluidsknop (muziek + stem) te tonen
+const MAP_ZOOM_BOOST=1;            // hoeveel verder de kaart inzoomt bij de start (0 = passend; elke fijne waarde werkt, bv. 0.3, 0.6, 1.2)
+const DEMO_CURSOR_START=[53.2162,6.5672];  // startplek van de demo-cursor [breedtegraad, lengtegraad]
+const MAP_START_CENTER=[53.2176,6.5672];       // null = past alle plekken in beeld (zoals nu). Of vaste positie, bv. [53.2188,6.5677]
+const MAP_START_ZOOM=16.1;         // zoomniveau wanneer MAP_START_CENTER is ingesteld
+const LIVE_AUTO_CENTER=true;       // true = bij het kiezen van Live centreert de kaart op je huidige locatie
+const LIVE_CENTER_ZOOM=17;         // zoomniveau waarop live-modus op je locatie inzoomt (fijn instelbaar, bv. 16.5, 17.4)
+const LIVE_FOLLOW=false;           // true = de kaart blijft je volgen terwijl je loopt; false = centreert alleen één keer
+const visited=new Set(); const TOTAL=ZONES.length;
+const histories={}; ZONES.forEach(z=>histories[z.id]=[]);
+const markersById={};
+const ME_HTML='<span class="halo"></span><span class="nav"><svg viewBox="0 0 24 24"><path class="body" d="M12 2 L20 21 L12 16 L4 21 Z"/></svg></span>';
+function setActiveMarker(id){ for(const k in markersById){ const el=markersById[k].getElement&&markersById[k].getElement(); if(el) el.classList.toggle('active', k===id); } }
+
+/* ===== KAART ===== */
+let map=null, bounds=[];
+try{
+  map=L.map('map',{zoomControl:false,attributionControl:false,zoomSnap:0}).setView([53.2185,6.5662],16);
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{subdomains:'abcd',maxZoom:20}).addTo(map);
+  const path=[];
+  ZONES.forEach(z=>{
+    const poly=L.polygon(z.polygon); // onzichtbaar: alleen voor geofence + midden
+    const ctr=poly.getBounds().getCenter(); path.push(ctr);
+    const m=L.marker(ctr,{icon:L.divIcon({className:'place-pin',iconSize:[0,0],iconAnchor:[0,0],html:'<span class="pulse"></span><span class="check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg></span><span class="ppin"><img src="'+(z.pin||'')+'" alt="" onerror="this.style.display=\'none\'"></span>'})}).addTo(map);
+    m.bindTooltip(z.name,{direction:'top',className:'lm-tip',offset:[0,-28]});
+    m.on('click',()=>openPlace(z.id));
+    markersById[z.id]=m;
+    z._center=ctr; z.polygon.forEach(p=>bounds.push(p));
+  });
+  // (geen routelijn)
+  SPOTS.forEach(s=>{
+    const inner = s.type==='horeca'
+      ? '<span class="spot-pin horeca"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3v7a2 2 0 0 0 4 0V3M8 10v11M16 3c-1.5 0-2.5 1.5-2.5 4s1 4 2.5 4v10"/></svg></span>'
+      : '<span class="spot-pin sight"></span>';
+    const html = '<span class="spot-hit">'+inner+'</span>';
+    const m=L.marker(s.point,{icon:L.divIcon({className:'spot-wrap',iconSize:[0,0],iconAnchor:[0,0],html:html})}).addTo(map);
+    m.bindTooltip(s.name,{direction:'top',className:'lm-tip',offset:[0,-14]});
+    m.on('click',()=>openSpot(s.id));
+    spotMarkers[s.id]=m;
+  });
+  const fit=()=>{ applyDemoView(false); };
+  fit(); setTimeout(fit,300); window.addEventListener('load',()=>setTimeout(fit,200));
+  window.addEventListener('resize',()=>{try{map.invalidateSize();}catch(e){}});
+}catch(e){}
+
+/* start-/demoweergave van de kaart (zelfde als bij het opstarten) */
+function applyDemoView(animate){ if(!map) return; try{ map.invalidateSize();
+  if(MAP_START_CENTER){ map.setView(MAP_START_CENTER,MAP_START_ZOOM,{animate:!!animate}); }
+  else if(bounds.length){ map.fitBounds(bounds,{paddingTopLeft:[60,150],paddingBottomRight:[60,300]}); map.setZoom(map.getZoom()+MAP_ZOOM_BOOST); }
+}catch(e){} }
+
+/* ===== SLIDE ===== */
+const sheet=$('#sheet'), dragEl=$('#drag');
+const appH=()=>sheet.parentElement.clientHeight;
+function downH(){ const dr=document.querySelector('.drag'), lh=document.querySelector('.list-head');
+  if(lh && lh.offsetHeight>0) return (dr?dr.offsetHeight:38) + lh.offsetHeight;
+  return Math.round(0.18*appH()); }
+const snaps=()=>[downH(), Math.round(0.92*appH())];
+function nearest(h){return snaps().reduce((a,b)=>Math.abs(b-h)<Math.abs(a-h)?b:a);}
+function setH(h,anim=true){ sheet.style.transition=anim?'height .4s cubic-bezier(.22,1,.36,1)':'none'; sheet.style.height=h+'px'; syncSetup(); updateVoiceFab(); }
+let dragging=false,sy=0,sh=0;
+function startDrag(e){dragging=true;sy=e.clientY;sh=sheet.offsetHeight;sheet.style.transition='none';try{e.currentTarget.setPointerCapture(e.pointerId);}catch(_){}}
+dragEl.addEventListener('pointerdown',startDrag);
+document.querySelector('.list-head').addEventListener('pointerdown',startDrag);
+window.addEventListener('pointermove',e=>{if(!dragging)return;const s=snaps();let h=sh+(sy-e.clientY);h=Math.max(s[0]*0.6,Math.min(s[s.length-1],h));sheet.style.height=h+'px';syncSetup();});
+window.addEventListener('pointerup',()=>{if(!dragging)return;dragging=false;setH(nearest(sheet.offsetHeight));});
+function syncSetup(){ const sp=$('#setup'); if(sp&&!sp.classList.contains('hide')) sp.style.bottom=(sheet.offsetHeight+14)+'px'; }
+setTimeout(()=>setH(snaps()[0],false),60);
+window.addEventListener('resize',()=>setH(nearest(sheet.offsetHeight),false));
+if(map) map.on('click',()=>{ if(activeSpot){ closeToList(); return; } if(!sheet.classList.contains('detail') && !sheet.classList.contains('info')) setH(snaps()[0]); });
+
+/* ===== ZWEVENDE SPRAAKKNOP ===== */
+const voiceFab=$('#voiceFab');
+function updateVoiceFab(){ if(!voiceFab) return;
+  const live=!!(elSession||elConnecting);
+  const detail=sheet.classList.contains('detail');
+  const atUp=sheet.offsetHeight > snaps()[1]-60;
+  voiceFab.classList.toggle('show', live && !(detail && atUp)); }
+function showConvoPanel(){ if(!active) return; const z=ZONES.find(x=>x.id===active);
+  sheet.classList.remove('info'); sheet.classList.add('detail');
+  if(map&&z&&z._center) map.panTo(z._center,{animate:true}); setH(snaps()[1]); }
+function minimizeConvo(){ sheet.classList.remove('detail'); sheet.classList.remove('info'); setH(snaps()[0]); updateVoiceFab(); }
+voiceFab.onclick=showConvoPanel;
+
+/* ===== KAARTEN ===== */
+const cardsEl=$('#cards');
+const cardById={};
+ZONES.forEach((z,i)=>{
+  const c=document.createElement('div'); c.className='card';
+  c.innerHTML=`<div class="meta"><div class="num">0${i+1}</div><div class="nm">${z.name}</div><div class="ch">“${z.character}”</div><div class="done"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg><span data-i18n="cardDone">Bezocht</span></div></div><div class="go"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h14"/><path d="M13 6l6 6-6 6"/></svg></div>`;
+  c.onclick=()=>openPlace(z.id); cardsEl.appendChild(c); cardById[z.id]=c;
+});
+
+/* ===== MODUS ===== */
+function setMode(m){ mode=m; $('#mLive').classList.toggle('on',m==='live'); $('#mDemo').classList.toggle('on',m==='demo');
+  $('#eyebrow').textContent=m==='live'?'Je staat bij':'Demo · je bezoekt';
+  if(m==='live'){ hideDemoMe(); $('#maphint').classList.add('hide'); primeMic(); startGeo(); startCompass();
+    if(LIVE_AUTO_CENTER){ liveNeedsCenter=true; if(map && livePos){ map.setView([livePos.lat,livePos.lng],LIVE_CENTER_ZOOM,{animate:true}); liveNeedsCenter=false; } } }
+  else { stopGeo(); if(liveMe&&map){map.removeLayer(liveMe);liveMe=null;} showDemoMe(); applyDemoView(true); if(!active)$('#maphint').classList.remove('hide'); }
+  showRecenter(false);
+  updateNavHud();
+}
+$('#mLive').onclick=()=>setMode('live'); $('#mDemo').onclick=()=>setMode('demo');
+
+/* ===== VERSCHUIFBARE LOCATIE (demo) ===== */
+function showDemoMe(){
+  if(!map||demoMe) return;
+  demoMe=L.marker(DEMO_CURSOR_START,{draggable:true,zIndexOffset:1000,
+    icon:L.divIcon({className:'me-pin demo',iconSize:[34,34],iconAnchor:[17,17],html:ME_HTML})}).addTo(map);
+  demoMe.on('drag',()=>{updateNavHud();checkSpots();});
+  demoMe.on('dragend',()=>{ const p=demoMe.getLatLng(); const here=ZONES.find(z=>inPoly(p.lat,p.lng,z.polygon)); const sp=here?null:spotAt({lat:p.lat,lng:p.lng});
+    if(here){ openConvo(here.id); } else if(sp){ unlockedSpots.add(sp.id); openSpot(sp.id); } else if(active||activeSpot){ closeToList(); } updateNavHud(); checkSpots(); });
+}
+function hideDemoMe(){ if(demoMe&&map){map.removeLayer(demoMe);demoMe=null;} demoZone=null; }
+
+/* ===== OPENEN / SLUITEN ===== */
+const MIC='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0M12 19v3"/></svg>';
+function openPlace(id){ const z=ZONES.find(x=>x.id===id); if(!z) return;
+  if(id===active && (elSession||elConnecting)){ showConvoPanel(); return; }
+  openConvo(id); }
+function openInfo(id){ const z=ZONES.find(x=>x.id===id); if(!z)return; stopSpotAudio(); active=id; activeSpot=null;
+  $('#maphint').classList.add('hide');
+  $('#iEyebrow').textContent = mode==='live'?'Je staat bij':'Demo · je bezoekt';
+  $('#iName').textContent=z.name; const ic=$('#iChar'); ic.style.display=''; ic.textContent='\u201C'+z.character+'\u201D';
+  { const md=$('#iMedia'); if(md){ md.style.display='none'; } stopSpotSlides(); }
+  $('#iDesc').textContent=INFO_TEXT[z.id]||'';
+  renderInfoFoot(z);
+  if(map&&z._center) map.panTo(z._center,{animate:true});
+  sheet.classList.remove('detail'); sheet.classList.add('info'); setH(snaps()[1]); }
+function renderInfoFoot(z){ const foot=$('#iFoot');
+  const can=(mode==='demo')||(mode==='live'&&livePos&&inPoly(livePos.lat,livePos.lng,z.polygon));
+  if(can){ foot.innerHTML='<button class="talk-cta" id="ctaTalk">'+MIC+' Praat met deze plek</button>'; $('#ctaTalk').onclick=()=>openConvo(z.id); }
+  else { let txt=tr('comeCloser');
+    if(mode==='live'&&livePos&&z._center){ const d=Math.round(haversine(livePos.lat,livePos.lng,z._center.lat,z._center.lng)); txt=tr('comeCloserDist').replace('{m}',d); }
+    else if(mode==='live'&&!livePos){ txt=tr('locating'); }
+    foot.innerHTML='<div class="talk-cta off">'+MIC+' '+txt+'</div>'; } }
+function distTxt(z){ if(mode==='live'&&livePos&&z._center){ const d=Math.round(haversine(livePos.lat,livePos.lng,z._center.lat,z._center.lng)); return tr('comeCloserDist').replace('{m}',d); } if(mode==='live'&&!livePos) return tr('locating'); return tr('comeCloser'); }
+function openConvo(id){ const z=ZONES.find(x=>x.id===id); if(!z)return; stopVoice(); stopSpotAudio(); active=id;
+  const aid=ELEVENLABS_AGENT_IDS[id];
+  canTalk=(mode==='demo')||(!!livePos && inPoly(livePos.lat,livePos.lng,z.polygon));
+  $('#sName').textContent=z.name; $('#sChar').textContent='\u201C'+z.character+'\u201D';
+  $('#input').placeholder=tr('inputPh').replace('{name}',z.name);
+  const sg=$('#sugs'); sg.innerHTML=''; sugsFor(z).forEach(s=>{const b=document.createElement('div');b.className='sug';b.textContent=s;b.onclick=()=>{$('#input').value=s;sendMsg();};sg.appendChild(b);});
+  renderConvo(z); if(!aid && histories[id].length===0) pushThem(z,z.fallback[0]); mountVoice(z);
+  buildSlides(z); setActiveMarker(id);
+  if(map&&z._center) map.panTo(z._center,{animate:true});
+  sheet.classList.remove('info'); sheet.classList.add('detail'); setH(snaps()[1]);
+  $('#talk').classList.toggle('off', !canTalk);
+  if(canTalk){ markVisited(id); if(aid) startConversation(z); } else { setTalkLabel(distTxt(z)); } }
+function closeToList(){ stopVoice(); stopSpotAudio(); stopSlides(); stopSpotSlides(); setActiveMarker(null); active=null; activeSpot=null; sheet.classList.remove('detail'); sheet.classList.remove('info'); sheet.classList.remove('voice'); setH(snaps()[0]);
+  if(mode==='demo'){ $('#maphint').classList.remove('hide'); } updateNavHud(); }
+$('#back').onclick=()=>{ if(elSession||elConnecting){ minimizeConvo(); } else { closeToList(); } };
+$('#backInfo').onclick=closeToList;
+
+/* ===== Losse plekken: openen, nabijheid en ontgrendelen ===== */
+/* audio-fragmenten: audio/spots/{id}_{taal}.mp3, terugval naar en en daarna nl */
+let spotAudio=null, spotAudioId=null;
+function audioLangChain(){ const main=(lang==='pt-br')?'pt':(UI_LANGS.includes(lang)?lang:'en');
+  const ch=[main]; if(!ch.includes('en')) ch.push('en'); if(!ch.includes('nl')) ch.push('nl'); return ch; }
+function setAudioBtnState(playing){ const b=$('#iAudioBtn'); if(!b) return; b.classList.toggle('playing',!!playing);
+  const lbl=$('#iAudioLbl'); if(lbl) lbl.textContent = playing ? (tr('spotPause')||'Pauzeer') : (tr('spotListen')||'Beluister audio'); }
+function stopSpotAudio(){ if(spotAudio){ try{spotAudio.pause();}catch(_){} spotAudio=null; spotAudioId=null; } setAudioBtnState(false); }
+function playSpotAudio(id){ if(!soundOn) return;
+  if(spotAudioId===id && spotAudio && !spotAudio.paused && !spotAudio.ended) return; /* speelt al */
+  stopSpotAudio(); const chain=audioLangChain(); let i=0;
+  const a=new Audio(); spotAudio=a; spotAudioId=id;
+  const tryNext=()=>{ if(spotAudio!==a) return; if(i>=chain.length){ stopSpotAudio(); return; }
+    a.src='audio/spots/'+id+'_'+chain[i++]+'.mp3'; a.play().then(()=>{ if(spotAudio===a) setAudioBtnState(true); }).catch(()=>{}); };
+  a.onerror=tryNext; a.onended=()=>{ if(spotAudio===a){ spotAudio=null; spotAudioId=null; setAudioBtnState(false); } };
+  tryNext(); }
+/* knop: speelt niets af -> start; speelt dit fragment af -> pauzeer; gepauzeerd -> hervat */
+function toggleSpotAudio(id){ if(!soundOn) return;
+  if(spotAudio && spotAudioId===id){ if(spotAudio.paused){ spotAudio.play().then(()=>setAudioBtnState(true)).catch(()=>{}); }
+    else { spotAudio.pause(); setAudioBtnState(false); } return; }
+  playSpotAudio(id); }
+function spotNear(s){ const p=curPos(); if(!p||!s.point) return false; return haversine(p.lat,p.lng,s.point[0],s.point[1])<=SPOT_RADIUS; }
+function openSpot(id){ const s=spotById[id]; if(!s) return;
+  const unlocked = unlockedSpots.has(id) || spotNear(s); if(unlocked) unlockedSpots.add(id);
+  stopSpotAudio(); /* audio niet meer automatisch; pas afspelen bij klik op de knop */
+  activeSpot=id; $('#maphint').classList.add('hide');
+  $('#iEyebrow').textContent = s.type==='horeca'?tr('catHoreca'):tr('catSight');
+  $('#iName').textContent=s.name; const ch=$('#iChar'); ch.textContent=''; ch.style.display='none';
+  const all=(s.photos||[]); const shown = unlocked ? all : all.slice(0,1);
+  const md=$('#iMedia'); if(md) md.style.display = shown.length?'block':'none';
+  buildSpotSlides(shown);
+  const desc=(s.desc&&(s.desc[lang]||s.desc.en))||'';
+  /* knoppen alleen tonen als de plek ontgrendeld is */
+  const acts=$('#iActions');
+  if(unlocked){ if(acts) acts.style.display='flex';
+    const ab=$('#iAudioBtn'); if(ab) ab.onclick=()=>toggleSpotAudio(id);
+    const sb=$('#iStoryBtn'); const dsc=$('#iDesc');
+    if(dsc){ dsc.textContent=desc; dsc.classList.add('collapsed'); dsc.classList.remove('locked-note'); }
+    if(sb){ sb.classList.remove('on'); sb.onclick=()=>{ const open=dsc.classList.toggle('collapsed')===false; sb.classList.toggle('on',open); }; }
+  } else { if(acts) acts.style.display='none';
+    const dsc=$('#iDesc'); if(dsc){ dsc.textContent=tr('spotVisit'); dsc.classList.remove('collapsed'); dsc.classList.add('locked-note'); }
+  }
+  $('#iFoot').innerHTML='';
+  if(map) map.panTo(s.point,{animate:true});
+  sheet.classList.remove('detail'); sheet.classList.add('info'); setH(snaps()[1]); }
+/* dichtstbijzijnde losse plek binnen de aankomst-straal van een punt (of null) */
+function spotAt(p){ if(!p) return null; let best=null,bd=SPOT_RADIUS+1; SPOTS.forEach(s=>{ if(!s.point) return; const d=haversine(p.lat,p.lng,s.point[0],s.point[1]); if(d<=SPOT_RADIUS && d<bd){ bd=d; best=s; } }); return best; }
+
+/* eigen 4:3-diavoorstelling voor losse plekken (zelfde stijl als de agents) */
+let iSlideEls=[], iSlideIdx=0, iSlideTimer=null;
+function stopSpotSlides(){ if(iSlideTimer){ clearInterval(iSlideTimer); iSlideTimer=null; } }
+function buildSpotSlides(photos){ const wrap=$('#iSlides'), dots=$('#iDots'); if(!wrap) return; stopSpotSlides();
+  wrap.innerHTML=''; dots.innerHTML=''; iSlideEls=[]; iSlideIdx=0;
+  photos.forEach((src,i)=>{ const im=document.createElement('img'); im.src=src; im.alt=''; im.loading=i?'lazy':'eager'; im.onerror=()=>{im.style.display='none';};
+    if(i===0) im.classList.add('on'); wrap.appendChild(im); iSlideEls.push(im);
+    const dt=document.createElement('i'); if(i===0) dt.classList.add('on'); dt.onclick=e=>{ e.stopPropagation(); showSpotSlide(i); restartSpotTimer(); }; dots.appendChild(dt); });
+  const md=$('#iMedia'); if(md) md.classList.toggle('multi', photos.length>1);
+  restartSpotTimer(); }
+function showSpotSlide(n){ if(!iSlideEls.length) return; iSlideIdx=(n+iSlideEls.length)%iSlideEls.length;
+  iSlideEls.forEach((im,i)=>im.classList.toggle('on',i===iSlideIdx)); const dots=$('#iDots').children; for(let i=0;i<dots.length;i++) dots[i].classList.toggle('on',i===iSlideIdx); }
+function restartSpotTimer(){ stopSpotSlides(); if(iSlideEls.length>1) iSlideTimer=setInterval(()=>showSpotSlide(iSlideIdx+1),4500); }
+{ const p=$('#iPrev'), n=$('#iNext'); if(p) p.onclick=e=>{e.stopPropagation();showSpotSlide(iSlideIdx-1);restartSpotTimer();}; if(n) n.onclick=e=>{e.stopPropagation();showSpotSlide(iSlideIdx+1);restartSpotTimer();}; }
+function checkSpots(){ let changed=false; SPOTS.forEach(s=>{ if(!unlockedSpots.has(s.id) && spotNear(s)){ unlockedSpots.add(s.id); changed=true;
+    const m=spotMarkers[s.id]; const el=m&&m.getElement&&m.getElement(); if(el){ const p=el.querySelector('.spot-pin'); if(p) p.classList.add('unlocked'); } } });
+  if(changed && activeSpot && unlockedSpots.has(activeSpot)) openSpot(activeSpot); }
+
+/* ===== Filter: toon/verberg categorieën op de kaart ===== */
+const filterState={agent:true,sight:true,horeca:true};
+function applyFilter(){ if(!map) return;
+  const set=(m,on)=>{ if(!m) return; try{ if(on){ if(!(map.hasLayer&&map.hasLayer(m))) m.addTo(map); } else { if(map.removeLayer) map.removeLayer(m); } }catch(e){} };
+  Object.keys(markersById).forEach(id=>set(markersById[id],filterState.agent));
+  SPOTS.forEach(s=>set(spotMarkers[s.id],filterState[s.type])); }
+{ const fh=$('#filterHead'); if(fh) fh.onclick=()=>$('#filter').classList.toggle('open');
+  document.querySelectorAll('#filter input[type=checkbox]').forEach(cb=>{ cb.onchange=()=>{ filterState[cb.dataset.cat]=cb.checked; applyFilter(); }; });
+  applyFilter(); }
+
+/* ===== PLEK-SPECIFIEKE INTROMUZIEK =====
+   Speelt zacht een muziekje zodra het welkomstbericht van een plek begint,
+   en fade-out automatisch tegen het einde van het fragment (of na de terugval-duur). */
+const ZONE_AUDIO = {
+  martini:       'audio/martini.mp3',
+  provinciehuis: 'audio/provinciehuis.mp3',
+  stadhuis:      'audio/stadhuis.mp3',
+  forum:         'audio/forum.mp3',
+  vismarkt:      'audio/vismarkt.mp3'
+};
+const ZONE_INTRO_VOLUME  = 0.16;    // volume van het muziekje (0 = stil, 1 = max)
+const ZONE_INTRO_FADE_MS = 4000;    // duur van de uitfade aan het einde
+const ZONE_INTRO_MS      = 90000;   // terugval-duur als de lengte onbekend is (1,5 min)
+const INTRO_ONCE_PER_SESSION = true;// elk muziekje max. één keer per plek per sessie
+
+let introAudio=null, introTimer=null, introFade=null;
+const introPlayed=new Set();
+
+function ensureIntroAudio(){ if(!introAudio){ introAudio=new Audio(); introAudio.preload='auto'; } return introAudio; }
+function clearIntroTimers(){ if(introTimer){ clearTimeout(introTimer); introTimer=null; } if(introFade){ clearInterval(introFade); introFade=null; } }
+function fadeIntroOut(ms){ const a=introAudio; if(!a) return; clearIntroTimers();
+  const start=a.volume, steps=Math.max(1,Math.round((ms||ZONE_INTRO_FADE_MS)/50)); let i=0;
+  introFade=setInterval(()=>{ i++; a.volume=Math.max(0,start*(1-i/steps));
+    if(i>=steps){ clearInterval(introFade); introFade=null; a.pause(); a.removeAttribute('src'); a.load(); } },50); }
+function stopZoneIntro(immediate){ const a=introAudio; if(!a){ clearIntroTimers(); return; }
+  if(immediate){ clearIntroTimers(); a.pause(); a.removeAttribute('src'); a.load(); a.volume=ZONE_INTRO_VOLUME; }
+  else { fadeIntroOut(600); } }
+function playZoneIntro(id){ const src=ZONE_AUDIO[id]; if(!src||!soundOn) return;
+  if(INTRO_ONCE_PER_SESSION && introPlayed.has(id)) return;
+  const a=ensureIntroAudio(); stopZoneIntro(true); introPlayed.add(id);
+  a.src=src; a.loop=false; a.volume=ZONE_INTRO_VOLUME;
+  a.onloadedmetadata=()=>{ const dur=a.duration; let delay=ZONE_INTRO_MS;
+    if(isFinite(dur)&&dur>0){ delay=Math.max(0, dur*1000 - ZONE_INTRO_FADE_MS); }
+    clearTimeout(introTimer); introTimer=setTimeout(()=>fadeIntroOut(ZONE_INTRO_FADE_MS), delay); };
+  a.onended=clearIntroTimers;
+  a.play().catch(()=>{ introPlayed.delete(id); }); } // geblokkeerd of bestand mist: opnieuw proberen mogelijk
+
+/* ===== STEM + TEKST (één sessie — spraak en tekst door elkaar) ===== */
+let elSession=null, elConnecting=false, elGen=0, lastUserText=null, lastUserAt=0, micPrimed=false;
+function setTalkLabel(t){ $('#talkLabel').textContent=t; }
+function mountVoice(z){ const aid=ELEVENLABS_AGENT_IDS[z.id];
+  setTalkLabel(aid?tr('tapToTalk'):tr('preview')); }
+function addUserText(t){ addBubble('me',t); lastUserText=t; lastUserAt=Date.now(); }
+async function primeMic(){ if(micPrimed) return; try{ const s=await navigator.mediaDevices.getUserMedia({audio:true}); s.getTracks().forEach(t=>t.stop()); micPrimed=true; }catch(e){ console.warn('mic vooraf niet toegestaan',e); } }
+function sendUserText(text){ if(!elSession) return; try{ if(elSession.sendUserActivity) elSession.sendUserActivity(); elSession.sendUserMessage(text); addUserText(text); }catch(e){ console.error(e); } }
+async function startConversation(z, initialMessage){
+  if(elConnecting) return;
+  if(elSession){ if(initialMessage) sendUserText(initialMessage); return; }
+  const aid=ELEVENLABS_AGENT_IDS[z.id]; if(!aid) return;
+  const Conv=window.ElevenLabsConversation;
+  if(!Conv){ setTalkLabel(tr('voiceUnavail')); return; }
+  const myGen=++elGen; elConnecting=true; setTalkLabel(tr('connecting')); $('#talk').classList.add('connecting');
+  try{ playZoneIntro(z.id); }catch(_){}
+  if(initialMessage) addUserText(initialMessage);
+  try{
+    try{ if(!textOnly) await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}}); micPrimed=true; }catch(e){}
+    const s=await Conv.startSession({
+      agentId:aid, connectionType:'websocket',
+      overrides:(lang&&lang!=='nl')?{agent:{language:lang}}:undefined,
+      onConnect:()=>{ if(myGen!==elGen) return; elConnecting=false; const t=$('#talk'); t.classList.remove('connecting'); t.classList.add('live'); setTalkLabel(tr('listening')); updateVoiceFab(); if(elSession) applyAgentMute(elSession); if(initialMessage) setTimeout(()=>{ if(myGen===elGen && elSession){ try{elSession.sendUserMessage(initialMessage);}catch(e){} } },250); },
+      onDisconnect:()=>{ if(myGen!==elGen) return; resetVoiceUI(); },
+      onError:(e)=>{ if(myGen!==elGen) return; console.error('EL error',e); setTalkLabel(tr('connectFailed')); resetVoiceUI(); },
+      onModeChange:(m)=>{ if(myGen!==elGen) return; const md=(m&&m.mode)||m; const sp=md==='speaking'; if(sp && elSession) applyAgentMute(elSession); $('#talk').classList.toggle('speaking',sp); if(voiceFab) voiceFab.classList.toggle('speaking',sp); { const md2=$('#media'); if(md2) md2.classList.toggle('speaking',sp); } setTalkLabel(sp?tr('speaking'):tr('listening')); },
+      onMessage:(p)=>{ if(myGen!==elGen) return; const t=p&&(p.message||p.text); const src=p&&(p.source||p.role); if(!t)return;
+        if(src==='user'){ if(t===lastUserText && Date.now()-lastUserAt<6000){ lastUserText=null; return; } addBubble('me',t); }
+        else addBubble('them',t); }
+    });
+    if(myGen!==elGen){ try{s.endSession();}catch(e){} return; }
+    elSession=s; applyAgentMute(elSession);
+  }catch(e){ if(myGen!==elGen) return; console.error(e); setTalkLabel(tr('noConnection')); resetVoiceUI(); }
+}
+function stopVoice(){ elGen++; const c=elSession; elSession=null; elConnecting=false; if(c){ try{c.endSession();}catch(e){} } resetVoiceUI(); try{ stopZoneIntro(false); }catch(_){} }
+function resetVoiceUI(){ elSession=null; elConnecting=false; const t=$('#talk'); if(t) t.classList.remove('speaking','live','connecting'); if(voiceFab) voiceFab.classList.remove('speaking'); { const md=$('#media'); if(md) md.classList.remove('speaking'); } updateVoiceFab();
+  if(active){ const z=ZONES.find(x=>x.id===active); if(z&&ELEVENLABS_AGENT_IDS[z.id]) setTalkLabel(tr('tapToTalk')); } }
+
+/* ===== GESPREK ===== */
+function renderConvo(z){ const c=$('#convo'); c.innerHTML=''; histories[z.id].forEach(m=>addBubble(m.role==='assistant'?'them':'me',m.content)); c.scrollTop=c.scrollHeight; }
+function addBubble(side,t){ const c=$('#convo'); const el=document.createElement('div'); el.className='msg '+side; el.textContent=t; c.appendChild(el); c.scrollTop=c.scrollHeight; }
+
+/* ===== SLIDESHOW (overlay) ===== */
+let slideTimer=null, slideIdx=0, slideEls=[];
+function buildSlides(z){
+  const wrap=$('#slides'), dots=$('#mdots'); if(!wrap) return;
+  wrap.innerHTML=''; dots.innerHTML=''; slideEls=[]; slideIdx=0;
+  $('#convoPanel').classList.remove('up');
+  const imgs=z.photos||[];
+  imgs.forEach((src,i)=>{
+    const im=document.createElement('img'); im.src=src; im.alt=z.name; im.loading=i?'lazy':'eager';
+    im.onerror=()=>{ im.style.display='none'; };
+    if(i===0) im.classList.add('on'); wrap.appendChild(im); slideEls.push(im);
+    const d=document.createElement('i'); if(i===0) d.classList.add('on'); d.onclick=(e)=>{ e.stopPropagation(); showSlide(i); restartSlideTimer(); }; dots.appendChild(d);
+  });
+  restartSlideTimer(); requestAnimationFrame(syncMediaHeight);
+  { const md=$('#media'); if(md) md.classList.toggle('multi', imgs.length>1); }
+}
+function showSlide(n){ if(!slideEls.length) return; slideIdx=(n+slideEls.length)%slideEls.length;
+  slideEls.forEach((im,i)=>im.classList.toggle('on',i===slideIdx));
+  const dots=$('#mdots').children; for(let i=0;i<dots.length;i++) dots[i].classList.toggle('on',i===slideIdx); }
+function nextSlide(){ showSlide(slideIdx+1); }
+function prevSlide(){ showSlide(slideIdx-1); }
+function restartSlideTimer(){ stopSlides(); if(slideEls.length>1) slideTimer=setInterval(nextSlide,4500); }
+function stopSlides(){ if(slideTimer){ clearInterval(slideTimer); slideTimer=null; } }
+(function(){ const ch=$('#chandle'), cp=$('#convoPanel'); if(!ch||!cp) return;
+  let dr=false, y0=0, dy=0;
+  ch.addEventListener('pointerdown',e=>{ dr=true; y0=e.clientY; dy=0; try{ch.setPointerCapture(e.pointerId);}catch(_){}});
+  ch.addEventListener('pointermove',e=>{ if(dr) dy=e.clientY-y0; });
+  ch.addEventListener('pointerup',()=>{ if(!dr)return; dr=false; if(dy<-26) cp.classList.add('up'); else if(dy>26) cp.classList.remove('up'); else cp.classList.toggle('up'); });
+})();
+function syncMediaHeight(){ const m=$('#media'), cp=$('#convoPanel'); if(!m||!cp)return; const h=m.offsetHeight; if(h>0) cp.style.setProperty('--lowtop',(h+10)+'px'); }
+window.addEventListener('resize',()=>{ if(active) syncMediaHeight(); });
+(function(){ const md=$('#media'); if(!md) return;
+  const mp=$('#mPrev'), mn=$('#mNext');
+  if(mp) mp.onclick=(e)=>{ e.stopPropagation(); prevSlide(); restartSlideTimer(); };
+  if(mn) mn.onclick=(e)=>{ e.stopPropagation(); nextSlide(); restartSlideTimer(); };
+  let x0=0,y0=0,dx=0,dy=0,sw=false;
+  md.addEventListener('pointerdown',e=>{ if(e.target.closest('.mdots')||e.target.closest('.marrow')) return; sw=true; x0=e.clientX; y0=e.clientY; dx=dy=0; });
+  window.addEventListener('pointermove',e=>{ if(sw){ dx=e.clientX-x0; dy=e.clientY-y0; }});
+  window.addEventListener('pointerup',()=>{ if(!sw)return; sw=false; if(Math.abs(dx)>34 && Math.abs(dx)>Math.abs(dy)){ if(dx<0) nextSlide(); else showSlide(slideIdx-1); restartSlideTimer(); } });
+})();
+function pushThem(z,t){ histories[z.id].push({role:'assistant',content:t}); addBubble('them',t); }
+function showTyping(){ const c=$('#convo'); const t=document.createElement('div'); t.className='typing';t.id='typing'; t.innerHTML='<i></i><i></i><i></i>'; c.appendChild(t); c.scrollTop=c.scrollHeight; }
+function hideTyping(){ const t=$('#typing'); if(t)t.remove(); }
+$('#talk').onclick=()=>{ if(!active) return; const z=ZONES.find(x=>x.id===active); const aid=ELEVENLABS_AGENT_IDS[z.id];
+  if(!aid){ $('#input').focus(); return; }
+  if(!canTalk){ setTalkLabel(distTxt(z)); return; }
+  if(elConnecting) return;
+  if(elSession){ stopVoice(); } else { startConversation(z); } };
+async function sendMsg(){ if(!active)return; const z=ZONES.find(x=>x.id===active); const text=$('#input').value.trim(); if(!text)return;
+  $('#input').value=''; $('#input').style.height='auto';
+  const aid=ELEVENLABS_AGENT_IDS[z.id];
+  if(aid){ if(!canTalk){ setTalkLabel(distTxt(z)); return; } if(!elSession){ startConversation(z, text); } else { sendUserText(text); } return; }
+  histories[z.id].push({role:'user',content:text}); addBubble('me',text);
+  showTyping(); $('#send').disabled=true; $('#talk').classList.add('speaking');
+  let reply; try{ reply=await askAgent(z);}catch(e){ reply=z.fallback[Math.floor(Math.random()*z.fallback.length)]; }
+  hideTyping(); $('#talk').classList.remove('speaking'); histories[z.id].push({role:'assistant',content:reply}); addBubble('them',reply); $('#send').disabled=false; }
+$('#send').onclick=sendMsg;
+$('#input').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg();}});
+$('#input').addEventListener('input',e=>{e.target.style.height='auto';e.target.style.height=Math.min(e.target.scrollHeight,90)+'px'; if(elSession&&elSession.sendUserActivity){try{elSession.sendUserActivity();}catch(_){}}});
+async function askAgent(z){ const system=z.persona+`\n\nREGELS: Antwoord ALTIJD in het Nederlands, in karakter, kort (2-4 zinnen). Echte info over Groningen waar het kan; verzin geen onzekere feiten. Soms een wedervraag.`;
+  const msgs=histories[z.id].slice(-10).map(m=>({role:m.role,content:m.content}));
+  const res=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,system,messages:msgs})});
+  const data=await res.json(); const out=(data.content||[]).filter(b=>b.type==='text').map(b=>b.text).join(' ').trim(); if(!out)throw new Error('leeg'); return out; }
+
+/* ===== GEOFENCE ===== */
+function inPoly(lat,lng,poly){ let inside=false; for(let i=0,j=poly.length-1;i<poly.length;j=i++){ const yi=poly[i][0],xi=poly[i][1],yj=poly[j][0],xj=poly[j][1]; if(((yi>lat)!==(yj>lat))&&(lng<(xj-xi)*(lat-yi)/(yj-yi)+xi)) inside=!inside; } return inside; }
+function haversine(la1,lo1,la2,lo2){ const R=6371e3,t=Math.PI/180; const dLa=(la2-la1)*t,dLo=(lo2-lo1)*t; const a=Math.sin(dLa/2)**2+Math.cos(la1*t)*Math.cos(la2*t)*Math.sin(dLo/2)**2; return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a)); }
+function startGeo(){ if(!navigator.geolocation)return; watch=navigator.geolocation.watchPosition(pos=>{ const {latitude:la,longitude:lo}=pos.coords; livePos={lat:la,lng:lo};
+  if(map){ if(!liveMe){ liveMe=L.marker([la,lo],{icon:L.divIcon({className:'me-pin',iconSize:[34,34],iconAnchor:[17,17],html:ME_HTML})}).addTo(map); applyHeading(); } else liveMe.setLatLng([la,lo]);
+    if(liveNeedsCenter){ map.setView([la,lo],LIVE_CENTER_ZOOM,{animate:true}); liveNeedsCenter=false; showRecenter(false); }
+    else if(LIVE_FOLLOW && mode==='live'){ map.panTo([la,lo],{animate:true}); showRecenter(false); } }
+  updateNavHud(); checkSpots();
+  const here=ZONES.find(z=>inPoly(la,lo,z.polygon));
+  if(here && active!==here.id){ openConvo(here.id); return; }
+  if(active){ const az=ZONES.find(x=>x.id===active); const insideActive = here && here.id===active;
+    if(insideActive){ if(!canTalk){ canTalk=true; $('#talk').classList.remove('off'); const aid=ELEVENLABS_AGENT_IDS[active]; if(aid && !elSession && !elConnecting) startConversation(az); } }
+    else { if(canTalk){ canTalk=false; $('#talk').classList.add('off'); } if(elSession||elConnecting) stopVoice(); if(az && !elSession && !elConnecting) setTalkLabel(distTxt(az)); }
+  }
+  else { const sp=spotAt({lat:la,lng:lo}); if(sp){ if(!unlockedSpots.has(sp.id) && activeSpot!==sp.id){ openSpot(sp.id); } unlockedSpots.add(sp.id); } } },()=>{},{enableHighAccuracy:true,maximumAge:4000}); }
+function stopGeo(){ if(watch!=null){ navigator.geolocation.clearWatch(watch); watch=null; } }
+
+/* centreer-knop: alleen in live, verschijnt zodra je de kaart verschuift */
+function showRecenter(on){ const b=$('#recenterBtn'); if(b) b.classList.toggle('show', !!on && mode==='live'); }
+function recenterLive(){ if(map && livePos){ map.panTo([livePos.lat,livePos.lng],{animate:true}); } showRecenter(false); }
+{ const rb=$('#recenterBtn'); if(rb) rb.onclick=recenterLive; }
+if(map) map.on('dragstart',()=>{ if(mode==='live') showRecenter(true); });
+
+/* ===== NIEUWE FEATURES: geluid · voortgang · richting · kompas ===== */
+function applySound(){ const b=$('#sndBtn'); if(b) b.classList.toggle('muted',!soundOn);
+  if(!soundOn){ const w=$('#welcomeAudio'); if(w){ try{w.pause();}catch(_){} } try{ stopZoneIntro(true); }catch(_){} try{ stopSpotAudio(); }catch(_){} }
+  if(elSession) applyAgentMute(elSession); }
+function toggleSound(){ soundOn=!soundOn; applySound(); }
+{ const sb=$('#sndBtn'); if(sb){ if(SHOW_SOUND_TOGGLE){ sb.onclick=toggleSound; } else { sb.style.display='none'; } } }
+
+/* tekst-modus: dempt de stem van de agents, alleen typen (knop standaard verborgen) */
+function agentVolume(){ return (soundOn && !textOnly) ? 1 : 0; }
+function applyAgentMute(s){ if(!s) return; try{ s.setVolume({volume: agentVolume()}); }catch(_){} try{ s.setMicMuted(textOnly); }catch(_){} }
+function applyTextOnly(){ const b=$('#textBtn'); if(b) b.classList.toggle('on',textOnly);
+  document.body.classList.toggle('text-only',textOnly); if(elSession) applyAgentMute(elSession); }
+function toggleTextOnly(){ textOnly=!textOnly; applyTextOnly(); }
+{ const tb=$('#textBtn'); if(tb){ tb.onclick=toggleTextOnly; if(!SHOW_TEXTONLY_TOGGLE) tb.style.display='none'; } }
+
+function markVisited(id){ if(visited.has(id)) return; visited.add(id); updateProgress(); updatePinVisited(id); updateNavHud(); }
+function updatePinVisited(id){ const m=markersById[id]; const el=m&&m.getElement&&m.getElement(); if(el) el.classList.add('visited'); const c=cardById[id]; if(c) c.classList.add('visited'); }
+function updateProgress(){ const n=visited.size; const pc=$('#progCount'); if(pc) pc.textContent=n; const pt=$('#progTotal'); if(pt) pt.textContent=TOTAL;
+  const ring=$('#progRing'); if(ring){ const C=2*Math.PI*15.5; ring.setAttribute('stroke-dasharray',C.toFixed(1)); ring.setAttribute('stroke-dashoffset',(C*(1-n/TOTAL)).toFixed(1)); } }
+
+function curPos(){ if(mode==='live') return livePos; if(demoMe){ const p=demoMe.getLatLng(); return {lat:p.lat,lng:p.lng}; } return null; }
+function bearing(la1,lo1,la2,lo2){ const t=Math.PI/180; const y=Math.sin((lo2-lo1)*t)*Math.cos(la2*t);
+  const x=Math.cos(la1*t)*Math.sin(la2*t)-Math.sin(la1*t)*Math.cos(la2*t)*Math.cos((lo2-lo1)*t); return (Math.atan2(y,x)/t+360)%360; }
+function fmtDist(m){ if(m>=1000) return (m/1000).toFixed(m<10000?1:0)+' km'; return Math.max(0,Math.round(m/5)*5)+' m'; }
+function updateNavHud(){ const hud=$('#navHud'); if(!hud) return; const pos=curPos();
+  if(active||!pos){ hud.classList.remove('show'); return; }
+  const left=ZONES.filter(z=>!visited.has(z.id)&&z._center);
+  const a=hud.querySelector('.arr svg');
+  if(left.length===0){ const mh=$('#maphint'); if(mh) mh.classList.add('hide'); hud.classList.add('show','done-all'); $('#navName').textContent=tr('navDone')||'Alles bezocht'; $('#navDist').textContent=''; if(a) a.style.transform='rotate(0deg)'; return; }
+  hud.classList.remove('done-all');
+  let best=null,bd=Infinity; left.forEach(z=>{ const d=haversine(pos.lat,pos.lng,z._center.lat,z._center.lng); if(d<bd){bd=d;best=z;} });
+  if(!best){ hud.classList.remove('show'); return; }
+  hud.classList.add('show'); $('#navName').textContent=best.name; $('#navDist').textContent=fmtDist(bd);
+  const brg=bearing(pos.lat,pos.lng,best._center.lat,best._center.lng);
+  let rot=brg; if(mode==='live'&&heading!=null) rot=(brg-heading+360)%360;
+  if(a) a.style.transform='rotate('+rot.toFixed(0)+'deg)'; }
+
+function applyHeading(){ if(heading==null) return; const el=liveMe&&liveMe.getElement&&liveMe.getElement();
+  if(el){ const nav=el.querySelector('.nav'); if(nav) nav.style.transform='rotate('+heading.toFixed(0)+'deg)'; } updateNavHud(); }
+function onOrient(e){ let h=null;
+  if(typeof e.webkitCompassHeading==='number'&&!isNaN(e.webkitCompassHeading)) h=e.webkitCompassHeading;
+  else if(typeof e.alpha==='number') h=(360-e.alpha+360)%360;
+  if(h!=null){ heading=h; headingOn=true; applyHeading(); } }
+function startCompass(){ if(headingOn||!window.DeviceOrientationEvent) return;
+  const add=()=>{ window.addEventListener('deviceorientationabsolute',onOrient,true); window.addEventListener('deviceorientation',onOrient,true); };
+  if(typeof DeviceOrientationEvent.requestPermission==='function'){ DeviceOrientationEvent.requestPermission().then(s=>{ if(s==='granted') add(); }).catch(()=>{}); }
+  else add(); }
+
+/* accu: pauzeer locatie als de app naar de achtergrond gaat */
+document.addEventListener('visibilitychange',()=>{ if(document.hidden){ if(mode==='live') stopGeo(); } else { if(mode==='live'&&!watch) startGeo(); } });
+
+applySound(); updateProgress();
+
+/* ===== INIT ===== */
+
+/* ===== i18n + welkom + taalkiezer ===== */
+let lang='nl', uiLang='nl', otherMode=false;
+const LANGS=[['af','Afrikaans'],['ar','العربية'],['hy','Հայերեն'],['as','অসমীয়া'],['ast','Asturianu'],['az','Azərbaycan'],['be','Беларуская'],['bn','বাংলা'],['bs','Bosanski'],['bg','Български'],['my','မြန်မာ'],['yue','粵語'],['ca','Català'],['zh','中文'],['hr','Hrvatski'],['cs','Čeština'],['da','Dansk'],['nl','Nederlands'],['en','English'],['et','Eesti'],['fil','Filipino'],['fi','Suomi'],['fr','Français'],['gl','Galego'],['ka','ქართული'],['de','Deutsch'],['el','Ελληνικά'],['gu','ગુજરાતી'],['ha','Hausa'],['he','עברית'],['hi','हिन्दी'],['hu','Magyar'],['is','Íslenska'],['id','Bahasa Indonesia'],['ga','Gaeilge'],['it','Italiano'],['ja','日本語'],['jv','Basa Jawa'],['kn','ಕನ್ನಡ'],['kk','Қазақша'],['ky','Кыргызча'],['ko','한국어'],['lv','Latviešu'],['lt','Lietuvių'],['lb','Lëtzebuergesch'],['mk','Македонски'],['ms','Bahasa Melayu'],['ml','മലയാളം'],['mt','Malti'],['mi','Māori'],['mr','मराठी'],['mn','Монгол'],['ne','नेपाली'],['no','Norsk'],['oc','Occitan'],['or','ଓଡ଼ିଆ'],['ps','پښتو'],['fa','فارسی'],['pl','Polski'],['pt-br','Português (Brasil)'],['pt','Português'],['pa','ਪੰਜਾਬੀ'],['ro','Română'],['ru','Русский'],['sr','Српски'],['sd','سنڌي'],['sk','Slovenčina'],['sl','Slovenščina'],['so','Soomaali'],['es','Español'],['sw','Kiswahili'],['sv','Svenska'],['tg','Тоҷикӣ'],['ta','தமிழ்'],['te','తెలుగు'],['th','ไทย'],['tr','Türkçe'],['uk','Українська'],['ur','اردو'],['uz','Oʻzbek'],['vi','Tiếng Việt'],['cy','Cymraeg'],['yo','Yorùbá']];
+const T={
+  wEyebrow:{nl:'Audio tour · Stadsstemmen',en:'Audio tour · Stadsstemmen',de:'Audiotour · Stadsstemmen',it:'Audioguida · Stadsstemmen',pt:'Áudio tour · Stadsstemmen',es:'Audioguía · Stadsstemmen',pl:'Audioprzewodnik · Stadsstemmen',da:'Audiotur · Stadsstemmen',sv:'Ljudtur · Stadsstemmen',no:'Lydtur · Stadsstemmen',fi:'Ääniopas · Stadsstemmen',el:'Ξενάγηση ήχου · Stadsstemmen'},
+  wTitle1:{nl:'Praat met de',en:'Talk to the',de:'Sprich mit den',it:'Parla con le',pt:'Fala com as',es:'Habla con las',pl:'Porozmawiaj z',da:'Tal med',sv:'Prata med',no:'Snakk med',fi:'Puhu',el:'Μίλα με τις'},
+  wTitle2:{nl:'stemmen van Groningen',en:'voices of Groningen',de:'Stimmen von Groningen',it:'voci di Groninga',pt:'vozes de Groningen',es:'voces de Groninga',pl:'głosami Groningen',da:'Groningens stemmer',sv:'Groningens röster',no:'Groningens stemmer',fi:'Groningenin äänille',el:'φωνές του Γκρόνινγκεν'},
+  wSub:{nl:'Ontdek de binnenstad met plekken die weten waar je staat, en je hun eigen verhaal vertellen.',en:'Explore the old city with places that know where you are, and tell you their own story.',de:'Entdecke die Innenstadt mit Orten, die wissen, wo du bist, und dir ihre Geschichte erzählen.',it:'Esplora il centro con luoghi che sanno dove sei, e ti raccontano la loro storia.',pt:'Explora o centro com lugares que sabem onde estás, e te contam a sua própria história.',es:'Explora el centro con lugares que saben dónde estás, y te cuentan su propia historia.',pl:'Odkryj centrum z miejscami, które wiedzą, gdzie jesteś, i opowiedzą ci swoją historię.',da:'Udforsk bymidten med steder, der ved, hvor du er, og fortæller dig deres egen historie.',sv:'Utforska stadskärnan med platser som vet var du är, och berättar sin egen historia.',no:'Utforsk sentrum med steder som vet hvor du er, og forteller deg sin egen historie.',fi:'Tutustu keskustaan paikkojen kanssa, jotka tietävät missä olet, ja kertovat oman tarinansa.',el:'Εξερεύνησε το κέντρο με μέρη που ξέρουν πού βρίσκεσαι, και σου λένε τη δική τους ιστορία.'},
+  wF1t:{nl:'Plek-bewust',en:'Location-aware',de:'Ortsbewusst',it:'Consapevole del luogo',pt:'Ciente do local',es:'Consciente del lugar',pl:'Świadomy lokalizacji',da:'Stedbevidst',sv:'Platsmedveten',no:'Stedsbevisst',fi:'Paikkatietoinen',el:'Με επίγνωση τοποθεσίας'},
+  wF1p:{nl:'Loop door de stad; elke plek herkent waar je bent en vertelt wat hier te zien is.',en:'Walk through the city; each place knows where you are and tells you what to see.',de:'Geh durch die Stadt; jeder Ort weiß, wo du bist, und erzählt, was es zu sehen gibt.',it:'Cammina per la città; ogni luogo sa dove sei e ti dice cosa vedere.',pt:'Caminha pela cidade; cada lugar sabe onde estás e diz-te o que ver.',es:'Camina por la ciudad; cada lugar sabe dónde estás y te dice qué ver.',pl:'Spaceruj po mieście; każde miejsce wie, gdzie jesteś, i mówi, co zobaczyć.',da:'Gå gennem byen; hvert sted ved, hvor du er, og fortæller, hvad du kan se.',sv:'Gå genom staden; varje plats vet var du är och berättar vad du kan se.',no:'Gå gjennom byen; hvert sted vet hvor du er og forteller hva du kan se.',fi:'Kävele kaupungissa; jokainen paikka tietää missä olet ja kertoo mitä nähdä.',el:'Περπάτησε στην πόλη· κάθε μέρος ξέρει πού είσαι και σου λέει τι να δεις.'},
+  wF2t:{nl:'Spreek of typ',en:'Speak or type',de:'Sprechen oder tippen',it:'Parla o scrivi',pt:'Fala ou escreve',es:'Habla o escribe',pl:'Mów lub pisz',da:'Tal eller skriv',sv:'Tala eller skriv',no:'Snakk eller skriv',fi:'Puhu tai kirjoita',el:'Μίλα ή γράψε'},
+  wF2p:{nl:'Tik op de microfoon en praat, of typ je vraag als het te druk is.',en:'Tap the microphone and talk, or type your question if it’s too busy.',de:'Tippe aufs Mikrofon und sprich, oder tippe deine Frage, wenn es zu laut ist.',it:'Tocca il microfono e parla, o scrivi la domanda se c\u2019è troppo rumore.',pt:'Toca no microfone e fala, ou escreve a tua pergunta se houver muito barulho.',es:'Toca el micrófono y habla, o escribe tu pregunta si hay mucho ruido.',pl:'Dotknij mikrofonu i mów, lub wpisz pytanie, gdy jest zbyt głośno.',da:'Tryk på mikrofonen og tal, eller skriv dit spørgsmål, hvis der er for travlt.',sv:'Tryck på mikrofonen och prata, eller skriv din fråga om det är för stökigt.',no:'Trykk på mikrofonen og snakk, eller skriv spørsmålet ditt hvis det er for travelt.',fi:'Napauta mikrofonia ja puhu, tai kirjoita kysymyksesi jos on liian meluisaa.',el:'Πάτα το μικρόφωνο και μίλα, ή γράψε την ερώτησή σου αν έχει φασαρία.'},
+  wPrivLabel:{nl:'Privacy:',en:'Privacy:',de:'Datenschutz:',it:'Privacy:',pt:'Privacidade:',es:'Privacidad:',pl:'Prywatność:',da:'Privatliv:',sv:'Integritet:',no:'Personvern:',fi:'Yksityisyys:',el:'Απόρρητο:'},
+  wPrivText:{nl:'je locatie wordt alleen gebruikt om te herkennen bij welke plek je staat. Niets wordt opgeslagen.',en:'your location is only used to recognise which place you’re at. Nothing is stored.',de:'dein Standort wird nur genutzt, um zu erkennen, an welchem Ort du bist. Nichts wird gespeichert.',it:'la tua posizione serve solo a riconoscere in quale luogo ti trovi. Niente viene salvato.',pt:'a tua localização só serve para reconhecer em que lugar estás. Nada é guardado.',es:'tu ubicación solo se usa para reconocer en qué lugar estás. No se guarda nada.',pl:'twoja lokalizacja służy tylko do rozpoznania, w którym miejscu jesteś. Nic nie jest zapisywane.',da:'din placering bruges kun til at genkende, hvilket sted du er ved. Intet gemmes.',sv:'din plats används bara för att känna igen vilken plats du är vid. Inget sparas.',no:'posisjonen din brukes bare til å gjenkjenne hvilket sted du er ved. Ingenting lagres.',fi:'sijaintiasi käytetään vain tunnistamaan missä paikassa olet. Mitään ei tallenneta.',el:'η τοποθεσία σου χρησιμοποιείται μόνο για να αναγνωρίσει σε ποιο μέρος βρίσκεσαι. Τίποτα δεν αποθηκεύεται.'},
+  wLangLabel:{nl:'Taal van de gids',en:'Guide language',de:'Sprache des Guides',it:'Lingua della guida',pt:'Idioma do guia',es:'Idioma de la guía',pl:'Język przewodnika',da:'Guidens sprog',sv:'Guidens språk',no:'Guidens språk',fi:'Oppaan kieli',el:'Γλώσσα του οδηγού'},
+  wOther:{nl:'Andere…',en:'Other…',de:'Andere…',it:'Altra…',pt:'Outro…',es:'Otro…',pl:'Inny…',da:'Andet…',sv:'Annat…',no:'Annet…',fi:'Muu…',el:'Άλλη…'},
+  wStart:{nl:'Start de tour',en:'Start the tour',de:'Tour starten',it:'Inizia il tour',pt:'Começar o tour',es:'Empezar el tour',pl:'Rozpocznij trasę',da:'Start turen',sv:'Starta turen',no:'Start turen',fi:'Aloita kierros',el:'Ξεκίνα την ξενάγηση'},
+  maphint:{nl:'Sleep je locatie over een plek',en:'Drag your location onto a place',de:'Zieh deinen Standort auf einen Ort',it:'Trascina la tua posizione su un luogo',pt:'Arrasta a tua localização para um lugar',es:'Arrastra tu ubicación sobre un lugar',pl:'Przeciągnij swoją lokalizację na miejsce',da:'Træk din placering hen på et sted',sv:'Dra din plats till en plats',no:'Dra posisjonen din til et sted',fi:'Vedä sijaintisi paikan päälle',el:'Σύρε την τοποθεσία σου πάνω σε ένα μέρος'},
+  listEb:{nl:'5 stemmen · binnenstad',en:'5 voices · city centre',de:'5 Stimmen · Innenstadt',it:'5 voci · centro',pt:'5 vozes · centro',es:'5 voces · centro',pl:'5 głosów · centrum',da:'5 stemmer · bymidte',sv:'5 röster · centrum',no:'5 stemmer · sentrum',fi:'5 ääntä · keskusta',el:'5 φωνές · κέντρο'},
+  listTtl:{nl:'Plekken in de buurt',en:'Places nearby',de:'Orte in der Nähe',it:'Luoghi vicini',pt:'Lugares por perto',es:'Lugares cercanos',pl:'Miejsca w pobliżu',da:'Steder i nærheden',sv:'Platser i närheten',no:'Steder i nærheten',fi:'Lähellä olevat paikat',el:'Κοντινά μέρη'},
+  progLabel:{nl:'bezocht',en:'visited',de:'besucht',it:'visitati',pt:'visitados',es:'visitados',pl:'odwiedzone',da:'besøgt',sv:'besökta',no:'besøkt',fi:'käyty',el:'επισκ.'},
+  cardDone:{nl:'Bezocht',en:'Visited',de:'Besucht',it:'Visitato',pt:'Visitado',es:'Visitado',pl:'Odwiedzone',da:'Besøgt',sv:'Besökt',no:'Besøkt',fi:'Käyty',el:'Επισκέφθηκες'},
+  wHead:{nl:'Werkt het best met een koptelefoon.',en:'Works best with headphones.',de:'Funktioniert am besten mit Kopfhörern.',it:'Funziona meglio con le cuffie.',pt:'Funciona melhor com auscultadores.',es:'Funciona mejor con auriculares.',pl:'Działa najlepiej ze słuchawkami.',da:'Fungerer bedst med høretelefoner.',sv:'Fungerar bäst med hörlurar.',no:'Fungerer best med hodetelefoner.',fi:'Toimii parhaiten kuulokkeilla.',el:'Λειτουργεί καλύτερα με ακουστικά.'},
+  navDone:{nl:'Alles bezocht',en:'All visited',de:'Alle besucht',it:'Tutto visitato',pt:'Tudo visitato',es:'Todo visitado',pl:'Wszystko odwiedzone',da:'Alt besøgt',sv:'Allt besökt',no:'Alt besøkt',fi:'Kaikki käyty',el:'Όλα ολοκληρώθηκαν'},
+  catSight:{nl:'Bezienswaardigheid',en:'Point of interest',de:'Sehenswürdigkeit'},
+  catHoreca:{nl:'Horeca',en:'Food & drink',de:'Gastronomie'},
+  spotLocked:{nl:'Kom langs om foto\u2019s en het verhaal te ontdekken.',en:'Come by to discover photos and the story.'},
+  spotGo:{nl:'Ga er heen om meer te zien',en:'Go there to see more'},
+  spotVisit:{nl:'Bezoek deze plek om alle foto\u2019s en het verhaal te ontdekken.',en:'Visit this place to discover all the photos and its story.',de:'Besuche diesen Ort, um alle Fotos und die Geschichte zu entdecken.'},
+  spotListen:{nl:'Beluister audio',en:'Listen to audio',de:'Audio anhören',it:'Ascolta l\u2019audio',pt:'Ouvir áudio',es:'Escuchar audio',pl:'Posłuchaj audio',da:'Lyt til lyd',sv:'Lyssna på ljud',no:'Lytt til lyd',fi:'Kuuntele ääni',el:'Άκου το ηχητικό'},
+  spotPause:{nl:'Pauzeer',en:'Pause',de:'Pause',it:'Pausa',pt:'Pausar',es:'Pausar',pl:'Pauza',da:'Pause',sv:'Pausa',no:'Pause',fi:'Tauko',el:'Παύση'},
+  spotStory:{nl:'Lees het verhaal',en:'Read the story',de:'Geschichte lesen',it:'Leggi la storia',pt:'Ler a história',es:'Leer la historia',pl:'Przeczytaj historię',da:'Læs historien',sv:'Läs berättelsen',no:'Les historien',fi:'Lue tarina',el:'Διάβασε την ιστορία'},
+  filterTitle:{nl:'Filter',en:'Filter',de:'Filter'},
+  filterAgents:{nl:'Stemmen',en:'Voices',de:'Stimmen'},
+  filterSights:{nl:'Bezienswaardigheden',en:'Sights',de:'Sehenswürdigkeiten'},
+  filterHoreca:{nl:'Horeca',en:'Food & drink',de:'Gastronomie'},
+  tapToTalk:{nl:'Tik om te praten',en:'Tap to talk',de:'Zum Sprechen tippen',it:'Tocca per parlare',pt:'Toca para falar',es:'Toca para hablar',pl:'Dotknij, aby mówić',da:'Tryk for at tale',sv:'Tryck för att prata',no:'Trykk for å snakke',fi:'Napauta puhuaksesi',el:'Πάτα για να μιλήσεις'},
+  preview:{nl:'Preview · typ of tik een vraag',en:'Preview · type or tap a question',de:'Vorschau · tippe oder wähle eine Frage',it:'Anteprima · scrivi o tocca una domanda',pt:'Pré-visualização · escreve ou toca numa pergunta',es:'Vista previa · escribe o toca una pregunta',pl:'Podgląd · wpisz lub dotknij pytania',da:'Forhåndsvisning · skriv eller tryk på et spørgsmål',sv:'Förhandsvisning · skriv eller tryck på en fråga',no:'Forhåndsvisning · skriv eller trykk på et spørsmål',fi:'Esikatselu · kirjoita tai napauta kysymystä',el:'Προεπισκόπηση · γράψε ή πάτα μια ερώτηση'},
+  connecting:{nl:'Verbinden…',en:'Connecting…',de:'Verbinden…',it:'Connessione…',pt:'A ligar…',es:'Conectando…',pl:'Łączenie…',da:'Forbinder…',sv:'Ansluter…',no:'Kobler til…',fi:'Yhdistetään…',el:'Σύνδεση…'},
+  listening:{nl:'Aan het luisteren… (tik om te stoppen)',en:'Listening… (tap to stop)',de:'Hört zu… (zum Stoppen tippen)',it:'In ascolto… (tocca per fermare)',pt:'A ouvir… (toca para parar)',es:'Escuchando… (toca para parar)',pl:'Słucham… (dotknij, aby zatrzymać)',da:'Lytter… (tryk for at stoppe)',sv:'Lyssnar… (tryck för att stoppa)',no:'Lytter… (trykk for å stoppe)',fi:'Kuuntelee… (napauta lopettaaksesi)',el:'Ακούει… (πάτα για διακοπή)'},
+  speaking:{nl:'Aan het praten…',en:'Speaking…',de:'Spricht…',it:'Sta parlando…',pt:'A falar…',es:'Hablando…',pl:'Mówi…',da:'Taler…',sv:'Talar…',no:'Snakker…',fi:'Puhuu…',el:'Μιλάει…'},
+  connectFailed:{nl:'Verbinding mislukt',en:'Connection failed',de:'Verbindung fehlgeschlagen',it:'Connessione fallita',pt:'Falha na ligação',es:'Conexión fallida',pl:'Połączenie nieudane',da:'Forbindelse mislykkedes',sv:'Anslutning misslyckades',no:'Tilkobling mislyktes',fi:'Yhteys epäonnistui',el:'Η σύνδεση απέτυχε'},
+  voiceUnavail:{nl:'Stem niet beschikbaar, typ je vraag',en:'Voice unavailable, type your question',de:'Stimme nicht verfügbar, tippe deine Frage',it:'Voce non disponibile, scrivi la domanda',pt:'Voz indisponível, escreve a tua pergunta',es:'Voz no disponible, escribe tu pregunta',pl:'Głos niedostępny, wpisz pytanie',da:'Stemme utilgængelig, skriv dit spørgsmål',sv:'Röst otillgänglig, skriv din fråga',no:'Stemme utilgjengelig, skriv spørsmålet ditt',fi:'Ääni ei käytettävissä, kirjoita kysymyksesi',el:'Η φωνή δεν είναι διαθέσιμη, γράψε την ερώτησή σου'},
+  noConnection:{nl:'Geen verbinding, check agent/microfoon',en:'No connection, check agent/microphone',de:'Keine Verbindung, prüfe Agent/Mikrofon',it:'Nessuna connessione, controlla agente/microfono',pt:'Sem ligação, verifica agente/microfone',es:'Sin conexión, revisa agente/micrófono',pl:'Brak połączenia, sprawdź agenta/mikrofon',da:'Ingen forbindelse, tjek agent/mikrofon',sv:'Ingen anslutning, kolla agent/mikrofon',no:'Ingen tilkobling, sjekk agent/mikrofon',fi:'Ei yhteyttä, tarkista agentti/mikrofoni',el:'Καμία σύνδεση, έλεγξε agent/μικρόφωνο'},
+  comeCloser:{nl:'Kom dichterbij om te praten',en:'Come closer to talk',de:'Komm näher zum Sprechen',it:'Avvicinati per parlare',pt:'Aproxima-te para falar',es:'Acércate para hablar',pl:'Podejdź bliżej, aby porozmawiać',da:'Kom tættere på for at tale',sv:'Kom närmare för att prata',no:'Kom nærmere for å snakke',fi:'Tule lähemmäs puhuaksesi',el:'Έλα πιο κοντά για να μιλήσεις'},
+  comeCloserDist:{nl:'Kom dichterbij · nog ~{m} m',en:'Come closer · ~{m} m to go',de:'Komm näher · noch ~{m} m',it:'Avvicinati · ancora ~{m} m',pt:'Aproxima-te · faltam ~{m} m',es:'Acércate · faltan ~{m} m',pl:'Podejdź bliżej · jeszcze ~{m} m',da:'Kom tættere på · ~{m} m tilbage',sv:'Kom närmare · ~{m} m kvar',no:'Kom nærmere · ~{m} m igjen',fi:'Tule lähemmäs · ~{m} m jäljellä',el:'Έλα πιο κοντά · ~{m} m ακόμα'},
+  locating:{nl:'Locatie zoeken…',en:'Finding location…',de:'Standort wird gesucht…',it:'Ricerca posizione…',pt:'A localizar…',es:'Buscando ubicación…',pl:'Szukanie lokalizacji…',da:'Finder placering…',sv:'Hittar plats…',no:'Finner posisjon…',fi:'Etsitään sijaintia…',el:'Εύρεση τοποθεσίας…'},
+  inputPh:{nl:'Typ je vraag aan {name}…',en:'Type your question to {name}…',de:'Tippe deine Frage an {name}…',it:'Scrivi la domanda a {name}…',pt:'Escreve a tua pergunta a {name}…',es:'Escribe tu pregunta a {name}…',pl:'Wpisz pytanie do {name}…',da:'Skriv dit spørgsmål til {name}…',sv:'Skriv din fråga till {name}…',no:'Skriv spørsmålet ditt til {name}…',fi:'Kirjoita kysymyksesi {name}…',el:'Γράψε την ερώτησή σου στο {name}…'}
+};
+function tr(k){ const e=T[k]; if(!e) return null; return e[uiLang]||e.en||e.nl; }
+function sugsFor(z){ const s=z.sugs; return Array.isArray(s)?s:((s&&(s[uiLang]||s.en||s.nl))||[]); }
+const UI_LANGS=['nl','en','de','it','pt','es','pl','da','sv','no','fi','el'];
+function applyI18n(){ uiLang=(lang==='pt-br')?'pt':(UI_LANGS.includes(lang)?lang:'en');
+  document.querySelectorAll('[data-i18n]').forEach(el=>{ const s=tr(el.dataset.i18n); if(s!=null) el.textContent=s; });
+  if(active){ const z=ZONES.find(x=>x.id===active); if(z){ $('#input').placeholder=tr('inputPh').replace('{name}',z.name); const sg=$('#sugs'); if(sg){ sg.innerHTML=''; sugsFor(z).forEach(s=>{const b=document.createElement('div');b.className='sug';b.textContent=s;b.onclick=()=>{$('#input').value=s;sendMsg();};sg.appendChild(b);}); } } }
+  if(activeSpot){ const s=spotById[activeSpot]; const dsc=$('#iDesc');
+    if(s&&dsc){ if(dsc.classList.contains('locked-note')){ dsc.textContent=tr('spotVisit'); }
+      else { dsc.textContent=(s.desc&&(s.desc[lang]||s.desc.en))||''; } }
+    /* audioknop: 'Pauzeer' tonen als dit fragment nu speelt, anders het normale label */
+    const playing = spotAudio && spotAudioId===activeSpot && !spotAudio.paused;
+    setAudioBtnState(playing); } }
+(function(){ const sel=$('#wsel');
+  /* ===== Achtergrondmuziek welkomstscherm ===== */
+  const BG_VOLUME=0.18;            // doelvolume (0 = stil, 1 = max)
+  const bgAudio=$('#welcomeAudio');
+  let bgStarted=false;
+  function startBg(){
+    if(bgStarted||!bgAudio||!soundOn) return;
+    bgStarted=true;
+    bgAudio.volume=BG_VOLUME;
+    bgAudio.play().catch(()=>{ bgStarted=false; }); // geblokkeerd? probeer bij volgende tik opnieuw
+  }
+  function fadeOutBg(){
+    if(!bgAudio||!bgStarted) return;
+    const step=bgAudio.volume/12;
+    const t=setInterval(()=>{
+      bgAudio.volume=Math.max(0,bgAudio.volume-step);
+      if(bgAudio.volume<=0.001){ clearInterval(t); bgAudio.pause(); }
+    },50);
+  }
+  // Browsers blokkeren autoplay met geluid: start bij de eerste tik op het welkomstscherm.
+  const wEl=$('#welcome');
+  if(wEl) wEl.addEventListener('pointerdown',startBg,{once:false});
+
+  const PRIORITY=['it','pt','es','pl','da','sv','no','fi','el'], SKIP=PRIORITY.concat(['nl','en','de']);
+  if(sel){ const nameOf=c=>{ const f=LANGS.find(l=>l[0]===c); return f?f[1]:c; };
+    PRIORITY.forEach((c,i)=>{ const o=document.createElement('option'); o.value=c; o.textContent=nameOf(c); if(i===0) o.selected=true; sel.appendChild(o); });
+    const sep=document.createElement('option'); sep.disabled=true; sep.textContent='\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500'; sel.appendChild(sep);
+    LANGS.forEach(([c,n])=>{ if(SKIP.includes(c)) return; const o=document.createElement('option'); o.value=c; o.textContent=n; sel.appendChild(o); }); }
+  function paint(){ document.querySelectorAll('#langRow button').forEach(b=>{ const v=b.dataset.l; b.classList.toggle('on', otherMode ? v==='other' : v===lang); }); }
+  document.querySelectorAll('#langRow button').forEach(b=>{ b.onclick=()=>{ startBg(); const v=b.dataset.l; if(v==='other'){ otherMode=true; $('#wsel').classList.add('show'); lang=$('#wsel').value; } else { otherMode=false; $('#wsel').classList.remove('show'); lang=v; } paint(); applyI18n(); }; });
+  if(sel) sel.onchange=e=>{ startBg(); lang=e.target.value; otherMode=true; paint(); applyI18n(); };
+  const st=$('#wstart'); if(st) st.onclick=()=>{ fadeOutBg(); $('#welcome').classList.add('hide'); primeMic(); };
+  applyI18n();
+})();
+
+setMode('demo');
+</script>
+</body>
+</html>
