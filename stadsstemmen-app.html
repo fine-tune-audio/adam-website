@@ -870,7 +870,7 @@ function openGuide(){ stopSpotAudio(); stopSlides(); activeSpot=null; setActiveM
   $('#sName').textContent=GUIDE.name; $('#sChar').textContent=tr('guideTagline')||'';
   $('#input').placeholder=(tr('inputPh')||'').replace('{name}',GUIDE.name);
   const sg=$('#sugs'); sg.innerHTML=''; sugsFor(GUIDE).forEach(s=>{const b=document.createElement('div');b.className='sug';b.textContent=s;b.onclick=()=>{$('#input').value=s;sendMsg();};sg.appendChild(b);});
-  renderConvo(GUIDE); if(histories[GUIDE.id].length===0) pushThem(GUIDE,GUIDE.fallback[0]);
+  renderConvo(GUIDE); /* geen standaard welkomstbericht meer; het gesprek begint leeg */
   const cp=$('#convoPanel'); if(cp){ cp.classList.add('up'); cp.style.setProperty('--lowtop','0px'); }
   sheet.classList.remove('info'); sheet.classList.add('detail','guide'); setH(snaps()[1]);
   $('#talk').classList.remove('off'); setTalkLabel(tr('guideStart'));
