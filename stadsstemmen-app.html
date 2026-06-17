@@ -432,13 +432,14 @@
   .cv-close svg{width:18px;height:18px;}
   .cv-close:hover{color:var(--ink);border-color:var(--ink);}
   .cv-close:active{transform:scale(.93);}
-  /* het kruisje in de open gids-pop-up is weg: de terug-pijl sluit het paneel.
-     Stoppen kan via het kruisje op de zwevende balk (#guideMini). */
+  /* terug-pijl = minimaliseren (gids praat af); dit kruisje = de gids meteen helemaal stoppen */
+  .sheet.guide .cv-close{display:grid;}
 
   /* ===== NIEUW: zwevende gids-balk (gids praat door terwijl het menu dicht is) ===== */
   .guide-mini{position:absolute;z-index:9;left:50%;bottom:calc(18% + 18px);transform:translateX(-50%);
     display:none;align-items:center;gap:11px;padding:8px 8px 8px 16px;border-radius:999px;cursor:pointer;
-    background:var(--ink);color:#fff;box-shadow:0 12px 30px rgba(0,0,0,.32);max-width:80%;}
+    background:var(--ink);color:#fff;box-shadow:0 12px 30px rgba(0,0,0,.32);max-width:80%;
+    transition:bottom .4s cubic-bezier(.22,1,.36,1);}
   .guide-mini.show{display:flex;animation:vfin .26s ease both;}
   .guide-mini .gm-ic{display:flex;color:var(--lime);}
   .guide-mini .gm-ic svg{width:19px;height:19px;}
@@ -446,7 +447,7 @@
   .guide-mini.speaking .gm-wave{display:flex;} .guide-mini.speaking .gm-ic{display:none;}
   .guide-mini .gm-wave i{width:3px;height:8px;background:var(--lime);border-radius:2px;animation:vfbar .75s ease-in-out infinite;}
   .guide-mini .gm-wave i:nth-child(2){animation-delay:.14s;} .guide-mini .gm-wave i:nth-child(3){animation-delay:.28s;} .guide-mini .gm-wave i:nth-child(4){animation-delay:.42s;}
-  .guide-mini .gm-txt{font-family:'Schibsted Grotesk';font-weight:800;font-size:13px;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .guide-mini .gm-txt{flex:1;min-width:0;font-family:'Schibsted Grotesk';font-weight:800;font-size:13px;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .guide-mini .gm-x{flex-shrink:0;width:30px;height:30px;border-radius:50%;border:none;cursor:pointer;
     background:rgba(255,255,255,.16);color:#fff;display:grid;place-items:center;transition:.15s;}
   .guide-mini .gm-x:hover{background:rgba(255,255,255,.28);}
@@ -658,9 +659,22 @@ const SPOTS = [].concat(
 const spotById={}; SPOTS.forEach(s=>spotById[s.id]=s);
 const spotMarkers={}; const unlockedSpots=new Set();
 const SPOT_RADIUS=40;   // meters: binnen deze afstand 'arriveer' je bij een losse plek en zie je foto's + tekst
+const SPOT_AUDIO_VOLUME=0.7;  // volume van de plek-audiofragmenten (0 = stil, 1 = max). Pas dit aan als ze te hard zijn.
 let activeSpot=null;
 
 const $=s=>document.querySelector(s);
+
+/* ===== Microfoon volledig vrijgeven =====
+   We onthouden elke microfoon-stream die wordt aangevraagd (ook die van de
+   spraak-SDK), zodat we ze altijd hard kunnen stoppen. Zo verdwijnt de
+   'microfoon staat aan'-melding zodra de gids stopt of de app naar de
+   achtergrond gaat. */
+const _micStreams=new Set();
+(function(){ try{ const md=navigator.mediaDevices; if(!md||!md.getUserMedia) return;
+  const orig=md.getUserMedia.bind(md);
+  md.getUserMedia=function(c){ return orig(c).then(s=>{ try{ if(c&&c.audio) _micStreams.add(s); }catch(_){} return s; }); };
+}catch(e){} })();
+function releaseAllMics(){ try{ _micStreams.forEach(s=>{ try{ s.getTracks().forEach(t=>{ try{ t.stop(); }catch(_){} }); }catch(_){} }); _micStreams.clear(); }catch(e){} }
 let active=null, mode='demo', watch=null, liveMe=null, demoMe=null, demoZone=null, livePos=null, canTalk=false;
 let soundOn=true, heading=null, headingOn=false, textOnly=false, liveNeedsCenter=false;
 const SHOW_TEXTONLY_TOGGLE=false;  // op true zetten om de tekst-modus-knop te tonen
@@ -732,7 +746,7 @@ function downH(){ const dr=document.querySelector('.drag'), lh=document.querySel
   return Math.round(0.18*appH()); }
 const snaps=()=>[downH(), Math.round(0.92*appH())];
 function nearest(h){return snaps().reduce((a,b)=>Math.abs(b-h)<Math.abs(a-h)?b:a);}
-function setH(h,anim=true){ sheet.style.transition=anim?'height .4s cubic-bezier(.22,1,.36,1)':'none'; sheet.style.height=h+'px'; syncSetup(); updateVoiceFab(); }
+function setH(h,anim=true){ sheet.style.transition=anim?'height .4s cubic-bezier(.22,1,.36,1)':'none'; sheet.style.height=h+'px'; syncSetup(); positionFloaters(); updateVoiceFab(); }
 let dragging=false,sy=0,sh=0;
 function startDrag(e){dragging=true;sy=e.clientY;sh=sheet.offsetHeight;sheet.style.transition='none';try{e.currentTarget.setPointerCapture(e.pointerId);}catch(_){}}
 dragEl.addEventListener('pointerdown',startDrag);
@@ -743,6 +757,8 @@ window.addEventListener('pointerup',()=>{if(!dragging)return;dragging=false;
   if(guideOpen && !sheet.classList.contains('over') && target===snaps()[0]){ minimizeGuide(); }
   else setH(target);});
 function syncSetup(){ const sp=$('#setup'); if(sp&&!sp.classList.contains('hide')) sp.style.bottom=(sheet.offsetHeight+14)+'px'; }
+/* orb + gids-balk net boven de ingeklapte slide laten zweven (anders staan ze te laag op mobiel) */
+function positionFloaters(){ try{ const b=(snaps()[0]+16)+'px'; const o=document.querySelector('#guideOrb'); if(o) o.style.bottom=b; const gm=document.querySelector('#guideMini'); if(gm) gm.style.bottom=b; }catch(e){} }
 setTimeout(()=>setH(snaps()[0],false),60);
 window.addEventListener('resize',()=>setH(nearest(sheet.offsetHeight),false));
 if(map) map.on('click',()=>{ if(sheet.classList.contains('over')) return; if(guideOpen){ minimizeGuide(); return; } if(activeSpot){ closeToList(); return; } if(!sheet.classList.contains('detail') && !sheet.classList.contains('info')) setH(snaps()[0]); });
@@ -857,7 +873,7 @@ function openGuide(){ stopSpotAudio(); stopSlides(); activeSpot=null; setActiveM
   renderConvo(GUIDE); if(histories[GUIDE.id].length===0) pushThem(GUIDE,GUIDE.fallback[0]);
   const cp=$('#convoPanel'); if(cp){ cp.classList.add('up'); cp.style.setProperty('--lowtop','0px'); }
   sheet.classList.remove('info'); sheet.classList.add('detail','guide'); setH(snaps()[1]);
-  $('#talk').classList.remove('off'); setTalkLabel(tr('guideHold'));
+  $('#talk').classList.remove('off'); setTalkLabel(tr('guideStart'));
   updateGuideOrb(); updateGuideMini();
   /* GEEN automatische spraakverbinding: de gids zwijgt tot je de knop indrukt.
      De openingszin staat al als tekst in het gesprek (hierboven via pushThem). */ }
@@ -877,7 +893,7 @@ function playSpotAudio(id){ if(!soundOn) return;
   if(elSession||elConnecting){ stopVoice(); } /* gids stopt als je plek-audio start */
   if(spotAudioId===id && spotAudio && !spotAudio.paused && !spotAudio.ended) return; /* speelt al */
   stopSpotAudio(); const chain=audioLangChain(); let i=0;
-  const a=new Audio(); spotAudio=a; spotAudioId=id;
+  const a=new Audio(); a.volume=SPOT_AUDIO_VOLUME; spotAudio=a; spotAudioId=id;
   const tryNext=()=>{ if(spotAudio!==a) return; if(i>=chain.length){ stopSpotAudio(); return; }
     a.src='audio/spots/'+id+'_'+chain[i++]+'.mp3'; a.play().then(()=>{ if(spotAudio===a) setAudioBtnState(true); }).catch(()=>{}); };
   a.onerror=tryNext; a.onended=()=>{ if(spotAudio===a){ spotAudio=null; spotAudioId=null; setAudioBtnState(false); } };
@@ -892,7 +908,7 @@ function spotNear(s){ const p=curPos(); if(!p) return false;
   if(!s.point) return false; return haversine(p.lat,p.lng,s.point[0],s.point[1])<=SPOT_RADIUS; }
 function openSpot(id){ const s=spotById[id]; if(!s) return;
   const overGuide = guideOpen || elSession || elConnecting;
-  if(overGuide){ windDownGuide(); sheet.classList.add('over'); /* gids blijft eronder en praat af */ }
+  if(overGuide){ stopVoice(); sheet.classList.add('over'); /* gids verbreekt netjes; plek-slide valt eroverheen */ }
   else { if(elSession||elConnecting) stopVoice(); guideOpen=false; guideMinimized=false; sheet.classList.remove('guide','over'); active=null; }
   const unlocked = unlockedSpots.has(id) || spotNear(s); if(unlocked) unlockedSpots.add(id);
   if(unlocked && s.type==='agent') markVisited(id);
@@ -1004,7 +1020,7 @@ async function startConversation(g, initialMessage){
   const myGen=++elGen; elConnecting=true; setTalkLabel(tr('connecting')); $('#talk').classList.add('connecting');
   if(initialMessage) addUserText(initialMessage);
   try{
-    try{ await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}}); micPrimed=true; }catch(e){}
+    try{ const ps=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}}); ps.getTracks().forEach(t=>t.stop()); micPrimed=true; }catch(e){}
     const s=await Conv.startSession({
       agentId:aid, connectionType:'websocket',
       overrides:(lang&&lang!=='nl')?{agent:{language:lang}}:undefined,
@@ -1027,9 +1043,9 @@ async function startConversation(g, initialMessage){
     elSession=s; applyGuideVolume(elSession); guideMicMuted(!pushHolding);
   }catch(e){ if(myGen!==elGen) return; console.error(e); setTalkLabel(tr('noConnection')); resetVoiceUI(); }
 }
-function stopVoice(){ elGen++; const c=elSession; elSession=null; elConnecting=false; pushHolding=false; guideSpeaking=false; if(c){ try{c.endSession();}catch(e){} } resetVoiceUI(); try{ stopZoneIntro(false); }catch(_){} }
+function stopVoice(){ elGen++; const c=elSession; elSession=null; elConnecting=false; pushHolding=false; guideSpeaking=false; if(c){ try{c.endSession();}catch(e){} } releaseAllMics(); resetVoiceUI(); try{ stopZoneIntro(false); }catch(_){} }
 function resetVoiceUI(){ elSession=null; elConnecting=false; pushHolding=false; guideSpeaking=false; const t=$('#talk'); if(t) t.classList.remove('speaking','live','connecting'); if(voiceFab) voiceFab.classList.remove('speaking'); updateVoiceFab(); try{ updateGuideMini(); }catch(_){}
-  if(guideOpen) setTalkLabel(tr('guideHold')); }
+  if(guideOpen) setTalkLabel(tr('guideStart')); }
 
 /* push-to-talk: houd de microfoon ingedrukt om te praten, laat los om te versturen */
 (function(){ const tb=$('#talk'); if(!tb) return;
@@ -1179,8 +1195,11 @@ function startCompass(){ if(headingOn||!window.DeviceOrientationEvent) return;
   if(typeof DeviceOrientationEvent.requestPermission==='function'){ DeviceOrientationEvent.requestPermission().then(s=>{ if(s==='granted') add(); }).catch(()=>{}); }
   else add(); }
 
-/* accu: pauzeer locatie als de app naar de achtergrond gaat */
-document.addEventListener('visibilitychange',()=>{ if(document.hidden){ if(mode==='live') stopGeo(); } else { if(mode==='live'&&!watch) startGeo(); } });
+/* accu + privacy: pauzeer locatie en stop de microfoon als de app naar de achtergrond gaat */
+document.addEventListener('visibilitychange',()=>{ if(document.hidden){ if(mode==='live') stopGeo(); try{ stopVoice(); }catch(_){} releaseAllMics(); } else { if(mode==='live'&&!watch) startGeo(); } });
+/* pagina verlaten/sluiten: microfoon en verbinding hard vrijgeven (geen 'mic aan'-melding meer) */
+window.addEventListener('pagehide',()=>{ try{ stopVoice(); }catch(_){} releaseAllMics(); });
+window.addEventListener('beforeunload',()=>{ try{ stopVoice(); }catch(_){} releaseAllMics(); });
 
 applySound(); updateProgress();
 
@@ -1216,9 +1235,10 @@ const T={
   guideOrb:{nl:'Gids',en:'Guide',de:'Guide',it:'Guida',pt:'Guia',es:'Guía',pl:'Przewodnik',da:'Guide',sv:'Guide',no:'Guide',fi:'Opas',el:'Οδηγός'},
   guideEyebrow:{nl:'Lokale gids',en:'Local guide',de:'Lokaler Guide',it:'Guida locale',pt:'Guia local',es:'Guía local',pl:'Lokalny przewodnik',da:'Lokal guide',sv:'Lokal guide',no:'Lokal guide',fi:'Paikallisopas',el:'Τοπικός οδηγός'},
   guideTagline:{nl:'Vraag me alles over de stad',en:'Ask me anything about the city',de:'Frag mich alles über die Stadt',it:'Chiedimi tutto sulla città',pt:'Pergunta-me tudo sobre a cidade',es:'Pregúntame lo que sea sobre la ciudad',pl:'Zapytaj mnie o miasto',da:'Spørg mig om byen',sv:'Fråga mig om staden',no:'Spør meg om byen',fi:'Kysy minulta kaupungista',el:'Ρώτα με για την πόλη'},
-  guideHold:{nl:'Houd de knop ingedrukt om een vraag te stellen',en:'Hold the button to ask a question',de:'Halte die Taste gedrückt, um zu fragen',it:'Tieni premuto per fare una domanda',pt:'Mantém premido para fazer uma pergunta',es:'Mantén pulsado para hacer una pregunta',pl:'Przytrzymaj, aby zadać pytanie',da:'Hold knappen nede for at stille et spørgsmål',sv:'Håll knappen inne för att ställa en fråga',no:'Hold knappen inne for å stille et spørsmål',fi:'Pidä painiketta pohjassa kysyäksesi',el:'Κράτα το κουμπί πατημένο για να ρωτήσεις'},
+  guideStart:{nl:'Tik en houd vast om te beginnen',en:'Tap & hold to start',de:'Zum Start tippen & halten',it:'Tocca e tieni premuto per iniziare',pt:'Toca e mantém para começar',es:'Toca y mantén para empezar',pl:'Dotknij i przytrzymaj, aby zacząć',da:'Tryk og hold for at starte',sv:'Tryck och håll för att börja',no:'Trykk og hold for å starte',fi:'Aloita pitämällä painettuna',el:'Πάτα & κράτα για να ξεκινήσεις'},
+  guideHold:{nl:'Houd ingedrukt om te praten',en:'Hold to talk',de:'Zum Sprechen gedrückt halten',it:'Tieni premuto per parlare',pt:'Mantém premido para falar',es:'Mantén pulsado para hablar',pl:'Przytrzymaj, aby mówić',da:'Hold nede for at tale',sv:'Håll inne för att prata',no:'Hold inne for å snakke',fi:'Pidä pohjassa puhuaksesi',el:'Κράτα πατημένο για να μιλήσεις'},
   guideListening:{nl:'Aan het luisteren… (laat los)',en:'Listening… (release)',de:'Hört zu… (loslassen)',it:'In ascolto… (rilascia)',pt:'A ouvir… (solta)',es:'Escuchando… (suelta)',pl:'Słucham… (puść)',da:'Lytter… (slip)',sv:'Lyssnar… (släpp)',no:'Lytter… (slipp)',fi:'Kuuntelee… (vapauta)',el:'Ακούει… (άσε το)'},
-  guideSpeaking:{nl:'De gids praat…',en:'The guide is speaking…',de:'Der Guide spricht…',it:'La guida sta parlando…',pt:'O guia está a falar…',es:'La guía está hablando…',pl:'Przewodnik mówi…',da:'Guiden taler…',sv:'Guiden talar…',no:'Guiden snakker…',fi:'Opas puhuu…',el:'Ο οδηγός μιλάει…'},
+  guideSpeaking:{nl:'Gids praat…',en:'Guide speaking…',de:'Guide spricht…',it:'Guida parla…',pt:'Guia a falar…',es:'Guía hablando…',pl:'Przewodnik mówi…',da:'Guiden taler…',sv:'Guiden talar…',no:'Guiden snakker…',fi:'Opas puhuu…',el:'Ο οδηγός μιλάει…'},
   guideTypeOnly:{nl:'Typ je vraag aan de gids',en:'Type your question to the guide',de:'Tippe deine Frage an den Guide',it:'Scrivi la domanda alla guida',pt:'Escreve a tua pergunta ao guia',es:'Escribe tu pregunta a la guía',pl:'Wpisz pytanie do przewodnika',da:'Skriv dit spørgsmål til guiden',sv:'Skriv din fråga till guiden',no:'Skriv spørsmålet ditt til guiden',fi:'Kirjoita kysymyksesi oppaalle',el:'Γράψε την ερώτησή σου στον οδηγό'},
   spotLocked:{nl:'Kom langs om foto\u2019s en het verhaal te ontdekken.',en:'Come by to discover photos and the story.'},
   spotGo:{nl:'Ga er heen om meer te zien',en:'Go there to see more'},
@@ -1251,13 +1271,14 @@ function applyI18n(){ uiLang=(lang==='pt-br')?'pt':(UI_LANGS.includes(lang)?lang
   if(guideOpen){ $('#eyebrow').textContent=tr('guideEyebrow')||''; $('#sChar').textContent=tr('guideTagline')||'';
     $('#input').placeholder=(tr('inputPh')||'').replace('{name}',GUIDE.name);
     const sg=$('#sugs'); if(sg){ sg.innerHTML=''; sugsFor(GUIDE).forEach(s=>{const b=document.createElement('div');b.className='sug';b.textContent=s;b.onclick=()=>{$('#input').value=s;sendMsg();};sg.appendChild(b);}); }
-    if(!elSession && !elConnecting) setTalkLabel(tr('guideHold')); }
+    if(!elSession && !elConnecting) setTalkLabel(tr('guideStart')); }
   if(activeSpot){ const s=spotById[activeSpot]; const dsc=$('#iDesc');
     if(s&&dsc){ if(dsc.classList.contains('locked-note')){ dsc.textContent=tr('spotVisit'); }
       else { dsc.textContent=(s.desc&&(s.desc[lang]||s.desc.en))||''; } }
     /* audioknop: 'Pauzeer' tonen als dit fragment nu speelt, anders het normale label */
     const playing = spotAudio && spotAudioId===activeSpot && !spotAudio.paused;
-    setAudioBtnState(playing); } }
+    setAudioBtnState(playing); }
+  positionFloaters(); }
 (function(){ const sel=$('#wsel');
   /* ===== Achtergrondmuziek welkomstscherm ===== */
   const BG_VOLUME=0.18;            // doelvolume (0 = stil, 1 = max)
