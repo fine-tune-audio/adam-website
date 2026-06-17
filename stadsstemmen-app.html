@@ -86,6 +86,12 @@
   .maphint .b{width:13px;height:13px;border-radius:50%;background:#fff;border:2px solid var(--ink);position:relative;}
   .maphint .b::after{content:'';position:absolute;inset:2.5px;border-radius:50%;background:var(--blue);}
 
+  /* korte melding (bv. GPS-fout) */
+  .toast{position:absolute;z-index:9;top:74px;left:50%;transform:translate(-50%,-10px);max-width:86%;
+    padding:11px 16px;border-radius:14px;background:var(--ink);color:#fff;font-size:13px;font-weight:600;line-height:1.35;
+    text-align:center;box-shadow:0 10px 30px rgba(0,0,0,.28);opacity:0;pointer-events:none;transition:opacity .28s,transform .28s;}
+  .toast.show{opacity:1;transform:translate(-50%,0);}
+
   /* ===== ZWEVENDE SPRAAKKNOP ===== */
   .voice-fab{position:absolute;z-index:7;top:70px;right:16px;width:56px;height:56px;border-radius:50%;
     display:none;align-items:center;justify-content:center;cursor:pointer;color:var(--ink);
@@ -287,6 +293,18 @@
   .sndbtn svg{width:20px;height:20px;}
   .sndbtn .on-ic{display:block;} .sndbtn .off-ic{display:none;}
   .sndbtn.muted{color:var(--muted);} .sndbtn.muted .on-ic{display:none;} .sndbtn.muted .off-ic{display:block;}
+  /* taalkiezer in de app */
+  .langpick{position:relative;}
+  .langmenu{position:absolute;top:calc(100% + 8px);right:0;z-index:12;display:none;min-width:148px;max-height:60vh;overflow-y:auto;
+    padding:6px;border-radius:14px;background:var(--surface);backdrop-filter:blur(16px) saturate(1.3);-webkit-backdrop-filter:blur(16px) saturate(1.3);
+    border:1px solid var(--glass-brd);box-shadow:0 12px 30px rgba(0,0,0,.2);}
+  .langpick.open .langmenu{display:block;}
+  .langmenu button{display:block;width:100%;text-align:left;border:none;background:transparent;color:var(--ink);
+    font-family:inherit;font-weight:600;font-size:13px;padding:9px 11px;border-radius:9px;cursor:pointer;white-space:nowrap;}
+  .langmenu button:active{background:rgba(0,0,0,.06);}
+  .langmenu button.on{background:var(--ink);color:var(--lime);}
+  .langmenu .langsep{height:1px;background:var(--line);margin:5px 4px;}
+  .langmenu .langmore{color:var(--muted);font-style:italic;}
   #textBtn.on{background:var(--ink);color:var(--lime);border-color:var(--ink);}
   /* tekst-modus: geen microfoon, alleen typen */
   body.text-only .micbtn{display:none;}
@@ -479,6 +497,12 @@
     <div class="top">
       <div class="chip"><span class="mk">Stads<b>stemmen</b></span></div>
       <div class="top-r">
+        <div class="langpick" id="langPick">
+          <button class="sndbtn" id="langBtn" aria-label="Taal kiezen" title="Taal kiezen">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a14 14 0 0 1 0 18 14 14 0 0 1 0-18z"/></svg>
+          </button>
+          <div class="langmenu" id="langMenu" role="menu"></div>
+        </div>
         <button class="sndbtn" id="sndBtn" aria-label="Geluid aan/uit" title="Geluid aan/uit">
           <span class="on-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M19 5a9 9 0 0 1 0 14"/></svg></span>
           <span class="off-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="M22 9l-6 6"/><path d="M16 9l6 6"/></svg></span>
@@ -509,6 +533,7 @@
     </div>
 
     <div class="maphint" id="maphint"><span class="b"></span><span data-i18n="maphint">Sleep je locatie over een plek</span></div>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
     <button class="recenter" id="recenterBtn" aria-label="Centreer op mijn locatie" title="Centreer op mijn locatie">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="7"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="2.4" fill="currentColor" stroke="none"/></svg>
@@ -923,7 +948,7 @@ function openSpot(id){ const s=spotById[id]; if(!s) return;
   const overGuide = guideOpen || elSession || elConnecting;
   if(overGuide){ stopVoice(); sheet.classList.add('over'); /* gids verbreekt netjes; plek-slide valt eroverheen */ }
   else { if(elSession||elConnecting) stopVoice(); guideOpen=false; guideMinimized=false; sheet.classList.remove('guide','over'); active=null; }
-  const unlocked = unlockedSpots.has(id) || spotNear(s); if(unlocked) unlockedSpots.add(id);
+  const unlocked = unlockedSpots.has(id) || spotNear(s); if(unlocked){ unlockedSpots.add(id); persistProgress(); }
   if(unlocked && s.type==='agent') markVisited(id);
   stopSpotAudio(); /* audio niet meer automatisch; pas afspelen bij klik op de knop */
   activeSpot=id; $('#maphint').classList.add('hide'); updateGuideOrb();
@@ -972,7 +997,7 @@ function restartSpotTimer(){ stopSpotSlides(); if(iSlideEls.length>1) iSlideTime
 { const p=$('#iPrev'), n=$('#iNext'); if(p) p.onclick=e=>{e.stopPropagation();showSpotSlide(iSlideIdx-1);restartSpotTimer();}; if(n) n.onclick=e=>{e.stopPropagation();showSpotSlide(iSlideIdx+1);restartSpotTimer();}; }
 function checkSpots(){ let changed=false; SPOTS.forEach(s=>{ if(!unlockedSpots.has(s.id) && spotNear(s)){ unlockedSpots.add(s.id); changed=true;
     const m=spotMarkers[s.id]; const el=m&&m.getElement&&m.getElement(); if(el){ const p=el.querySelector('.spot-pin'); if(p) p.classList.add('unlocked'); } } });
-  if(changed && activeSpot && unlockedSpots.has(activeSpot)) openSpot(activeSpot); }
+  if(changed){ persistProgress(); if(activeSpot && unlockedSpots.has(activeSpot)) openSpot(activeSpot); } }
 
 /* ===== Filter: toon/verberg categorieën op de kaart ===== */
 const filterState={agent:true,sight:true,horeca:true};
@@ -1149,7 +1174,23 @@ async function askAgent(g){ const system=(g.persona||'')+`\n\nREGELS: Antwoord i
 /* ===== GEOFENCE ===== */
 function inPoly(lat,lng,poly){ let inside=false; for(let i=0,j=poly.length-1;i<poly.length;j=i++){ const yi=poly[i][0],xi=poly[i][1],yj=poly[j][0],xj=poly[j][1]; if(((yi>lat)!==(yj>lat))&&(lng<(xj-xi)*(lat-yi)/(yj-yi)+xi)) inside=!inside; } return inside; }
 function haversine(la1,lo1,la2,lo2){ const R=6371e3,t=Math.PI/180; const dLa=(la2-la1)*t,dLo=(lo2-lo1)*t; const a=Math.sin(dLa/2)**2+Math.cos(la1*t)*Math.cos(la2*t)*Math.sin(dLo/2)**2; return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a)); }
-function startGeo(){ if(!navigator.geolocation)return; watch=navigator.geolocation.watchPosition(pos=>{ const {latitude:la,longitude:lo}=pos.coords; livePos={lat:la,lng:lo};
+/* ===== korte melding ===== */
+let toastTimer=null;
+function showToast(msg,ms=4200){ const t=$('#toast'); if(!t||!msg) return; t.textContent=msg; t.classList.add('show'); if(toastTimer) clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('show'),ms); }
+/* ===== GPS-foutafhandeling ===== */
+let geoToastAt=0;
+function geoError(err){ const code=err&&err.code;
+  if(code===1){ /* geweigerd */ showToast(tr('geoDenied')); if(mode==='live') setMode('demo'); return; }
+  const now=Date.now(); if(now-geoToastAt<8000) return; geoToastAt=now; /* niet blijven herhalen */
+  showToast(tr(code===3?'geoTimeout':'geoUnavailable')); }
+/* ===== voortgang onthouden (taal + bezochte plekken) ===== */
+function persistProgress(){ try{ localStorage.setItem('ss_unlocked',JSON.stringify([...unlockedSpots])); localStorage.setItem('ss_visited',JSON.stringify([...visited])); }catch(_){} }
+function restoreProgress(){ try{
+    const u=JSON.parse(localStorage.getItem('ss_unlocked')||'[]'); u.forEach(id=>{ if(spotById[id]) unlockedSpots.add(id); });
+    const v=JSON.parse(localStorage.getItem('ss_visited')||'[]'); v.forEach(id=>{ if(ZONES.find(z=>z.id===id)){ visited.add(id); updatePinVisited(id); } });
+    updateProgress();
+  }catch(_){} }
+function startGeo(){ if(!navigator.geolocation){ showToast(tr('geoUnsupported')); if(mode==='live') setMode('demo'); return; } watch=navigator.geolocation.watchPosition(pos=>{ const {latitude:la,longitude:lo}=pos.coords; livePos={lat:la,lng:lo};
   if(map){ if(!liveMe){ liveMe=L.marker([la,lo],{icon:L.divIcon({className:'me-pin',iconSize:[34,34],iconAnchor:[17,17],html:ME_HTML})}).addTo(map); applyHeading(); } else liveMe.setLatLng([la,lo]);
     if(liveNeedsCenter){ map.setView([la,lo],LIVE_CENTER_ZOOM,{animate:true}); liveNeedsCenter=false; showRecenter(false); }
     else if(LIVE_FOLLOW && mode==='live'){ map.panTo([la,lo],{animate:true}); showRecenter(false); } }
@@ -1158,7 +1199,7 @@ function startGeo(){ if(!navigator.geolocation)return; watch=navigator.geolocati
   const here=ZONES.find(z=>inPoly(la,lo,z.polygon));
   if(here){ if(!unlockedSpots.has(here.id)){ unlockedSpots.add(here.id); markVisited(here.id); }
     if(activeSpot!==here.id) openSpot(here.id); return; }
-  const sp=spotAt({lat:la,lng:lo}); if(sp){ if(!unlockedSpots.has(sp.id) && activeSpot!==sp.id){ openSpot(sp.id); } unlockedSpots.add(sp.id); } },()=>{},{enableHighAccuracy:true,maximumAge:4000}); }
+  const sp=spotAt({lat:la,lng:lo}); if(sp){ if(!unlockedSpots.has(sp.id) && activeSpot!==sp.id){ openSpot(sp.id); } unlockedSpots.add(sp.id); persistProgress(); } },geoError,{enableHighAccuracy:true,maximumAge:4000,timeout:12000}); }
 function stopGeo(){ if(watch!=null){ navigator.geolocation.clearWatch(watch); watch=null; } }
 
 /* centreer-knop: alleen in live, verschijnt zodra je de kaart verschuift */
@@ -1181,7 +1222,7 @@ function applyTextOnly(){ const b=$('#textBtn'); if(b) b.classList.toggle('on',t
 function toggleTextOnly(){ textOnly=!textOnly; applyTextOnly(); }
 { const tb=$('#textBtn'); if(tb){ tb.onclick=toggleTextOnly; if(!SHOW_TEXTONLY_TOGGLE) tb.style.display='none'; } }
 
-function markVisited(id){ if(visited.has(id)) return; visited.add(id); updateProgress(); updatePinVisited(id); updateNavHud(); }
+function markVisited(id){ if(visited.has(id)) return; visited.add(id); updateProgress(); updatePinVisited(id); updateNavHud(); persistProgress(); }
 function updatePinVisited(id){ const m=markersById[id]; const el=m&&m.getElement&&m.getElement(); if(el) el.classList.add('visited'); const c=cardById[id]; if(c) c.classList.add('visited'); }
 function updateProgress(){ const n=visited.size; const pc=$('#progCount'); if(pc) pc.textContent=n; const pt=$('#progTotal'); if(pt) pt.textContent=TOTAL;
   const ring=$('#progRing'); if(ring){ const C=2*Math.PI*15.5; ring.setAttribute('stroke-dasharray',C.toFixed(1)); ring.setAttribute('stroke-dashoffset',(C*(1-n/TOTAL)).toFixed(1)); } }
@@ -1242,6 +1283,10 @@ const T={
   wOther:{nl:'Andere…',en:'Other…',de:'Andere…',it:'Altra…',pt:'Outro…',es:'Otro…',pl:'Inny…',da:'Andet…',sv:'Annat…',no:'Annet…',fi:'Muu…',el:'Άλλη…'},
   wStart:{nl:'Start de tour',en:'Start the tour',de:'Tour starten',it:'Inizia il tour',pt:'Começar o tour',es:'Empezar el tour',pl:'Rozpocznij trasę',da:'Start turen',sv:'Starta turen',no:'Start turen',fi:'Aloita kierros',el:'Ξεκίνα την ξενάγηση'},
   maphint:{nl:'Sleep je locatie over een plek',en:'Drag your location onto a place',de:'Zieh deinen Standort auf einen Ort',it:'Trascina la tua posizione su un luogo',pt:'Arrasta a tua localização para um lugar',es:'Arrastra tu ubicación sobre un lugar',pl:'Przeciągnij swoją lokalizację na miejsce',da:'Træk din placering hen på et sted',sv:'Dra din plats till en plats',no:'Dra posisjonen din til et sted',fi:'Vedä sijaintisi paikan päälle',el:'Σύρε την τοποθεσία σου πάνω σε ένα μέρος'},
+  geoDenied:{nl:'Locatie staat uit. Je tour gaat verder in demo-modus.',en:'Location is off. Continuing in demo mode.',de:'Standort ist aus. Weiter im Demo-Modus.'},
+  geoUnavailable:{nl:'Geen locatie beschikbaar. Probeer naar buiten te gaan of gebruik demo-modus.',en:'No location available. Try going outside or use demo mode.',de:'Kein Standort verfügbar. Geh nach draußen oder nutze den Demo-Modus.'},
+  geoTimeout:{nl:'Locatie zoeken duurt lang…',en:'Finding your location is taking a while…',de:'Standortsuche dauert…'},
+  geoUnsupported:{nl:'Deze browser ondersteunt geen locatie. Gebruik demo-modus.',en:'This browser has no location support. Use demo mode.',de:'Dieser Browser unterstützt keinen Standort. Nutze den Demo-Modus.'},
   listEb:{nl:'Ontdek de binnenstad',en:'Explore the city centre',de:'Entdecke die Innenstadt',it:'Esplora il centro',pt:'Explora o centro',es:'Explora el centro',pl:'Odkryj centrum',da:'Udforsk bymidten',sv:'Utforska centrum',no:'Utforsk sentrum',fi:'Tutustu keskustaan',el:'Εξερεύνησε το κέντρο'},
   listTtl:{nl:'Plekken in de buurt',en:'Places nearby',de:'Orte in der Nähe',it:'Luoghi vicini',pt:'Lugares por perto',es:'Lugares cercanos',pl:'Miejsca w pobliżu',da:'Steder i nærheden',sv:'Platser i närheten',no:'Steder i nærheten',fi:'Lähellä olevat paikat',el:'Κοντινά μέρη'},
   progLabel:{nl:'bezocht',en:'visited',de:'besucht',it:'visitati',pt:'visitados',es:'visitados',pl:'odwiedzone',da:'besøgt',sv:'besökta',no:'besøkt',fi:'käyty',el:'επισκ.'},
@@ -1298,6 +1343,26 @@ function applyI18n(){ uiLang=(lang==='pt-br')?'pt':(UI_LANGS.includes(lang)?lang
     const playing = spotAudio && spotAudioId===activeSpot && !spotAudio.paused;
     setAudioBtnState(playing); try{updateInfoScrollCue();}catch(_){} }
   positionFloaters(); }
+/* ===== taalkiezer in de app (12 talen met inhoud, plus 'Andere…' voor alle overige; gids spreekt die taal, tekst valt terug op Engels) ===== */
+(function(){ const btn=$('#langBtn'), menu=$('#langMenu'), pick=$('#langPick'); if(!btn||!menu||!pick) return;
+  const nameOf=c=>{ const f=LANGS.find(l=>l[0]===c); return f?f[1]:c; };
+  const REST=LANGS.filter(([c])=>!UI_LANGS.includes(c)).map(([c])=>c);
+  let showAll=false;
+  function choose(c){ lang=c; otherMode=!['nl','en','de'].includes(c); applyI18n();
+    try{ localStorage.setItem('ss_lang',lang); }catch(_){}
+    const ws=$('#wsel'); if(ws) ws.value=c;
+    document.querySelectorAll('#langRow button').forEach(x=>{ const v=x.dataset.l; x.classList.toggle('on', otherMode? v==='other': v===c); });
+    pick.classList.remove('open'); showAll=false; }
+  function addItem(c){ const b=document.createElement('button'); b.type='button'; b.role='menuitem'; b.textContent=nameOf(c); b.classList.toggle('on', c===lang); b.onclick=()=>choose(c); menu.appendChild(b); }
+  function build(){ menu.innerHTML=''; if(!UI_LANGS.includes(lang)) showAll=true;
+    UI_LANGS.forEach(addItem);
+    const sep=document.createElement('div'); sep.className='langsep'; menu.appendChild(sep);
+    if(!showAll){ const more=document.createElement('button'); more.type='button'; more.className='langmore'; more.textContent=tr('wOther')||'Andere…';
+      more.onclick=e=>{ e.stopPropagation(); showAll=true; build(); }; menu.appendChild(more); }
+    else { REST.forEach(addItem); } }
+  btn.onclick=e=>{ e.stopPropagation(); build(); pick.classList.toggle('open'); };
+  document.addEventListener('click',e=>{ if(pick.classList.contains('open') && !pick.contains(e.target)) pick.classList.remove('open'); });
+})();
 (function(){ const sel=$('#wsel');
   /* ===== Achtergrondmuziek welkomstscherm ===== */
   const BG_VOLUME=0.18;            // doelvolume (0 = stil, 1 = max)
@@ -1327,12 +1392,18 @@ function applyI18n(){ uiLang=(lang==='pt-br')?'pt':(UI_LANGS.includes(lang)?lang
     const sep=document.createElement('option'); sep.disabled=true; sep.textContent='\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500'; sel.appendChild(sep);
     LANGS.forEach(([c,n])=>{ if(SKIP.includes(c)) return; const o=document.createElement('option'); o.value=c; o.textContent=n; sel.appendChild(o); }); }
   function paint(){ document.querySelectorAll('#langRow button').forEach(b=>{ const v=b.dataset.l; b.classList.toggle('on', otherMode ? v==='other' : v===lang); }); }
-  document.querySelectorAll('#langRow button').forEach(b=>{ b.onclick=()=>{ startBg(); const v=b.dataset.l; if(v==='other'){ otherMode=true; $('#wsel').classList.add('show'); lang=$('#wsel').value; } else { otherMode=false; $('#wsel').classList.remove('show'); lang=v; } paint(); applyI18n(); }; });
-  if(sel) sel.onchange=e=>{ startBg(); lang=e.target.value; otherMode=true; paint(); applyI18n(); };
-  const st=$('#wstart'); if(st) st.onclick=()=>{ fadeOutBg(); $('#welcome').classList.add('hide'); primeMic(); };
+  function saveLang(){ try{ localStorage.setItem('ss_lang',lang); }catch(_){} }
+  document.querySelectorAll('#langRow button').forEach(b=>{ b.onclick=()=>{ startBg(); const v=b.dataset.l; if(v==='other'){ otherMode=true; $('#wsel').classList.add('show'); lang=$('#wsel').value; } else { otherMode=false; $('#wsel').classList.remove('show'); lang=v; } paint(); applyI18n(); saveLang(); }; });
+  if(sel) sel.onchange=e=>{ startBg(); lang=e.target.value; otherMode=true; paint(); applyI18n(); saveLang(); };
+  const st=$('#wstart'); if(st) st.onclick=()=>{ saveLang(); fadeOutBg(); $('#welcome').classList.add('hide'); primeMic(); };
+  /* eerdere taalkeuze herstellen */
+  try{ const sl=localStorage.getItem('ss_lang'); if(sl){ lang=sl;
+    if(['nl','en','de'].includes(sl)){ otherMode=false; } else { otherMode=true; if(sel){ sel.value=sl; sel.classList.add('show'); } } } }catch(_){}
+  paint();
   applyI18n();
 })();
 
+restoreProgress();
 setMode('demo');
 </script>
 </body>
