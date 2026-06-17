@@ -371,6 +371,87 @@
   .filter-body input{accent-color:var(--lime-d);width:16px;height:16px;flex-shrink:0;}
   .filter-body .fdot{width:12px;height:12px;border-radius:50%;border:1.5px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.18);flex-shrink:0;}
   .fdot.agent{background:var(--ink);} .fdot.sight{background:#f5c518;} .fdot.horeca{background:#e8772e;}
+
+  /* ===== LOKALE GIDS: orb-knop ===== */
+  .guide-orb{position:absolute;z-index:5;right:16px;bottom:calc(18% + 18px);width:64px;height:64px;border-radius:50%;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;cursor:pointer;padding:0;
+    color:var(--ink);border:1px solid rgba(255,255,255,.6);
+    background:radial-gradient(120% 120% at 30% 25%,var(--lime-l) 0%,var(--lime) 50%,var(--lime-d) 100%);
+    box-shadow:0 12px 30px rgba(159,206,28,.5),0 2px 8px rgba(0,0,0,.2),inset 0 2px 6px rgba(255,255,255,.5);
+    transition:transform .16s,bottom .4s cubic-bezier(.22,1,.36,1);}
+  .guide-orb:active{transform:scale(.94);}
+  .guide-orb.hide{opacity:0;transform:scale(1.6);pointer-events:none;}
+  .guide-orb::before{content:'';position:absolute;inset:-4px;border-radius:50%;border:2px solid var(--lime-d);opacity:.55;animation:vfring 2.1s ease-out infinite;pointer-events:none;}
+  .guide-orb .go-core{display:flex;}
+  .guide-orb .go-core svg{width:26px;height:26px;}
+  .guide-orb .go-label{font-family:'Schibsted Grotesk';font-weight:800;font-size:9px;letter-spacing:.04em;text-transform:uppercase;line-height:1;}
+
+  /* gids-modus: gesprekspaneel zonder plek-galerij, transcript vult de ruimte */
+  .sheet.guide .media{display:none;}
+  .sheet.guide .convo-panel{top:0;border-radius:0;box-shadow:none;background:transparent;}
+  .sheet.guide .cv-title .ch{color:var(--muted);font-weight:600;}
+
+  /* ===== PUSH-TO-TALK: grote, opvallende microfoon-orb ===== */
+  /* hint-regel boven de orb, gecentreerd en duidelijk */
+  .sheet.guide .cstatus{text-align:center;font-size:13.5px;font-weight:700;color:var(--ink-2);padding:6px 20px 4px;min-height:18px;}
+  /* de mic-orb staat los en gecentreerd, suggesties komen eronder, dan het tekstveld */
+  .sheet.guide #talk{align-self:center;margin:2px auto 2px;}
+  .sheet.guide .sugs{justify-content:center;padding:12px 18px 8px;}
+  .sheet.guide .composer{padding-top:4px;}
+  /* de mic-orb zelf: groter, glanzend, met zachte pulserende ring (rustige staat) */
+  .sheet.guide #talk.micbtn{width:88px;height:88px;border-radius:50%;border:2px solid rgba(255,255,255,.65);
+    background:radial-gradient(120% 120% at 30% 25%,var(--lime-l) 0%,var(--lime) 50%,var(--lime-d) 100%);
+    box-shadow:0 12px 30px rgba(159,206,28,.5),0 2px 10px rgba(0,0,0,.2),inset 0 2px 7px rgba(255,255,255,.5);
+    transition:transform .14s,box-shadow .2s;touch-action:none;}
+  .sheet.guide #talk .m-ico svg{width:36px;height:36px;}
+  .sheet.guide #talk .m-wave{height:30px;}
+  .sheet.guide #talk .m-wave i{width:4px;height:9px;}
+  .sheet.guide #talk.micbtn::before{content:'';position:absolute;inset:-7px;border-radius:50%;border:2px solid var(--lime-d);
+    opacity:.45;animation:vfring 2.1s ease-out infinite;pointer-events:none;}
+  /* actieve staat tijdens ingedrukt houden: groter, fel gemarkeerd */
+  .sheet.guide #talk.micbtn.live{transform:scale(1.08);
+    box-shadow:0 0 0 5px rgba(159,206,28,.35),0 0 0 2px var(--lime-d),0 14px 38px rgba(159,206,28,.95);}
+  .sheet.guide #talk.micbtn.live::before{animation-duration:1.1s;opacity:.75;border-color:var(--lime);}
+  .sheet.guide #talk.micbtn.connecting{animation:micpulse 1s ease-in-out infinite;}
+
+  /* ===== NIEUW: plek-overlay valt OVER de gids ===== */
+  /* Als een plek geopend wordt terwijl de gids loopt, blijft het gidspaneel
+     eronder staan en schuift de plek-info er als laag overheen. */
+  .sheet.over .info-view{position:absolute;inset:0;z-index:6;display:flex;
+    background:var(--surface-solid);border-radius:30px 30px 0 0;
+    box-shadow:0 -10px 40px rgba(0,0,0,.2);
+    animation:spotOver .42s cubic-bezier(.22,1,.36,1) both;}
+  @keyframes spotOver{from{transform:translateY(16%);opacity:0;}to{transform:none;opacity:1;}}
+  .sheet.over .convo-view{display:flex;}   /* gids zichtbaar houden onder de overlay */
+  .sheet.over .list-view{display:none;}
+
+  /* ===== NIEUW: kruisje in de gids-kop (gids hard stoppen) ===== */
+  .cv-close{display:none;margin-left:auto;width:40px;height:40px;border-radius:50%;flex-shrink:0;
+    border:1px solid var(--line);background:var(--surface-solid);color:var(--ink-2);cursor:pointer;
+    place-items:center;transition:.15s;}
+  .cv-close svg{width:18px;height:18px;}
+  .cv-close:hover{color:var(--ink);border-color:var(--ink);}
+  .cv-close:active{transform:scale(.93);}
+  /* het kruisje in de open gids-pop-up is weg: de terug-pijl sluit het paneel.
+     Stoppen kan via het kruisje op de zwevende balk (#guideMini). */
+
+  /* ===== NIEUW: zwevende gids-balk (gids praat door terwijl het menu dicht is) ===== */
+  .guide-mini{position:absolute;z-index:9;left:50%;bottom:calc(18% + 18px);transform:translateX(-50%);
+    display:none;align-items:center;gap:11px;padding:8px 8px 8px 16px;border-radius:999px;cursor:pointer;
+    background:var(--ink);color:#fff;box-shadow:0 12px 30px rgba(0,0,0,.32);max-width:80%;}
+  .guide-mini.show{display:flex;animation:vfin .26s ease both;}
+  .guide-mini .gm-ic{display:flex;color:var(--lime);}
+  .guide-mini .gm-ic svg{width:19px;height:19px;}
+  .guide-mini .gm-wave{display:none;gap:3px;align-items:center;height:17px;}
+  .guide-mini.speaking .gm-wave{display:flex;} .guide-mini.speaking .gm-ic{display:none;}
+  .guide-mini .gm-wave i{width:3px;height:8px;background:var(--lime);border-radius:2px;animation:vfbar .75s ease-in-out infinite;}
+  .guide-mini .gm-wave i:nth-child(2){animation-delay:.14s;} .guide-mini .gm-wave i:nth-child(3){animation-delay:.28s;} .guide-mini .gm-wave i:nth-child(4){animation-delay:.42s;}
+  .guide-mini .gm-txt{font-family:'Schibsted Grotesk';font-weight:800;font-size:13px;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .guide-mini .gm-x{flex-shrink:0;width:30px;height:30px;border-radius:50%;border:none;cursor:pointer;
+    background:rgba(255,255,255,.16);color:#fff;display:grid;place-items:center;transition:.15s;}
+  .guide-mini .gm-x:hover{background:rgba(255,255,255,.28);}
+  .guide-mini .gm-x:active{transform:scale(.9);}
+  .guide-mini .gm-x svg{width:15px;height:15px;}
 </style>
 </head>
 <body>
@@ -420,6 +501,22 @@
       <span class="vf-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0M12 19v3"/></svg></span>
       <span class="vf-wave"><i></i><i></i><i></i><i></i></span>
     </button>
+
+    <!-- Lokale gids: herkenbare orb, opent push-to-talk gesprek -->
+    <button class="guide-orb" id="guideOrb" aria-label="Lokale gids" title="Lokale gids">
+      <span class="go-core">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 14v-2a9 9 0 0 1 18 0v2"/><path d="M21 16a2 2 0 0 1-2 2h-1v-6h1a2 2 0 0 1 2 2zM3 16a2 2 0 0 0 2 2h1v-6H5a2 2 0 0 0-2 2z"/><path d="M12 21a4 4 0 0 0 4-4"/></svg>
+      </span>
+      <span class="go-label" data-i18n="guideOrb">Gids</span>
+    </button>
+
+    <!-- Gids praat door terwijl het menu dicht is: zwevende balk met kruisje -->
+    <div class="guide-mini" id="guideMini" role="button" aria-label="Gids weer openen">
+      <span class="gm-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 14v-2a9 9 0 0 1 18 0v2"/><path d="M21 16a2 2 0 0 1-2 2h-1v-6h1a2 2 0 0 1 2 2zM3 16a2 2 0 0 0 2 2h1v-6H5a2 2 0 0 0-2 2z"/></svg></span>
+      <span class="gm-wave"><i></i><i></i><i></i><i></i></span>
+      <span class="gm-txt" id="guideMiniTxt" data-i18n="guideOrb">Gids</span>
+      <button class="gm-x" id="guideMiniX" aria-label="Gids stoppen" title="Gids stoppen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    </div>
 
     <div class="welcome" id="welcome">
       <div class="wcard">
@@ -511,6 +608,7 @@
         <div class="cv-head">
           <button class="back" id="back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12H6"/><path d="M11 6l-6 6 6 6"/></svg></button>
           <div class="cv-title"><div class="eyebrow" id="eyebrow">Demo · je bezoekt</div><div class="nm" id="sName">-</div><div class="ch" id="sChar"></div></div>
+          <button class="cv-close" id="guideClose" aria-label="Gids stoppen" title="Gids stoppen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
         </div>
         <div class="cv-body">
           <div class="media" id="media">
@@ -524,13 +622,13 @@
             <div class="convo" id="convo"></div>
           </div>
         </div>
-        <div class="sugs" id="sugs"></div>
         <div class="cstatus" id="talkLabel" data-i18n="tapToTalk">Tik om te praten</div>
+        <button class="micbtn" id="talk" aria-label="Praten">
+          <span class="m-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0M12 19v3"/></svg></span>
+          <span class="m-wave"><i></i><i></i><i></i></span>
+        </button>
+        <div class="sugs" id="sugs"></div>
         <div class="composer">
-          <button class="micbtn" id="talk" aria-label="Praten">
-            <span class="m-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0M12 19v3"/></svg></span>
-            <span class="m-wave"><i></i><i></i><i></i></span>
-          </button>
           <div class="field"><textarea id="input" rows="1" placeholder="Typ je vraag…"></textarea></div>
           <button class="send" id="send"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V6"/><path d="M6 11l6-6 6 6"/></svg></button>
         </div>
@@ -591,7 +689,7 @@ try{
     const ctr=poly.getBounds().getCenter(); path.push(ctr);
     const m=L.marker(ctr,{icon:L.divIcon({className:'place-pin',iconSize:[0,0],iconAnchor:[0,0],html:'<span class="pulse"></span><span class="check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg></span><span class="ppin"><img src="'+(z.pin||'')+'" alt="" onerror="this.style.display=\'none\'"></span>'})}).addTo(map);
     m.bindTooltip(z.name,{direction:'top',className:'lm-tip',offset:[0,-28]});
-    m.on('click',()=>openPlace(z.id));
+    m.on('click',()=>openSpot(z.id));
     markersById[z.id]=m;
     z._center=ctr; z.polygon.forEach(p=>bounds.push(p));
   });
@@ -610,6 +708,15 @@ try{
   fit(); setTimeout(fit,300); window.addEventListener('load',()=>setTimeout(fit,200));
   window.addEventListener('resize',()=>{try{map.invalidateSize();}catch(e){}});
 }catch(e){}
+
+/* Hoofdlocaties (voorheen pratende plekken) als content-plekken:
+   zelfde info-paneel als bezienswaardigheden/horeca (audio-fragment + lees-optie). */
+(function(){ const byId={}; (CONTENT.agents||[]).forEach(a=>byId[a.id]=a);
+  ZONES.forEach(z=>{ const a=byId[z.id]||{};
+    const ctr=z._center; const point=ctr?[ctr.lat,ctr.lng]:(z.polygon&&z.polygon[0])||null;
+    spotById[z.id]={ id:z.id, type:'agent', name:z.name, point:point, polygon:z.polygon,
+      photos:z.photos, desc:a.desc||{} }; });
+})();
 
 /* start-/demoweergave van de kaart (zelfde als bij het opstarten) */
 function applyDemoView(animate){ if(!map) return; try{ map.invalidateSize();
@@ -631,32 +738,32 @@ function startDrag(e){dragging=true;sy=e.clientY;sh=sheet.offsetHeight;sheet.sty
 dragEl.addEventListener('pointerdown',startDrag);
 document.querySelector('.list-head').addEventListener('pointerdown',startDrag);
 window.addEventListener('pointermove',e=>{if(!dragging)return;const s=snaps();let h=sh+(sy-e.clientY);h=Math.max(s[0]*0.6,Math.min(s[s.length-1],h));sheet.style.height=h+'px';syncSetup();});
-window.addEventListener('pointerup',()=>{if(!dragging)return;dragging=false;setH(nearest(sheet.offsetHeight));});
+window.addEventListener('pointerup',()=>{if(!dragging)return;dragging=false;
+  const target=nearest(sheet.offsetHeight);
+  if(guideOpen && !sheet.classList.contains('over') && target===snaps()[0]){ minimizeGuide(); }
+  else setH(target);});
 function syncSetup(){ const sp=$('#setup'); if(sp&&!sp.classList.contains('hide')) sp.style.bottom=(sheet.offsetHeight+14)+'px'; }
 setTimeout(()=>setH(snaps()[0],false),60);
 window.addEventListener('resize',()=>setH(nearest(sheet.offsetHeight),false));
-if(map) map.on('click',()=>{ if(activeSpot){ closeToList(); return; } if(!sheet.classList.contains('detail') && !sheet.classList.contains('info')) setH(snaps()[0]); });
+if(map) map.on('click',()=>{ if(sheet.classList.contains('over')) return; if(guideOpen){ minimizeGuide(); return; } if(activeSpot){ closeToList(); return; } if(!sheet.classList.contains('detail') && !sheet.classList.contains('info')) setH(snaps()[0]); });
 
 /* ===== ZWEVENDE SPRAAKKNOP ===== */
 const voiceFab=$('#voiceFab');
-function updateVoiceFab(){ if(!voiceFab) return;
-  const live=!!(elSession||elConnecting);
-  const detail=sheet.classList.contains('detail');
-  const atUp=sheet.offsetHeight > snaps()[1]-60;
-  voiceFab.classList.toggle('show', live && !(detail && atUp)); }
+const guideMini=$('#guideMini');   // zwevende gids-balk (gids praat door als het menu dicht is)
+function updateVoiceFab(){ if(!voiceFab) return; voiceFab.classList.remove('show'); /* vervangen door de gids-balk (#guideMini) */ }
 function showConvoPanel(){ if(!active) return; const z=ZONES.find(x=>x.id===active);
   sheet.classList.remove('info'); sheet.classList.add('detail');
   if(map&&z&&z._center) map.panTo(z._center,{animate:true}); setH(snaps()[1]); }
 function minimizeConvo(){ sheet.classList.remove('detail'); sheet.classList.remove('info'); setH(snaps()[0]); updateVoiceFab(); }
-voiceFab.onclick=showConvoPanel;
+voiceFab.onclick=()=>{ if(guideOpen) showGuidePanel(); else showConvoPanel(); };
 
 /* ===== KAARTEN ===== */
 const cardsEl=$('#cards');
 const cardById={};
 ZONES.forEach((z,i)=>{
   const c=document.createElement('div'); c.className='card';
-  c.innerHTML=`<div class="meta"><div class="num">0${i+1}</div><div class="nm">${z.name}</div><div class="ch">“${z.character}”</div><div class="done"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg><span data-i18n="cardDone">Bezocht</span></div></div><div class="go"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h14"/><path d="M13 6l6 6-6 6"/></svg></div>`;
-  c.onclick=()=>openPlace(z.id); cardsEl.appendChild(c); cardById[z.id]=c;
+  c.innerHTML=`<div class="meta"><div class="num">0${i+1}</div><div class="nm">${z.name}</div><div class="done"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg><span data-i18n="cardDone">Bezocht</span></div></div><div class="go"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h14"/><path d="M13 6l6 6-6 6"/></svg></div>`;
+  c.onclick=()=>openSpot(z.id); cardsEl.appendChild(c); cardById[z.id]=c;
 });
 
 /* ===== MODUS ===== */
@@ -677,48 +784,86 @@ function showDemoMe(){
     icon:L.divIcon({className:'me-pin demo',iconSize:[34,34],iconAnchor:[17,17],html:ME_HTML})}).addTo(map);
   demoMe.on('drag',()=>{updateNavHud();checkSpots();});
   demoMe.on('dragend',()=>{ const p=demoMe.getLatLng(); const here=ZONES.find(z=>inPoly(p.lat,p.lng,z.polygon)); const sp=here?null:spotAt({lat:p.lat,lng:p.lng});
-    if(here){ openConvo(here.id); } else if(sp){ unlockedSpots.add(sp.id); openSpot(sp.id); } else if(active||activeSpot){ closeToList(); } updateNavHud(); checkSpots(); });
+    if(here){ unlockedSpots.add(here.id); markVisited(here.id); openSpot(here.id); }
+    else if(sp){ unlockedSpots.add(sp.id); openSpot(sp.id); }
+    else if(activeSpot){ closeToList(); } updateNavHud(); checkSpots(); });
 }
 function hideDemoMe(){ if(demoMe&&map){map.removeLayer(demoMe);demoMe=null;} demoZone=null; }
 
 /* ===== OPENEN / SLUITEN ===== */
-const MIC='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0M12 19v3"/></svg>';
-function openPlace(id){ const z=ZONES.find(x=>x.id===id); if(!z) return;
-  if(id===active && (elSession||elConnecting)){ showConvoPanel(); return; }
-  openConvo(id); }
-function openInfo(id){ const z=ZONES.find(x=>x.id===id); if(!z)return; stopSpotAudio(); active=id; activeSpot=null;
-  $('#maphint').classList.add('hide');
-  $('#iEyebrow').textContent = mode==='live'?'Je staat bij':'Demo · je bezoekt';
-  $('#iName').textContent=z.name; const ic=$('#iChar'); ic.style.display=''; ic.textContent='\u201C'+z.character+'\u201D';
-  { const md=$('#iMedia'); if(md){ md.style.display='none'; } stopSpotSlides(); }
-  $('#iDesc').textContent=INFO_TEXT[z.id]||'';
-  renderInfoFoot(z);
-  if(map&&z._center) map.panTo(z._center,{animate:true});
-  sheet.classList.remove('detail'); sheet.classList.add('info'); setH(snaps()[1]); }
-function renderInfoFoot(z){ const foot=$('#iFoot');
-  const can=(mode==='demo')||(mode==='live'&&livePos&&inPoly(livePos.lat,livePos.lng,z.polygon));
-  if(can){ foot.innerHTML='<button class="talk-cta" id="ctaTalk">'+MIC+' Praat met deze plek</button>'; $('#ctaTalk').onclick=()=>openConvo(z.id); }
-  else { let txt=tr('comeCloser');
-    if(mode==='live'&&livePos&&z._center){ const d=Math.round(haversine(livePos.lat,livePos.lng,z._center.lat,z._center.lng)); txt=tr('comeCloserDist').replace('{m}',d); }
-    else if(mode==='live'&&!livePos){ txt=tr('locating'); }
-    foot.innerHTML='<div class="talk-cta off">'+MIC+' '+txt+'</div>'; } }
-function distTxt(z){ if(mode==='live'&&livePos&&z._center){ const d=Math.round(haversine(livePos.lat,livePos.lng,z._center.lat,z._center.lng)); return tr('comeCloserDist').replace('{m}',d); } if(mode==='live'&&!livePos) return tr('locating'); return tr('comeCloser'); }
-function openConvo(id){ const z=ZONES.find(x=>x.id===id); if(!z)return; stopVoice(); stopSpotAudio(); active=id;
-  const aid=ELEVENLABS_AGENT_IDS[id];
-  canTalk=(mode==='demo')||(!!livePos && inPoly(livePos.lat,livePos.lng,z.polygon));
-  $('#sName').textContent=z.name; $('#sChar').textContent='\u201C'+z.character+'\u201D';
-  $('#input').placeholder=tr('inputPh').replace('{name}',z.name);
-  const sg=$('#sugs'); sg.innerHTML=''; sugsFor(z).forEach(s=>{const b=document.createElement('div');b.className='sug';b.textContent=s;b.onclick=()=>{$('#input').value=s;sendMsg();};sg.appendChild(b);});
-  renderConvo(z); if(!aid && histories[id].length===0) pushThem(z,z.fallback[0]); mountVoice(z);
-  buildSlides(z); setActiveMarker(id);
-  if(map&&z._center) map.panTo(z._center,{animate:true});
-  sheet.classList.remove('info'); sheet.classList.add('detail'); setH(snaps()[1]);
-  $('#talk').classList.toggle('off', !canTalk);
-  if(canTalk){ markVisited(id); if(aid) startConversation(z); } else { setTalkLabel(distTxt(z)); } }
-function closeToList(){ stopVoice(); stopSpotAudio(); stopSlides(); stopSpotSlides(); setActiveMarker(null); active=null; activeSpot=null; sheet.classList.remove('detail'); sheet.classList.remove('info'); sheet.classList.remove('voice'); setH(snaps()[0]);
-  if(mode==='demo'){ $('#maphint').classList.remove('hide'); } updateNavHud(); }
-$('#back').onclick=()=>{ if(elSession||elConnecting){ minimizeConvo(); } else { closeToList(); } };
-$('#backInfo').onclick=closeToList;
+function closeToList(){ stopVoice(); stopSpotAudio(); stopSlides(); stopSpotSlides(); setActiveMarker(null);
+  clearTimeout(windDownTimer); guideWindingDown=false; guideMinimized=false;
+  active=null; activeSpot=null; guideOpen=false;
+  sheet.classList.remove('detail'); sheet.classList.remove('info'); sheet.classList.remove('voice'); sheet.classList.remove('guide'); sheet.classList.remove('over'); setH(snaps()[0]);
+  if(mode==='demo'){ $('#maphint').classList.remove('hide'); } updateGuideOrb(); updateGuideMini(); updateNavHud(); }
+/* sluit de plek-overlay: terug naar de gids eronder, of naar de lijst */
+function closeSpotOverlay(){ stopSpotAudio(); stopSpotSlides(); activeSpot=null;
+  if(sheet.classList.contains('over')){ sheet.classList.remove('over','info'); showGuidePanel(); updateGuideOrb(); updateGuideMini(); }
+  else { closeToList(); } }
+$('#back').onclick=()=>{ if(guideOpen) minimizeGuide(); else closeToList(); };
+$('#backInfo').onclick=closeSpotOverlay;
+{ const gc=$('#guideClose'); if(gc) gc.onclick=stopGuideNow; }
+{ const gx=$('#guideMiniX'); if(gx) gx.onclick=(e)=>{ e.stopPropagation(); stopGuideNow(); }; }
+if(guideMini) guideMini.onclick=()=>showGuidePanel();
+
+/* ===== LOKALE GIDS (één globale stadsgids, push-to-talk) ===== */
+const GUIDE=(function(){ const g=(CONTENT.guide)||{};
+  return { id:'__guide__', name:g.name||'Lokale gids', sugs:g.sugs||{}, persona:g.persona||'',
+    agentId:g.agentId||'', fallback:(g.fallback&&g.fallback.length)?g.fallback:['Hoi! Ik ben je lokale gids. Vraag me iets over de stad.'] }; })();
+histories[GUIDE.id]=[];
+let guideOpen=false, pushHolding=false;
+/* gids blijft praten als het menu sluit, maakt af en stopt dan automatisch */
+let guideMinimized=false, guideWindingDown=false, guideSpeaking=false, guideWdSpoke=false, windDownTimer=null;
+function guidePanelVisible(){ return guideOpen && !guideMinimized && !sheet.classList.contains('over'); }
+function updateGuideMini(){ if(!guideMini) return;
+  const live=!!(elSession||elConnecting);
+  const show=live && !guidePanelVisible() && !sheet.classList.contains('over');
+  guideMini.classList.toggle('show',show);
+  guideMini.classList.toggle('speaking',!!guideSpeaking);
+  const txt=$('#guideMiniTxt'); if(txt) txt.textContent = guideSpeaking ? (tr('guideSpeaking')||GUIDE.name) : GUIDE.name; }
+/* het verhaal afmaken en dan de gids stoppen */
+function finishGuideWindDown(){ clearTimeout(windDownTimer); guideWindingDown=false; guideWdSpoke=false;
+  stopVoice();
+  if(!sheet.classList.contains('over') && guideMinimized){ guideOpen=false; guideMinimized=false; updateGuideOrb(); }
+  updateGuideMini(); }
+/* gids in de achtergrond laten uitpraten (mic uit, sessie eindigt na de huidige zin) */
+function windDownGuide(){
+  if(!(elSession||elConnecting)){ if(!sheet.classList.contains('over') && guideMinimized){ guideOpen=false; guideMinimized=false; updateGuideOrb(); } updateGuideMini(); return; }
+  guideWindingDown=true; guideWdSpoke=false; pushHolding=false; guideMicMuted(true);
+  const t=$('#talk'); if(t) t.classList.remove('live');
+  clearTimeout(windDownTimer);
+  windDownTimer=setTimeout(()=>{ if(guideWindingDown) finishGuideWindDown(); }, 15000); /* harde grens */
+  if(!guideSpeaking){ /* nog niets aan het zeggen: kort wachten op een antwoord, anders stoppen */
+    setTimeout(()=>{ if(guideWindingDown && !guideSpeaking && !guideWdSpoke) finishGuideWindDown(); }, 2600); }
+  updateGuideMini(); }
+/* menu wegklikken: inklappen, gids praat door en stopt vanzelf */
+function minimizeGuide(){ guideMinimized=true;
+  sheet.classList.remove('over','detail','guide','info'); /* paneel weg, terug naar de kaart/lijst */
+  setH(snaps()[0]);
+  if(mode==='demo') $('#maphint').classList.remove('hide');
+  windDownGuide(); updateGuideOrb(); updateGuideMini(); }
+/* kruisje: gids meteen helemaal stoppen */
+function stopGuideNow(){ clearTimeout(windDownTimer); guideWindingDown=false; guideMinimized=false; closeToList(); }
+
+function updateGuideOrb(){ const o=$('#guideOrb'); if(!o) return; o.classList.toggle('hide', guideOpen); }
+function openGuide(){ stopSpotAudio(); stopSlides(); activeSpot=null; setActiveMarker(null);
+  clearTimeout(windDownTimer); guideWindingDown=false; guideWdSpoke=false; guideMinimized=false;
+  active=GUIDE.id; guideOpen=true; $('#maphint').classList.add('hide');
+  sheet.classList.remove('over');
+  $('#eyebrow').textContent=tr('guideEyebrow')||'';
+  $('#sName').textContent=GUIDE.name; $('#sChar').textContent=tr('guideTagline')||'';
+  $('#input').placeholder=(tr('inputPh')||'').replace('{name}',GUIDE.name);
+  const sg=$('#sugs'); sg.innerHTML=''; sugsFor(GUIDE).forEach(s=>{const b=document.createElement('div');b.className='sug';b.textContent=s;b.onclick=()=>{$('#input').value=s;sendMsg();};sg.appendChild(b);});
+  renderConvo(GUIDE); if(histories[GUIDE.id].length===0) pushThem(GUIDE,GUIDE.fallback[0]);
+  const cp=$('#convoPanel'); if(cp){ cp.classList.add('up'); cp.style.setProperty('--lowtop','0px'); }
+  sheet.classList.remove('info'); sheet.classList.add('detail','guide'); setH(snaps()[1]);
+  $('#talk').classList.remove('off'); setTalkLabel(tr('guideHold'));
+  updateGuideOrb(); updateGuideMini();
+  /* GEEN automatische spraakverbinding: de gids zwijgt tot je de knop indrukt.
+     De openingszin staat al als tekst in het gesprek (hierboven via pushThem). */ }
+function showGuidePanel(){ if(!guideOpen) return; clearTimeout(windDownTimer); guideWindingDown=false; guideMinimized=false;
+  sheet.classList.remove('info','over'); sheet.classList.add('detail','guide'); setH(snaps()[1]); updateGuideOrb(); updateGuideMini(); }
+{ const o=$('#guideOrb'); if(o) o.onclick=openGuide; }
 
 /* ===== Losse plekken: openen, nabijheid en ontgrendelen ===== */
 /* audio-fragmenten: audio/spots/{id}_{taal}.mp3, terugval naar en en daarna nl */
@@ -729,6 +874,7 @@ function setAudioBtnState(playing){ const b=$('#iAudioBtn'); if(!b) return; b.cl
   const lbl=$('#iAudioLbl'); if(lbl) lbl.textContent = playing ? (tr('spotPause')||'Pauzeer') : (tr('spotListen')||'Beluister audio'); }
 function stopSpotAudio(){ if(spotAudio){ try{spotAudio.pause();}catch(_){} spotAudio=null; spotAudioId=null; } setAudioBtnState(false); }
 function playSpotAudio(id){ if(!soundOn) return;
+  if(elSession||elConnecting){ stopVoice(); } /* gids stopt als je plek-audio start */
   if(spotAudioId===id && spotAudio && !spotAudio.paused && !spotAudio.ended) return; /* speelt al */
   stopSpotAudio(); const chain=audioLangChain(); let i=0;
   const a=new Audio(); spotAudio=a; spotAudioId=id;
@@ -741,12 +887,18 @@ function toggleSpotAudio(id){ if(!soundOn) return;
   if(spotAudio && spotAudioId===id){ if(spotAudio.paused){ spotAudio.play().then(()=>setAudioBtnState(true)).catch(()=>{}); }
     else { spotAudio.pause(); setAudioBtnState(false); } return; }
   playSpotAudio(id); }
-function spotNear(s){ const p=curPos(); if(!p||!s.point) return false; return haversine(p.lat,p.lng,s.point[0],s.point[1])<=SPOT_RADIUS; }
+function spotNear(s){ const p=curPos(); if(!p) return false;
+  if(s.type==='agent'&&s.polygon) return inPoly(p.lat,p.lng,s.polygon);
+  if(!s.point) return false; return haversine(p.lat,p.lng,s.point[0],s.point[1])<=SPOT_RADIUS; }
 function openSpot(id){ const s=spotById[id]; if(!s) return;
+  const overGuide = guideOpen || elSession || elConnecting;
+  if(overGuide){ windDownGuide(); sheet.classList.add('over'); /* gids blijft eronder en praat af */ }
+  else { if(elSession||elConnecting) stopVoice(); guideOpen=false; guideMinimized=false; sheet.classList.remove('guide','over'); active=null; }
   const unlocked = unlockedSpots.has(id) || spotNear(s); if(unlocked) unlockedSpots.add(id);
+  if(unlocked && s.type==='agent') markVisited(id);
   stopSpotAudio(); /* audio niet meer automatisch; pas afspelen bij klik op de knop */
-  activeSpot=id; $('#maphint').classList.add('hide');
-  $('#iEyebrow').textContent = s.type==='horeca'?tr('catHoreca'):tr('catSight');
+  activeSpot=id; $('#maphint').classList.add('hide'); updateGuideOrb();
+  $('#iEyebrow').textContent = s.type==='horeca'?tr('catHoreca'):(s.type==='agent'?tr('catMain'):tr('catSight'));
   $('#iName').textContent=s.name; const ch=$('#iChar'); ch.textContent=''; ch.style.display='none';
   const all=(s.photos||[]); const shown = unlocked ? all : all.slice(0,1);
   const md=$('#iMedia'); if(md) md.style.display = shown.length?'block':'none';
@@ -763,8 +915,10 @@ function openSpot(id){ const s=spotById[id]; if(!s) return;
     const dsc=$('#iDesc'); if(dsc){ dsc.textContent=tr('spotVisit'); dsc.classList.remove('collapsed'); dsc.classList.add('locked-note'); }
   }
   $('#iFoot').innerHTML='';
-  if(map) map.panTo(s.point,{animate:true});
-  sheet.classList.remove('detail'); sheet.classList.add('info'); setH(snaps()[1]); }
+  if(map && s.point) map.panTo(s.point,{animate:true});
+  if(overGuide){ sheet.classList.add('info'); /* detail+guide blijven staan, info komt eroverheen */ }
+  else { sheet.classList.remove('detail'); sheet.classList.add('info'); }
+  setH(snaps()[1]); updateGuideMini(); }
 /* dichtstbijzijnde losse plek binnen de aankomst-straal van een punt (of null) */
 function spotAt(p){ if(!p) return null; let best=null,bd=SPOT_RADIUS+1; SPOTS.forEach(s=>{ if(!s.point) return; const d=haversine(p.lat,p.lng,s.point[0],s.point[1]); if(d<=SPOT_RADIUS && d<bd){ bd=d; best=s; } }); return best; }
 
@@ -833,43 +987,65 @@ function playZoneIntro(id){ const src=ZONE_AUDIO[id]; if(!src||!soundOn) return;
   a.onended=clearIntroTimers;
   a.play().catch(()=>{ introPlayed.delete(id); }); } // geblokkeerd of bestand mist: opnieuw proberen mogelijk
 
-/* ===== STEM + TEKST (één sessie — spraak en tekst door elkaar) ===== */
+/* ===== STEM + TEKST (lokale gids — push-to-talk) ===== */
 let elSession=null, elConnecting=false, elGen=0, lastUserText=null, lastUserAt=0, micPrimed=false;
-function setTalkLabel(t){ $('#talkLabel').textContent=t; }
-function mountVoice(z){ const aid=ELEVENLABS_AGENT_IDS[z.id];
-  setTalkLabel(aid?tr('tapToTalk'):tr('preview')); }
+function setTalkLabel(t){ $('#talkLabel').textContent=t||''; }
 function addUserText(t){ addBubble('me',t); lastUserText=t; lastUserAt=Date.now(); }
 async function primeMic(){ if(micPrimed) return; try{ const s=await navigator.mediaDevices.getUserMedia({audio:true}); s.getTracks().forEach(t=>t.stop()); micPrimed=true; }catch(e){ console.warn('mic vooraf niet toegestaan',e); } }
 function sendUserText(text){ if(!elSession) return; try{ if(elSession.sendUserActivity) elSession.sendUserActivity(); elSession.sendUserMessage(text); addUserText(text); }catch(e){ console.error(e); } }
-async function startConversation(z, initialMessage){
+function guideMicMuted(muted){ if(elSession){ try{ elSession.setMicMuted(muted); }catch(_){} } }
+function applyGuideVolume(s){ if(!s) return; try{ s.setVolume({volume: soundOn?1:0 }); }catch(_){} }
+async function startConversation(g, initialMessage){
   if(elConnecting) return;
   if(elSession){ if(initialMessage) sendUserText(initialMessage); return; }
-  const aid=ELEVENLABS_AGENT_IDS[z.id]; if(!aid) return;
+  const aid=(g&&g.agentId)||''; if(!aid){ setTalkLabel(tr('guideTypeOnly')); return; }
   const Conv=window.ElevenLabsConversation;
   if(!Conv){ setTalkLabel(tr('voiceUnavail')); return; }
   const myGen=++elGen; elConnecting=true; setTalkLabel(tr('connecting')); $('#talk').classList.add('connecting');
-  try{ playZoneIntro(z.id); }catch(_){}
   if(initialMessage) addUserText(initialMessage);
   try{
-    try{ if(!textOnly) await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}}); micPrimed=true; }catch(e){}
+    try{ await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}}); micPrimed=true; }catch(e){}
     const s=await Conv.startSession({
       agentId:aid, connectionType:'websocket',
       overrides:(lang&&lang!=='nl')?{agent:{language:lang}}:undefined,
-      onConnect:()=>{ if(myGen!==elGen) return; elConnecting=false; const t=$('#talk'); t.classList.remove('connecting'); t.classList.add('live'); setTalkLabel(tr('listening')); updateVoiceFab(); if(elSession) applyAgentMute(elSession); if(initialMessage) setTimeout(()=>{ if(myGen===elGen && elSession){ try{elSession.sendUserMessage(initialMessage);}catch(e){} } },250); },
+      onConnect:()=>{ if(myGen!==elGen) return; elConnecting=false; const t=$('#talk'); t.classList.remove('connecting'); if(pushHolding) t.classList.add('live'); updateVoiceFab();
+        if(elSession){ applyGuideVolume(elSession); guideMicMuted(!pushHolding || guideWindingDown); }
+        setTalkLabel(pushHolding?tr('guideListening'):tr('guideHold')); updateGuideMini();
+        if(initialMessage) setTimeout(()=>{ if(myGen===elGen && elSession){ try{elSession.sendUserMessage(initialMessage);}catch(e){} } },250); },
       onDisconnect:()=>{ if(myGen!==elGen) return; resetVoiceUI(); },
       onError:(e)=>{ if(myGen!==elGen) return; console.error('EL error',e); setTalkLabel(tr('connectFailed')); resetVoiceUI(); },
-      onModeChange:(m)=>{ if(myGen!==elGen) return; const md=(m&&m.mode)||m; const sp=md==='speaking'; if(sp && elSession) applyAgentMute(elSession); $('#talk').classList.toggle('speaking',sp); if(voiceFab) voiceFab.classList.toggle('speaking',sp); { const md2=$('#media'); if(md2) md2.classList.toggle('speaking',sp); } setTalkLabel(sp?tr('speaking'):tr('listening')); },
+      onModeChange:(m)=>{ if(myGen!==elGen) return; const md=(m&&m.mode)||m; const sp=md==='speaking';
+        guideSpeaking=sp; $('#talk').classList.toggle('speaking',sp); if(voiceFab) voiceFab.classList.toggle('speaking',sp);
+        setTalkLabel(sp?tr('guideSpeaking'):(pushHolding?tr('guideListening'):tr('guideHold')));
+        if(guideWindingDown){ if(sp){ guideWdSpoke=true; } else if(guideWdSpoke){ finishGuideWindDown(); } }
+        updateGuideMini(); },
       onMessage:(p)=>{ if(myGen!==elGen) return; const t=p&&(p.message||p.text); const src=p&&(p.source||p.role); if(!t)return;
         if(src==='user'){ if(t===lastUserText && Date.now()-lastUserAt<6000){ lastUserText=null; return; } addBubble('me',t); }
         else addBubble('them',t); }
     });
     if(myGen!==elGen){ try{s.endSession();}catch(e){} return; }
-    elSession=s; applyAgentMute(elSession);
+    elSession=s; applyGuideVolume(elSession); guideMicMuted(!pushHolding);
   }catch(e){ if(myGen!==elGen) return; console.error(e); setTalkLabel(tr('noConnection')); resetVoiceUI(); }
 }
-function stopVoice(){ elGen++; const c=elSession; elSession=null; elConnecting=false; if(c){ try{c.endSession();}catch(e){} } resetVoiceUI(); try{ stopZoneIntro(false); }catch(_){} }
-function resetVoiceUI(){ elSession=null; elConnecting=false; const t=$('#talk'); if(t) t.classList.remove('speaking','live','connecting'); if(voiceFab) voiceFab.classList.remove('speaking'); { const md=$('#media'); if(md) md.classList.remove('speaking'); } updateVoiceFab();
-  if(active){ const z=ZONES.find(x=>x.id===active); if(z&&ELEVENLABS_AGENT_IDS[z.id]) setTalkLabel(tr('tapToTalk')); } }
+function stopVoice(){ elGen++; const c=elSession; elSession=null; elConnecting=false; pushHolding=false; guideSpeaking=false; if(c){ try{c.endSession();}catch(e){} } resetVoiceUI(); try{ stopZoneIntro(false); }catch(_){} }
+function resetVoiceUI(){ elSession=null; elConnecting=false; pushHolding=false; guideSpeaking=false; const t=$('#talk'); if(t) t.classList.remove('speaking','live','connecting'); if(voiceFab) voiceFab.classList.remove('speaking'); updateVoiceFab(); try{ updateGuideMini(); }catch(_){}
+  if(guideOpen) setTalkLabel(tr('guideHold')); }
+
+/* push-to-talk: houd de microfoon ingedrukt om te praten, laat los om te versturen */
+(function(){ const tb=$('#talk'); if(!tb) return;
+  function ptStart(e){ if(!guideOpen) return; if(e&&e.preventDefault) e.preventDefault();
+    if(!GUIDE.agentId){ setTalkLabel(tr('guideTypeOnly')); $('#input').focus(); return; }
+    pushHolding=true; tb.classList.add('live');
+    if(!elSession && !elConnecting){ startConversation(GUIDE); }
+    else { guideMicMuted(false); }
+    setTalkLabel(tr('guideListening')); }
+  function ptEnd(){ if(!guideOpen) return; if(!pushHolding) return; pushHolding=false; tb.classList.remove('live');
+    guideMicMuted(true); setTalkLabel(tr('guideHold')); }
+  tb.addEventListener('pointerdown',ptStart);
+  tb.addEventListener('pointerup',ptEnd);
+  tb.addEventListener('pointercancel',ptEnd);
+  tb.addEventListener('pointerleave',ptEnd);
+})();
 
 /* ===== GESPREK ===== */
 function renderConvo(z){ const c=$('#convo'); c.innerHTML=''; histories[z.id].forEach(m=>addBubble(m.role==='assistant'?'them':'me',m.content)); c.scrollTop=c.scrollHeight; }
@@ -918,24 +1094,20 @@ window.addEventListener('resize',()=>{ if(active) syncMediaHeight(); });
 function pushThem(z,t){ histories[z.id].push({role:'assistant',content:t}); addBubble('them',t); }
 function showTyping(){ const c=$('#convo'); const t=document.createElement('div'); t.className='typing';t.id='typing'; t.innerHTML='<i></i><i></i><i></i>'; c.appendChild(t); c.scrollTop=c.scrollHeight; }
 function hideTyping(){ const t=$('#typing'); if(t)t.remove(); }
-$('#talk').onclick=()=>{ if(!active) return; const z=ZONES.find(x=>x.id===active); const aid=ELEVENLABS_AGENT_IDS[z.id];
-  if(!aid){ $('#input').focus(); return; }
-  if(!canTalk){ setTalkLabel(distTxt(z)); return; }
-  if(elConnecting) return;
-  if(elSession){ stopVoice(); } else { startConversation(z); } };
-async function sendMsg(){ if(!active)return; const z=ZONES.find(x=>x.id===active); const text=$('#input').value.trim(); if(!text)return;
+/* (microfoon werkt nu via push-to-talk pointer-events; geen klik-toggle meer) */
+async function sendMsg(){ if(!guideOpen) return; const text=$('#input').value.trim(); if(!text)return;
   $('#input').value=''; $('#input').style.height='auto';
-  const aid=ELEVENLABS_AGENT_IDS[z.id];
-  if(aid){ if(!canTalk){ setTalkLabel(distTxt(z)); return; } if(!elSession){ startConversation(z, text); } else { sendUserText(text); } return; }
-  histories[z.id].push({role:'user',content:text}); addBubble('me',text);
-  showTyping(); $('#send').disabled=true; $('#talk').classList.add('speaking');
-  let reply; try{ reply=await askAgent(z);}catch(e){ reply=z.fallback[Math.floor(Math.random()*z.fallback.length)]; }
-  hideTyping(); $('#talk').classList.remove('speaking'); histories[z.id].push({role:'assistant',content:reply}); addBubble('them',reply); $('#send').disabled=false; }
+  if(GUIDE.agentId){ if(!elSession){ startConversation(GUIDE, text); } else { sendUserText(text); } return; }
+  /* geen ElevenLabs-agent ingesteld: val terug op tekst-chat met de gids-persona */
+  histories[GUIDE.id].push({role:'user',content:text}); addBubble('me',text);
+  showTyping(); $('#send').disabled=true;
+  let reply; try{ reply=await askAgent(GUIDE);}catch(e){ reply=GUIDE.fallback[Math.floor(Math.random()*GUIDE.fallback.length)]; }
+  hideTyping(); histories[GUIDE.id].push({role:'assistant',content:reply}); addBubble('them',reply); $('#send').disabled=false; }
 $('#send').onclick=sendMsg;
 $('#input').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg();}});
 $('#input').addEventListener('input',e=>{e.target.style.height='auto';e.target.style.height=Math.min(e.target.scrollHeight,90)+'px'; if(elSession&&elSession.sendUserActivity){try{elSession.sendUserActivity();}catch(_){}}});
-async function askAgent(z){ const system=z.persona+`\n\nREGELS: Antwoord ALTIJD in het Nederlands, in karakter, kort (2-4 zinnen). Echte info over Groningen waar het kan; verzin geen onzekere feiten. Soms een wedervraag.`;
-  const msgs=histories[z.id].slice(-10).map(m=>({role:m.role,content:m.content}));
+async function askAgent(g){ const system=(g.persona||'')+`\n\nREGELS: Antwoord in de taal van de gebruiker, kort (2-4 zinnen). Echte info over Groningen waar het kan; verzin geen onzekere feiten.`;
+  const msgs=histories[g.id].slice(-10).map(m=>({role:m.role,content:m.content}));
   const res=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,system,messages:msgs})});
   const data=await res.json(); const out=(data.content||[]).filter(b=>b.type==='text').map(b=>b.text).join(' ').trim(); if(!out)throw new Error('leeg'); return out; }
 
@@ -947,13 +1119,11 @@ function startGeo(){ if(!navigator.geolocation)return; watch=navigator.geolocati
     if(liveNeedsCenter){ map.setView([la,lo],LIVE_CENTER_ZOOM,{animate:true}); liveNeedsCenter=false; showRecenter(false); }
     else if(LIVE_FOLLOW && mode==='live'){ map.panTo([la,lo],{animate:true}); showRecenter(false); } }
   updateNavHud(); checkSpots();
+  if(guideOpen) return; /* gids open: niet automatisch een plek openen */
   const here=ZONES.find(z=>inPoly(la,lo,z.polygon));
-  if(here && active!==here.id){ openConvo(here.id); return; }
-  if(active){ const az=ZONES.find(x=>x.id===active); const insideActive = here && here.id===active;
-    if(insideActive){ if(!canTalk){ canTalk=true; $('#talk').classList.remove('off'); const aid=ELEVENLABS_AGENT_IDS[active]; if(aid && !elSession && !elConnecting) startConversation(az); } }
-    else { if(canTalk){ canTalk=false; $('#talk').classList.add('off'); } if(elSession||elConnecting) stopVoice(); if(az && !elSession && !elConnecting) setTalkLabel(distTxt(az)); }
-  }
-  else { const sp=spotAt({lat:la,lng:lo}); if(sp){ if(!unlockedSpots.has(sp.id) && activeSpot!==sp.id){ openSpot(sp.id); } unlockedSpots.add(sp.id); } } },()=>{},{enableHighAccuracy:true,maximumAge:4000}); }
+  if(here){ if(!unlockedSpots.has(here.id)){ unlockedSpots.add(here.id); markVisited(here.id); }
+    if(activeSpot!==here.id) openSpot(here.id); return; }
+  const sp=spotAt({lat:la,lng:lo}); if(sp){ if(!unlockedSpots.has(sp.id) && activeSpot!==sp.id){ openSpot(sp.id); } unlockedSpots.add(sp.id); } },()=>{},{enableHighAccuracy:true,maximumAge:4000}); }
 function stopGeo(){ if(watch!=null){ navigator.geolocation.clearWatch(watch); watch=null; } }
 
 /* centreer-knop: alleen in live, verschijnt zodra je de kaart verschuift */
@@ -965,15 +1135,14 @@ if(map) map.on('dragstart',()=>{ if(mode==='live') showRecenter(true); });
 /* ===== NIEUWE FEATURES: geluid · voortgang · richting · kompas ===== */
 function applySound(){ const b=$('#sndBtn'); if(b) b.classList.toggle('muted',!soundOn);
   if(!soundOn){ const w=$('#welcomeAudio'); if(w){ try{w.pause();}catch(_){} } try{ stopZoneIntro(true); }catch(_){} try{ stopSpotAudio(); }catch(_){} }
-  if(elSession) applyAgentMute(elSession); }
+  if(elSession) applyGuideVolume(elSession); }
 function toggleSound(){ soundOn=!soundOn; applySound(); }
 { const sb=$('#sndBtn'); if(sb){ if(SHOW_SOUND_TOGGLE){ sb.onclick=toggleSound; } else { sb.style.display='none'; } } }
 
-/* tekst-modus: dempt de stem van de agents, alleen typen (knop standaard verborgen) */
+/* tekst-modus (standaard verborgen): alleen typen */
 function agentVolume(){ return (soundOn && !textOnly) ? 1 : 0; }
-function applyAgentMute(s){ if(!s) return; try{ s.setVolume({volume: agentVolume()}); }catch(_){} try{ s.setMicMuted(textOnly); }catch(_){} }
 function applyTextOnly(){ const b=$('#textBtn'); if(b) b.classList.toggle('on',textOnly);
-  document.body.classList.toggle('text-only',textOnly); if(elSession) applyAgentMute(elSession); }
+  document.body.classList.toggle('text-only',textOnly); if(elSession) applyGuideVolume(elSession); }
 function toggleTextOnly(){ textOnly=!textOnly; applyTextOnly(); }
 { const tb=$('#textBtn'); if(tb){ tb.onclick=toggleTextOnly; if(!SHOW_TEXTONLY_TOGGLE) tb.style.display='none'; } }
 
@@ -1035,7 +1204,7 @@ const T={
   wOther:{nl:'Andere…',en:'Other…',de:'Andere…',it:'Altra…',pt:'Outro…',es:'Otro…',pl:'Inny…',da:'Andet…',sv:'Annat…',no:'Annet…',fi:'Muu…',el:'Άλλη…'},
   wStart:{nl:'Start de tour',en:'Start the tour',de:'Tour starten',it:'Inizia il tour',pt:'Começar o tour',es:'Empezar el tour',pl:'Rozpocznij trasę',da:'Start turen',sv:'Starta turen',no:'Start turen',fi:'Aloita kierros',el:'Ξεκίνα την ξενάγηση'},
   maphint:{nl:'Sleep je locatie over een plek',en:'Drag your location onto a place',de:'Zieh deinen Standort auf einen Ort',it:'Trascina la tua posizione su un luogo',pt:'Arrasta a tua localização para um lugar',es:'Arrastra tu ubicación sobre un lugar',pl:'Przeciągnij swoją lokalizację na miejsce',da:'Træk din placering hen på et sted',sv:'Dra din plats till en plats',no:'Dra posisjonen din til et sted',fi:'Vedä sijaintisi paikan päälle',el:'Σύρε την τοποθεσία σου πάνω σε ένα μέρος'},
-  listEb:{nl:'5 stemmen · binnenstad',en:'5 voices · city centre',de:'5 Stimmen · Innenstadt',it:'5 voci · centro',pt:'5 vozes · centro',es:'5 voces · centro',pl:'5 głosów · centrum',da:'5 stemmer · bymidte',sv:'5 röster · centrum',no:'5 stemmer · sentrum',fi:'5 ääntä · keskusta',el:'5 φωνές · κέντρο'},
+  listEb:{nl:'Ontdek de binnenstad',en:'Explore the city centre',de:'Entdecke die Innenstadt',it:'Esplora il centro',pt:'Explora o centro',es:'Explora el centro',pl:'Odkryj centrum',da:'Udforsk bymidten',sv:'Utforska centrum',no:'Utforsk sentrum',fi:'Tutustu keskustaan',el:'Εξερεύνησε το κέντρο'},
   listTtl:{nl:'Plekken in de buurt',en:'Places nearby',de:'Orte in der Nähe',it:'Luoghi vicini',pt:'Lugares por perto',es:'Lugares cercanos',pl:'Miejsca w pobliżu',da:'Steder i nærheden',sv:'Platser i närheten',no:'Steder i nærheten',fi:'Lähellä olevat paikat',el:'Κοντινά μέρη'},
   progLabel:{nl:'bezocht',en:'visited',de:'besucht',it:'visitati',pt:'visitados',es:'visitados',pl:'odwiedzone',da:'besøgt',sv:'besökta',no:'besøkt',fi:'käyty',el:'επισκ.'},
   cardDone:{nl:'Bezocht',en:'Visited',de:'Besucht',it:'Visitato',pt:'Visitado',es:'Visitado',pl:'Odwiedzone',da:'Besøgt',sv:'Besökt',no:'Besøkt',fi:'Käyty',el:'Επισκέφθηκες'},
@@ -1043,6 +1212,14 @@ const T={
   navDone:{nl:'Alles bezocht',en:'All visited',de:'Alle besucht',it:'Tutto visitato',pt:'Tudo visitato',es:'Todo visitado',pl:'Wszystko odwiedzone',da:'Alt besøgt',sv:'Allt besökt',no:'Alt besøkt',fi:'Kaikki käyty',el:'Όλα ολοκληρώθηκαν'},
   catSight:{nl:'Bezienswaardigheid',en:'Point of interest',de:'Sehenswürdigkeit'},
   catHoreca:{nl:'Horeca',en:'Food & drink',de:'Gastronomie'},
+  catMain:{nl:'Hoofdlocatie',en:'Highlight',de:'Highlight',it:'Punto clou',pt:'Destaque',es:'Lugar destacado',pl:'Atrakcja',da:'Højdepunkt',sv:'Höjdpunkt',no:'Høydepunkt',fi:'Kohokohta',el:'Σημείο ενδιαφέροντος'},
+  guideOrb:{nl:'Gids',en:'Guide',de:'Guide',it:'Guida',pt:'Guia',es:'Guía',pl:'Przewodnik',da:'Guide',sv:'Guide',no:'Guide',fi:'Opas',el:'Οδηγός'},
+  guideEyebrow:{nl:'Lokale gids',en:'Local guide',de:'Lokaler Guide',it:'Guida locale',pt:'Guia local',es:'Guía local',pl:'Lokalny przewodnik',da:'Lokal guide',sv:'Lokal guide',no:'Lokal guide',fi:'Paikallisopas',el:'Τοπικός οδηγός'},
+  guideTagline:{nl:'Vraag me alles over de stad',en:'Ask me anything about the city',de:'Frag mich alles über die Stadt',it:'Chiedimi tutto sulla città',pt:'Pergunta-me tudo sobre a cidade',es:'Pregúntame lo que sea sobre la ciudad',pl:'Zapytaj mnie o miasto',da:'Spørg mig om byen',sv:'Fråga mig om staden',no:'Spør meg om byen',fi:'Kysy minulta kaupungista',el:'Ρώτα με για την πόλη'},
+  guideHold:{nl:'Houd de knop ingedrukt om een vraag te stellen',en:'Hold the button to ask a question',de:'Halte die Taste gedrückt, um zu fragen',it:'Tieni premuto per fare una domanda',pt:'Mantém premido para fazer uma pergunta',es:'Mantén pulsado para hacer una pregunta',pl:'Przytrzymaj, aby zadać pytanie',da:'Hold knappen nede for at stille et spørgsmål',sv:'Håll knappen inne för att ställa en fråga',no:'Hold knappen inne for å stille et spørsmål',fi:'Pidä painiketta pohjassa kysyäksesi',el:'Κράτα το κουμπί πατημένο για να ρωτήσεις'},
+  guideListening:{nl:'Aan het luisteren… (laat los)',en:'Listening… (release)',de:'Hört zu… (loslassen)',it:'In ascolto… (rilascia)',pt:'A ouvir… (solta)',es:'Escuchando… (suelta)',pl:'Słucham… (puść)',da:'Lytter… (slip)',sv:'Lyssnar… (släpp)',no:'Lytter… (slipp)',fi:'Kuuntelee… (vapauta)',el:'Ακούει… (άσε το)'},
+  guideSpeaking:{nl:'De gids praat…',en:'The guide is speaking…',de:'Der Guide spricht…',it:'La guida sta parlando…',pt:'O guia está a falar…',es:'La guía está hablando…',pl:'Przewodnik mówi…',da:'Guiden taler…',sv:'Guiden talar…',no:'Guiden snakker…',fi:'Opas puhuu…',el:'Ο οδηγός μιλάει…'},
+  guideTypeOnly:{nl:'Typ je vraag aan de gids',en:'Type your question to the guide',de:'Tippe deine Frage an den Guide',it:'Scrivi la domanda alla guida',pt:'Escreve a tua pergunta ao guia',es:'Escribe tu pregunta a la guía',pl:'Wpisz pytanie do przewodnika',da:'Skriv dit spørgsmål til guiden',sv:'Skriv din fråga till guiden',no:'Skriv spørsmålet ditt til guiden',fi:'Kirjoita kysymyksesi oppaalle',el:'Γράψε την ερώτησή σου στον οδηγό'},
   spotLocked:{nl:'Kom langs om foto\u2019s en het verhaal te ontdekken.',en:'Come by to discover photos and the story.'},
   spotGo:{nl:'Ga er heen om meer te zien',en:'Go there to see more'},
   spotVisit:{nl:'Bezoek deze plek om alle foto\u2019s en het verhaal te ontdekken.',en:'Visit this place to discover all the photos and its story.',de:'Besuche diesen Ort, um alle Fotos und die Geschichte zu entdecken.'},
@@ -1050,7 +1227,7 @@ const T={
   spotPause:{nl:'Pauzeer',en:'Pause',de:'Pause',it:'Pausa',pt:'Pausar',es:'Pausar',pl:'Pauza',da:'Pause',sv:'Pausa',no:'Pause',fi:'Tauko',el:'Παύση'},
   spotStory:{nl:'Lees het verhaal',en:'Read the story',de:'Geschichte lesen',it:'Leggi la storia',pt:'Ler a história',es:'Leer la historia',pl:'Przeczytaj historię',da:'Læs historien',sv:'Läs berättelsen',no:'Les historien',fi:'Lue tarina',el:'Διάβασε την ιστορία'},
   filterTitle:{nl:'Filter',en:'Filter',de:'Filter'},
-  filterAgents:{nl:'Stemmen',en:'Voices',de:'Stimmen'},
+  filterAgents:{nl:'Hoofdlocaties',en:'Highlights',de:'Highlights',it:'Punti clou',pt:'Destaques',es:'Lugares destacados',pl:'Atrakcje',da:'Højdepunkter',sv:'Höjdpunkter',no:'Høydepunkter',fi:'Kohokohdat',el:'Σημεία ενδιαφέροντος'},
   filterSights:{nl:'Bezienswaardigheden',en:'Sights',de:'Sehenswürdigkeiten'},
   filterHoreca:{nl:'Horeca',en:'Food & drink',de:'Gastronomie'},
   tapToTalk:{nl:'Tik om te praten',en:'Tap to talk',de:'Zum Sprechen tippen',it:'Tocca per parlare',pt:'Toca para falar',es:'Toca para hablar',pl:'Dotknij, aby mówić',da:'Tryk for at tale',sv:'Tryck för att prata',no:'Trykk for å snakke',fi:'Napauta puhuaksesi',el:'Πάτα για να μιλήσεις'},
@@ -1071,7 +1248,10 @@ function sugsFor(z){ const s=z.sugs; return Array.isArray(s)?s:((s&&(s[uiLang]||
 const UI_LANGS=['nl','en','de','it','pt','es','pl','da','sv','no','fi','el'];
 function applyI18n(){ uiLang=(lang==='pt-br')?'pt':(UI_LANGS.includes(lang)?lang:'en');
   document.querySelectorAll('[data-i18n]').forEach(el=>{ const s=tr(el.dataset.i18n); if(s!=null) el.textContent=s; });
-  if(active){ const z=ZONES.find(x=>x.id===active); if(z){ $('#input').placeholder=tr('inputPh').replace('{name}',z.name); const sg=$('#sugs'); if(sg){ sg.innerHTML=''; sugsFor(z).forEach(s=>{const b=document.createElement('div');b.className='sug';b.textContent=s;b.onclick=()=>{$('#input').value=s;sendMsg();};sg.appendChild(b);}); } } }
+  if(guideOpen){ $('#eyebrow').textContent=tr('guideEyebrow')||''; $('#sChar').textContent=tr('guideTagline')||'';
+    $('#input').placeholder=(tr('inputPh')||'').replace('{name}',GUIDE.name);
+    const sg=$('#sugs'); if(sg){ sg.innerHTML=''; sugsFor(GUIDE).forEach(s=>{const b=document.createElement('div');b.className='sug';b.textContent=s;b.onclick=()=>{$('#input').value=s;sendMsg();};sg.appendChild(b);}); }
+    if(!elSession && !elConnecting) setTalkLabel(tr('guideHold')); }
   if(activeSpot){ const s=spotById[activeSpot]; const dsc=$('#iDesc');
     if(s&&dsc){ if(dsc.classList.contains('locked-note')){ dsc.textContent=tr('spotVisit'); }
       else { dsc.textContent=(s.desc&&(s.desc[lang]||s.desc.en))||''; } }
