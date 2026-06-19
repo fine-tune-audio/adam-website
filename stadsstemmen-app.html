@@ -1185,6 +1185,11 @@ function applyGuideVolume(s){ if(!s) return; try{ s.setVolume({volume: soundOn?1
 /* ---- locatiebewuste gids: snapshot voor de ElevenLabs-agent ---- */
 function compassDir(deg){ const dirs=['north','northeast','east','southeast','south','southwest','west','northwest'];
   return dirs[Math.round(((deg%360)/45))%8]; }
+/* Nederlands lidwoord per plek — alleen waar de naam het niet al bevat (voor {{welcome_place_nl}}).
+   Plekken die hier niet in staan (eigennamen, of naam met lidwoord erin) krijgen niets ervoor. */
+const PLACE_ARTICLE={ martini:'de', provinciehuis:'het', stadhuis:'het', forum:'het', vismarkt:'de', gmus:'het', rug:'de', burg:'de',
+  prinsentuin:'de', korenbeurs:'de', akerk:'de', papengang:'de', pepergasthuis:'het', goudkantoor:'het', synagoge:'de',
+  martinus:'de', driegezusters:'de', pakhuis:'het', poeleplein:'het' };
 function guideContext(){
   const pos=curPos();
   const dv={ visited_count:String(visited.size), total:String(TOTAL) };
@@ -1202,10 +1207,12 @@ function guideContext(){
     .sort((a,b)=>a.d-b.d).slice(0,3).map(s=>s.n+' ('+fmtDist(s.d)+')');
   dv.nearby=near.join(', ');
   // welcome_place: dichtstbijzijnde plek (agents + sights + horeca), ongeacht bezocht — voor het welkomstbericht ({{welcome_place}})
-  let wp='',wd=Infinity;
-  ZONES.forEach(z=>{ if(!z._center) return; const d=haversine(pos.lat,pos.lng,z._center.lat,z._center.lng); if(d<wd){wd=d;wp=z.name;} });
-  SPOTS.forEach(s=>{ if(!s.point) return; const d=haversine(pos.lat,pos.lng,s.point[0],s.point[1]); if(d<wd){wd=d;wp=s.name;} });
+  let wp='',wpId='',wd=Infinity;
+  ZONES.forEach(z=>{ if(!z._center) return; const d=haversine(pos.lat,pos.lng,z._center.lat,z._center.lng); if(d<wd){wd=d;wp=z.name;wpId=z.id;} });
+  SPOTS.forEach(s=>{ if(!s.point) return; const d=haversine(pos.lat,pos.lng,s.point[0],s.point[1]); if(d<wd){wd=d;wp=s.name;wpId=s.id;} });
   dv.welcome_place=wp;
+  const _art=PLACE_ARTICLE[wpId]||'';
+  dv.welcome_place_nl = _art ? (_art+' '+wp) : wp;   // Nederlandse vorm met lidwoord, bv. 'het Provinciehuis'
   dv.near_place = (wp && wd<=NEAR_PLACE_RADIUS) ? 'yes' : 'no';   // sta je vlak bij een plek (agent of spot)?
   return dv;
 }
