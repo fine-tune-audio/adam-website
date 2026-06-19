@@ -747,7 +747,7 @@ const CONTENT = window.STADSSTEMMEN_CONTENT || {paths:{},agents:[],sights:[],hor
 const APATH=(CONTENT.paths&&CONTENT.paths.agent)||'imgstad/';
 const ZONES = (CONTENT.agents||[]).map(a=>{ const ph=(a.photos||[]).map(n=>APATH+n+'.jpg');
   return { id:a.id, name:a.name, character:a.character||a.name, pin:ph[0]||'', photos:ph,
-    video:a.video?APATH+a.video+'.mp4':'', polygon:a.polygon, sugs:a.sugs||{}, persona:a.persona||'',
+    video:a.video?APATH+a.video+'.mp4':'', polygon:a.polygon, point:a.point||null, sugs:a.sugs||{}, persona:a.persona||'',
     fallback:(a.fallback&&a.fallback.length)?a.fallback:['(De stem van deze plek volgt binnenkort.)'] }; });
 const ELEVENLABS_AGENT_IDS = {}; (CONTENT.agents||[]).forEach(a=>{ ELEVENLABS_AGENT_IDS[a.id]=a.agentId||''; });
 const INFO_TEXT = {}; (CONTENT.agents||[]).forEach(a=>{ INFO_TEXT[a.id]=a.info||''; });
@@ -809,7 +809,8 @@ try{
   const path=[];
   ZONES.forEach(z=>{
     const poly=L.polygon(z.polygon); // onzichtbaar: alleen voor geofence + midden
-    const ctr=poly.getBounds().getCenter(); path.push(ctr);
+    // marker op eigen 'point' (bv. midden op de vaart) als die is opgegeven, anders het polygon-midden
+    const ctr=(z.point&&z.point.length===2)?L.latLng(z.point[0],z.point[1]):poly.getBounds().getCenter(); path.push(ctr);
     const m=L.marker(ctr,{icon:L.divIcon({className:'place-pin',iconSize:[0,0],iconAnchor:[0,0],html:'<span class="pulse"></span><span class="check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg></span><span class="ppin"><img src="'+(z.pin||'')+'" alt="" onerror="this.style.display=\'none\'"></span>'})}).addTo(map);
     m.bindTooltip(z.name,{direction:'top',className:'lm-tip',offset:[0,-28]});
     m.on('click',()=>openSpot(z.id));
