@@ -760,6 +760,7 @@ const SPOTS = [].concat(
 const spotById={}; SPOTS.forEach(s=>spotById[s.id]=s);
 const spotMarkers={}; const unlockedSpots=new Set();
 const SPOT_RADIUS=40;   // meters: binnen deze afstand 'arriveer' je bij een losse plek en zie je foto's + tekst
+const NEAR_PLACE_RADIUS=75;  // meters: binnen deze afstand telt de gids je als 'vlak bij' een plek ({{near_place}}='yes')
 /* ===== geofence-stabilisatie (alleen live GPS) ===== */
 const GEO_ENTER=SPOT_RADIUS;            // m: zo dichtbij telt als 'binnen'
 const GEO_EXIT=SPOT_RADIUS+15;          // m: pas hierbuiten weer 'buiten' (hysterese: de 40-55m dead zone dempt GPS-jitter)
@@ -1187,7 +1188,9 @@ function compassDir(deg){ const dirs=['north','northeast','east','southeast','so
 function guideContext(){
   const pos=curPos();
   const dv={ visited_count:String(visited.size), total:String(TOTAL) };
-  if(!pos){ dv.location_known='no'; dv.here=''; dv.nearest_unvisited=''; dv.nearest_distance=''; dv.nearest_direction=''; dv.nearby=''; return dv; }
+  if(!pos){ dv.location_known='no'; dv.near_place='no'; dv.here=''; dv.nearest_unvisited=''; dv.nearest_distance=''; dv.nearest_direction=''; dv.nearby='';
+    /* welcome_place bewust NIET meesturen zonder locatie: dan gebruikt ElevenLabs de standaardwaarde van de variabele */
+    return dv; }
   dv.location_known='yes';
   const here=spotAt(pos); dv.here=here?here.name:'';
   let best=null,bd=Infinity; ZONES.forEach(z=>{ if(visited.has(z.id)||!z._center) return;
@@ -1198,6 +1201,12 @@ function guideContext(){
   const near=SPOTS.filter(s=>s.point).map(s=>({n:s.name,d:haversine(pos.lat,pos.lng,s.point[0],s.point[1])}))
     .sort((a,b)=>a.d-b.d).slice(0,3).map(s=>s.n+' ('+fmtDist(s.d)+')');
   dv.nearby=near.join(', ');
+  // welcome_place: dichtstbijzijnde plek (agents + sights + horeca), ongeacht bezocht — voor het welkomstbericht ({{welcome_place}})
+  let wp='',wd=Infinity;
+  ZONES.forEach(z=>{ if(!z._center) return; const d=haversine(pos.lat,pos.lng,z._center.lat,z._center.lng); if(d<wd){wd=d;wp=z.name;} });
+  SPOTS.forEach(s=>{ if(!s.point) return; const d=haversine(pos.lat,pos.lng,s.point[0],s.point[1]); if(d<wd){wd=d;wp=s.name;} });
+  dv.welcome_place=wp;
+  dv.near_place = (wp && wd<=NEAR_PLACE_RADIUS) ? 'yes' : 'no';   // sta je vlak bij een plek (agent of spot)?
   return dv;
 }
 async function startConversation(g, initialMessage){
