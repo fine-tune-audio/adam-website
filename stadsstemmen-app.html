@@ -983,10 +983,11 @@ function openGuide(){ stopSpotAudio(); stopSlides(); activeSpot=null; setActiveM
   renderConvo(GUIDE); /* geen standaard welkomstbericht meer; het gesprek begint leeg */
   const cp=$('#convoPanel'); if(cp){ cp.classList.add('up'); cp.style.setProperty('--lowtop','0px'); }
   sheet.classList.remove('info'); sheet.classList.add('detail','guide'); setH(snaps()[1]);
-  $('#talk').classList.remove('off'); setTalkLabel(tr('guideStart'));
+  $('#talk').classList.remove('off');
   updateGuideOrb(); updateGuideMini();
-  /* GEEN automatische spraakverbinding: de gids zwijgt tot je de knop indrukt.
-     De openingszin staat al als tekst in het gesprek (hierboven via pushThem). */ }
+  /* direct starten: zodra je de gids opent, verbindt de agent en begroet hij je meteen.
+     Push-to-talk: houd daarna de knop ingedrukt om te antwoorden. */
+  startConversation(GUIDE); }
 function showGuidePanel(){ if(!guideOpen) return; clearTimeout(windDownTimer); guideWindingDown=false; guideMinimized=false;
   sheet.classList.remove('info','over'); sheet.classList.add('detail','guide'); setH(snaps()[1]); updateGuideOrb(); updateGuideMini(); }
 { const o=$('#guideOrb'); if(o){ o.onclick=openGuide; o.addEventListener('contextmenu',e=>e.preventDefault()); } }
