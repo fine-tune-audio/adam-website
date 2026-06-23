@@ -527,6 +527,34 @@
   .guide-mini .gm-x:hover{background:rgba(255,255,255,.28);}
   .guide-mini .gm-x:active{transform:scale(.9);}
   .guide-mini .gm-x svg{width:15px;height:15px;}
+
+  /* ===== NIEUW: gids binnen de plek-slide ===== */
+  /* Zelfde gids-orb, maar nu zwevend in de plek-slide (boven de tekst). */
+  .spot-guide-orb{position:absolute;z-index:5;right:18px;bottom:20px;width:58px;height:58px;border-radius:50%;
+    border:none;cursor:pointer;display:none;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+    background:var(--ink);color:var(--lime);box-shadow:0 12px 28px rgba(0,0,0,.34);}
+  .spot-guide-orb svg{width:23px;height:23px;}
+  .spot-guide-orb .go-label{font-family:'Schibsted Grotesk';font-weight:800;font-size:8px;letter-spacing:.05em;text-transform:uppercase;line-height:1;}
+  .spot-guide-orb:active{transform:scale(.94);}
+  .spot-guide-orb::before{content:'';position:absolute;inset:-4px;border-radius:50%;border:2px solid var(--lime-d);opacity:.5;animation:vfring 2.1s ease-out infinite;pointer-events:none;}
+  .sheet.info .spot-guide-orb{display:flex;}
+  .sheet.info.spotguide .spot-guide-orb{display:none;}
+  /* fail-safe: beluister-knop even op slot na het sluiten van de gids */
+  .sa-audio.locked{opacity:.45;pointer-events:none;}
+
+  /* De gids (convo-view) schuift van onder over de plektekst, tot onder de foto. */
+  .sheet.spotguide .info-view{display:flex;}
+  .sheet.spotguide .convo-view{display:flex;position:absolute;left:0;right:0;bottom:0;top:46%;z-index:7;
+    background:var(--surface-solid);border-radius:26px 26px 0 0;box-shadow:0 -14px 40px rgba(0,0,0,.26);
+    animation:spotGuideUp .42s cubic-bezier(.22,1,.36,1) both;overflow:hidden;}
+  @keyframes spotGuideUp{from{transform:translateY(100%);}to{transform:none;}}
+  .sheet.spotguide .convo-view .media{display:none;}
+  .sheet.spotguide .convo-view .composer{display:none;}
+  .sheet.spotguide .convo-view .chandle{display:none;}
+  .sheet.spotguide .convo-view .cv-body{padding:8px 0 0;}
+  .sheet.spotguide .convo-view .convo-panel{position:absolute;inset:0;top:0;background:transparent;box-shadow:none;border-radius:0;}
+  .sheet.spotguide .convo-view .convo{position:absolute;inset:0;overflow-y:auto;padding:8px 20px 4px;}
+  .sheet.spotguide .cv-close{display:grid;}
 </style>
 </head>
 <body>
@@ -692,6 +720,10 @@
         </div>
         <div class="info-foot" id="iFoot"></div>
         <div class="info-scrollcue" id="iScrollCue" aria-hidden="true"><span class="chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span></div>
+        <button class="spot-guide-orb" id="spotGuideOrb" aria-label="Vraag de gids" title="Vraag de gids">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 0 1 16 0v5a3 3 0 0 1-3 3h-2v-7h5M4 12v5a3 3 0 0 0 3 3h0"/></svg>
+          <span class="go-label" data-i18n="guideOrb">Gids</span>
+        </button>
       </div>
 
       <div class="convo-view">
@@ -920,15 +952,15 @@ function hideDemoMe(){ if(demoMe&&map){map.removeLayer(demoMe);demoMe=null;} dem
 function closeToList(){ stopVoice(); stopSpotAudio(); stopSlides(); stopSpotSlides(); setActiveMarker(null);
   clearTimeout(windDownTimer); guideWindingDown=false; guideMinimized=false;
   active=null; activeSpot=null; guideOpen=false;
-  sheet.classList.remove('detail'); sheet.classList.remove('info'); sheet.classList.remove('voice'); sheet.classList.remove('guide'); sheet.classList.remove('over'); setH(snaps()[0]);
+  sheet.classList.remove('detail'); sheet.classList.remove('info'); sheet.classList.remove('voice'); sheet.classList.remove('guide'); sheet.classList.remove('over'); sheet.classList.remove('spotguide'); setH(snaps()[0]);
   if(mode==='demo'){ $('#maphint').classList.remove('hide'); } updateGuideOrb(); updateGuideMini(); updateNavHud(); }
 /* sluit de plek-overlay: terug naar de gids eronder, of naar de lijst */
 function closeSpotOverlay(){ stopSpotAudio(); stopSpotSlides(); activeSpot=null;
   if(sheet.classList.contains('over')){ sheet.classList.remove('over','info'); showGuidePanel(); updateGuideOrb(); updateGuideMini(); }
   else { closeToList(); } }
-$('#back').onclick=()=>{ if(guideOpen) minimizeGuide(); else closeToList(); };
+$('#back').onclick=()=>{ if(sheet.classList.contains('spotguide')) return closeSpotGuide(); if(guideOpen) minimizeGuide(); else closeToList(); };
 $('#backInfo').onclick=closeSpotOverlay;
-{ const gc=$('#guideClose'); if(gc) gc.onclick=stopGuideNow; }
+{ const gc=$('#guideClose'); if(gc) gc.onclick=()=>{ if(sheet.classList.contains('spotguide')) return closeSpotGuide(); stopGuideNow(); }; }
 { const gx=$('#guideMiniX'); if(gx) gx.onclick=(e)=>{ e.stopPropagation(); stopGuideNow(); }; }
 if(guideMini) guideMini.onclick=()=>showGuidePanel();
 
@@ -991,6 +1023,36 @@ function openGuide(){ stopSpotAudio(); stopSlides(); activeSpot=null; setActiveM
 function showGuidePanel(){ if(!guideOpen) return; clearTimeout(windDownTimer); guideWindingDown=false; guideMinimized=false;
   sheet.classList.remove('info','over'); sheet.classList.add('detail','guide'); setH(snaps()[1]); updateGuideOrb(); updateGuideMini(); }
 { const o=$('#guideOrb'); if(o){ o.onclick=openGuide; o.addEventListener('contextmenu',e=>e.preventDefault()); } }
+
+/* ===== Gids binnen de plek-slide: overlay schuift van onder over de tekst ===== */
+let audioBtnLockTimer=null;
+function lockSpotAudioBtn(ms){ const b=$('#iAudioBtn'); if(!b) return; b.classList.add('locked'); b.disabled=true;
+  clearTimeout(audioBtnLockTimer); audioBtnLockTimer=setTimeout(()=>{ b.classList.remove('locked'); b.disabled=false; }, ms||3000); }
+function openSpotGuide(){ if(sheet.classList.contains('spotguide')) return;
+  stopSpotAudio();                                  /* plek-audio uit: kan niet tegelijk met de gids */
+  active=GUIDE.id; guideOpen=true; guideMinimized=false;
+  $('#sName').textContent=GUIDE.name; $('#sChar').textContent=tr('guideTagline')||'';
+  const sg=$('#sugs'); if(sg){ sg.innerHTML=''; sugsFor(GUIDE).forEach(s=>{const b=document.createElement('div');b.className='sug';b.textContent=s;b.onclick=()=>{$('#input').value=s;sendMsg();};sg.appendChild(b);}); }
+  renderConvo(GUIDE);
+  const ib=$('.info-body'); if(ib) ib.scrollTop=0;   /* foto bovenaan zodat de overlay er precies onder begint */
+  sheet.classList.add('spotguide');
+  positionSpotGuide();
+  updateGuideMini();
+  startConversation(GUIDE);                          /* direct verbinden + begroeting */ }
+/* zet de bovenkant van de gids-overlay net onder de foto (valt zo over tekst + beluister-knop) */
+function positionSpotGuide(){ const cv=$('.convo-view'), md=$('#iMedia'), sh=document.querySelector('.sheet'); if(!cv||!sh) return;
+  let topPx;
+  if(md && md.offsetHeight>0){ const mr=md.getBoundingClientRect(), sr=sh.getBoundingClientRect(); topPx=Math.round(mr.bottom-sr.top+6); }
+  else { topPx=Math.round(sh.getBoundingClientRect().height*0.30); }
+  cv.style.top=topPx+'px'; }
+function closeSpotGuide(){ if(!sheet.classList.contains('spotguide')) return;
+  stopVoice();
+  sheet.classList.remove('spotguide');
+  const cv=$('.convo-view'); if(cv) cv.style.top='';  /* inline-top weghalen zodat de volledige gids normaal blijft */
+  guideOpen=false; active=null;
+  lockSpotAudioBtn(3000);                            /* fail-safe: beluister-knop even op slot */
+  updateGuideMini(); }
+{ const o=$('#spotGuideOrb'); if(o){ o.onclick=openSpotGuide; o.addEventListener('contextmenu',e=>e.preventDefault()); } }
 
 /* ===== Losse plekken: openen, nabijheid en ontgrendelen ===== */
 /* audio-fragmenten: audio/spots/{id}_{taal}.mp3, terugval naar en en daarna nl */
