@@ -371,7 +371,11 @@
   .spot-pin.horeca svg{width:15px;height:15px;color:var(--ink);}
   .spot-pin.unlocked{box-shadow:0 0 0 2px var(--lime),0 2px 6px rgba(0,0,0,.32);}
   /* 4:3-galerij in het info-paneel (zelfde stijl als de agents) */
-  .media.media-info{position:relative;top:auto;left:auto;right:auto;width:100%;margin-bottom:14px;}
+  .media.media-info{position:relative;top:auto;left:auto;right:auto;width:100%;aspect-ratio:4/3;background:#fff;margin-bottom:14px;}
+  /* staande (verticale) foto's passend in het 4:3-frame, witte zijkanten i.p.v. bijsnijden */
+  .media-info .slides img.portrait{object-fit:contain;}
+  /* alleen als de gids-overlay open is: foto kleiner zodat de gids meer ruimte krijgt */
+  .sheet.spotguide .media.media-info{aspect-ratio:16/9;max-height:24vh;}
   .info-desc.locked-note{color:var(--ink-2);font-style:italic;}
   /* twee knoppen onder de foto's: beluister audio + lees het verhaal */
   .spot-actions{display:flex;gap:10px;margin-bottom:14px;}
@@ -452,7 +456,7 @@
     color:var(--ink);border:1px solid rgba(255,255,255,.6);
     background:radial-gradient(120% 120% at 30% 25%,var(--lime-l) 0%,var(--lime) 50%,var(--lime-d) 100%);
     box-shadow:0 12px 30px rgba(159,206,28,.5),0 2px 8px rgba(0,0,0,.2),inset 0 2px 6px rgba(255,255,255,.5);
-    transition:transform .16s,bottom .4s cubic-bezier(.22,1,.36,1);}
+    transition:transform .16s,bottom .4s cubic-bezier(.22,1,.36,1),background .32s ease,box-shadow .32s ease,color .32s ease;}
   .guide-orb:active{transform:scale(.94);}
   .guide-orb.hide{opacity:0;transform:scale(1.6);pointer-events:none;}
   .guide-orb::before{content:'';position:absolute;inset:-4px;border-radius:50%;border:2px solid var(--lime-d);opacity:.55;animation:vfring 2.1s ease-out infinite;pointer-events:none;}
@@ -529,16 +533,13 @@
   .guide-mini .gm-x svg{width:15px;height:15px;}
 
   /* ===== NIEUW: gids binnen de plek-slide ===== */
-  /* Zelfde gids-orb, maar nu zwevend in de plek-slide (boven de tekst). */
-  .spot-guide-orb{position:absolute;z-index:5;right:18px;bottom:20px;width:58px;height:58px;border-radius:50%;
-    border:none;cursor:pointer;display:none;flex-direction:column;align-items:center;justify-content:center;gap:2px;
-    background:var(--ink);color:var(--lime);box-shadow:0 12px 28px rgba(0,0,0,.34);}
-  .spot-guide-orb svg{width:23px;height:23px;}
-  .spot-guide-orb .go-label{font-family:'Schibsted Grotesk';font-weight:800;font-size:8px;letter-spacing:.05em;text-transform:uppercase;line-height:1;}
-  .spot-guide-orb:active{transform:scale(.94);}
-  .spot-guide-orb::before{content:'';position:absolute;inset:-4px;border-radius:50%;border:2px solid var(--lime-d);opacity:.5;animation:vfring 2.1s ease-out infinite;pointer-events:none;}
-  .sheet.info .spot-guide-orb{display:flex;}
-  .sheet.info.spotguide .spot-guide-orb{display:none;}
+  /* Dezelfde hoofd-orb, maar in een plek wordt hij zwart (zelfde plek, andere kleur) en boven de sheet. */
+  .guide-orb.spotmode{z-index:9;color:var(--lime);border-color:rgba(255,255,255,.22);
+    background:radial-gradient(120% 120% at 30% 25%,#3a3a34 0%,var(--ink) 60%,#000 100%);
+    box-shadow:0 12px 30px rgba(0,0,0,.42),0 2px 8px rgba(0,0,0,.25),inset 0 2px 6px rgba(255,255,255,.12);}
+  .guide-orb.spotmode::before{border-color:rgba(255,255,255,.35);}
+  /* in de gids-overlay geen terug-pijl: het kruisje is genoeg */
+  .sheet.spotguide .cv-head .back{display:none;}
   /* fail-safe: beluister-knop even op slot na het sluiten van de gids */
   .sa-audio.locked{opacity:.45;pointer-events:none;}
 
@@ -694,8 +695,6 @@
         <div class="info-body">
           <div class="media media-info" id="iMedia" style="display:none">
             <div class="slides" id="iSlides"></div>
-            <button class="marrow prev" id="iPrev" aria-label="Vorige foto"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></button>
-            <button class="marrow next" id="iNext" aria-label="Volgende foto"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
             <div class="mdots" id="iDots"></div>
           </div>
           <div class="spot-actions" id="iActions" style="display:none">
@@ -720,10 +719,6 @@
         </div>
         <div class="info-foot" id="iFoot"></div>
         <div class="info-scrollcue" id="iScrollCue" aria-hidden="true"><span class="chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span></div>
-        <button class="spot-guide-orb" id="spotGuideOrb" aria-label="Vraag de gids" title="Vraag de gids">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 0 1 16 0v5a3 3 0 0 1-3 3h-2v-7h5M4 12v5a3 3 0 0 0 3 3h0"/></svg>
-          <span class="go-label" data-i18n="guideOrb">Gids</span>
-        </button>
       </div>
 
       <div class="convo-view">
@@ -1003,7 +998,15 @@ function minimizeGuide(){ guideMinimized=true;
 /* kruisje: gids meteen helemaal stoppen */
 function stopGuideNow(){ clearTimeout(windDownTimer); guideWindingDown=false; guideMinimized=false; closeToList(); }
 
-function updateGuideOrb(){ const o=$('#guideOrb'); if(!o) return; o.classList.toggle('hide', guideOpen); }
+function updateGuideOrb(){ const o=$('#guideOrb'); if(!o) return;
+  const fullGuide = sheet.classList.contains('guide');         // standaard gids-menu open
+  const overlay   = sheet.classList.contains('spotguide');     // gids-overlay binnen een plek open
+  const spotOpen  = sheet.classList.contains('info') && !overlay; // plek-slide open, overlay dicht
+  o.classList.toggle('hide', fullGuide || overlay || sheet.classList.contains('over'));
+  o.classList.toggle('spotmode', spotOpen);                    // in een plek: zwart + boven de sheet
+}
+/* orb-klik: in een plek -> gids-overlay; anders -> standaard gids-menu */
+function onGuideOrbClick(){ if(sheet.classList.contains('info') && !sheet.classList.contains('spotguide')) openSpotGuide(); else openGuide(); }
 function openGuide(){ stopSpotAudio(); stopSlides(); activeSpot=null; setActiveMarker(null);
   clearTimeout(windDownTimer); guideWindingDown=false; guideWdSpoke=false; guideMinimized=false;
   active=GUIDE.id; guideOpen=true; $('#maphint').classList.add('hide');
@@ -1022,7 +1025,7 @@ function openGuide(){ stopSpotAudio(); stopSlides(); activeSpot=null; setActiveM
   startConversation(GUIDE); }
 function showGuidePanel(){ if(!guideOpen) return; clearTimeout(windDownTimer); guideWindingDown=false; guideMinimized=false;
   sheet.classList.remove('info','over'); sheet.classList.add('detail','guide'); setH(snaps()[1]); updateGuideOrb(); updateGuideMini(); }
-{ const o=$('#guideOrb'); if(o){ o.onclick=openGuide; o.addEventListener('contextmenu',e=>e.preventDefault()); } }
+{ const o=$('#guideOrb'); if(o){ o.onclick=onGuideOrbClick; o.addEventListener('contextmenu',e=>e.preventDefault()); } }
 
 /* ===== Gids binnen de plek-slide: overlay schuift van onder over de tekst ===== */
 let audioBtnLockTimer=null;
@@ -1037,7 +1040,7 @@ function openSpotGuide(){ if(sheet.classList.contains('spotguide')) return;
   const ib=$('.info-body'); if(ib) ib.scrollTop=0;   /* foto bovenaan zodat de overlay er precies onder begint */
   sheet.classList.add('spotguide');
   positionSpotGuide();
-  updateGuideMini();
+  updateGuideOrb(); updateGuideMini();
   startConversation(GUIDE);                          /* direct verbinden + begroeting */ }
 /* zet de bovenkant van de gids-overlay net onder de foto (valt zo over tekst + beluister-knop) */
 function positionSpotGuide(){ const cv=$('.convo-view'), md=$('#iMedia'), sh=document.querySelector('.sheet'); if(!cv||!sh) return;
@@ -1051,8 +1054,7 @@ function closeSpotGuide(){ if(!sheet.classList.contains('spotguide')) return;
   const cv=$('.convo-view'); if(cv) cv.style.top='';  /* inline-top weghalen zodat de volledige gids normaal blijft */
   guideOpen=false; active=null;
   lockSpotAudioBtn(3000);                            /* fail-safe: beluister-knop even op slot */
-  updateGuideMini(); }
-{ const o=$('#spotGuideOrb'); if(o){ o.onclick=openSpotGuide; o.addEventListener('contextmenu',e=>e.preventDefault()); } }
+  updateGuideOrb(); updateGuideMini(); }
 
 /* ===== Losse plekken: openen, nabijheid en ontgrendelen ===== */
 /* audio-fragmenten: audio/spots/{id}_{taal}.mp3, terugval naar en en daarna nl */
@@ -1145,7 +1147,7 @@ function openSpot(id){ const s=spotById[id]; if(!s) return;
   if(overGuide){ sheet.classList.add('info'); /* detail+guide blijven staan, info komt eroverheen */ }
   else { sheet.classList.remove('detail'); sheet.classList.add('info'); }
   setH(snaps()[1]); const ib=$('.info-body'); if(ib) ib.scrollTop=0;
-  requestAnimationFrame(()=>requestAnimationFrame(updateInfoScrollCue)); updateGuideMini(); }
+  requestAnimationFrame(()=>requestAnimationFrame(updateInfoScrollCue)); updateGuideOrb(); updateGuideMini(); }
 /* subtiele scroll-hint: toon vervaging + pijltje zolang er nog tekst onder zit */
 function updateInfoScrollCue(){ const body=$('.info-body'), cue=$('#iScrollCue'); if(!body||!cue) return;
   const more=body.scrollHeight-body.clientHeight-body.scrollTop; cue.classList.toggle('show', more>24); }
@@ -1176,7 +1178,9 @@ let iSlideEls=[], iSlideIdx=0, iSlideTimer=null;
 function stopSpotSlides(){ if(iSlideTimer){ clearInterval(iSlideTimer); iSlideTimer=null; } }
 function buildSpotSlides(photos){ const wrap=$('#iSlides'), dots=$('#iDots'); if(!wrap) return; stopSpotSlides();
   wrap.innerHTML=''; dots.innerHTML=''; iSlideEls=[]; iSlideIdx=0;
-  photos.forEach((src,i)=>{ const im=document.createElement('img'); im.src=src; im.alt=''; im.loading=i?'lazy':'eager'; im.onerror=()=>{im.style.display='none';};
+  photos.forEach((src,i)=>{ const im=document.createElement('img'); im.alt=''; im.loading=i?'lazy':'eager'; im.onerror=()=>{im.style.display='none';};
+    const markPortrait=()=>{ if(im.naturalWidth && im.naturalHeight>im.naturalWidth) im.classList.add('portrait'); };
+    im.onload=markPortrait; im.src=src; if(im.complete) markPortrait();   /* verticale foto's: fit-to-frame */
     if(i===0) im.classList.add('on'); wrap.appendChild(im); iSlideEls.push(im);
     const dt=document.createElement('i'); if(i===0) dt.classList.add('on'); dt.onclick=e=>{ e.stopPropagation(); showSpotSlide(i); restartSpotTimer(); }; dots.appendChild(dt); });
   const md=$('#iMedia'); if(md) md.classList.toggle('multi', photos.length>1);
