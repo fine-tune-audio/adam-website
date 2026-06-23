@@ -371,9 +371,7 @@
   .spot-pin.horeca svg{width:15px;height:15px;color:var(--ink);}
   .spot-pin.unlocked{box-shadow:0 0 0 2px var(--lime),0 2px 6px rgba(0,0,0,.32);}
   /* 4:3-galerij in het info-paneel (zelfde stijl als de agents) */
-  .media.media-info{position:relative;top:auto;left:auto;right:auto;width:100%;aspect-ratio:4/3;background:#fff;margin-bottom:14px;}
-  /* staande (verticale) foto's passend in het 4:3-frame, witte zijkanten i.p.v. bijsnijden */
-  .media-info .slides img.portrait{object-fit:contain;}
+  .media.media-info{position:relative;top:auto;left:auto;right:auto;width:100%;aspect-ratio:4/3;margin-bottom:14px;}
   /* alleen als de gids-overlay open is: foto kleiner zodat de gids meer ruimte krijgt */
   .sheet.spotguide .media.media-info{aspect-ratio:16/9;max-height:24vh;}
   .info-desc.locked-note{color:var(--ink-2);font-style:italic;}
@@ -554,8 +552,14 @@
   .sheet.spotguide .convo-view .chandle{display:none;}
   .sheet.spotguide .convo-view .cv-body{padding:8px 0 0;}
   .sheet.spotguide .convo-view .convo-panel{position:absolute;inset:0;top:0;background:transparent;box-shadow:none;border-radius:0;}
-  .sheet.spotguide .convo-view .convo{position:absolute;inset:0;overflow-y:auto;padding:8px 20px 4px;}
+  .sheet.spotguide .convo-view .convo{position:absolute;inset:0;overflow-y:auto;padding:6px 22px 4px;}
   .sheet.spotguide .cv-close{display:grid;}
+  /* nettere marges + plaatsing binnen de gids-overlay */
+  .sheet.spotguide .convo-view .cv-head{padding:18px 22px 10px;}
+  .sheet.spotguide .convo-view .cv-title .eyebrow{display:none;}     /* eyebrow weg: titel lijnt met het kruis */
+  .sheet.spotguide .convo-view .cstatus{padding:7px 22px 0;}
+  .sheet.spotguide #talk{align-self:flex-end;margin:2px 22px 2px 0;} /* tap-to-talk naar rechts */
+  .sheet.spotguide .convo-view .sugs{padding:10px 20px calc(12px + env(safe-area-inset-bottom));}
 </style>
 </head>
 <body>
@@ -1178,9 +1182,7 @@ let iSlideEls=[], iSlideIdx=0, iSlideTimer=null;
 function stopSpotSlides(){ if(iSlideTimer){ clearInterval(iSlideTimer); iSlideTimer=null; } }
 function buildSpotSlides(photos){ const wrap=$('#iSlides'), dots=$('#iDots'); if(!wrap) return; stopSpotSlides();
   wrap.innerHTML=''; dots.innerHTML=''; iSlideEls=[]; iSlideIdx=0;
-  photos.forEach((src,i)=>{ const im=document.createElement('img'); im.alt=''; im.loading=i?'lazy':'eager'; im.onerror=()=>{im.style.display='none';};
-    const markPortrait=()=>{ if(im.naturalWidth && im.naturalHeight>im.naturalWidth) im.classList.add('portrait'); };
-    im.onload=markPortrait; im.src=src; if(im.complete) markPortrait();   /* verticale foto's: fit-to-frame */
+  photos.forEach((src,i)=>{ const im=document.createElement('img'); im.src=src; im.alt=''; im.loading=i?'lazy':'eager'; im.onerror=()=>{im.style.display='none';};
     if(i===0) im.classList.add('on'); wrap.appendChild(im); iSlideEls.push(im);
     const dt=document.createElement('i'); if(i===0) dt.classList.add('on'); dt.onclick=e=>{ e.stopPropagation(); showSpotSlide(i); restartSpotTimer(); }; dots.appendChild(dt); });
   const md=$('#iMedia'); if(md) md.classList.toggle('multi', photos.length>1);
