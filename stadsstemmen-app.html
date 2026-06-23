@@ -128,7 +128,7 @@
   .list-head .eb{font-size:11px;font-weight:700;letter-spacing:.04em;color:var(--muted);}
   .list-head .ttl{font-family:'Schibsted Grotesk';font-weight:800;font-size:28px;letter-spacing:-.03em;line-height:1.04;margin-top:5px;}
   .cards{flex:1;overflow-y:auto;padding:2px 16px 24px;display:flex;flex-direction:column;gap:11px;}
-  .cards::-webkit-scrollbar{width:6px;}.cards::-webkit-scrollbar-thumb{background:var(--line);border-radius:9px;}
+  .cards{scrollbar-width:none;}.cards::-webkit-scrollbar{display:none;}
   .card{display:flex;align-items:center;gap:16px;padding:16px 16px 16px 20px;border-radius:18px;cursor:pointer;
     background:var(--surface-solid);border:1px solid var(--line);transition:.16s;box-shadow:0 2px 8px rgba(0,0,0,.04);}
   .card:hover{box-shadow:0 8px 22px rgba(0,0,0,.10);transform:translateY(-1px);}
@@ -143,7 +143,8 @@
   .info-view{flex:1;display:none;flex-direction:column;min-height:0;position:relative;}
   .sheet.info .list-view{display:none;}
   .sheet.info .info-view{display:flex;}
-  .info-body{flex:1;overflow-y:auto;padding:18px 24px 8px;}
+  .info-body{flex:1;overflow-y:auto;padding:18px 24px 8px;scrollbar-width:none;}
+  .info-body::-webkit-scrollbar{display:none;}
   .info-desc{font-size:15px;line-height:1.6;color:var(--ink-2);}
   .info-foot{padding:12px 18px calc(18px + env(safe-area-inset-bottom));}
   /* subtiele scroll-hint: zachte vervaging onderaan + klein dalend pijltje, verdwijnt bij het einde */
@@ -221,7 +222,7 @@
   @keyframes micpulse{0%,100%{box-shadow:0 4px 14px rgba(159,206,28,.5);}50%{box-shadow:0 4px 22px rgba(159,206,28,.95);}}
 
   .convo{flex:1;overflow-y:auto;padding:4px 20px 6px;display:flex;flex-direction:column;gap:11px;min-height:0;}
-  .convo::-webkit-scrollbar{width:6px;}.convo::-webkit-scrollbar-thumb{background:var(--line);border-radius:9px;}
+  .convo{scrollbar-width:none;}.convo::-webkit-scrollbar{display:none;}
   .msg{max-width:84%;padding:12px 16px;border-radius:17px;line-height:1.5;font-size:14.5px;animation:rise .3s ease both;}
   @keyframes rise{from{opacity:0;transform:translateY(7px);}to{opacity:1;transform:none;}}
   .msg.them{align-self:flex-start;background:var(--surface-solid);border:1px solid var(--line);border-top-left-radius:5px;font-family:'Schibsted Grotesk';font-weight:600;}
@@ -537,7 +538,7 @@
     box-shadow:0 12px 30px rgba(0,0,0,.42),0 2px 8px rgba(0,0,0,.25),inset 0 2px 6px rgba(255,255,255,.12);}
   .guide-orb.spotmode::before{border-color:rgba(255,255,255,.35);}
   /* in de gids-overlay geen terug-pijl: het kruisje is genoeg */
-  .sheet.spotguide .cv-head .back{display:none;}
+  .sheet.spotguide .convo-view .back{display:none;}
   /* fail-safe: beluister-knop even op slot na het sluiten van de gids */
   .sa-audio.locked{opacity:.45;pointer-events:none;}
 
@@ -558,7 +559,7 @@
   .sheet.spotguide .convo-view .cv-head{padding:18px 22px 10px;}
   .sheet.spotguide .convo-view .cv-title .eyebrow{display:none;}     /* eyebrow weg: titel lijnt met het kruis */
   .sheet.spotguide .convo-view .cstatus{padding:7px 22px 0;}
-  .sheet.spotguide #talk{align-self:flex-end;margin:2px 22px 2px 0;} /* tap-to-talk naar rechts */
+  .sheet.spotguide #talk{align-self:flex-start;margin:2px 0 2px 22px;} /* tap-to-talk links, maar van de rand af */
   .sheet.spotguide .convo-view .sugs{padding:10px 20px calc(12px + env(safe-area-inset-bottom));}
 </style>
 </head>
@@ -699,6 +700,8 @@
         <div class="info-body">
           <div class="media media-info" id="iMedia" style="display:none">
             <div class="slides" id="iSlides"></div>
+            <button class="marrow prev" id="iPrev" aria-label="Vorige foto"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></button>
+            <button class="marrow next" id="iNext" aria-label="Volgende foto"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
             <div class="mdots" id="iDots"></div>
           </div>
           <div class="spot-actions" id="iActions" style="display:none">
@@ -899,7 +902,12 @@ window.addEventListener('pointerup',()=>{if(!dragging)return;dragging=false;
   else setH(target);});
 function syncSetup(){ const sp=$('#setup'); if(sp&&!sp.classList.contains('hide')) sp.style.bottom=(sheet.offsetHeight+14)+'px'; }
 /* orb + gids-balk net boven de ingeklapte slide laten zweven (anders staan ze te laag op mobiel) */
-function positionFloaters(){ try{ const b=(snaps()[0]+16)+'px'; const o=document.querySelector('#guideOrb'); if(o) o.style.bottom=b; const gm=document.querySelector('#guideMini'); if(gm) gm.style.bottom=b; }catch(e){} }
+/* Hoogte van de gids-orb binnen een plek-slide, in px vanaf de onderrand.
+   Lager getal = orb lager op het scherm, hoger getal = hoger. Pas dit aan naar smaak. */
+const GIDS_ORB_PLEK_BODEM = 26;
+function positionFloaters(){ try{ const b=(snaps()[0]+16)+'px'; const o=document.querySelector('#guideOrb');
+  if(o) o.style.bottom = o.classList.contains('spotmode') ? (GIDS_ORB_PLEK_BODEM+'px') : b;   /* in een plek lager, anders boven de ingeklapte sheet */
+  const gm=document.querySelector('#guideMini'); if(gm) gm.style.bottom=b; }catch(e){} }
 setTimeout(()=>setH(snaps()[0],false),60);
 window.addEventListener('resize',()=>setH(nearest(sheet.offsetHeight),false));
 if(map) map.on('click',()=>{ if(sheet.classList.contains('over')) return; if(guideOpen){ minimizeGuide(); return; } if(activeSpot){ closeToList(); return; } if(!sheet.classList.contains('detail') && !sheet.classList.contains('info')) setH(snaps()[0]); });
@@ -1008,6 +1016,7 @@ function updateGuideOrb(){ const o=$('#guideOrb'); if(!o) return;
   const spotOpen  = sheet.classList.contains('info') && !overlay; // plek-slide open, overlay dicht
   o.classList.toggle('hide', fullGuide || overlay || sheet.classList.contains('over'));
   o.classList.toggle('spotmode', spotOpen);                    // in een plek: zwart + boven de sheet
+  positionFloaters();                                          // hoogte aanpassen aan de context
 }
 /* orb-klik: in een plek -> gids-overlay; anders -> standaard gids-menu */
 function onGuideOrbClick(){ if(sheet.classList.contains('info') && !sheet.classList.contains('spotguide')) openSpotGuide(); else openGuide(); }
