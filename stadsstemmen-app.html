@@ -117,8 +117,8 @@
     background:var(--surface);backdrop-filter:blur(30px) saturate(1.4);-webkit-backdrop-filter:blur(30px) saturate(1.4);
     border-top:1px solid var(--glass-brd);border-radius:30px 30px 0 0;
     box-shadow:0 -18px 50px rgba(0,0,0,.18), 0 -1px 0 rgba(255,255,255,.8) inset;display:flex;flex-direction:column;overflow:hidden;}
-  .drag{flex-shrink:0;cursor:grab;touch-action:none;padding:18px 0 16px;}
-  .drag:active{cursor:grabbing;}
+  .drag{flex-shrink:0;padding:14px 0 2px;}
+  .drag .grip{display:none;}   /* geen sleep-greep meer: openen via tik, inklappen via terug-pijl */
   .grip{width:48px;height:6px;border-radius:9px;background:rgba(20,21,15,.22);margin:0 auto;}
 
   /* lijst */
@@ -141,8 +141,12 @@
 
   /* gesprek */
   .info-view{flex:1;display:none;flex-direction:column;min-height:0;position:relative;}
-  .sheet.info .list-view{display:none;}
   .sheet.info .info-view{display:flex;}
+  /* ingeklapt menu: alleen de titel; terug-pijl, deelstreep en alle inhoud verdwijnen */
+  .sheet.collapsed .info-view .back{display:none;}
+  .sheet.collapsed .info-view .cv-head{border-bottom-color:transparent;}
+  .sheet.collapsed .info-view .info-body,
+  .sheet.collapsed .info-view .info-foot{display:none;}
   .info-body{flex:1;overflow-y:auto;padding:18px 24px 8px;scrollbar-width:none;}
   .info-body::-webkit-scrollbar{display:none;}
   .info-desc{font-size:15px;line-height:1.6;color:var(--ink-2);}
@@ -255,8 +259,9 @@
   .setup.hide{display:none;}
   /* ===== WELKOMSTSCHERM + TAALKIEZER ===== */
   .welcome{position:absolute;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;padding:16px;
-    background:rgba(20,21,15,.55);-webkit-backdrop-filter:blur(7px);backdrop-filter:blur(7px);}
-  .welcome.hide{display:none;}
+    background:rgba(20,21,15,.55);-webkit-backdrop-filter:blur(7px);backdrop-filter:blur(7px);
+    transition:opacity .45s ease;}
+  .welcome.hide{opacity:0;pointer-events:none;}   /* uitfaden naar de uitleg toe */
   .wcard{width:100%;max-width:420px;max-height:96%;overflow-y:auto;background:var(--surface-solid);border-radius:23px;
     padding:21px 21px;box-shadow:0 30px 80px rgba(0,0,0,.45);border:1px solid var(--glass-brd);}
   .wcard .eb{font-family:'Schibsted Grotesk';font-weight:800;font-size:10.5px;letter-spacing:.12em;color:var(--ink-2);text-transform:uppercase;}
@@ -284,6 +289,42 @@
     font-family:'Schibsted Grotesk';font-weight:800;font-size:15.5px;letter-spacing:-.01em;color:var(--ink);
     background:linear-gradient(135deg,var(--lime-l),var(--lime) 55%,var(--lime-d));box-shadow:0 8px 22px rgba(159,206,28,.5);}
   .wstart:active{transform:scale(.99);}.wstart svg{width:19px;height:19px;}
+
+  /* ===== INTRODUCTIE / COACH-MARKS ===== */
+  .intro{position:absolute;inset:0;z-index:60;opacity:0;visibility:hidden;pointer-events:none;
+    transition:opacity .45s ease, visibility 0s linear .45s;}   /* infaden vanuit het welkomstscherm, uitfaden bij sluiten */
+  .intro.show{opacity:1;visibility:visible;pointer-events:auto;transition:opacity .45s ease;}
+  .intro-hole{position:absolute;left:50%;top:50%;width:2px;height:2px;border-radius:16px;
+    box-shadow:0 0 0 9999px rgba(20,21,15,.66);border:2.5px solid var(--lime);
+    transition:left .55s cubic-bezier(.22,1,.36,1),top .55s cubic-bezier(.22,1,.36,1),width .55s cubic-bezier(.22,1,.36,1),height .55s cubic-bezier(.22,1,.36,1),border-color .4s ease;
+    pointer-events:none;}
+  .intro.center .intro-hole{border-color:transparent;}
+  /* Overslaan: linksboven (weg bij de Demo/Live-knop) en groen voor duidelijkheid */
+  .intro-skip{position:absolute;top:16px;left:16px;z-index:3;cursor:pointer;
+    padding:10px 18px;border-radius:999px;border:none;
+    background:linear-gradient(135deg,var(--lime-l),var(--lime) 55%,var(--lime-d));color:var(--ink);
+    font-family:'Schibsted Grotesk';font-weight:800;font-size:12.5px;box-shadow:0 8px 20px rgba(159,206,28,.5);}
+  .intro-skip:active{transform:scale(.96);}
+  .intro-card{position:absolute;z-index:2;width:min(86%,330px);background:var(--surface-solid);border:1px solid var(--glass-brd);
+    border-radius:18px;padding:16px 17px 14px;box-shadow:0 24px 60px rgba(0,0,0,.4);
+    transition:left .55s cubic-bezier(.22,1,.36,1),top .55s cubic-bezier(.22,1,.36,1);}
+  .intro-card .intro-step{font-family:'Schibsted Grotesk';font-weight:800;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--lime-d);}
+  .intro-card h3{font-family:'Schibsted Grotesk';font-weight:800;font-size:18px;line-height:1.1;color:var(--ink);margin:5px 0 0;}
+  .intro-card p{font-size:13px;line-height:1.42;color:var(--ink-2);margin-top:7px;}
+  .intro-nav{display:flex;align-items:center;gap:10px;margin-top:14px;}
+  .intro-dots{display:flex;gap:5px;flex:1;justify-content:center;}
+  .intro-dots i{width:6px;height:6px;border-radius:50%;background:var(--line);transition:.2s;}
+  .intro-dots i.on{background:var(--lime-d);width:16px;border-radius:3px;}
+  .intro-prev{border:none;background:transparent;cursor:pointer;color:var(--muted);font-family:'Hanken Grotesk';font-weight:700;font-size:13px;padding:8px 4px;}
+  .intro-prev[disabled]{opacity:0;pointer-events:none;}
+  .intro-next{border:none;cursor:pointer;display:flex;align-items:center;gap:7px;padding:11px 16px;border-radius:12px;
+    font-family:'Schibsted Grotesk';font-weight:800;font-size:13.5px;color:var(--ink);
+    background:linear-gradient(135deg,var(--lime-l),var(--lime) 55%,var(--lime-d));box-shadow:0 6px 16px rgba(159,206,28,.45);}
+  .intro-next:active{transform:scale(.97);}
+  /* respecteer 'minder beweging' en voorkom dat een bevroren transitie de uitleg onzichtbaar laat */
+  @media (prefers-reduced-motion: reduce){
+    .welcome,.intro,.intro.show,.intro-hole,.intro-card{transition-duration:0s !important;}
+  }
 
   /* ===== NIEUW: geluidsknop ===== */
   .top-r{display:flex;align-items:center;gap:10px;}
@@ -679,18 +720,25 @@
     <!-- Achtergrondmuziek welkomstscherm -->
     <audio id="welcomeAudio" loop preload="auto" src="audio/welkom.mp3"></audio>
 
+    <!-- Visuele introductie (coach-marks) -->
+    <div class="intro" id="introOverlay" aria-hidden="true">
+      <div class="intro-hole" id="introHole"></div>
+      <button class="intro-skip" id="introSkip"></button>
+      <div class="intro-card" id="introCard">
+        <div class="intro-step" id="introStep"></div>
+        <h3 id="introTitle"></h3>
+        <p id="introBody"></p>
+        <div class="intro-nav">
+          <button class="intro-prev" id="introPrev"></button>
+          <div class="intro-dots" id="introDots"></div>
+          <button class="intro-next" id="introNext"></button>
+        </div>
+      </div>
+    </div>
+
     <!-- SLEEPBAAR PANEEL -->
     <div class="sheet" id="sheet">
       <div class="drag" id="drag"><div class="grip"></div></div>
-
-      <div class="list-view">
-        <div class="list-head"><div><div class="eb" data-i18n="listEb">5 stemmen · binnenstad</div><div class="ttl" data-i18n="listTtl">Plekken in de buurt</div></div>
-          <div class="lh-prog" id="lhProg" title="Bezocht">
-            <div class="ring"><svg viewBox="0 0 36 36"><circle class="bg" cx="18" cy="18" r="15.5"></circle><circle class="fg" id="progRing" cx="18" cy="18" r="15.5" stroke-dasharray="97.4" stroke-dashoffset="97.4"></circle></svg></div>
-            <div class="pt"><span id="progCount">0</span>/<span id="progTotal">5</span><small data-i18n="progLabel">bezocht</small></div>
-          </div></div>
-        <div class="cards" id="cards"></div>
-      </div>
 
       <div class="info-view">
         <div class="cv-head">
@@ -725,7 +773,6 @@
           <p class="info-desc" id="iDesc"></p>
         </div>
         <div class="info-foot" id="iFoot"></div>
-        <div class="info-scrollcue" id="iScrollCue" aria-hidden="true"><span class="chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span></div>
       </div>
 
       <div class="convo-view">
@@ -805,6 +852,7 @@ const geoEnterAt=Object.create(null);   // plek-id -> tijdstip van binnenkomst (
 function resetGeoState(){ geoInside.clear(); Object.keys(geoEnterAt).forEach(k=>delete geoEnterAt[k]); }
 const SPOT_AUDIO_VOLUME=0.7;  // volume van de plek-audiofragmenten (0 = stil, 1 = max). Pas dit aan als ze te hard zijn.
 let activeSpot=null;
+let lastSpot=null;   /* laatst geopende plek: blijft het 'menu in beeld', ook nadat de gids activeSpot wist */
 
 const $=s=>document.querySelector(s);
 
@@ -820,13 +868,14 @@ const _micStreams=new Set();
 }catch(e){} })();
 function releaseAllMics(){ try{ _micStreams.forEach(s=>{ try{ s.getTracks().forEach(t=>{ try{ t.stop(); }catch(_){} }); }catch(_){} }); _micStreams.clear(); }catch(e){} }
 let active=null, mode='demo', watch=null, liveMe=null, demoMe=null, demoZone=null, livePos=null, canTalk=false;
-let soundOn=true, heading=null, headingOn=false, textOnly=false, liveNeedsCenter=false;
+let soundOn=true, heading=null, headingOn=false, textOnly=false, liveNeedsCenter=false, tourStarted=false;
 const SHOW_TEXTONLY_TOGGLE=false;  // op true zetten om de tekst-modus-knop te tonen
 const SHOW_SOUND_TOGGLE=false;     // op true zetten om de geluidsknop (muziek + stem) te tonen
 const MAP_ZOOM_BOOST=1;            // hoeveel verder de kaart inzoomt bij de start (0 = passend; elke fijne waarde werkt, bv. 0.3, 0.6, 1.2)
-const DEMO_CURSOR_START=[53.2162,6.5672];  // startplek van de demo-cursor [breedtegraad, lengtegraad]
+const DEMO_CURSOR_START=[53.2168,6.5672];  // startplek van de demo-cursor [breedtegraad, lengtegraad]
 const MAP_START_CENTER=[53.2176,6.5672];       // null = past alle plekken in beeld (zoals nu). Of vaste positie, bv. [53.2188,6.5677]
 const MAP_START_ZOOM=16.1;         // zoomniveau wanneer MAP_START_CENTER is ingesteld
+const INTRO_END_ZOOM=17;           // zoomniveau waarop de kaart inzoomt zodra de intro klaar/overgeslagen is (fijn instelbaar, bv. 16.6, 17.4)
 const LIVE_AUTO_CENTER=true;       // true = bij het kiezen van Live centreert de kaart op je huidige locatie
 const LIVE_CENTER_ZOOM=17;         // zoomniveau waarop live-modus op je locatie inzoomt (fijn instelbaar, bv. 16.5, 17.4)
 const LIVE_FOLLOW=false;           // true = de kaart blijft je volgen terwijl je loopt; false = centreert alleen één keer
@@ -885,32 +934,43 @@ function applyDemoView(animate){ if(!map) return; try{ map.invalidateSize();
 /* ===== SLIDE ===== */
 const sheet=$('#sheet'), dragEl=$('#drag');
 const appH=()=>sheet.parentElement.clientHeight;
-function downH(){ const dr=document.querySelector('.drag'), lh=document.querySelector('.list-head');
-  if(lh && lh.offsetHeight>0) return (dr?dr.offsetHeight:38) + lh.offsetHeight;
-  return Math.round(0.18*appH()); }
+/* Ingeklapte hoogte. Kaart-first: zonder open plek is de sheet weg (kaart vult het scherm).
+   Met een open plek toont 'peek' alleen de plek-header (greep + naam + terug) zodat je hem
+   kunt aantikken om weer omhoog te halen. */
+function downH(){ const dr=document.querySelector('.drag'); const drH=dr?dr.offsetHeight:0;
+  if(sheet.classList.contains('info')){ const head=document.querySelector('.info-view .cv-head');
+    if(head && head.offsetHeight>0) return drH + head.offsetHeight; }
+  return 0; }
 const snaps=()=>[downH(), Math.round(0.92*appH())];
 function nearest(h){return snaps().reduce((a,b)=>Math.abs(b-h)<Math.abs(a-h)?b:a);}
-function setH(h,anim=true){ sheet.style.transition=anim?'height .4s cubic-bezier(.22,1,.36,1)':'none'; sheet.style.height=h+'px'; syncSetup(); positionFloaters(); updateVoiceFab(); try{updateInfoScrollCue();}catch(_){} }
-let dragging=false,sy=0,sh=0;
-function startDrag(e){dragging=true;sy=e.clientY;sh=sheet.offsetHeight;sheet.style.transition='none';try{e.currentTarget.setPointerCapture(e.pointerId);}catch(_){}}
-dragEl.addEventListener('pointerdown',startDrag);
-document.querySelector('.list-head').addEventListener('pointerdown',startDrag);
-window.addEventListener('pointermove',e=>{if(!dragging)return;const s=snaps();let h=sh+(sy-e.clientY);h=Math.max(s[0]*0.6,Math.min(s[s.length-1],h));sheet.style.height=h+'px';syncSetup();});
+function setH(h,anim=true){ sheet.style.transition=anim?'height .4s cubic-bezier(.22,1,.36,1)':'none'; sheet.style.height=h+'px';
+  /* ingeklapt = alleen de titel; stuurt ook de orb-kleur (groen op de kaart, zwart in een open plek) */
+  sheet.classList.toggle('collapsed', sheet.classList.contains('info') && h<=downH()+4);
+  syncSetup(); positionFloaters(); updateVoiceFab(); try{updateGuideOrb();}catch(_){} }
+let dragging=false,sy=0,sh=0,dragMoved=false;
+function startDrag(e){dragging=true;dragMoved=false;sy=e.clientY;sh=sheet.offsetHeight;sheet.style.transition='none';try{e.currentTarget.setPointerCapture(e.pointerId);}catch(_){}}
+/* slepen uitgeschakeld: openen via tik op de balk, inklappen via de terug-pijl */
+window.addEventListener('pointermove',e=>{if(!dragging)return;const s=snaps();let h=sh+(sy-e.clientY);if(Math.abs(e.clientY-sy)>5)dragMoved=true;h=Math.max(s[0]*0.6,Math.min(s[s.length-1],h));sheet.style.height=h+'px';syncSetup();});
 window.addEventListener('pointerup',()=>{if(!dragging)return;dragging=false;
   const target=nearest(sheet.offsetHeight);
   if(guideOpen && !sheet.classList.contains('over') && target===snaps()[0]){ minimizeGuide(); }
   else setH(target);});
+/* Tik op de ingeklapte plek-balk om hem weer omhoog te halen (naast slepen). */
+sheet.addEventListener('click',e=>{ if(dragMoved){ dragMoved=false; return; }
+  if(!sheet.classList.contains('info')) return;
+  if(e.target.closest('.back,button,input,select,a,.sp-seek,.marrow,.mdots')) return;
+  if(sheet.offsetHeight <= snaps()[0]+24) setH(snaps()[1]); });
 function syncSetup(){ const sp=$('#setup'); if(sp&&!sp.classList.contains('hide')) sp.style.bottom=(sheet.offsetHeight+14)+'px'; }
 /* orb + gids-balk net boven de ingeklapte slide laten zweven (anders staan ze te laag op mobiel) */
 /* Hoogte van de gids-orb binnen een plek-slide, in px vanaf de onderrand.
    Lager getal = orb lager op het scherm, hoger getal = hoger. Pas dit aan naar smaak. */
-const GIDS_ORB_PLEK_BODEM = 127;
-function positionFloaters(){ try{ const b=(snaps()[0]+16)+'px'; const o=document.querySelector('#guideOrb');
+const GIDS_ORB_PLEK_BODEM = 99;
+function positionFloaters(){ try{ const b=(Math.max(snaps()[0],80)+16)+'px'; const o=document.querySelector('#guideOrb');
   if(o) o.style.bottom = o.classList.contains('spotmode') ? (GIDS_ORB_PLEK_BODEM+'px') : b;   /* in een plek lager, anders boven de ingeklapte sheet */
   const gm=document.querySelector('#guideMini'); if(gm) gm.style.bottom=b; }catch(e){} }
 setTimeout(()=>setH(snaps()[0],false),60);
 window.addEventListener('resize',()=>setH(nearest(sheet.offsetHeight),false));
-if(map) map.on('click',()=>{ if(sheet.classList.contains('over')) return; if(guideOpen){ minimizeGuide(); return; } if(activeSpot){ closeToList(); return; } if(!sheet.classList.contains('detail') && !sheet.classList.contains('info')) setH(snaps()[0]); });
+if(map) map.on('click',()=>{ if(sheet.classList.contains('over')) return; if(guideOpen){ minimizeGuide(); return; } if(activeSpot){ setH(snaps()[0]); return; } if(!sheet.classList.contains('detail') && !sheet.classList.contains('info')) setH(snaps()[0]); });
 
 /* ===== ZWEVENDE SPRAAKKNOP ===== */
 const voiceFab=$('#voiceFab');
@@ -922,17 +982,11 @@ function showConvoPanel(){ if(!active) return; const z=ZONES.find(x=>x.id===acti
 function minimizeConvo(){ sheet.classList.remove('detail'); sheet.classList.remove('info'); setH(snaps()[0]); updateVoiceFab(); }
 voiceFab.onclick=()=>{ if(guideOpen) showGuidePanel(); else showConvoPanel(); };
 
-/* ===== KAARTEN ===== */
-const cardsEl=$('#cards');
+/* ===== KAARTEN (lijst verwijderd; kaart-first — plekken open je via de pins op de kaart) ===== */
 const cardById={};
-ZONES.forEach((z,i)=>{
-  const c=document.createElement('div'); c.className='card';
-  c.innerHTML=`<div class="meta"><div class="num">0${i+1}</div><div class="nm">${z.name}</div><div class="done"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg><span data-i18n="cardDone">Bezocht</span></div></div><div class="go"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h14"/><path d="M13 6l6 6-6 6"/></svg></div>`;
-  c.onclick=()=>openSpot(z.id); cardsEl.appendChild(c); cardById[z.id]=c;
-});
 
 /* ===== MODUS ===== */
-function setMode(m){ mode=m; $('#mLive').classList.toggle('on',m==='live'); $('#mDemo').classList.toggle('on',m==='demo');
+function setMode(m){ if(m==='live') tourStarted=true; mode=m; $('#mLive').classList.toggle('on',m==='live'); $('#mDemo').classList.toggle('on',m==='demo');
   $('#eyebrow').textContent=m==='live'?'Je staat bij':'Demo · je bezoekt';
   if(m==='live'){ hideDemoMe(); $('#maphint').classList.add('hide'); primeMic(); startGeo(); startCompass();
     if(LIVE_AUTO_CENTER){ liveNeedsCenter=true; if(map && livePos){ map.setView([livePos.lat,livePos.lng],LIVE_CENTER_ZOOM,{animate:true}); liveNeedsCenter=false; } } }
@@ -958,15 +1012,19 @@ function hideDemoMe(){ if(demoMe&&map){map.removeLayer(demoMe);demoMe=null;} dem
 /* ===== OPENEN / SLUITEN ===== */
 function closeToList(){ stopVoice(); stopSpotAudio(); stopSlides(); stopSpotSlides(); setActiveMarker(null);
   clearTimeout(windDownTimer); guideWindingDown=false; guideMinimized=false;
-  active=null; activeSpot=null; guideOpen=false;
-  sheet.classList.remove('detail'); sheet.classList.remove('info'); sheet.classList.remove('voice'); sheet.classList.remove('guide'); sheet.classList.remove('over'); sheet.classList.remove('spotguide'); setH(snaps()[0]);
+  active=null; guideOpen=false;
+  sheet.classList.remove('detail','voice','guide','over','spotguide');
+  /* kaart-first: er blijft altijd een menu in beeld -> val terug op de huidige/laatste plek, ingeklapt */
+  restoreMenuPeek();
   if(mode==='demo'){ $('#maphint').classList.remove('hide'); } updateGuideOrb(); updateGuideMini(); updateNavHud(); }
 /* sluit de plek-overlay: terug naar de gids eronder, of naar de lijst */
 function closeSpotOverlay(){ stopSpotAudio(); stopSpotSlides(); activeSpot=null;
   if(sheet.classList.contains('over')){ sheet.classList.remove('over','info'); showGuidePanel(); updateGuideOrb(); updateGuideMini(); }
   else { closeToList(); } }
 $('#back').onclick=()=>{ if(sheet.classList.contains('spotguide')) return closeSpotGuide(); if(guideOpen) minimizeGuide(); else closeToList(); };
-$('#backInfo').onclick=closeSpotOverlay;
+/* terug-pijl in een plek: niet sluiten maar inklappen tot het peek-menu (audio loopt door).
+   Is de plek over de gids heen geopend, dan keren we terug naar de gids eronder. */
+$('#backInfo').onclick=()=>{ if(sheet.classList.contains('over')) return closeSpotOverlay(); setH(snaps()[0]); };
 { const gc=$('#guideClose'); if(gc) gc.onclick=()=>{ if(sheet.classList.contains('spotguide')) return closeSpotGuide(); stopGuideNow(); }; }
 { const gx=$('#guideMiniX'); if(gx) gx.onclick=(e)=>{ e.stopPropagation(); stopGuideNow(); }; }
 if(guideMini) guideMini.onclick=()=>showGuidePanel();
@@ -989,11 +1047,11 @@ function updateGuideMini(){ if(!guideMini) return;
 /* het verhaal afmaken en dan de gids stoppen */
 function finishGuideWindDown(){ clearTimeout(windDownTimer); guideWindingDown=false; guideWdSpoke=false;
   stopVoice();
-  if(!sheet.classList.contains('over') && guideMinimized){ guideOpen=false; guideMinimized=false; updateGuideOrb(); }
+  if(!sheet.classList.contains('over') && guideMinimized){ guideOpen=false; guideMinimized=false; restoreMenuPeek(); updateGuideOrb(); }
   updateGuideMini(); }
 /* gids in de achtergrond laten uitpraten (mic uit, sessie eindigt na de huidige zin) */
 function windDownGuide(){
-  if(!(elSession||elConnecting)){ if(!sheet.classList.contains('over') && guideMinimized){ guideOpen=false; guideMinimized=false; updateGuideOrb(); } updateGuideMini(); return; }
+  if(!(elSession||elConnecting)){ if(!sheet.classList.contains('over') && guideMinimized){ guideOpen=false; guideMinimized=false; restoreMenuPeek(); updateGuideOrb(); } updateGuideMini(); return; }
   guideWindingDown=true; guideWdSpoke=false; pushHolding=false; guideMicMuted(true);
   const t=$('#talk'); if(t) t.classList.remove('live');
   clearTimeout(windDownTimer);
@@ -1013,7 +1071,7 @@ function stopGuideNow(){ clearTimeout(windDownTimer); guideWindingDown=false; gu
 function updateGuideOrb(){ const o=$('#guideOrb'); if(!o) return;
   const fullGuide = sheet.classList.contains('guide');         // standaard gids-menu open
   const overlay   = sheet.classList.contains('spotguide');     // gids-overlay binnen een plek open
-  const spotOpen  = sheet.classList.contains('info') && !overlay; // plek-slide open, overlay dicht
+  const spotOpen  = sheet.classList.contains('info') && !sheet.classList.contains('collapsed') && !overlay; // plek UITGEklapt (ingeklapt = groen op de kaart)
   o.classList.toggle('hide', fullGuide || overlay || sheet.classList.contains('over'));
   o.classList.toggle('spotmode', spotOpen);                    // in een plek: zwart + boven de sheet
   positionFloaters();                                          // hoogte aanpassen aan de context
@@ -1116,7 +1174,8 @@ function updateCue(){ const a=spotAudio; if(!a||!cueSpans.length||!cueTotal) ret
   const target=(a.currentTime/d)*cueTotal; let idx=cueRanges.findIndex(r=>target<r[1]); if(idx<0) idx=cueSpans.length-1;
   if(idx===cueIdx) return; cueIdx=idx;
   cueSpans.forEach((s,n)=>s.classList.toggle('cue-now', n===idx)); maybeAutoScroll(cueSpans[idx]); }
-function maybeAutoScroll(sp){ const body=$('.info-body'); if(!body||!sp||!sp.getBoundingClientRect) return;
+function maybeAutoScroll(sp){ if(sheet.classList.contains('collapsed')) return; /* ingeklapt: niet scrollen, anders duwt de transcriptie de titel weg */
+  const body=$('.info-body'); if(!body||!sp||!sp.getBoundingClientRect) return;
   if(Date.now()-userScrolledAt<4000) return; /* gebruiker scrollde net zelf: niet overrulen */
   const br=body.getBoundingClientRect(), sr=sp.getBoundingClientRect();
   if(sr.top<br.top+8 || sr.bottom>br.bottom-8){ lastAutoScroll=Date.now(); try{ sp.scrollIntoView({block:'center',behavior:'smooth'}); }catch(_){} } }
@@ -1131,14 +1190,18 @@ function maybeAutoScroll(sp){ const body=$('.info-body'); if(!body||!sp||!sp.get
 function spotNear(s){ const p=curPos(); if(!p) return false;
   if(s.type==='agent'&&s.polygon) return inPoly(p.lat,p.lng,s.polygon);
   if(!s.point) return false; return haversine(p.lat,p.lng,s.point[0],s.point[1])<=SPOT_RADIUS; }
-function openSpot(id){ const s=spotById[id]; if(!s) return;
+/* toon een plek als ingeklapt menu (kaart-first: er is altijd een menu in beeld) */
+function showSpotPeek(id){ if(!spotById[id]) return; openSpot(id, true); setH(snaps()[0], false); }
+/* val terug op een ingeklapt menu: huidige plek, anders de laatst geopende, anders de eerste */
+function restoreMenuPeek(){ const id=(activeSpot&&spotById[activeSpot])?activeSpot:((lastSpot&&spotById[lastSpot])?lastSpot:(ZONES[0]&&ZONES[0].id)); if(id) showSpotPeek(id); else { sheet.classList.remove('info'); setH(snaps()[0]); } }
+function openSpot(id, noPan){ const s=spotById[id]; if(!s) return;
   const overGuide = guideOpen || elSession || elConnecting;
   if(overGuide){ stopVoice(); sheet.classList.add('over'); /* gids verbreekt netjes; plek-slide valt eroverheen */ }
   else { if(elSession||elConnecting) stopVoice(); guideOpen=false; guideMinimized=false; sheet.classList.remove('guide','over'); active=null; }
   const unlocked = unlockedSpots.has(id) || spotNear(s); if(unlocked){ unlockedSpots.add(id); persistProgress(); }
   if(unlocked && s.type==='agent') markVisited(id);
   stopSpotAudio(); /* audio niet meer automatisch; pas afspelen bij klik op de knop */
-  activeSpot=id; $('#maphint').classList.add('hide'); updateGuideOrb();
+  activeSpot=id; lastSpot=id; $('#maphint').classList.add('hide'); updateGuideOrb();
   $('#iEyebrow').textContent = s.type==='horeca'?tr('catHoreca'):(s.type==='agent'?tr('catMain'):tr('catSight'));
   $('#iName').textContent=s.name; const ch=$('#iChar'); ch.textContent=''; ch.style.display='none';
   const all=(s.photos||[]); const shown = unlocked ? all : all.slice(0,1);
@@ -1156,13 +1219,14 @@ function openSpot(id){ const s=spotById[id]; if(!s) return;
   }
   { const rb=$('#iRouteBtn'); if(rb) rb.onclick=()=>askRoute(s); updateRouteBtn(); }
   $('#iFoot').innerHTML='';
-  if(map && s.point) map.panTo(s.point,{animate:true});
+  if(map && s.point && !noPan) map.panTo(s.point,{animate:true});
   if(overGuide){ sheet.classList.add('info'); /* detail+guide blijven staan, info komt eroverheen */ }
   else { sheet.classList.remove('detail'); sheet.classList.add('info'); }
   setH(snaps()[1]); const ib=$('.info-body'); if(ib) ib.scrollTop=0;
   requestAnimationFrame(()=>requestAnimationFrame(updateInfoScrollCue)); updateGuideOrb(); updateGuideMini(); }
 /* subtiele scroll-hint: toon vervaging + pijltje zolang er nog tekst onder zit */
 function updateInfoScrollCue(){ const body=$('.info-body'), cue=$('#iScrollCue'); if(!body||!cue) return;
+  if(sheet.offsetHeight <= snaps()[0]+24){ cue.classList.remove('show'); return; } /* ingeklapte peek: geen scroll-hint */
   const more=body.scrollHeight-body.clientHeight-body.scrollTop; cue.classList.toggle('show', more>24); }
 (function(){ const b=$('.info-body'); if(b) b.addEventListener('scroll',()=>{ if(Date.now()-lastAutoScroll>900) userScrolledAt=Date.now(); updateInfoScrollCue(); },{passive:true});
   window.addEventListener('resize',()=>{ try{updateInfoScrollCue();}catch(_){} }); })();
@@ -1522,7 +1586,7 @@ function startCompass(){ if(headingOn||!window.DeviceOrientationEvent) return;
   else add(); }
 
 /* accu + privacy: pauzeer locatie en stop de microfoon als de app naar de achtergrond gaat */
-document.addEventListener('visibilitychange',()=>{ if(document.hidden){ if(mode==='live') stopGeo(); try{ stopVoice(); }catch(_){} releaseAllMics(); } else { if(mode==='live'&&!watch) startGeo(); } });
+document.addEventListener('visibilitychange',()=>{ if(document.hidden){ if(mode==='live') stopGeo(); try{ stopVoice(); }catch(_){} releaseAllMics(); } else { if(mode==='live'&&tourStarted&&!watch) startGeo(); } });
 /* pagina verlaten/sluiten: microfoon en verbinding hard vrijgeven (geen 'mic aan'-melding meer) */
 window.addEventListener('pagehide',()=>{ try{ stopVoice(); }catch(_){} releaseAllMics(); });
 window.addEventListener('beforeunload',()=>{ try{ stopVoice(); }catch(_){} releaseAllMics(); });
@@ -1548,6 +1612,27 @@ const T={
   wLangLabel:{nl:'Taal van de gids',en:'Guide language',de:'Sprache des Guides',it:'Lingua della guida',pt:'Idioma do guia',es:'Idioma de la guía',pl:'Język przewodnika',da:'Guidens sprog',sv:'Guidens språk',no:'Guidens språk',fi:'Oppaan kieli',el:'Γλώσσα του οδηγού'},
   wOther:{nl:'Andere…',en:'Other…',de:'Andere…',it:'Altra…',pt:'Outro…',es:'Otro…',pl:'Inny…',da:'Andet…',sv:'Annat…',no:'Annet…',fi:'Muu…',el:'Άλλη…'},
   wStart:{nl:'Start de tour',en:'Start the tour',de:'Tour starten',it:'Inizia il tour',pt:'Começar o tour',es:'Empezar el tour',pl:'Rozpocznij trasę',da:'Start turen',sv:'Starta turen',no:'Start turen',fi:'Aloita kierros',el:'Ξεκίνα την ξενάγηση'},
+  introWelcomeTitle:{nl:'Even kort hoe het werkt',en:'Quickly, how it works',de:'Kurz erklärt',it:'Come funziona, in breve',pt:'Como funciona, em breve',es:'Cómo funciona, en breve',pl:'Krótko, jak to działa',da:'Kort om hvordan det virker',sv:'Kort om hur det funkar',no:'Kort om hvordan det funker',fi:'Lyhyesti: näin se toimii',el:'Πώς λειτουργεί, εν συντομία'},
+  introWelcomeBody:{nl:'Stadsstemmen is een audiotour door de Groningse binnenstad. We laten je in een paar tikken de belangrijkste knoppen zien.',en:'Stadsstemmen is an audio tour through Groningen’s old centre. In a few taps we’ll show you the main buttons.',de:'Stadsstemmen ist eine Audiotour durch die Groninger Innenstadt. In ein paar Tipps zeigen wir dir die wichtigsten Tasten.',it:'Stadsstemmen è un’audioguida nel centro di Groninga. In pochi tocchi ti mostriamo i pulsanti principali.',pt:'Stadsstemmen é um áudio tour pelo centro de Groningen. Em poucos toques mostramos-te os botões principais.',es:'Stadsstemmen es una audioguía por el centro de Groninga. En unos toques te mostramos los botones principales.',pl:'Stadsstemmen to audioprzewodnik po centrum Groningen. W kilku dotknięciach pokażemy najważniejsze przyciski.',da:'Stadsstemmen er en audiotur gennem Groningens bymidte. På få tryk viser vi dig de vigtigste knapper.',sv:'Stadsstemmen är en ljudtur genom Groningens stadskärna. På några tryck visar vi de viktigaste knapparna.',no:'Stadsstemmen er en lydtur gjennom Groningens sentrum. På noen trykk viser vi deg de viktigste knappene.',fi:'Stadsstemmen on äänikierros Groningenin keskustassa. Näytämme tärkeimmät painikkeet muutamalla napautuksella.',el:'Το Stadsstemmen είναι μια ηχητική ξενάγηση στο κέντρο του Γκρόνινγκεν. Με λίγα πατήματα σου δείχνουμε τα βασικά κουμπιά.'},
+  introMapTitle:{nl:'Plekken op de kaart',en:'Places on the map',de:'Orte auf der Karte',it:'Luoghi sulla mappa',pt:'Lugares no mapa',es:'Lugares en el mapa',pl:'Miejsca na mapie',da:'Steder på kortet',sv:'Platser på kartan',no:'Steder på kartet',fi:'Paikat kartalla',el:'Μέρη στον χάρτη'},
+  introMapLive:{nl:'Loop door de stad. Elke plek herkent waar je staat en begint vanzelf te vertellen.',en:'Walk through the city. Each place knows where you are and starts telling its story.',de:'Geh durch die Stadt. Jeder Ort erkennt, wo du bist, und beginnt von selbst zu erzählen.',it:'Cammina per la città. Ogni luogo riconosce dove sei e inizia a raccontare.',pt:'Caminha pela cidade. Cada lugar reconhece onde estás e começa a contar a sua história.',es:'Camina por la ciudad. Cada lugar reconoce dónde estás y empieza a contar su historia.',pl:'Spaceruj po mieście. Każde miejsce rozpozna, gdzie jesteś, i samo zacznie opowiadać.',da:'Gå gennem byen. Hvert sted genkender, hvor du er, og begynder selv at fortælle.',sv:'Gå genom staden. Varje plats känner igen var du är och börjar berätta.',no:'Gå gjennom byen. Hvert sted gjenkjenner hvor du er og begynner å fortelle.',fi:'Kävele kaupungissa. Jokainen paikka tunnistaa missä olet ja alkaa kertoa tarinaansa.',el:'Περπάτησε στην πόλη. Κάθε μέρος αναγνωρίζει πού είσαι και αρχίζει να αφηγείται.'},
+  introMapDemo:{nl:'Versleep je locatie-stip naar een plek om die te openen.',en:'Drag your location dot onto a place to open it.',de:'Zieh deinen Standortpunkt auf einen Ort, um ihn zu öffnen.',it:'Trascina il tuo punto di posizione su un luogo per aprirlo.',pt:'Arrasta o teu ponto de localização para um lugar para o abrir.',es:'Arrastra tu punto de ubicación sobre un lugar para abrirlo.',pl:'Przeciągnij swój punkt lokalizacji na miejsce, aby je otworzyć.',da:'Træk din placeringsprik hen på et sted for at åbne det.',sv:'Dra din platsprick till en plats för att öppna den.',no:'Dra posisjonsprikken din til et sted for å åpne det.',fi:'Vedä sijaintipisteesi paikan päälle avataksesi sen.',el:'Σύρε την κουκκίδα τοποθεσίας σου πάνω σε ένα μέρος για να το ανοίξεις.'},
+  introFilterTitle:{nl:'Filter de kaart',en:'Filter the map',de:'Karte filtern',it:'Filtra la mappa',pt:'Filtra o mapa',es:'Filtra el mapa',pl:'Filtruj mapę',da:'Filtrer kortet',sv:'Filtrera kartan',no:'Filtrer kartet',fi:'Suodata kartta',el:'Φιλτράρισμα χάρτη'},
+  introFilterBody:{nl:'Kies welke soorten plekken je op de kaart ziet: stemmen, bezienswaardigheden en horeca.',en:'Choose which kinds of places appear on the map: voices, sights and food and drink.',de:'Wähle, welche Arten von Orten auf der Karte erscheinen: Stimmen, Sehenswürdigkeiten und Gastronomie.',it:'Scegli quali tipi di luoghi vedere sulla mappa: voci, luoghi di interesse e ristorazione.',pt:'Escolhe que tipos de lugares aparecem no mapa: vozes, pontos de interesse e restauração.',es:'Elige qué tipos de lugares ves en el mapa: voces, lugares de interés y comida y bebida.',pl:'Wybierz, jakie rodzaje miejsc widzisz na mapie: głosy, atrakcje oraz jedzenie i picie.',da:'Vælg hvilke slags steder du ser på kortet: stemmer, seværdigheder og spisesteder.',sv:'Välj vilka slags platser du ser på kartan: röster, sevärdheter och mat och dryck.',no:'Velg hvilke typer steder du ser på kartet: stemmer, severdigheter og spisesteder.',fi:'Valitse, millaisia paikkoja näet kartalla: äänet, nähtävyydet sekä ruoka ja juoma.',el:'Διάλεξε ποια είδη μερών βλέπεις στον χάρτη: φωνές, αξιοθέατα και φαγητό και ποτό.'},
+  introMenuTitle:{nl:'Het plek-menu',en:'The place menu',de:'Das Ortsmenü',it:'Il menu del luogo',pt:'O menu do lugar',es:'El menú del lugar',pl:'Menu miejsca',da:'Stedmenuen',sv:'Platsmenyn',no:'Stedmenyen',fi:'Paikkavalikko',el:'Το μενού του μέρους'},
+  introMenuBody:{nl:'Onderin blijft altijd de huidige plek staan. Tik erop om hem te openen. Met de terug-pijl klapt hij weer in.',en:'The current place always stays at the bottom. Tap it to open it. The back arrow collapses it again.',de:'Unten bleibt immer der aktuelle Ort. Tippe darauf, um ihn zu öffnen. Mit dem Zurück-Pfeil klappt er wieder ein.',it:'In basso resta sempre il luogo attuale. Toccalo per aprirlo. Con la freccia indietro si richiude.',pt:'O lugar atual fica sempre em baixo. Toca para o abrir. A seta para trás volta a fechá-lo.',es:'El lugar actual siempre queda abajo. Tócalo para abrirlo. La flecha de atrás lo vuelve a cerrar.',pl:'Na dole zawsze zostaje bieżące miejsce. Dotknij, aby je otworzyć. Strzałka wstecz znów je zwija.',da:'Det aktuelle sted bliver altid nederst. Tryk for at åbne det. Tilbage-pilen klapper det sammen igen.',sv:'Den aktuella platsen ligger alltid kvar längst ner. Tryck för att öppna den. Bakåtpilen fäller ihop den igen.',no:'Det aktuelle stedet ligger alltid nederst. Trykk for å åpne det. Tilbake-pilen feller det sammen igjen.',fi:'Nykyinen paikka pysyy aina alhaalla. Avaa se napauttamalla. Takaisin-nuoli sulkee sen taas.',el:'Το τρέχον μέρος μένει πάντα κάτω. Πάτησέ το για να ανοίξει. Το βέλος επιστροφής το συμπτύσσει ξανά.'},
+  introGuideTitle:{nl:'De stadsgids',en:'The city guide',de:'Der Stadtführer',it:'La guida della città',pt:'O guia da cidade',es:'La guía de la ciudad',pl:'Przewodnik po mieście',da:'Byguiden',sv:'Stadsguiden',no:'Byguiden',fi:'Kaupunkiopas',el:'Ο οδηγός της πόλης'},
+  introGuideBody:{nl:'Tik op de gids en vraag hem van alles over Groningen.',en:'Tap the guide and ask anything about Groningen.',de:'Tippe auf den Guide und frag ihn alles über Groningen.',it:'Tocca la guida e chiedile tutto su Groninga.',pt:'Toca no guia e pergunta-lhe tudo sobre Groningen.',es:'Toca la guía y pregúntale lo que sea sobre Groninga.',pl:'Dotknij przewodnika i zapytaj go o wszystko o Groningen.',da:'Tryk på guiden og spørg den om alt om Groningen.',sv:'Tryck på guiden och fråga den om allt om Groningen.',no:'Trykk på guiden og spør den om alt om Groningen.',fi:'Napauta opasta ja kysy häneltä mitä tahansa Groningenista.',el:'Πάτα τον οδηγό και ρώτα τον οτιδήποτε για το Γκρόνινγκεν.'},
+  introLangTitle:{nl:'Kies je taal',en:'Choose your language',de:'Wähle deine Sprache',it:'Scegli la lingua',pt:'Escolhe o teu idioma',es:'Elige tu idioma',pl:'Wybierz język',da:'Vælg dit sprog',sv:'Välj ditt språk',no:'Velg språk',fi:'Valitse kielesi',el:'Διάλεξε τη γλώσσα σου'},
+  introLangBody:{nl:'Wissel hier makkelijk van taal voor de tour.',en:'Switch the tour language here anytime.',de:'Wechsle hier jederzeit die Sprache der Tour.',it:'Cambia qui la lingua del tour quando vuoi.',pt:'Muda aqui o idioma do tour quando quiseres.',es:'Cambia aquí el idioma del tour cuando quieras.',pl:'Tutaj w każdej chwili zmienisz język trasy.',da:'Skift turens sprog her når som helst.',sv:'Byt turens språk här när du vill.',no:'Bytt turens språk her når som helst.',fi:'Vaihda kierroksen kieli täältä milloin vain.',el:'Άλλαξε εδώ τη γλώσσα της ξενάγησης όποτε θες.'},
+  introModeTitle:{nl:'Live of Demo',en:'Live or Demo',de:'Live oder Demo',it:'Live o Demo',pt:'Live ou Demo',es:'Live o Demo',pl:'Live lub Demo',da:'Live eller Demo',sv:'Live eller Demo',no:'Live eller Demo',fi:'Live tai Demo',el:'Live ή Demo'},
+  introModeBody:{nl:'Live volgt je echte locatie terwijl je loopt. Demo laat je je locatie verslepen om alvast rond te kijken, zonder naar buiten te gaan.',en:'Live follows your real location as you walk. Demo lets you drag your location to look around first, without going outside.',de:'Live folgt deinem echten Standort beim Gehen. Demo lässt dich deinen Standort ziehen, um dich erst umzusehen, ohne nach draußen zu gehen.',it:'Live segue la tua posizione reale mentre cammini. Demo ti fa trascinare la posizione per guardarti intorno, senza uscire.',pt:'Live segue a tua localização real enquanto andas. Demo deixa-te arrastar a localização para espreitar primeiro, sem sair.',es:'Live sigue tu ubicación real mientras caminas. Demo te deja arrastrar tu ubicación para echar un vistazo, sin salir.',pl:'Live śledzi twoją prawdziwą lokalizację podczas spaceru. Demo pozwala przeciągać lokalizację, by rozejrzeć się, bez wychodzenia.',da:'Live følger din rigtige placering, mens du går. Demo lader dig trække din placering for at se dig om, uden at gå ud.',sv:'Live följer din riktiga plats medan du går. Demo låter dig dra din plats för att se dig omkring, utan att gå ut.',no:'Live følger din virkelige posisjon mens du går. Demo lar deg dra posisjonen for å se deg rundt, uten å gå ut.',fi:'Live seuraa todellista sijaintiasi kävellessäsi. Demossa voit vetää sijaintiasi katsellaksesi ympärille, ulos menemättä.',el:'Το Live ακολουθεί την πραγματική σου θέση καθώς περπατάς. Το Demo σου επιτρέπει να σύρεις τη θέση σου για να ρίξεις μια ματιά, χωρίς να βγεις έξω.'},
+  introDoneTitle:{nl:'Je bent klaar!',en:'You’re all set!',de:'Alles klar!',it:'Tutto pronto!',pt:'Está tudo pronto!',es:'¡Todo listo!',pl:'Gotowe!',da:'Du er klar!',sv:'Du är redo!',no:'Du er klar!',fi:'Olet valmis!',el:'Είσαι έτοιμος!'},
+  introDoneBody:{nl:'Veel plezier met je ontdekkingstocht door Groningen.',en:'Enjoy your journey of discovery through Groningen.',de:'Viel Spaß bei deiner Entdeckungstour durch Groningen.',it:'Buon viaggio alla scoperta di Groninga.',pt:'Boa viagem de descoberta por Groningen.',es:'Disfruta tu viaje de descubrimiento por Groninga.',pl:'Miłego odkrywania Groningen.',da:'God fornøjelse med din opdagelsesrejse gennem Groningen.',sv:'Ha det så kul på din upptäcktsfärd genom Groningen.',no:'Kos deg med oppdagelsesferden gjennom Groningen.',fi:'Nauti löytöretkestäsi Groningenissa.',el:'Καλή περιήγηση και ανακάλυψη στο Γκρόνινγκεν.'},
+  introNext:{nl:'Volgende',en:'Next',de:'Weiter',it:'Avanti',pt:'Seguinte',es:'Siguiente',pl:'Dalej',da:'Næste',sv:'Nästa',no:'Neste',fi:'Seuraava',el:'Επόμενο'},
+  introPrev:{nl:'Vorige',en:'Back',de:'Zurück',it:'Indietro',pt:'Voltar',es:'Atrás',pl:'Wstecz',da:'Tilbage',sv:'Tillbaka',no:'Tilbake',fi:'Takaisin',el:'Πίσω'},
+  introDone2:{nl:'Klaar',en:'Done',de:'Fertig',it:'Fatto',pt:'Concluir',es:'Listo',pl:'Gotowe',da:'Færdig',sv:'Klar',no:'Ferdig',fi:'Valmis',el:'Τέλος'},
+  introSkip:{nl:'Overslaan',en:'Skip',de:'Überspringen',it:'Salta',pt:'Saltar',es:'Saltar',pl:'Pomiń',da:'Spring over',sv:'Hoppa över',no:'Hopp over',fi:'Ohita',el:'Παράλειψη'},
   maphint:{nl:'Sleep je locatie over een plek',en:'Drag your location onto a place',de:'Zieh deinen Standort auf einen Ort',it:'Trascina la tua posizione su un luogo',pt:'Arrasta a tua localização para um lugar',es:'Arrastra tu ubicación sobre un lugar',pl:'Przeciągnij swoją lokalizację na miejsce',da:'Træk din placering hen på et sted',sv:'Dra din plats till en plats',no:'Dra posisjonen din til et sted',fi:'Vedä sijaintisi paikan päälle',el:'Σύρε την τοποθεσία σου πάνω σε ένα μέρος'},
   geoDenied:{nl:'Locatie staat uit. Je tour gaat verder in demo-modus.',en:'Location is off. Continuing in demo mode.',de:'Standort ist aus. Weiter im Demo-Modus.',it:'La posizione è disattivata. Si continua in modalità demo.',pt:'A localização está desligada. A continuar em modo demo.',es:'La ubicación está desactivada. Se continúa en modo demo.',pl:'Lokalizacja jest wyłączona. Kontynuacja w trybie demo.',da:'Placering er slået fra. Fortsætter i demo-tilstand.',sv:'Platsen är avstängd. Fortsätter i demoläge.',no:'Posisjon er av. Fortsetter i demomodus.',fi:'Sijainti on pois päältä. Jatketaan demotilassa.',el:'Η τοποθεσία είναι απενεργοποιημένη. Συνέχεια σε λειτουργία demo.'},
   geoUnavailable:{nl:'Geen locatie beschikbaar. Probeer naar buiten te gaan of gebruik demo-modus.',en:'No location available. Try going outside or use demo mode.',de:'Kein Standort verfügbar. Geh nach draußen oder nutze den Demo-Modus.',it:'Nessuna posizione disponibile. Prova ad andare all’aperto o usa la modalità demo.',pt:'Sem localização disponível. Tenta ir para o exterior ou usa o modo demo.',es:'No hay ubicación disponible. Prueba a salir al exterior o usa el modo demo.',pl:'Brak dostępnej lokalizacji. Spróbuj wyjść na zewnątrz lub użyj trybu demo.',da:'Ingen placering tilgængelig. Prøv at gå udenfor eller brug demo-tilstand.',sv:'Ingen plats tillgänglig. Prova att gå ut eller använd demoläge.',no:'Ingen posisjon tilgjengelig. Prøv å gå ut eller bruk demomodus.',fi:'Sijaintia ei saatavilla. Kokeile mennä ulos tai käytä demotilaa.',el:'Δεν υπάρχει διαθέσιμη τοποθεσία. Δοκίμασε να βγεις έξω ή χρησιμοποίησε τη λειτουργία demo.'},
@@ -1666,7 +1751,7 @@ function applyI18n(){ uiLang=(lang==='pt-br')?'pt':(UI_LANGS.includes(lang)?lang
   function saveLang(){ try{ localStorage.setItem('ss_lang',lang); }catch(_){} }
   document.querySelectorAll('#langRow button').forEach(b=>{ b.onclick=()=>{ startBg(); const v=b.dataset.l; if(v==='other'){ otherMode=true; $('#wsel').classList.add('show'); lang=$('#wsel').value; } else { otherMode=false; $('#wsel').classList.remove('show'); lang=v; } paint(); applyI18n(); saveLang(); }; });
   if(sel) sel.onchange=e=>{ startBg(); lang=e.target.value; otherMode=true; paint(); applyI18n(); saveLang(); };
-  const st=$('#wstart'); if(st) st.onclick=()=>{ saveLang(); fadeOutBg(); $('#welcome').classList.add('hide'); primeMic(); };
+  const st=$('#wstart'); if(st) st.onclick=()=>{ saveLang(); fadeOutBg(); $('#welcome').classList.add('hide'); primeMic(); if(window.startIntro) window.startIntro(true); };
   /* eerdere taalkeuze herstellen */
   try{ const sl=localStorage.getItem('ss_lang'); if(sl){ lang=sl;
     if(['nl','en','de'].includes(sl)){ otherMode=false; } else { otherMode=true; if(sel){ sel.value=sl; sel.classList.add('show'); } } } }catch(_){}
@@ -1675,7 +1760,103 @@ function applyI18n(){ uiLang=(lang==='pt-br')?'pt':(UI_LANGS.includes(lang)?lang
 })();
 
 restoreProgress();
-setMode('demo');
+
+/* ===== VISUELE INTRODUCTIE (coach-marks) ===== */
+(function(){
+  const ov=$('#introOverlay'); if(!ov) return;
+  const hole=$('#introHole'), card=$('#introCard'), elStep=$('#introStep'),
+        elTitle=$('#introTitle'), elBody=$('#introBody'), dots=$('#introDots'),
+        btnPrev=$('#introPrev'), btnNext=$('#introNext'), btnSkip=$('#introSkip');
+  let steps=[], idx=0, open=false, startGps=false;
+
+  function buildSteps(){
+    return [
+      { center:true, key:'introWelcome' },
+      { target:()=>{ const z=ZONES[0]; const m=z&&markersById[z.id]; return m&&m.getElement?m.getElement():null; },
+        onEnter:()=>{ try{ const z=ZONES[0]; if(map&&z&&z._center) map.setView(z._center, Math.max(map.getZoom(),16), {animate:false}); }catch(_){} },
+        title:'introMapTitle', body:()=> mode==='live' ? tr('introMapLive') : tr('introMapDemo') },
+      { target:()=>$('#filterHead'), key:'introFilter' },
+      { target:()=>$('#sheet'), key:'introMenu' },
+      { target:()=>$('#guideOrb'), key:'introGuide' },
+      { target:()=>$('#langBtn'), key:'introLang' },
+      { target:()=>document.querySelector('.top .seg'), key:'introMode' },
+      { center:true, key:'introDone' }
+    ];
+  }
+  function titleFor(s){ return (s.title?tr(s.title):tr(s.key+'Title'))||''; }
+  function bodyFor(s){ return (s.body?s.body():tr(s.key+'Body'))||''; }
+
+  function renderDots(){ dots.innerHTML=''; steps.forEach((_,i)=>{ const d=document.createElement('i'); if(i===idx) d.className='on'; dots.appendChild(d); }); }
+
+  function place(animate){
+    const s=steps[idx]; if(!s) return;
+    const app=$('#app'); const appR=app.getBoundingClientRect();
+    const last=idx===steps.length-1;
+    elStep.textContent=(idx+1)+' / '+steps.length;
+    elTitle.textContent=titleFor(s);
+    elBody.textContent=bodyFor(s);
+    btnPrev.textContent=tr('introPrev')||'Vorige';
+    btnNext.textContent=last?(tr('introDone2')||'Klaar'):(tr('introNext')||'Volgende');
+    btnSkip.textContent=tr('introSkip')||'Overslaan';
+    btnPrev.disabled=idx===0;
+    btnSkip.style.display=last?'none':'';
+    renderDots();
+    /* eerste plaatsing van een stap zonder animatie: voorkomt 'springen' als doel/kaart net verschoof */
+    if(animate===false){ hole.style.transition='none'; card.style.transition='none'; }
+    card.style.transform='none'; /* gecentreerd plaatsen we via left/top, niet via translate */
+    const el=s.target&&s.target();
+    const cw=card.offsetWidth||300, ch=card.offsetHeight||170;
+    if(s.center||!el){
+      ov.classList.add('center');
+      hole.style.width='2px'; hole.style.height='2px';
+      hole.style.left=Math.round(appR.width/2)+'px'; hole.style.top=Math.round(appR.height/2)+'px';
+      card.style.left=Math.round((appR.width-cw)/2)+'px'; card.style.top=Math.round((appR.height-ch)/2)+'px';
+    } else {
+      ov.classList.remove('center');
+      const r=el.getBoundingClientRect(), pad=8;
+      const x=r.left-appR.left-pad, y=r.top-appR.top-pad, w=r.width+pad*2, h=r.height+pad*2;
+      hole.style.left=x+'px'; hole.style.top=y+'px'; hole.style.width=w+'px'; hole.style.height=h+'px';
+      let cx=Math.min(Math.max(12,x+w/2-cw/2),appR.width-cw-12);
+      const spaceAbove=y, spaceBelow=appR.height-(y+h);
+      let cy=(spaceAbove>spaceBelow)?(y-ch-14):(y+h+14);
+      cy=Math.min(Math.max(12,cy),appR.height-ch-12);
+      card.style.left=Math.round(cx)+'px'; card.style.top=Math.round(cy)+'px';
+    }
+    if(animate===false){ void hole.offsetWidth; hole.style.transition=''; card.style.transition=''; }
+  }
+
+  /* direct plaatsen (tekst meteen gevuld), daarna kort corrigeren nadat kaart/layout settelt.
+     Niet afhankelijk van requestAnimationFrame, zodat het ook bij een achtergrond-tab werkt. */
+  function show(i, noAnim){ idx=Math.max(0,Math.min(steps.length-1,i)); const s=steps[idx];
+    if(s&&s.onEnter){ try{ s.onEnter(); }catch(_){} }
+    place(noAnim===true ? false : true);
+    /* na het settelen van kaart/layout nog eens bijsturen MET animatie (kapt de overgang niet af) */
+    setTimeout(()=>{ if(open) place(true); }, 90); }
+  function finish(){ open=false; ov.classList.remove('show'); ov.setAttribute('aria-hidden','true');
+    /* na de uitleg (klaar én overslaan) wat verder inzoomen; centreren op het demo-middelpunt zodat
+       zowel de Martinitoren als de locatiestip in beeld blijven */
+    try{ if(map){ if(MAP_START_CENTER) map.setView(MAP_START_CENTER, INTRO_END_ZOOM, {animate:true}); else map.setZoom(INTRO_END_ZOOM,{animate:true}); } }catch(_){} }
+
+  btnNext.onclick=()=>{ if(idx>=steps.length-1) finish(); else show(idx+1); };
+  btnPrev.onclick=()=>show(idx-1);
+  btnSkip.onclick=finish;
+  window.addEventListener('resize',()=>{ if(open) place(false); });
+  window.addEventListener('orientationchange',()=>{ if(open) setTimeout(()=>place(false),200); });
+
+  window.startIntro=function(fromStart){ startGps=!!fromStart; steps=buildSteps(); idx=0; open=true;
+    try{ setH(snaps()[0],false); }catch(_){}
+    /* de uitleg begint bij de Martinitoren: kaart daar alvast op centreren, zodat niets verspringt */
+    try{ const z=ZONES[0]; if(map&&z&&z._center) map.setView(z._center, Math.max(map.getZoom(),16), {animate:false}); }catch(_){}
+    ov.classList.add('show'); ov.setAttribute('aria-hidden','false');
+    show(0,true);
+  };
+})();
+
+/* Start in demo-modus; altijd een menu in beeld (Martinitoren ingeklapt). */
+(function(){
+  try{ if(ZONES[0]) showSpotPeek(ZONES[0].id); }catch(_){}
+  try{ setMode('demo'); }catch(_){}
+})();
 </script>
 </body>
 </html>
