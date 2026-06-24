@@ -904,7 +904,7 @@ function syncSetup(){ const sp=$('#setup'); if(sp&&!sp.classList.contains('hide'
 /* orb + gids-balk net boven de ingeklapte slide laten zweven (anders staan ze te laag op mobiel) */
 /* Hoogte van de gids-orb binnen een plek-slide, in px vanaf de onderrand.
    Lager getal = orb lager op het scherm, hoger getal = hoger. Pas dit aan naar smaak. */
-const GIDS_ORB_PLEK_BODEM = 26;
+const GIDS_ORB_PLEK_BODEM = 127;
 function positionFloaters(){ try{ const b=(snaps()[0]+16)+'px'; const o=document.querySelector('#guideOrb');
   if(o) o.style.bottom = o.classList.contains('spotmode') ? (GIDS_ORB_PLEK_BODEM+'px') : b;   /* in een plek lager, anders boven de ingeklapte sheet */
   const gm=document.querySelector('#guideMini'); if(gm) gm.style.bottom=b; }catch(e){} }
