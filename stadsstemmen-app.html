@@ -362,6 +362,10 @@
   .lh-prog .ring .fg{fill:none;stroke:var(--lime-d);stroke-width:3.5;stroke-linecap:round;transition:stroke-dashoffset .5s ease;}
   .lh-prog .pt{font-family:'Schibsted Grotesk';font-weight:800;font-size:12.5px;letter-spacing:-.01em;line-height:1.15;color:var(--ink);}
   .lh-prog .pt small{display:block;font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.02em;}
+  /* voortgang ('bezocht') vast rechtsboven in het plek-menu; titel krimpt ernaast (geen overlap) */
+  .info-view .cv-title{flex:1;min-width:0;}
+  .info-view .lh-prog{margin-left:auto;align-self:flex-start;flex-shrink:0;padding:5px 10px;gap:7px;}
+  .info-view .lh-prog .ring,.info-view .lh-prog .ring svg{width:24px;height:24px;}
 
   /* ===== NIEUW: bezocht-status op pin ===== */
   .place-pin .check{position:absolute;left:13px;top:-21px;width:20px;height:20px;border-radius:50%;background:var(--ink);
@@ -599,8 +603,20 @@
   /* nettere marges + plaatsing binnen de gids-overlay */
   .sheet.spotguide .convo-view .cv-head{padding:18px 22px 10px;}
   .sheet.spotguide .convo-view .cv-title .eyebrow{display:none;}     /* eyebrow weg: titel lijnt met het kruis */
-  .sheet.spotguide .convo-view .cstatus{padding:7px 22px 0;}
-  .sheet.spotguide #talk{align-self:flex-start;margin:2px 0 2px 22px;} /* tap-to-talk links, maar van de rand af */
+  /* opvallende, gecentreerde praatknop zodat duidelijk is dat je tikt om te praten */
+  .sheet.spotguide .convo-view .cstatus{text-align:center;font-size:13.5px;font-weight:800;color:var(--ink-2);padding:8px 22px 2px;min-height:18px;}
+  .sheet.spotguide #talk{align-self:center;margin:4px auto 8px;}
+  .sheet.spotguide #talk.micbtn{width:74px;height:74px;border:2px solid rgba(255,255,255,.65);
+    background:radial-gradient(120% 120% at 30% 25%,var(--lime-l) 0%,var(--lime) 50%,var(--lime-d) 100%);
+    box-shadow:0 10px 26px rgba(159,206,28,.5),0 2px 8px rgba(0,0,0,.2),inset 0 2px 6px rgba(255,255,255,.5);}
+  .sheet.spotguide #talk .m-ico svg{width:30px;height:30px;}
+  .sheet.spotguide #talk .m-wave{height:26px;}
+  .sheet.spotguide #talk .m-wave i{width:4px;height:8px;}
+  .sheet.spotguide #talk.micbtn::before{content:'';position:absolute;inset:-6px;border-radius:50%;border:2px solid var(--lime-d);
+    opacity:.45;animation:vfring 2.1s ease-out infinite;pointer-events:none;}
+  .sheet.spotguide #talk.micbtn.live{transform:scale(1.07);
+    box-shadow:0 0 0 5px rgba(159,206,28,.35),0 0 0 2px var(--lime-d),0 14px 38px rgba(159,206,28,.9);}
+  .sheet.spotguide #talk.micbtn.live::before{animation-duration:1.1s;opacity:.75;border-color:var(--lime);}
   .sheet.spotguide .convo-view .sugs{padding:10px 20px calc(12px + env(safe-area-inset-bottom));}
 </style>
 </head>
@@ -744,6 +760,10 @@
         <div class="cv-head">
           <button class="back" id="backInfo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12H6"/><path d="M11 6l-6 6 6 6"/></svg></button>
           <div class="cv-title"><div class="eyebrow" id="iEyebrow">Plek</div><div class="nm" id="iName">-</div><div class="ch" id="iChar"></div></div>
+          <div class="lh-prog" id="lhProg" title="Bezocht">
+            <div class="ring"><svg viewBox="0 0 36 36"><circle class="bg" cx="18" cy="18" r="15.5"></circle><circle class="fg" id="progRing" cx="18" cy="18" r="15.5" stroke-dasharray="97.4" stroke-dashoffset="97.4"></circle></svg></div>
+            <div class="pt"><span id="progCount">0</span>/<span id="progTotal">5</span></div>
+          </div>
         </div>
         <div class="info-body">
           <div class="media media-info" id="iMedia" style="display:none">
@@ -773,6 +793,7 @@
           <p class="info-desc" id="iDesc"></p>
         </div>
         <div class="info-foot" id="iFoot"></div>
+        <div class="info-scrollcue" id="iScrollCue" aria-hidden="true"><span class="chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span></div>
       </div>
 
       <div class="convo-view">
@@ -946,7 +967,8 @@ function nearest(h){return snaps().reduce((a,b)=>Math.abs(b-h)<Math.abs(a-h)?b:a
 function setH(h,anim=true){ sheet.style.transition=anim?'height .4s cubic-bezier(.22,1,.36,1)':'none'; sheet.style.height=h+'px';
   /* ingeklapt = alleen de titel; stuurt ook de orb-kleur (groen op de kaart, zwart in een open plek) */
   sheet.classList.toggle('collapsed', sheet.classList.contains('info') && h<=downH()+4);
-  syncSetup(); positionFloaters(); updateVoiceFab(); try{updateGuideOrb();}catch(_){} }
+  syncSetup(); positionFloaters(); updateVoiceFab(); try{updateGuideOrb();}catch(_){} try{updateInfoScrollCue();}catch(_){}
+  setTimeout(()=>{ try{updateInfoScrollCue();}catch(_){} }, 430); }
 let dragging=false,sy=0,sh=0,dragMoved=false;
 function startDrag(e){dragging=true;dragMoved=false;sy=e.clientY;sh=sheet.offsetHeight;sheet.style.transition='none';try{e.currentTarget.setPointerCapture(e.pointerId);}catch(_){}}
 /* slepen uitgeschakeld: openen via tik op de balk, inklappen via de terug-pijl */
@@ -1076,8 +1098,8 @@ function updateGuideOrb(){ const o=$('#guideOrb'); if(!o) return;
   o.classList.toggle('spotmode', spotOpen);                    // in een plek: zwart + boven de sheet
   positionFloaters();                                          // hoogte aanpassen aan de context
 }
-/* orb-klik: in een plek -> gids-overlay; anders -> standaard gids-menu */
-function onGuideOrbClick(){ if(sheet.classList.contains('info') && !sheet.classList.contains('spotguide')) openSpotGuide(); else openGuide(); }
+/* orb-klik: in een UITGEklapte plek -> gids-overlay; anders (ingeklapt menu of kaart) -> volledig gidsmenu */
+function onGuideOrbClick(){ if(sheet.classList.contains('info') && !sheet.classList.contains('collapsed') && !sheet.classList.contains('spotguide')) openSpotGuide(); else openGuide(); }
 function openGuide(){ stopSpotAudio(); stopSlides(); activeSpot=null; setActiveMarker(null);
   clearTimeout(windDownTimer); guideWindingDown=false; guideWdSpoke=false; guideMinimized=false;
   active=GUIDE.id; guideOpen=true; $('#maphint').classList.add('hide');
@@ -1191,7 +1213,9 @@ function spotNear(s){ const p=curPos(); if(!p) return false;
   if(s.type==='agent'&&s.polygon) return inPoly(p.lat,p.lng,s.polygon);
   if(!s.point) return false; return haversine(p.lat,p.lng,s.point[0],s.point[1])<=SPOT_RADIUS; }
 /* toon een plek als ingeklapt menu (kaart-first: er is altijd een menu in beeld) */
-function showSpotPeek(id){ if(!spotById[id]) return; openSpot(id, true); setH(snaps()[0], false); }
+function showSpotPeek(id){ if(!spotById[id]) return; openSpot(id, true); setH(snaps()[0], false);
+  /* herbereken de peek-hoogte zodra de fonts klaar zijn (tekst-metrics kunnen anders nog verschuiven) */
+  try{ if(document.fonts&&document.fonts.ready) document.fonts.ready.then(function(){ if(sheet.classList.contains('collapsed')) setH(snaps()[0],false); }); }catch(_){} }
 /* val terug op een ingeklapt menu: huidige plek, anders de laatst geopende, anders de eerste */
 function restoreMenuPeek(){ const id=(activeSpot&&spotById[activeSpot])?activeSpot:((lastSpot&&spotById[lastSpot])?lastSpot:(ZONES[0]&&ZONES[0].id)); if(id) showSpotPeek(id); else { sheet.classList.remove('info'); setH(snaps()[0]); } }
 function openSpot(id, noPan){ const s=spotById[id]; if(!s) return;
@@ -1226,7 +1250,7 @@ function openSpot(id, noPan){ const s=spotById[id]; if(!s) return;
   requestAnimationFrame(()=>requestAnimationFrame(updateInfoScrollCue)); updateGuideOrb(); updateGuideMini(); }
 /* subtiele scroll-hint: toon vervaging + pijltje zolang er nog tekst onder zit */
 function updateInfoScrollCue(){ const body=$('.info-body'), cue=$('#iScrollCue'); if(!body||!cue) return;
-  if(sheet.offsetHeight <= snaps()[0]+24){ cue.classList.remove('show'); return; } /* ingeklapte peek: geen scroll-hint */
+  if(sheet.classList.contains('collapsed')){ cue.classList.remove('show'); return; } /* ingeklapte peek: geen scroll-hint */
   const more=body.scrollHeight-body.clientHeight-body.scrollTop; cue.classList.toggle('show', more>24); }
 (function(){ const b=$('.info-body'); if(b) b.addEventListener('scroll',()=>{ if(Date.now()-lastAutoScroll>900) userScrolledAt=Date.now(); updateInfoScrollCue(); },{passive:true});
   window.addEventListener('resize',()=>{ try{updateInfoScrollCue();}catch(_){} }); })();
