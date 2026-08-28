@@ -94,40 +94,6 @@
       letter-spacing:0.05em;
     }
 
-    .nav-right{
-      display:flex;
-      align-items:center;
-      gap:16px;
-    }
-
-    .industry-switcher{
-      background:rgba(255,255,255,0.05);
-      border:1px solid rgba(255,255,255,0.12);
-      color:#fff;
-      font-family:'Sora',sans-serif;
-      font-size:12px;
-      font-weight:600;
-      padding:7px 10px;
-      border-radius:6px;
-      cursor:pointer;
-      outline:none;
-      max-width:180px;
-      transition:border-color 0.2s;
-    }
-
-    .industry-switcher:hover{
-      border-color:rgba(206,255,26,0.4);
-    }
-
-    .industry-switcher:focus{
-      border-color:var(--yellow);
-    }
-
-    .industry-switcher option{
-      background:#111;
-      color:#fff;
-    }
-
     .nav-back{
       font-size:13px;
       font-weight:600;
@@ -193,10 +159,82 @@
 
     .progress-fill{
       height:100%;
-      width:11.11%;
+      width:0%;
       background:var(--yellow);
       box-shadow:0 0 10px rgba(206,255,26,0.5);
       transition:width 0.5s cubic-bezier(0.65,0,0.35,1);
+    }
+
+    /* ---------- STEP 0: industry picker ---------- */
+    .picker{
+      min-height:calc(100vh - 67px);
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      padding:48px;
+    }
+
+    .picker-title{
+      font-size:clamp(28px,4vw,44px);
+      font-weight:800;
+      letter-spacing:-0.02em;
+      margin-bottom:12px;
+    }
+
+    .picker-sub{
+      font-size:15px;
+      color:rgba(255,255,255,0.5);
+      margin-bottom:44px;
+    }
+
+    .industry-grid{
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:14px;
+      width:100%;
+      max-width:920px;
+    }
+
+    .industry-card{
+      background:rgba(255,255,255,0.03);
+      border:1px solid rgba(255,255,255,0.1);
+      border-radius:14px;
+      padding:28px 16px;
+      cursor:pointer;
+      transition:border-color 0.2s,background 0.2s,transform 0.2s;
+    }
+
+    .industry-card:hover{
+      border-color:var(--yellow);
+      background:rgba(206,255,26,0.06);
+      transform:translateY(-3px);
+    }
+
+    .industry-card-emoji{
+      font-size:30px;
+      margin-bottom:12px;
+    }
+
+    .industry-card-label{
+      font-size:13px;
+      font-weight:700;
+      line-height:1.35;
+    }
+
+    .change-industry-link{
+      display:inline-block;
+      margin-top:32px;
+      font-size:12px;
+      font-weight:600;
+      color:rgba(255,255,255,0.35);
+      text-decoration:underline;
+      text-underline-offset:3px;
+    }
+
+    .change-industry-link:hover{
+      color:rgba(255,255,255,0.6);
     }
 
     /* ---------- step scaffolding ---------- */
@@ -1530,9 +1568,8 @@
         display:none;
       }
 
-      .industry-switcher{
-        max-width:120px;
-        font-size:11px;
+      .industry-grid{
+        grid-template-columns:repeat(2,1fr);
       }
 
       .orb-status{
@@ -1585,12 +1622,8 @@
         font-size:14px;
       }
 
-      .nav-right{
-        gap:8px;
-      }
-
-      .industry-switcher{
-        max-width:88px;
+      .industry-grid{
+        grid-template-columns:1fr;
       }
 
       .step-inner{
@@ -1630,21 +1663,28 @@
 
   <div class="nav-status">
     <div class="nav-status-dot" id="statusDot"></div>
-    <span id="statusText">Step 1 of 9</span>
+    <span id="statusText">Choose your industry</span>
   </div>
 
-  <div class="nav-right">
-    <select class="industry-switcher" id="industrySwitcher" aria-label="Choose industry" onchange="switchIndustry(this.value)"></select>
-    <a class="nav-back" href="index.html">← Back</a>
-  </div>
+  <a class="nav-back" href="index.html">← Back</a>
 </nav>
 
 <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
 
 <div class="funnel">
 
+  <!-- STEP 0: industry picker -->
+  <section class="step active" data-step="0">
+    <div class="picker">
+      <div class="eyebrow" style="text-align:center;">AI Phone Agent Demo</div>
+      <h1 class="picker-title">Which industry are you in?</h1>
+      <p class="picker-sub">Pick your industry and we'll tailor the whole demo to it.</p>
+      <div class="industry-grid" id="industryGrid"></div>
+    </div>
+  </section>
+
   <!-- STEP 1: hero -->
-  <section class="step active" data-step="1">
+  <section class="step" data-step="1">
     <div class="hero">
       <canvas class="hero-canvas" id="heroCanvas"></canvas>
       <div class="hero-inner">
@@ -1655,6 +1695,8 @@
         <div class="perk-row" id="perkRow"></div>
 
         <div class="sample-convo" id="sampleConvo"></div>
+
+        <a href="javascript:void(0)" onclick="backToPicker()" class="change-industry-link">Not the right fit? Choose a different industry</a>
       </div>
     </div>
   </section>
@@ -2012,21 +2054,9 @@
     return String(s).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
   }
 
-  function resolveIndustryId(){
-    try {
-      const params = new URLSearchParams(window.location.search);
-      const id = params.get('industry');
-      if (id && window.INDUSTRIES && window.INDUSTRIES[id]) return id;
-    } catch (err) {
-      console.error('Failed to read ?industry from URL:', err && err.message);
-    }
-    return 'vet';
-  }
-
-  function switchIndustry(id){
-    const params = new URLSearchParams(window.location.search);
-    params.set('industry', id);
-    window.location.search = params.toString();
+  function backToPicker(){
+    // full reload, stripped of ?industry= — simplest way back to a clean picker
+    window.location.href = window.location.pathname;
   }
 
   // Renders {{token}} placeholders from a flat data object. A small alias
@@ -2119,12 +2149,57 @@
   }
 
   // ==================== industry-driven boot ====================
+  // Default entry: show the industry picker as step 0 and wait for a click.
+  // ?industry=<id> deep-links straight past the picker (e.g. from a targeted
+  // homepage/marketing link) and forcedCfg is the last-resort fallback used
+  // if industry-configs.js itself never loads.
   function boot(forcedCfg){
-    cfg = forcedCfg || (window.INDUSTRIES && window.INDUSTRIES[resolveIndustryId()]) || FALLBACK_CFG;
+    if (forcedCfg){
+      cfg = forcedCfg;
+      activateIndustry();
+      return;
+    }
 
+    const params = new URLSearchParams(window.location.search);
+    const deepLinkId = params.get('industry');
+    if (deepLinkId && window.INDUSTRIES && window.INDUSTRIES[deepLinkId]){
+      cfg = window.INDUSTRIES[deepLinkId];
+      activateIndustry();
+      return;
+    }
+
+    renderIndustryPicker();
+  }
+
+  function renderIndustryPicker(){
+    const grid = document.getElementById('industryGrid');
+    const order = window.INDUSTRY_ORDER || [];
+    const industries = window.INDUSTRIES || {};
+    grid.innerHTML = '';
+    order.forEach(id => {
+      const ind = industries[id];
+      if (!ind) return;
+      const card = document.createElement('div');
+      card.className = 'industry-card';
+      card.innerHTML = '<div class="industry-card-emoji">' + ind.emoji + '</div><div class="industry-card-label">' + ind.label + '</div>';
+      card.addEventListener('click', () => pickIndustry(id));
+      grid.appendChild(card);
+    });
+  }
+
+  function pickIndustry(id){
+    const industries = window.INDUSTRIES || {};
+    if (!industries[id]) return;
+    cfg = industries[id];
+    const params = new URLSearchParams(window.location.search);
+    params.set('industry', id);
+    window.history.replaceState(null, '', '?' + params.toString());
+    activateIndustry();
+  }
+
+  function activateIndustry(){
     document.title = cfg.label + ' — AI Phone Agent Demo | ADAM AI Agents';
 
-    renderIndustrySwitcher();
     renderHero();
     renderUseCaseGrid();
     renderPersonalityCards();
@@ -2135,22 +2210,8 @@
     ['companyName','companyWebsite','contactEmail'].forEach(id => {
       document.getElementById(id).addEventListener('input', validateStep2);
     });
-  }
 
-  function renderIndustrySwitcher(){
-    const sel = document.getElementById('industrySwitcher');
-    const order = window.INDUSTRY_ORDER || [cfg.id];
-    const industries = window.INDUSTRIES || { [cfg.id]: cfg };
-    sel.innerHTML = '';
-    order.forEach(id => {
-      const ind = industries[id];
-      if (!ind) return;
-      const opt = document.createElement('option');
-      opt.value = id;
-      opt.textContent = ind.emoji + ' ' + ind.label;
-      if (id === cfg.id) opt.selected = true;
-      sel.appendChild(opt);
-    });
+    goStep(1);
   }
 
   function renderHero(){
