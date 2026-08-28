@@ -21,30 +21,17 @@ const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
 const ANTHROPIC_MODEL = 'claude-sonnet-4-6';
 const LEADS_FILE = path.join(__dirname, 'leads.json');
 
-const SYSTEM_PROMPT = `You are a veterinary front-desk assistant summarising a phone call transcript for the practice's staff.
-
-Read the transcript and return ONLY valid JSON — no markdown code fence, no commentary — in exactly this shape:
-{
-  "caller_name": string|null,
-  "caller_phone": string|null,
-  "animal_name": string|null,
-  "animal_species": string|null,
-  "reason": string|null,
-  "urgency": "normal"|"urgent",
-  "action": string|null,
-  "summary": string|null,
-  "email_subject": string|null,
-  "email_body": string|null
+// industry-configs.js is an ES module living one directory up (repo root).
+// require() can't load ESM directly, so it's loaded once via dynamic
+// import() and cached — cheap since the file rarely changes at runtime.
+let industriesCache = null;
+async function loadIndustries() {
+  if (!industriesCache) {
+    const mod = await import('../industry-configs.js');
+    industriesCache = mod.INDUSTRIES;
+  }
+  return industriesCache;
 }
-
-Rules:
-- Never invent a diagnosis. You are not a vet and must not speculate about what is medically wrong with the animal.
-- Never give treatment advice.
-- Only mark "urgency" as "urgent" for genuine red flags explicitly present in the transcript: toxin/poison ingestion, difficulty breathing, collapse, major trauma, seizure, or bloat (distended abdomen). Otherwise use "normal".
-- Use null for any field the caller did not actually state. Do not fabricate names, phone numbers, or any other detail not present in the transcript.
-- "action" describes what the assistant did or arranged (e.g. "Booked next available appointment"), not medical guidance.
-- "summary" is 1-3 sentences for practice staff.
-- "email_subject" and "email_body" together form a short internal handoff email from the AI assistant to the practice team, written in a plain professional tone, based only on what's in the transcript.`;
 
 function stripJsonFence(text) {
   return text.trim()
@@ -53,12 +40,40 @@ function stripJsonFence(text) {
     .trim();
 }
 
+// Builds a per-industry system prompt from that industry's own dataCollection
+// schema and red-flag list, so the JSON shape the model is asked for always
+// matches the fields the frontend actually renders for the selected industry.
+function buildSystemPrompt(industryCfg) {
+  const fieldLines = industryCfg.dataCollection
+    .map((f) => `  "${f.name}": string|null  // ${f.instruction}`)
+    .join('\n');
+
+  const redFlagRule = industryCfg.redFlags && industryCfg.redFlags.length
+    ? `- Only escalate to an urgent/emergency status for genuine red flags explicitly present in the transcript: ${industryCfg.redFlags.join('; ')}. Do not escalate for anything else, and never infer urgency from tone alone.`
+    : '- Only mark elevated urgency for a clearly stated emergency in the transcript, never from tone alone.';
+
+  return `You are a front-desk assistant for a ${industryCfg.label.toLowerCase()} business, summarising a phone call transcript for staff.
+
+Read the transcript and return ONLY valid JSON — no markdown code fence, no commentary — in exactly this shape:
+{
+${fieldLines}
+}
+
+Rules:
+- Never invent a diagnosis, professional/technical assessment, or advice beyond what's appropriate for this industry.
+${redFlagRule}
+- Use null for any field the caller did not actually state. Do not fabricate names, numbers, addresses, or any other detail not present in the transcript.
+- Any "summary"-type field is 2-3 neutral sentences for staff, describing what happened, not offering advice.
+- Any "action"-type field describes what the assistant did or arranged, not advice.`;
+}
+
 app.get('/health', (req, res) => {
   res.json({ status: 'ok' });
 });
 
 app.post('/api/summarise', async (req, res) => {
-  const { transcript, practiceName, useCases } = req.body || {};
+  const { transcript, companyName, practiceName, useCases, industry } = req.body || {};
+  const companyLabel = companyName || practiceName; // practiceName kept for backward compatibility
 
   if (!Array.isArray(transcript) || transcript.length === 0) {
     return res.status(400).json({ error: 'transcript (non-empty array) is required' });
@@ -68,12 +83,22 @@ app.post('/api/summarise', async (req, res) => {
     return res.status(200).json({ ok: false, fallback: true, error: 'Server is not configured with ANTHROPIC_API_KEY' });
   }
 
+  let industryCfg;
+  try {
+    const industries = await loadIndustries();
+    industryCfg = industries[industry] || industries.vet;
+  } catch (err) {
+    return res.status(200).json({ ok: false, fallback: true, error: 'Failed to load industry configuration', detail: err.message });
+  }
+
+  const systemPrompt = buildSystemPrompt(industryCfg);
+
   const transcriptText = transcript
     .map((turn) => `${turn.role === 'user' ? 'Caller' : 'Agent'}: ${turn.text}`)
     .join('\n');
 
   const userContent = [
-    practiceName ? `Practice: ${practiceName}` : null,
+    companyLabel ? `Company: ${companyLabel}` : null,
     Array.isArray(useCases) && useCases.length ? `Use cases this assistant handles: ${useCases.join(', ')}` : null,
     '',
     'Transcript:',
@@ -96,7 +121,7 @@ app.post('/api/summarise', async (req, res) => {
         body: JSON.stringify({
           model: ANTHROPIC_MODEL,
           max_tokens: 1024,
-          system: SYSTEM_PROMPT,
+          system: systemPrompt,
           messages: [{ role: 'user', content: userContent }]
         }),
         signal: controller.signal

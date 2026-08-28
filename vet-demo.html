@@ -4,8 +4,8 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
-  <title>Vet AI Phone Agent Demo | ADAM AI Agents</title>
-  <meta name="description" content="Create a personalised AI phone assistant for your veterinary practice and test it immediately."/>
+  <title>AI Phone Agent Demo | ADAM AI Agents</title>
+  <meta name="description" content="Create a personalised AI phone assistant for your business and test it immediately."/>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&display=swap"/>
@@ -34,6 +34,13 @@
         window.dispatchEvent(new CustomEvent('elevenlabs-sdk-status', { detail: { ok: false } }));
       }
     })();
+  </script>
+
+  <script type="module">
+    import { INDUSTRIES, INDUSTRY_ORDER } from './industry-configs.js';
+    window.INDUSTRIES = INDUSTRIES;
+    window.INDUSTRY_ORDER = INDUSTRY_ORDER;
+    window.dispatchEvent(new Event('industry-configs-ready'));
   </script>
 
   <style>
@@ -85,6 +92,40 @@
       font-weight:800;
       color:#fff;
       letter-spacing:0.05em;
+    }
+
+    .nav-right{
+      display:flex;
+      align-items:center;
+      gap:16px;
+    }
+
+    .industry-switcher{
+      background:rgba(255,255,255,0.05);
+      border:1px solid rgba(255,255,255,0.12);
+      color:#fff;
+      font-family:'Sora',sans-serif;
+      font-size:12px;
+      font-weight:600;
+      padding:7px 10px;
+      border-radius:6px;
+      cursor:pointer;
+      outline:none;
+      max-width:180px;
+      transition:border-color 0.2s;
+    }
+
+    .industry-switcher:hover{
+      border-color:rgba(206,255,26,0.4);
+    }
+
+    .industry-switcher:focus{
+      border-color:var(--yellow);
+    }
+
+    .industry-switcher option{
+      background:#111;
+      color:#fff;
     }
 
     .nav-back{
@@ -484,6 +525,12 @@
       line-height:1.4;
     }
 
+    .check-emoji{
+      flex-shrink:0;
+      font-size:15px;
+      line-height:1;
+    }
+
     /* ---------- STEP 4: personality / voice ---------- */
     .card-row{
       display:grid;
@@ -509,6 +556,11 @@
     .pick-card.selected{
       border-color:var(--yellow);
       background:rgba(206,255,26,0.07);
+    }
+
+    .pick-card-icon{
+      font-size:20px;
+      margin-bottom:8px;
     }
 
     .pick-card-title{
@@ -1478,6 +1530,11 @@
         display:none;
       }
 
+      .industry-switcher{
+        max-width:120px;
+        font-size:11px;
+      }
+
       .orb-status{
         width:calc(100% - 32px);
         bottom:160px;
@@ -1528,6 +1585,14 @@
         font-size:14px;
       }
 
+      .nav-right{
+        gap:8px;
+      }
+
+      .industry-switcher{
+        max-width:88px;
+      }
+
       .step-inner{
         padding:32px 14px 48px;
       }
@@ -1568,7 +1633,10 @@
     <span id="statusText">Step 1 of 9</span>
   </div>
 
-  <a class="nav-back" href="index.html">← Back</a>
+  <div class="nav-right">
+    <select class="industry-switcher" id="industrySwitcher" aria-label="Choose industry" onchange="switchIndustry(this.value)"></select>
+    <a class="nav-back" href="index.html">← Back</a>
+  </div>
 </nav>
 
 <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
@@ -1580,45 +1648,31 @@
     <div class="hero">
       <canvas class="hero-canvas" id="heroCanvas"></canvas>
       <div class="hero-inner">
-        <div class="eyebrow">AI Veterinary Phone Agent</div>
-        <h1>Spend less time on the phone. More time with animals.</h1>
-        <p class="hero-sub">Create a personalised AI phone assistant for your practice and test it immediately.</p>
-        <button class="btn btn-primary" onclick="goStep(2)">Create a demo for my practice</button>
-        <div class="perk-row">
-          <div class="perk-chip">Ready in ~2 minutes</div>
-          <div class="perk-chip">No installation</div>
-          <div class="perk-chip">Personalised</div>
-          <div class="perk-chip">Test immediately</div>
-        </div>
+        <div class="eyebrow" id="heroEyebrow">AI Veterinary Phone Agent</div>
+        <h1 id="heroHeadline">Spend less time on the phone. More time with animals.</h1>
+        <p class="hero-sub" id="heroSub">Create a personalised AI phone assistant for your practice and test it immediately.</p>
+        <button class="btn btn-primary" onclick="goStep(2)">Create my demo</button>
+        <div class="perk-row" id="perkRow"></div>
 
-        <div class="sample-convo">
-          <div class="convo-bubble caller">
-            <div class="convo-role">Caller</div>
-            My dog has been limping since this morning.
-          </div>
-          <div class="convo-bubble agent">
-            <div class="convo-role">Agent</div>
-            I'm sorry to hear that. I'll ask a few quick questions so the practice knows what's going on. What is your dog's name?
-          </div>
-        </div>
+        <div class="sample-convo" id="sampleConvo"></div>
       </div>
     </div>
   </section>
 
-  <!-- STEP 2: practice details -->
+  <!-- STEP 2: company details -->
   <section class="step" data-step="2">
     <div class="step-inner narrow">
       <div class="eyebrow">Step 1 of 4</div>
-      <h2 class="step-title">Tell us about your practice</h2>
+      <h2 class="step-title">Tell us about your business</h2>
       <p class="step-desc">We use this to personalise the assistant's knowledge and greeting.</p>
 
       <div class="field">
-        <label>Practice name <span class="req">*</span></label>
-        <input type="text" id="practiceName" placeholder="e.g. Riverside Veterinary Clinic">
+        <label>Company name <span class="req">*</span></label>
+        <input type="text" id="companyName" placeholder="e.g. Riverside Veterinary Clinic">
       </div>
       <div class="field">
-        <label>Practice website <span class="req">*</span></label>
-        <input type="url" id="practiceWebsite" placeholder="https://yourpractice.com">
+        <label>Company website <span class="req">*</span></label>
+        <input type="url" id="companyWebsite" placeholder="https://yourcompany.com">
       </div>
       <div class="field">
         <label>Contact name</label>
@@ -1626,7 +1680,7 @@
       </div>
       <div class="field">
         <label>Email <span class="req">*</span></label>
-        <input type="email" id="contactEmail" placeholder="you@yourpractice.com">
+        <input type="email" id="contactEmail" placeholder="you@yourcompany.com">
       </div>
 
       <div class="step-actions">
@@ -1647,7 +1701,7 @@
 
       <div class="field">
         <label>What would you most like to take off your team's phone workload?</label>
-        <textarea id="workloadNote" placeholder="e.g. repetitive appointment calls during peak hours"></textarea>
+        <textarea id="workloadNote" placeholder="e.g. repetitive calls during peak hours"></textarea>
       </div>
 
       <div class="step-actions">
@@ -1671,7 +1725,7 @@
 
       <div class="field">
         <label>Custom greeting (optional)</label>
-        <textarea id="customGreeting" placeholder="Good afternoon, you're speaking with the digital assistant of [Practice Name]. How can I help you today?"></textarea>
+        <textarea id="customGreeting" placeholder="Good afternoon, you're speaking with the digital assistant of [Company Name]. How can I help you today?"></textarea>
       </div>
 
       <div class="step-actions">
@@ -1687,13 +1741,13 @@
       <div class="gen-orb"></div>
       <h2 class="step-title" style="margin-bottom:32px;">Setting up your assistant...</h2>
       <div class="checklist" id="genChecklist">
-        <div class="check-row" data-label="Reading practice website">
+        <div class="check-row" data-label="Reading company website">
           <div class="check-row-dot"><svg viewBox="0 0 24 24" fill="none"><path d="M5 12l5 5L19 8" stroke="#0A0A0A" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-          <span>Reading practice website</span>
+          <span>Reading company website</span>
         </div>
-        <div class="check-row" data-label="Extracting practice information">
+        <div class="check-row" data-label="Extracting company information">
           <div class="check-row-dot"><svg viewBox="0 0 24 24" fill="none"><path d="M5 12l5 5L19 8" stroke="#0A0A0A" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-          <span>Extracting practice information</span>
+          <span>Extracting company information</span>
         </div>
         <div class="check-row" data-label="Configuring personality">
           <div class="check-row-dot"><svg viewBox="0 0 24 24" fill="none"><path d="M5 12l5 5L19 8" stroke="#0A0A0A" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
@@ -1717,19 +1771,14 @@
       <div class="left-panel">
         <div class="left-header">
           <div class="left-eyebrow">Your Assistant</div>
-          <div class="left-title" id="agentNameTitle">Practice Assistant</div>
+          <div class="left-title" id="agentNameTitle">Business Assistant</div>
           <div class="left-subtitle">Try a real scenario, or say anything a caller might.</div>
         </div>
 
         <div class="left-body">
           <div class="info-block">
             <div class="info-block-label">Try a scenario</div>
-            <div class="suggestion-list">
-              <div class="suggestion" onclick="runScenario('limping')">🐶 My dog is limping</div>
-              <div class="suggestion" onclick="runScenario('booking')">🐱 I want to book an appointment</div>
-              <div class="suggestion" onclick="runScenario('medication')">💊 I need more medication</div>
-              <div class="suggestion" onclick="runScenario('emergency')">🚨 My pet may have an emergency</div>
-            </div>
+            <div class="suggestion-list" id="scenarioList"></div>
           </div>
 
           <div class="info-block">
@@ -1825,25 +1874,14 @@
       <div class="eyebrow">Call complete</div>
       <h2 class="step-title">Here's what your assistant captured</h2>
 
-      <div class="result-card" id="resultCard">
-        <div class="result-row"><div class="result-label">Caller</div><div class="result-value" id="resCaller">Sarah Jenkins</div></div>
-        <div class="result-row"><div class="result-label">Animal</div><div class="result-value" id="resAnimal">Bella (dog)</div></div>
-        <div class="result-row"><div class="result-label">Reason for calling</div><div class="result-value" id="resReason">Limping since this morning</div></div>
-        <div class="result-row"><div class="result-label">Urgency</div><div class="result-value"><span class="pill normal" id="resUrgency">Normal</span></div></div>
-        <div class="result-row"><div class="result-label">Action</div><div class="result-value" id="resAction">Booked for next available appointment</div></div>
-        <div class="result-row"><div class="result-label">Summary</div><div class="result-value" id="resSummary">Caller reports mild limping on the front left leg since this morning, no visible wound. Booked in for a check-up.</div></div>
-      </div>
+      <div class="result-card" id="resultCard"></div>
 
       <div class="email-card" id="emailCard">
         <div class="email-meta">
-          To: <b id="emailTo">practice@example.com</b><br>
-          Subject: <b id="emailSubject">New call: Bella (dog) — appointment request</b>
+          To: <b id="emailTo">you@example.com</b><br>
+          Subject: <b id="emailSubject">Call summary</b>
         </div>
-        <div class="email-body" id="emailBody">Hi team,
-
-The AI assistant just handled a call from Sarah Jenkins regarding her dog Bella, who has been limping since this morning. No visible wound reported. An appointment has been booked for the next available slot.
-
-— Sent by your AI phone assistant</div>
+        <div class="email-body" id="emailBody">—</div>
         <div class="email-actions">
           <button class="btn btn-primary btn-small" id="approveBtn" onclick="approveSend()">Approve &amp; send</button>
           <button class="btn btn-ghost btn-small">Edit</button>
@@ -1862,9 +1900,9 @@ The AI assistant just handled a call from Sarah Jenkins regarding her dog Bella,
   <section class="step" data-step="8">
     <div class="step-inner narrow">
       <div class="eyebrow">Almost there</div>
-      <h2 class="step-title">Help us size this for your practice</h2>
+      <h2 class="step-title">Help us size this for your business</h2>
 
-      <div class="info-block-label" style="margin-bottom:14px;">How many calls does your practice get per day?</div>
+      <div class="info-block-label" style="margin-bottom:14px;">How many calls do you get per day?</div>
       <div class="radio-list" id="callsRadioList"></div>
 
       <div class="info-block-label" style="margin-bottom:14px;">What does your team struggle with most?</div>
@@ -1882,7 +1920,7 @@ The AI assistant just handled a call from Sarah Jenkins regarding her dog Bella,
     <div class="thanks">
       <div class="thanks-orb"></div>
       <h1 id="thanksHeadline">Thank you.</h1>
-      <p>We'll reach out shortly to walk through your custom AI phone assistant and get it live for your practice.</p>
+      <p>We'll reach out shortly to walk through your custom AI phone assistant and get it live for your business.</p>
       <div class="step-actions" style="margin-top:32px;">
         <button class="btn btn-ghost" onclick="resetDemo()">Start over</button>
       </div>
@@ -1895,8 +1933,134 @@ The AI assistant just handled a call from Sarah Jenkins regarding her dog Bella,
   const TOTAL_STEPS = 9;
   const API_BASE = 'http://localhost:3002';
 
+  // Real per-industry ElevenLabs agent ids (Prompt 2's create-industry-agents.js
+  // output). Any industry missing here falls back to the vet agent + a console
+  // warning — the demo must still run even if an id hasn't been added yet.
+  const AGENT_IDS = {
+    vet: 'agent_1401m0z366vwfbebvka3kbevhpn2',
+    trades: 'agent_8401m13xyypdek1tfgf8zhbjdy14',
+    property: 'agent_0601m13xyztwfkjsrm5f8445bhd7',
+    clinic: 'agent_5701m13xz2preem8h915z85ymmww',
+    msp: 'agent_2401m13xz3vge0ebykwberwa8ryw',
+    utilities: 'agent_7901m13xz4sxffgrtqy1hj03n2am',
+    hospitality: 'agent_7301m13xz5y3f19bh2b2kn3bn7dn',
+    contactcentre: 'agent_8901m13xz6xsf7nar8wp8qtg9k6b'
+  };
+  const FALLBACK_AGENT_ID = AGENT_IDS.vet;
+
+  function getAgentId(){
+    const id = AGENT_IDS[cfg.id];
+    if (!id){
+      console.warn('No ElevenLabs agent id configured for industry "' + cfg.id + '" — falling back to the vet agent.');
+      return FALLBACK_AGENT_ID;
+    }
+    return id;
+  }
+
+  // Built-in last-resort content — used only if industry-configs.js itself
+  // fails to load (e.g. served from a location without it). Mirrors the
+  // original single-industry vet demo so the page is never blank.
+  const FALLBACK_CFG = {
+    id: 'vet',
+    label: 'Veterinary Clinics',
+    emoji: '🐾',
+    eyebrow: 'AI Veterinary Phone Agent',
+    headline: 'Spend less time on the phone. More time with animals.',
+    subheadline: 'Create a personalised AI phone assistant for your practice and test it immediately.',
+    perks: ['Ready in ~2 minutes', 'No installation', 'Personalised', 'Test immediately'],
+    personas: [
+      { id: 'warm', icon: '🤗', title: 'Warm & reassuring', blurb: 'Calm and supportive for stressed callers' },
+      { id: 'professional', icon: '👔', title: 'Professional & clear', blurb: 'Efficient, concise and practical' },
+      { id: 'personal', icon: '😊', title: 'Personal & informal', blurb: 'Friendly, like a member of the team' }
+    ],
+    defaultAgentName: 'Emma',
+    sampleConversation: [
+      { who: 'caller', text: "My dog has been limping since this morning." },
+      { who: 'agent', text: "I'm sorry to hear that. I'll ask a few quick questions so the practice knows what's going on. What is your dog's name?" }
+    ],
+    useCases: [
+      { emoji: '📅', label: 'Booking appointments' },
+      { emoji: '🔄', label: 'Changing or cancelling' },
+      { emoji: '🚨', label: 'Emergency calls' },
+      { emoji: '🕐', label: 'Opening hours' },
+      { emoji: '💊', label: 'Medication & repeat prescriptions' },
+      { emoji: '📋', label: 'Test results & callbacks' }
+    ],
+    scenarios: [
+      { emoji: '🐶', label: 'My dog is limping' },
+      { emoji: '🐱', label: 'Book an appointment' },
+      { emoji: '💊', label: 'I need more medication' },
+      { emoji: '🚨', label: 'Possible emergency' }
+    ],
+    greeting: "Good afternoon, you're speaking with {{agent_name}}, the digital assistant of {{company_name}}. How can I help you today?",
+    redFlags: ['difficulty breathing', 'collapse or unresponsiveness', 'seizures', 'suspected poisoning', 'major trauma', 'bloated or distended abdomen', 'heavy bleeding'],
+    dataCollection: [
+      { name: 'caller_name', type: 'string', instruction: "Owner's name, or empty." },
+      { name: 'animal_name', type: 'string', instruction: "Pet's name, or empty." },
+      { name: 'animal_species', type: 'string', instruction: 'Species, or empty.' },
+      { name: 'reason', type: 'string', instruction: 'Reason for calling, one sentence.' },
+      { name: 'urgency', type: 'string', instruction: 'One of: normal | urgent.' },
+      { name: 'action', type: 'string', instruction: 'Outcome of the call.' },
+      { name: 'summary', type: 'string', instruction: '2-3 neutral sentences.' }
+    ],
+    emailSubject: 'Call summary — {{animal_name}} ({{reason}})'
+  };
+
+  let cfg = null;
+
+  function slugify(s){
+    return String(s).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+  }
+
+  function resolveIndustryId(){
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const id = params.get('industry');
+      if (id && window.INDUSTRIES && window.INDUSTRIES[id]) return id;
+    } catch (err) {
+      console.error('Failed to read ?industry from URL:', err && err.message);
+    }
+    return 'vet';
+  }
+
+  function switchIndustry(id){
+    const params = new URLSearchParams(window.location.search);
+    params.set('industry', id);
+    window.location.search = params.toString();
+  }
+
+  // Renders {{token}} placeholders from a flat data object. A small alias
+  // table bridges the few places industry-configs.js's template tokens don't
+  // exactly match its own dataCollection field names (e.g. "fault" vs
+  // "fault_type"). Unresolved tokens render as empty, never literal braces.
+  const TOKEN_ALIASES = {
+    fault: 'fault_type',
+    issue: 'issue_type',
+    property: 'property_address',
+    address: 'property_address',
+    request: 'request_type',
+    room: 'room',
+    patient_name: 'patient_name',
+    intent: 'intent',
+    priority: 'priority'
+  };
+
+  function substituteVars(template, data){
+    if (!template) return '';
+    return template.replace(/\{\{\s*([a-zA-Z0-9_]+)\s*\}\}/g, (match, key) => {
+      if (data[key] !== undefined && data[key] !== null && data[key] !== '') return data[key];
+      const alias = TOKEN_ALIASES[key];
+      if (alias && data[alias]) return data[alias];
+      return '';
+    });
+  }
+
+  function humanizeFieldName(name){
+    return String(name).replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+  }
+
   const demoState = {
-    practiceName: '',
+    companyName: '',
     website: '',
     contactName: '',
     contactEmail: '',
@@ -1909,46 +2073,10 @@ The AI assistant just handled a call from Sarah Jenkins regarding her dog Bella,
     struggles: []
   };
 
-  const USE_CASES = [
-    { id:'booking', label:'Booking appointments' },
-    { id:'changing', label:'Changing or cancelling' },
-    { id:'emergency', label:'Emergency calls' },
-    { id:'hours', label:'Opening hours' },
-    { id:'medication', label:'Medication & repeat prescriptions' },
-    { id:'results', label:'Test results & callbacks' },
-    { id:'pricing', label:'Pricing questions' },
-    { id:'treatment', label:'Treatment information' },
-    { id:'registering', label:'Registering new animals' },
-    { id:'transferring', label:'Transferring callers' }
-  ];
-
-  const PERSONALITIES = [
-    { id:'warm', title:'Warm & reassuring', desc:'Empathetic tone, ideal for anxious pet owners.' },
-    { id:'professional', title:'Professional & clear', desc:'Efficient, to the point, clinical confidence.' },
-    { id:'personal', title:'Personal & informal', desc:'Friendly and conversational, like a familiar face.' }
-  ];
-
   const CALLS_PER_DAY = ['<25','25–50','50–100','100–200','200+'];
   const STRUGGLES = ['Missed calls', 'Long hold times', 'Repetitive questions', 'After-hours coverage', 'Staff burnout', 'No-shows'];
 
   const checkSvg = '<svg viewBox="0 0 24 24" fill="none"><path d="M5 12l5 5L19 8" stroke="#0A0A0A" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-
-  // A short, plausible "limping dog" call used whenever a real session isn't
-  // available: as the seed for the scripted local fallback conversation, and
-  // as the source transcript when a call ends with nothing actually said.
-  const SAMPLE_TRANSCRIPT = [
-    { role:'agent', text:"Good afternoon, you're speaking with the digital assistant. How can I help you today?" },
-    { role:'user', text:"Hi, my dog has been limping since this morning." },
-    { role:'agent', text:"I'm sorry to hear that. Can I get your name, and your dog's name?" },
-    { role:'user', text:"I'm Sarah, and her name is Bella." },
-    { role:'agent', text:"Thanks Sarah. Is Bella able to put any weight on the leg at all?" },
-    { role:'user', text:"A little, but she's clearly uncomfortable and doesn't want to walk on it." },
-    { role:'agent', text:"Okay, that's good to know. I'd like to get Bella seen — would this afternoon or tomorrow morning suit you better?" },
-    { role:'user', text:"Tomorrow morning would be great, thank you." },
-    { role:'agent', text:"Perfect, I've noted that down for the team to confirm. Anything else I can help with?" },
-    { role:'user', text:"No, that's everything." },
-    { role:'agent', text:"You're welcome — take care, and we hope Bella feels better soon." }
-  ];
 
   // 'loading' | 'ready' | 'failed' — set once the head's dynamic SDK import settles
   let sdkStatus = 'loading';
@@ -1990,72 +2118,175 @@ The AI assistant just handled a call from Sarah Jenkins regarding her dog Bella,
     window.scrollTo(0, 0);
   }
 
+  // ==================== industry-driven boot ====================
+  function boot(forcedCfg){
+    cfg = forcedCfg || (window.INDUSTRIES && window.INDUSTRIES[resolveIndustryId()]) || FALLBACK_CFG;
+
+    document.title = cfg.label + ' — AI Phone Agent Demo | ADAM AI Agents';
+
+    renderIndustrySwitcher();
+    renderHero();
+    renderUseCaseGrid();
+    renderPersonalityCards();
+    renderVoiceCards();
+    renderScenarioList();
+    buildResultRows();
+
+    ['companyName','companyWebsite','contactEmail'].forEach(id => {
+      document.getElementById(id).addEventListener('input', validateStep2);
+    });
+  }
+
+  function renderIndustrySwitcher(){
+    const sel = document.getElementById('industrySwitcher');
+    const order = window.INDUSTRY_ORDER || [cfg.id];
+    const industries = window.INDUSTRIES || { [cfg.id]: cfg };
+    sel.innerHTML = '';
+    order.forEach(id => {
+      const ind = industries[id];
+      if (!ind) return;
+      const opt = document.createElement('option');
+      opt.value = id;
+      opt.textContent = ind.emoji + ' ' + ind.label;
+      if (id === cfg.id) opt.selected = true;
+      sel.appendChild(opt);
+    });
+  }
+
+  function renderHero(){
+    document.getElementById('heroEyebrow').textContent = cfg.eyebrow;
+    document.getElementById('heroHeadline').textContent = cfg.headline;
+    document.getElementById('heroSub').textContent = cfg.subheadline;
+
+    const perkRow = document.getElementById('perkRow');
+    perkRow.innerHTML = '';
+    (cfg.perks || []).forEach(perk => {
+      const chip = document.createElement('div');
+      chip.className = 'perk-chip';
+      chip.textContent = perk;
+      perkRow.appendChild(chip);
+    });
+
+    const convo = document.getElementById('sampleConvo');
+    convo.innerHTML = '';
+    (cfg.sampleConversation || []).forEach(turn => {
+      const bubble = document.createElement('div');
+      bubble.className = 'convo-bubble ' + (turn.who === 'agent' ? 'agent' : 'caller');
+      const role = document.createElement('div');
+      role.className = 'convo-role';
+      role.textContent = turn.who === 'agent' ? 'Agent' : 'Caller';
+      bubble.appendChild(role);
+      bubble.appendChild(document.createTextNode(turn.text));
+      convo.appendChild(bubble);
+    });
+  }
+
+  function renderUseCaseGrid(){
+    const grid = document.getElementById('useCaseGrid');
+    grid.innerHTML = '';
+    (cfg.useCases || []).forEach(uc => {
+      const el = document.createElement('label');
+      el.className = 'check-item';
+      el.dataset.id = slugify(uc.label);
+      el.innerHTML = '<input type="checkbox"><div class="check-box">' + checkSvg + '</div><span class="check-emoji">' + uc.emoji + '</span><span class="check-label">' + uc.label + '</span>';
+      el.addEventListener('click', (e) => {
+        e.preventDefault();
+        el.classList.toggle('selected');
+      });
+      grid.appendChild(el);
+    });
+  }
+
+  function renderPersonalityCards(){
+    const wrap = document.getElementById('personalityCards');
+    wrap.innerHTML = '';
+    (cfg.personas || []).forEach(p => {
+      const el = document.createElement('div');
+      el.className = 'pick-card' + (p.id === demoState.personality ? ' selected' : '');
+      el.dataset.id = p.id;
+      el.innerHTML = '<div class="pick-card-icon">' + (p.icon || '') + '</div><div class="pick-card-title">' + p.title + '</div><div class="pick-card-desc">' + (p.blurb || p.desc || '') + '</div>';
+      el.addEventListener('click', () => {
+        wrap.querySelectorAll('.pick-card').forEach(c => c.classList.remove('selected'));
+        el.classList.add('selected');
+      });
+      wrap.appendChild(el);
+    });
+  }
+
+  function renderVoiceCards(){
+    const wrap = document.getElementById('voiceCards');
+    wrap.innerHTML = '';
+    ['female','male'].forEach(v => {
+      const el = document.createElement('div');
+      el.className = 'pick-card' + (v === demoState.voice ? ' selected' : '');
+      el.dataset.id = v;
+      el.innerHTML = '<div class="pick-card-title">' + (v === 'female' ? 'Female' : 'Male') + '</div>';
+      el.addEventListener('click', () => {
+        wrap.querySelectorAll('.pick-card').forEach(c => c.classList.remove('selected'));
+        el.classList.add('selected');
+      });
+      wrap.appendChild(el);
+    });
+  }
+
+  function renderScenarioList(){
+    const list = document.getElementById('scenarioList');
+    list.innerHTML = '';
+    (cfg.scenarios || []).forEach((s, i) => {
+      const el = document.createElement('div');
+      el.className = 'suggestion';
+      el.textContent = s.emoji + ' ' + s.label;
+      el.addEventListener('click', () => runScenario(i));
+      list.appendChild(el);
+    });
+  }
+
+  function buildResultRows(){
+    const card = document.getElementById('resultCard');
+    card.innerHTML = '';
+    (cfg.dataCollection || []).forEach(field => {
+      const row = document.createElement('div');
+      row.className = 'result-row';
+      const label = document.createElement('div');
+      label.className = 'result-label';
+      label.textContent = humanizeFieldName(field.name);
+      const value = document.createElement('div');
+      value.className = 'result-value';
+      value.id = 'res_' + field.name;
+      value.textContent = '—';
+      if (/urgency|priority/i.test(field.name)) value.dataset.statusField = 'true';
+      row.appendChild(label);
+      row.appendChild(value);
+      card.appendChild(row);
+    });
+  }
+
   // ---------- step 2 ----------
   function captureStep2(){
-    demoState.practiceName = document.getElementById('practiceName').value.trim();
-    demoState.website = document.getElementById('practiceWebsite').value.trim();
+    demoState.companyName = document.getElementById('companyName').value.trim();
+    demoState.website = document.getElementById('companyWebsite').value.trim();
     demoState.contactName = document.getElementById('contactName').value.trim();
     demoState.contactEmail = document.getElementById('contactEmail').value.trim();
   }
 
   function validateStep2(){
-    const ok = document.getElementById('practiceName').value.trim() &&
-               document.getElementById('practiceWebsite').value.trim() &&
+    const ok = document.getElementById('companyName').value.trim() &&
+               document.getElementById('companyWebsite').value.trim() &&
                document.getElementById('contactEmail').value.trim();
     document.getElementById('step2Next').disabled = !ok;
   }
 
-  ['practiceName','practiceWebsite','contactEmail'].forEach(id => {
-    document.getElementById(id).addEventListener('input', validateStep2);
-  });
-
   // ---------- step 3 ----------
-  const useCaseGrid = document.getElementById('useCaseGrid');
-  USE_CASES.forEach(uc => {
-    const el = document.createElement('label');
-    el.className = 'check-item';
-    el.dataset.id = uc.id;
-    el.innerHTML = '<input type="checkbox"><div class="check-box">' + checkSvg + '</div><span class="check-label">' + uc.label + '</span>';
-    el.addEventListener('click', (e) => {
-      e.preventDefault();
-      el.classList.toggle('selected');
-    });
-    useCaseGrid.appendChild(el);
-  });
-
   function captureStep3(){
-    demoState.useCases = Array.from(useCaseGrid.querySelectorAll('.check-item.selected')).map(el => el.dataset.id);
+    const grid = document.getElementById('useCaseGrid');
+    demoState.useCases = Array.from(grid.querySelectorAll('.check-item.selected')).map(el => el.querySelector('.check-label').textContent);
     demoState.workload = document.getElementById('workloadNote').value.trim();
   }
 
   // ---------- step 4 ----------
-  const personalityWrap = document.getElementById('personalityCards');
-  PERSONALITIES.forEach(p => {
-    const el = document.createElement('div');
-    el.className = 'pick-card' + (p.id === demoState.personality ? ' selected' : '');
-    el.dataset.id = p.id;
-    el.innerHTML = '<div class="pick-card-title">' + p.title + '</div><div class="pick-card-desc">' + p.desc + '</div>';
-    el.addEventListener('click', () => {
-      personalityWrap.querySelectorAll('.pick-card').forEach(c => c.classList.remove('selected'));
-      el.classList.add('selected');
-    });
-    personalityWrap.appendChild(el);
-  });
-
-  const voiceWrap = document.getElementById('voiceCards');
-  ['female','male'].forEach(v => {
-    const el = document.createElement('div');
-    el.className = 'pick-card' + (v === demoState.voice ? ' selected' : '');
-    el.dataset.id = v;
-    el.innerHTML = '<div class="pick-card-title">' + (v === 'female' ? 'Female' : 'Male') + '</div>';
-    el.addEventListener('click', () => {
-      voiceWrap.querySelectorAll('.pick-card').forEach(c => c.classList.remove('selected'));
-      el.classList.add('selected');
-    });
-    voiceWrap.appendChild(el);
-  });
-
   function captureStep4(){
+    const personalityWrap = document.getElementById('personalityCards');
+    const voiceWrap = document.getElementById('voiceCards');
     const selP = personalityWrap.querySelector('.pick-card.selected');
     const selV = voiceWrap.querySelector('.pick-card.selected');
     demoState.personality = selP ? selP.dataset.id : 'warm';
@@ -2080,18 +2311,16 @@ The AI assistant just handled a call from Sarah Jenkins regarding her dog Bella,
 
   // ---------- step 6 ----------
   function populateStep6(){
-    const name = demoState.practiceName || 'Practice';
-    document.getElementById('agentNameTitle').textContent = name + ' Assistant';
+    const name = demoState.companyName || (cfg.label + ' Assistant').replace(' Assistant Assistant', ' Assistant');
+    document.getElementById('agentNameTitle').textContent = demoState.companyName ? (demoState.companyName + ' Assistant') : (cfg.label + ' Assistant');
 
     const list = document.getElementById('capabilityList');
     list.innerHTML = '';
-    const selected = demoState.useCases.length ? demoState.useCases : ['booking','emergency','hours'];
-    selected.forEach(id => {
-      const uc = USE_CASES.find(u => u.id === id);
-      if (!uc) return;
+    const selectedLabels = demoState.useCases.length ? demoState.useCases : (cfg.useCases || []).slice(0, 3).map(u => u.label);
+    selectedLabels.forEach(label => {
       const row = document.createElement('div');
       row.className = 'capability';
-      row.innerHTML = '<div class="cap-dot"></div><span>' + uc.label + '</span>';
+      row.innerHTML = '<div class="cap-dot"></div><span>' + label + '</span>';
       list.appendChild(row);
     });
 
@@ -2149,18 +2378,11 @@ The AI assistant just handled a call from Sarah Jenkins regarding her dog Bella,
     }
   }
 
-  const SCENARIOS = {
-    limping: "My dog has been limping since this morning.",
-    booking: "I'd like to book an appointment for my cat's vaccination.",
-    medication: "I need to order a repeat prescription for my dog.",
-    emergency: "My dog just ate something and is acting strange — is this an emergency?"
-  };
-
-  function runScenario(id){
-    const text = SCENARIOS[id];
-    if (!text) return;
+  function runScenario(index){
+    const s = (cfg.scenarios || [])[index];
+    if (!s) return;
     const hint = document.getElementById('scenarioHint');
-    hint.innerHTML = 'Try saying: <span>"' + text + '"</span>';
+    hint.innerHTML = 'Try saying: <span>"' + s.label + '"</span>';
   }
 
   function updateTranscript(role, text){
@@ -2201,12 +2423,12 @@ The AI assistant just handled a call from Sarah Jenkins regarding her dog Bella,
     demoState.callsPerDay = selCalls ? selCalls.textContent : '';
     demoState.struggles = Array.from(struggleChips.querySelectorAll('.chip-select.selected')).map(el => el.textContent);
     const headline = document.getElementById('thanksHeadline');
-    headline.textContent = demoState.practiceName ? 'Thank you, ' + demoState.practiceName + '.' : 'Thank you.';
+    headline.textContent = demoState.companyName ? 'Thank you, ' + demoState.companyName + '.' : 'Thank you.';
 
     fetch(API_BASE + '/api/lead', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify(demoState)
+      body: JSON.stringify({ industry: cfg.id, ...demoState })
     }).catch(err => console.error('Lead submit failed:', err));
   }
 
@@ -2397,12 +2619,22 @@ The AI assistant just handled a call from Sarah Jenkins regarding her dog Bella,
   const badgeText = document.getElementById('badgeText');
 
   function getAgentName(){
-    return demoState.voice === 'female' ? 'Emma' : 'James';
+    return cfg.defaultAgentName || 'Assistant';
+  }
+
+  function greetingVars(){
+    return {
+      company_name: demoState.companyName || cfg.label,
+      agent_name: getAgentName(),
+      use_cases: demoState.useCases.join(', ') || (cfg.useCases || []).map(u => u.label).join(', '),
+      personality: demoState.personality,
+      contact_name: demoState.contactName,
+      website: demoState.website
+    };
   }
 
   function defaultGreeting(){
-    const name = demoState.practiceName || 'the practice';
-    return "Good afternoon, you're speaking with the digital assistant of " + name + ". How can I help you today?";
+    return substituteVars(cfg.greeting, greetingVars());
   }
 
   function handleMicUnavailable(){
@@ -2452,11 +2684,11 @@ The AI assistant just handled a call from Sarah Jenkins regarding her dog Bella,
       const agentName = getAgentName();
 
       conversation = await window.ElevenLabsConversation.startSession({
-        agentId: 'agent_1401m0z366vwfbebvka3kbevhpn2',
+        agentId: getAgentId(),
 
         dynamicVariables: {
-          practice_name: demoState.practiceName,
-          practice_website: demoState.website,
+          company_name: demoState.companyName,
+          website: demoState.website,
           contact_name: demoState.contactName,
           use_cases: demoState.useCases.join(', '),
           personality: demoState.personality,
@@ -2585,7 +2817,8 @@ The AI assistant just handled a call from Sarah Jenkins regarding her dog Bella,
   }
 
   // Fully local, offline conversation used when neither a voice nor a text
-  // session can be established — the demo still plays out end to end.
+  // session can be established — the demo still plays out end to end, using
+  // the current industry's own sample conversation as the seed.
   // Never wipes a transcript that already has real caller turns in it.
   function playScriptedConversation(){
     if (transcript.length){
@@ -2597,8 +2830,11 @@ The AI assistant just handled a call from Sarah Jenkins regarding her dog Bella,
     if (messages) messages.innerHTML = '';
     showCalmNotice('Live connection unavailable — playing a sample conversation.');
 
+    const script = (cfg.sampleConversation || []).map(t => ({ role: t.who === 'agent' ? 'agent' : 'user', text: t.text }));
+    if (!script.length) return;
+
     const stepDelay = reducedMotion() ? 60 : 1300;
-    SAMPLE_TRANSCRIPT.forEach((turn, i) => {
+    script.forEach((turn, i) => {
       const t1 = setTimeout(() => {
         if (turn.role === 'agent') showTyping();
         const t2 = setTimeout(() => {
@@ -2651,12 +2887,12 @@ The AI assistant just handled a call from Sarah Jenkins regarding her dog Bella,
 
     try {
       textConversation = await window.ElevenLabsConversation.startSession({
-        agentId: 'agent_1401m0z366vwfbebvka3kbevhpn2',
+        agentId: getAgentId(),
         textOnly: true,
 
         dynamicVariables: {
-          practice_name: demoState.practiceName,
-          practice_website: demoState.website,
+          company_name: demoState.companyName,
+          website: demoState.website,
           contact_name: demoState.contactName,
           use_cases: demoState.useCases.join(', '),
           personality: demoState.personality,
@@ -2733,12 +2969,13 @@ The AI assistant just handled a call from Sarah Jenkins regarding her dog Bella,
   function showResultSkeleton(){
     document.getElementById('resultCard').classList.add('is-loading');
     document.getElementById('emailCard').classList.add('is-loading');
-    ['resCaller','resAnimal','resReason','resAction','resSummary','emailTo','emailSubject','emailBody'].forEach(id => {
-      document.getElementById(id).textContent = ' ';
+    (cfg.dataCollection || []).forEach(field => {
+      const el = document.getElementById('res_' + field.name);
+      if (el) el.textContent = ' ';
     });
-    const urgencyEl = document.getElementById('resUrgency');
-    urgencyEl.textContent = ' ';
-    urgencyEl.className = 'pill';
+    ['emailTo','emailSubject','emailBody'].forEach(id => {
+      document.getElementById(id).textContent = ' ';
+    });
   }
 
   function hideResultSkeleton(){
@@ -2746,10 +2983,14 @@ The AI assistant just handled a call from Sarah Jenkins regarding her dog Bella,
     document.getElementById('emailCard').classList.remove('is-loading');
   }
 
+  function localSampleTranscript(){
+    return (cfg.sampleConversation || []).map(t => ({ role: t.who === 'agent' ? 'agent' : 'user', text: t.text }));
+  }
+
   async function summariseCall(){
     // never present an empty result to a live prospect — fall back to a
     // plausible sample call instead
-    const activeTranscript = transcript.length ? transcript : SAMPLE_TRANSCRIPT;
+    const activeTranscript = transcript.length ? transcript : localSampleTranscript();
 
     showResultSkeleton();
 
@@ -2782,7 +3023,8 @@ The AI assistant just handled a call from Sarah Jenkins regarding her dog Bella,
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({
           transcript: activeTranscript,
-          practiceName: demoState.practiceName,
+          industry: cfg.id,
+          companyName: demoState.companyName,
           useCases: demoState.useCases
         }),
         signal: controller.signal
@@ -2802,35 +3044,61 @@ The AI assistant just handled a call from Sarah Jenkins regarding her dog Bella,
     }
   }
 
+  function isElevatedStatus(fieldName, value){
+    if (!/urgency|priority/i.test(fieldName)) return null;
+    const v = String(value || '').toLowerCase();
+    return v === 'urgent' || v === 'emergency' || v === 'p1';
+  }
+
   function populateResultFromSummary(r){
-    document.getElementById('resCaller').textContent = r.caller_name || 'Not provided';
+    (cfg.dataCollection || []).forEach(field => {
+      const el = document.getElementById('res_' + field.name);
+      if (!el) return;
+      const value = r[field.name];
 
-    const animalParts = [r.animal_name, r.animal_species].filter(Boolean);
-    document.getElementById('resAnimal').textContent = animalParts.length ? animalParts.join(' — ') : 'Not specified';
+      const elevated = isElevatedStatus(field.name, value);
+      if (elevated !== null){
+        el.textContent = value || (elevated ? 'Urgent' : 'Normal');
+        el.className = 'result-value';
+        const pill = document.createElement('span');
+        pill.className = elevated ? 'pill urgent' : 'pill normal';
+        pill.textContent = value || (elevated ? 'Urgent' : 'Normal');
+        el.textContent = '';
+        el.appendChild(pill);
+      } else {
+        el.textContent = value || 'Not specified';
+      }
+    });
 
-    document.getElementById('resReason').textContent = r.reason || 'See transcript';
-
-    const urgent = r.urgency === 'urgent';
-    const urgencyEl = document.getElementById('resUrgency');
-    urgencyEl.textContent = urgent ? 'Urgent' : 'Normal';
-    urgencyEl.className = urgent ? 'pill urgent' : 'pill normal';
-
-    document.getElementById('resAction').textContent = r.action || 'Logged for your team.';
-    document.getElementById('resSummary').textContent = r.summary || '—';
-
-    document.getElementById('emailTo').textContent = demoState.contactEmail || 'practice@example.com';
-    document.getElementById('emailSubject').textContent = r.email_subject || ((demoState.practiceName || 'Practice') + ' — new call summary');
-    document.getElementById('emailBody').textContent = r.email_body || '—';
+    const emailVars = Object.assign({}, r);
+    document.getElementById('emailTo').textContent = demoState.contactEmail || 'you@example.com';
+    const renderedSubject = substituteVars(cfg.emailSubject, emailVars).replace(/\s+/g, ' ').trim();
+    document.getElementById('emailSubject').textContent = renderedSubject || ((demoState.companyName || cfg.label) + ' — new call summary');
+    document.getElementById('emailBody').textContent = r.email_body || r.summary || '—';
   }
 
   // ---------- pure-JS local summariser: used whenever the backend is unreachable, ----------
-  // ---------- times out, or returns unparseable JSON. Never throws. ----------
+  // ---------- times out, or returns unparseable JSON. Never throws. Generic across ----------
+  // ---------- every industry — uses the current industry's own red-flag list for urgency. ----------
   function extractFirstMatch(patterns, text){
     for (const re of patterns){
       const m = text.match(re);
       if (m && m[1]) return m[1].trim().replace(/[.,!?]+$/, '');
     }
     return null;
+  }
+
+  // A redFlag entry is a descriptive phrase (e.g. "smell of gas", "no heat
+  // for a vulnerable person in cold weather") — callers never say the phrase
+  // verbatim, so matching it as one literal substring almost never fires.
+  // Instead, pull out its meaningful words and match on any one of them.
+  const KEYWORD_STOPWORDS = new Set(['and','the','a','an','of','or','in','on','at','to','for','with','near','is','are','someone','anyone','without','from','into','their','your','any','signs','sounding','affecting','genuine','major','severe','suspected']);
+
+  function phraseKeywords(phrase){
+    return String(phrase)
+      .toLowerCase()
+      .split(/[\s,\/\-()]+/)
+      .filter(w => w.length >= 3 && !KEYWORD_STOPWORDS.has(w));
   }
 
   function localSummarise(callTranscript){
@@ -2846,18 +3114,8 @@ The AI assistant just handled a call from Sarah Jenkins regarding her dog Bella,
         /i'?m ([a-z]+)(?:,| calling| speaking|$)/i
       ], userText);
 
-      const animalName = extractFirstMatch([
-        /(?:her|his|its) name is ([a-z]+)/i,
-        /(?:dog|cat|pet|rabbit)(?:'s| is)? (?:called|named) ([a-z]+)/i,
-        /called ([a-z]+)/i
-      ], userText);
-
-      let species = null;
-      if (/\bdogs?\b/.test(lower)) species = 'Dog';
-      else if (/\bcats?\b/.test(lower)) species = 'Cat';
-      else if (/\brabbits?\b/.test(lower)) species = 'Rabbit';
-
-      const urgent = /\b(emergency|urgent|poison|toxic|collapsed|seizure|bloat|hit by a car|can'?t breathe|difficulty breathing|bleeding heavily)\b/i.test(allText);
+      const redFlags = cfg.redFlags || [];
+      const urgent = redFlags.some(flag => phraseKeywords(flag).some(word => lower.includes(word)));
 
       const firstUserLine = callTranscript.find(t => t.role === 'user');
       const reason = firstUserLine ? firstUserLine.text : 'General enquiry';
@@ -2869,42 +3127,42 @@ The AI assistant just handled a call from Sarah Jenkins regarding her dog Bella,
         .join(' ') || 'Caller reached out with a general enquiry.';
 
       const action = urgent
-        ? 'Flagged as urgent for the practice team to call back immediately.'
-        : 'Logged the enquiry for the practice team to follow up.';
+        ? 'Flagged as urgent for the team to follow up immediately.'
+        : 'Logged the enquiry for the team to follow up.';
 
-      const practiceName = demoState.practiceName || 'the practice';
+      const companyLabel = demoState.companyName || cfg.label;
       const transcriptText = callTranscript.map(t => (t.role === 'user' ? 'Caller' : 'Agent') + ': ' + t.text).join('\n');
-      const emailSubject = (animalName ? animalName + ' — ' : '') + (reason ? reason.slice(0, 60) : 'Call summary');
       const emailBody =
         'Hi team,\n\nThe AI assistant just handled a call' +
-        (callerName ? ' from ' + callerName : '') +
-        (animalName ? ' about ' + animalName : '') + '.\n\n' +
-        transcriptText + '\n\n— Sent by your AI phone assistant for ' + practiceName;
+        (callerName ? ' from ' + callerName : '') + '.\n\n' +
+        transcriptText + '\n\n— Sent by your AI phone assistant for ' + companyLabel;
 
-      return {
+      const result = {
         caller_name: callerName,
-        caller_phone: null,
-        animal_name: animalName,
-        animal_species: species,
         reason,
-        urgency: urgent ? 'urgent' : 'normal',
-        action,
         summary,
-        email_subject: emailSubject,
+        action,
         email_body: emailBody
       };
+
+      // fill every field this industry actually collects, defaulting anything
+      // we can't infer to null rather than inventing a value
+      (cfg.dataCollection || []).forEach(field => {
+        if (result[field.name] !== undefined) return;
+        if (/urgency|priority/i.test(field.name)){
+          result[field.name] = urgent ? (field.name === 'priority' ? 'P1' : 'urgent') : (field.name === 'priority' ? 'P3' : 'normal');
+        } else {
+          result[field.name] = null;
+        }
+      });
+
+      return result;
     } catch (err) {
       console.error('Local summariser failed, using static placeholder:', err && err.message);
       return {
-        caller_name: null,
-        caller_phone: null,
-        animal_name: null,
-        animal_species: null,
         reason: 'See transcript',
-        urgency: 'normal',
-        action: 'Logged for your team.',
         summary: 'Caller reached out with a general enquiry.',
-        email_subject: (demoState.practiceName || 'Practice') + ' — new call summary',
+        action: 'Logged for your team.',
         email_body: 'Hi team,\n\nThe AI assistant just handled a call. Details are in the transcript.\n\n— Sent by your AI phone assistant'
       };
     }
@@ -2933,7 +3191,7 @@ The AI assistant just handled a call from Sarah Jenkins regarding her dog Bella,
       if (sendStatus) sendStatus.style.display = 'none';
 
       hideResultSkeleton();
-      populateResultFromSummary(localSummarise(SAMPLE_TRANSCRIPT));
+      populateResultFromSummary(localSummarise(localSampleTranscript()));
       goStep(7);
     } catch (err) {
       console.error('Presenter escape failed:', err && err.message);
@@ -2946,6 +3204,24 @@ The AI assistant just handled a call from Sarah Jenkins regarding her dog Bella,
       presenterEscape();
     }
   });
+
+  // ---------- boot sequencing ----------
+  // industry-configs.js is a same-origin static file (near-instant), but if
+  // it's ever missing or slow we still never leave the page blank.
+  let bootTimer = setTimeout(() => {
+    console.error('industry-configs.js did not load in time — using built-in fallback content.');
+    boot(FALLBACK_CFG);
+  }, 3000);
+
+  if (window.INDUSTRIES){
+    clearTimeout(bootTimer);
+    boot();
+  } else {
+    window.addEventListener('industry-configs-ready', () => {
+      clearTimeout(bootTimer);
+      boot();
+    });
+  }
 </script>
 </body>
 </html>
