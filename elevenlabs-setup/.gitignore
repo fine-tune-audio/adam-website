@@ -1,0 +1,4 @@
+.env
+node_modules/
+current-agent.json
+simulation-*.json
