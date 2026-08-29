@@ -17,8 +17,8 @@ app.use(cors({
   methods: ['GET', 'POST']
 }));
 
-const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
-const ANTHROPIC_MODEL = 'claude-sonnet-4-6';
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+const OPENAI_MODEL = 'gpt-5.4-mini'; // verified against GET /v1/models with the live key before use
 const LEADS_FILE = path.join(__dirname, 'leads.json');
 
 // industry-configs.js is an ES module living one directory up (repo root).
@@ -45,26 +45,29 @@ function stripJsonFence(text) {
 // matches the fields the frontend actually renders for the selected industry.
 function buildSystemPrompt(industryCfg) {
   const fieldLines = industryCfg.dataCollection
-    .map((f) => `  "${f.name}": string|null  // ${f.instruction}`)
+    .map((f) => `  "${f.name}": string  // ${f.instruction}`)
     .join('\n');
 
+  const urgencyField = industryCfg.dataCollection.find((f) => /urgency|priority/i.test(f.name));
   const redFlagRule = industryCfg.redFlags && industryCfg.redFlags.length
-    ? `- Only escalate to an urgent/emergency status for genuine red flags explicitly present in the transcript: ${industryCfg.redFlags.join('; ')}. Do not escalate for anything else, and never infer urgency from tone alone.`
-    : '- Only mark elevated urgency for a clearly stated emergency in the transcript, never from tone alone.';
+    ? `Only raise ${urgencyField ? `"${urgencyField.name}"` : 'urgency'} above its calmest/default value for genuine red flags explicitly present in the transcript: ${industryCfg.redFlags.join('; ')}. Everything else — including a completely ordinary booking, question, or request — MUST get the calmest/default value for that field. Never infer urgency from tone, hesitation, or filler words alone; only from an explicitly stated red-flag situation.`
+    : `Only raise urgency for a clearly and explicitly stated emergency in the transcript. An ordinary request MUST get the calmest/default value. Never infer urgency from tone alone.`;
 
-  return `You are a front-desk assistant for a ${industryCfg.label.toLowerCase()} business, summarising a phone call transcript for staff.
+  return `You are extracting a structured summary of a phone call for a ${industryCfg.label.toLowerCase()} front desk.
 
-Read the transcript and return ONLY valid JSON — no markdown code fence, no commentary — in exactly this shape:
+Return ONLY valid JSON — no markdown code fence, no commentary — with exactly these keys:
 {
 ${fieldLines}
+  "summary": string
 }
 
-Rules:
+HARD RULES:
+- "summary" MUST be a clean 2-3 sentence paraphrase, in your own words, of what the caller wanted and what was agreed. NEVER copy or closely echo the transcript verbatim. Strip filler ("um", "yeah", "you know") and disfluencies.
+- ${redFlagRule}
+- For any field the caller did not actually provide, return the literal string "Not specified" — do not guess, infer, or invent a plausible-sounding value.
+- Never invent names, phone numbers, addresses, room numbers, or any other identifying detail not explicitly stated.
 - Never invent a diagnosis, professional/technical assessment, or advice beyond what's appropriate for this industry.
-${redFlagRule}
-- Use null for any field the caller did not actually state. Do not fabricate names, numbers, addresses, or any other detail not present in the transcript.
-- Any "summary"-type field is 2-3 neutral sentences for staff, describing what happened, not offering advice.
-- Any "action"-type field describes what the assistant did or arranged, not advice.`;
+- Any "action"-type field describes what was arranged or logged, not advice.`;
 }
 
 app.get('/health', (req, res) => {
@@ -79,8 +82,8 @@ app.post('/api/summarise', async (req, res) => {
     return res.status(400).json({ error: 'transcript (non-empty array) is required' });
   }
 
-  if (!ANTHROPIC_API_KEY) {
-    return res.status(200).json({ ok: false, fallback: true, error: 'Server is not configured with ANTHROPIC_API_KEY' });
+  if (!OPENAI_API_KEY) {
+    return res.status(200).json({ ok: false, fallback: true, error: 'Server is not configured with OPENAI_API_KEY' });
   }
 
   let industryCfg;
@@ -111,36 +114,38 @@ app.post('/api/summarise', async (req, res) => {
   try {
     let response;
     try {
-      response = await fetch('https://api.anthropic.com/v1/messages', {
+      response = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
         headers: {
           'content-type': 'application/json',
-          'x-api-key': ANTHROPIC_API_KEY,
-          'anthropic-version': '2023-06-01'
+          'authorization': `Bearer ${OPENAI_API_KEY}`
         },
         body: JSON.stringify({
-          model: ANTHROPIC_MODEL,
-          max_tokens: 1024,
-          system: systemPrompt,
-          messages: [{ role: 'user', content: userContent }]
+          model: OPENAI_MODEL,
+          temperature: 0.2,
+          response_format: { type: 'json_object' },
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: userContent }
+          ]
         }),
         signal: controller.signal
       });
     } catch (err) {
-      return res.status(200).json({ ok: false, fallback: true, error: 'Failed to reach Anthropic API', detail: err.message });
+      return res.status(200).json({ ok: false, fallback: true, error: 'Failed to reach OpenAI API', detail: err.message });
     }
 
     if (!response.ok) {
       const detail = await response.text().catch(() => '');
-      return res.status(200).json({ ok: false, fallback: true, error: `Anthropic API error (${response.status})`, detail });
+      return res.status(200).json({ ok: false, fallback: true, error: `OpenAI API error (${response.status})`, detail });
     }
 
     const data = await response.json().catch(() => null);
     if (!data) {
-      return res.status(200).json({ ok: false, fallback: true, error: 'Anthropic API returned an unreadable response' });
+      return res.status(200).json({ ok: false, fallback: true, error: 'OpenAI API returned an unreadable response' });
     }
 
-    const rawText = (data.content || []).map((block) => block.text || '').join('');
+    const rawText = data.choices && data.choices[0] && data.choices[0].message ? data.choices[0].message.content || '' : '';
     const cleaned = stripJsonFence(rawText);
 
     let parsed;
@@ -149,6 +154,16 @@ app.post('/api/summarise', async (req, res) => {
     } catch (err) {
       return res.status(200).json({ ok: false, fallback: true, error: 'Model did not return valid JSON', raw: rawText });
     }
+
+    // The model mostly follows the "Not specified" instruction, but not
+    // always (e.g. an empty string instead) — normalise deterministically
+    // rather than trust it every time.
+    Object.keys(parsed).forEach((key) => {
+      if (key === 'summary') return;
+      if (parsed[key] === null || parsed[key] === undefined || parsed[key] === '') {
+        parsed[key] = 'Not specified';
+      }
+    });
 
     return res.status(200).json({ ok: true, result: parsed });
   } catch (err) {
