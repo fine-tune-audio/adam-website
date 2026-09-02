@@ -5,6 +5,13 @@
  * ElevenLabs setup). The page and the agent stay identical — only the
  * CONTENT changes per industry.
  *
+ * Default language is Dutch (matching the rest of the site). All
+ * user-facing strings below are Dutch. `systemPrompt` bodies are kept
+ * in English (agent-internal instructions only, never rendered) with
+ * a short Dutch-language directive appended — LLMs converse reliably
+ * in the target language from an English meta-instruction, so the
+ * whole ~3,200-word instruction set doesn't need hand-translating.
+ *
  * How it plugs in:
  *   - The demo reads ?industry=<id> from the URL (default "vet") and
  *     renders every string below into the same funnel + orb UI.
@@ -19,14 +26,21 @@
  * ------------------------------------------------------------------
  */
 
+// Appended to every systemPrompt below so the agent always replies in
+// Dutch, regardless of the caller's own phrasing or the fact that these
+// instructions themselves are written in English.
+const DUTCH_LANGUAGE_DIRECTIVE = `
+
+LANGUAGE: Conduct this entire conversation in Dutch (Nederlands). The caller speaks Dutch — always reply in Dutch, regardless of the language these instructions are written in. Keep names, addresses and numbers as the caller states them.`;
+
 // Shared across every industry — the tone options are the same everywhere.
 const PERSONAS = [
-  { id: "warm",         icon: "🤗", title: "Warm & reassuring",    blurb: "Calm and supportive for stressed callers" },
-  { id: "professional", icon: "👔", title: "Professional & clear", blurb: "Efficient, concise and practical" },
-  { id: "personal",     icon: "😊", title: "Personal & informal",  blurb: "Friendly, like a member of the team" },
+  { id: "warm",         icon: "🤗", title: "Warm & geruststellend",     blurb: "Kalm en ondersteunend voor gestreste bellers" },
+  { id: "professional", icon: "👔", title: "Professioneel & duidelijk", blurb: "Efficiënt, bondig en praktisch" },
+  { id: "personal",     icon: "😊", title: "Persoonlijk & informeel",   blurb: "Vriendelijk, als een collega aan de lijn" },
 ];
 
-const PERKS = ["Ready in ~2 minutes", "No installation", "Personalised", "Test immediately"];
+const PERKS = ["Klaar in ~2 minuten", "Geen installatie", "Gepersonaliseerd", "Direct testen"];
 
 export const INDUSTRIES = {
 
@@ -35,39 +49,39 @@ export const INDUSTRIES = {
      ══════════════════════════════════════════════════════════════ */
   trades: {
     id: "trades",
-    label: "Trades & Home Services",
+    label: "Vakmensen & Huisservice",
     emoji: "🔧",
-    eyebrow: "AI Phone Agent for Trades & Home Services",
-    headline: "Stop waking your on-call engineer for a tripped fuse.",
-    subheadline: "An AI assistant answers every call, tells a real emergency from a job that can wait, and sends your team a clean summary either way.",
-    pitch: "Stop waking up your on-call engineer for a tripped fuse.",
+    eyebrow: "AI-telefoonassistent voor vakmensen & huisservice",
+    headline: "Laat uw storingsdienst niet meer wakker bellen voor een doorgeslagen stop.",
+    subheadline: "Een AI-assistent beantwoordt elk gesprek, onderscheidt een echte noodsituatie van werk dat kan wachten, en stuurt uw team hoe dan ook een heldere samenvatting.",
+    pitch: "Laat uw storingsdienst niet meer wakker bellen voor een doorgeslagen stop.",
     perks: PERKS,
     personas: PERSONAS,
     defaultAgentName: "Alex",
     sampleConversation: [
-      { who: "caller", text: "I've got no hot water and the boiler's making a clicking noise." },
-      { who: "agent",  text: "I can help sort that. First, quick safety check — is there any smell of gas, or any water leaking right now?" },
+      { who: "caller", text: "Ik heb geen warm water en de ketel maakt een tikkend geluid." },
+      { who: "agent",  text: "Daar kan ik u mee helpen. Eerst een korte veiligheidscheck — ruikt u gas, of lekt er op dit moment ergens water?" },
     ],
     useCases: [
-      { emoji: "🚨", label: "Emergency vs non-urgent triage" },
-      { emoji: "🔥", label: "Boiler & heating faults" },
-      { emoji: "⚡", label: "Electrical faults" },
-      { emoji: "💧", label: "Plumbing & leaks" },
-      { emoji: "📅", label: "Booking a callout" },
-      { emoji: "🔄", label: "Rescheduling a job" },
-      { emoji: "💰", label: "Quotes & pricing questions" },
-      { emoji: "🌙", label: "Out-of-hours cover" },
-      { emoji: "🛠", label: "First-line troubleshooting" },
-      { emoji: "📞", label: "Transfer to on-call engineer" },
+      { emoji: "🚨", label: "Triage: spoed of niet" },
+      { emoji: "🔥", label: "Storingen aan cv-ketel & verwarming" },
+      { emoji: "⚡", label: "Elektrische storingen" },
+      { emoji: "💧", label: "Loodgieterswerk & lekkages" },
+      { emoji: "📅", label: "Een monteur inplannen" },
+      { emoji: "🔄", label: "Afspraak verzetten" },
+      { emoji: "💰", label: "Offertes & prijsvragen" },
+      { emoji: "🌙", label: "Bereikbaarheid buiten kantooruren" },
+      { emoji: "🛠", label: "Eerstelijns storingzoeken" },
+      { emoji: "📞", label: "Doorverbinden met storingsdienst" },
     ],
     scenarios: [
-      { emoji: "🔥", label: "No heating or hot water" },
-      { emoji: "💧", label: "I have a leak" },
-      { emoji: "⚡", label: "A fuse keeps tripping" },
-      { emoji: "🚨", label: "I smell gas" },
+      { emoji: "🔥", label: "Geen verwarming of warm water" },
+      { emoji: "💧", label: "Ik heb een lekkage" },
+      { emoji: "⚡", label: "Een stop slaat steeds door" },
+      { emoji: "🚨", label: "Ik ruik gas" },
     ],
-    greeting: "Hi, you've reached {{company_name}}'s assistant. Tell me what's going on and I'll get it sorted.",
-    redFlags: ["smell of gas", "carbon-monoxide alarm sounding", "active flooding or a major leak", "burning smell or sparking from electrics", "exposed live wiring", "no heat for a vulnerable person in cold weather"],
+    greeting: "Hallo, u spreekt met de assistent van {{company_name}}. Vertel me wat er aan de hand is, dan zoek ik het voor u uit.",
+    redFlags: ["gaslucht", "koolmonoxidemelder die afgaat", "actieve overstroming of grote lekkage", "brandlucht of vonken uit elektra", "blootliggende bedrading onder spanning", "geen verwarming voor een kwetsbaar persoon bij koud weer"],
     systemPrompt: `You are {{agent_name}}, the phone assistant for {{company_name}}, a trades and home-services company. You answer calls so the team isn't interrupted for things that can wait.
 
 TONE: {{personality}}. Be brief and practical — this is spoken aloud. Ask ONE question at a time.
@@ -82,18 +96,18 @@ COLLECT: caller's name, callback number, the address, the nature of the fault, a
 
 RULES: keep replies short, one question at a time, never repeat what they've told you, never quote a firm price — say the team will confirm. Confirm name, number and address once before ending.
 
-CLOSING: confirm what happens next (someone will call back, or an engineer is on the way), then end warmly.`,
+CLOSING: confirm what happens next (someone will call back, or an engineer is on the way), then end warmly.${DUTCH_LANGUAGE_DIRECTIVE}`,
     dataCollection: [
-      { name: "caller_name",         type: "string", instruction: "The caller's name, or empty if not given." },
-      { name: "caller_phone",        type: "string", instruction: "Callback number, or empty." },
-      { name: "address",             type: "string", instruction: "The job address, or empty." },
-      { name: "fault_type",          type: "string", instruction: "The reported fault in a few words (e.g. no hot water, tripping fuse)." },
-      { name: "urgency",             type: "string", instruction: "One of: emergency | routine. 'emergency' only for gas, CO, flooding, sparking/burning electrics, or vulnerable-person no-heat." },
-      { name: "troubleshooting_tried", type: "string", instruction: "Any first-line steps attempted and the result, or empty." },
-      { name: "action",              type: "string", instruction: "Outcome: engineer dispatched / callout booked / callback requested / resolved on call." },
-      { name: "summary",             type: "string", instruction: "2–3 neutral sentences. No firm pricing or diagnosis of cause." },
+      { name: "caller_name",         label: "Naam beller",              type: "string", instruction: "The caller's name, or empty if not given." },
+      { name: "caller_phone",        label: "Telefoonnummer",           type: "string", instruction: "Callback number, or empty." },
+      { name: "address",             label: "Adres",                    type: "string", instruction: "The job address, or empty." },
+      { name: "fault_type",          label: "Type storing",             type: "string", instruction: "The reported fault in a few words (e.g. no hot water, tripping fuse)." },
+      { name: "urgency",             label: "Urgentie",                 type: "string", instruction: "One of: emergency | routine. 'emergency' only for gas, CO, flooding, sparking/burning electrics, or vulnerable-person no-heat." },
+      { name: "troubleshooting_tried", label: "Al geprobeerde stappen", type: "string", instruction: "Any first-line steps attempted and the result, or empty." },
+      { name: "action",              label: "Actie",                    type: "string", instruction: "Outcome: engineer dispatched / callout booked / callback requested / resolved on call." },
+      { name: "summary",             label: "Samenvatting",             type: "string", instruction: "2–3 neutral sentences, written in Dutch. No firm pricing or diagnosis of cause." },
     ],
-    emailSubject: "Callout request — {{fault}} at {{address}}",
+    emailSubject: "Aanvraag storingsmonteur — {{fault}} op {{address}}",
   },
 
   /* ══════════════════════════════════════════════════════════════
@@ -101,39 +115,39 @@ CLOSING: confirm what happens next (someone will call back, or an engineer is on
      ══════════════════════════════════════════════════════════════ */
   property: {
     id: "property",
-    label: "Property Management & Housing",
+    label: "Vastgoedbeheer & Woningcorporaties",
     emoji: "🏢",
-    eyebrow: "AI Phone Agent for Property Management",
-    headline: "Tenants reach a real conversation at 3am. Your team reads the email at 9.",
-    subheadline: "An AI assistant takes maintenance reports around the clock, handles the true emergencies, and logs everything else for the morning.",
-    pitch: "Your tenants reach a real conversation at 3am, your team reads the email at 9.",
+    eyebrow: "AI-telefoonassistent voor vastgoedbeheer",
+    headline: "Huurders voeren om 3 uur 's nachts een echt gesprek. Uw team leest de e-mail om 9 uur.",
+    subheadline: "Een AI-assistent neemt dag en nacht onderhoudsmeldingen aan, handelt echte noodgevallen af en legt de rest vast voor de volgende ochtend.",
+    pitch: "Uw huurders voeren om 3 uur 's nachts een echt gesprek, uw team leest de e-mail om 9 uur.",
     perks: PERKS,
     personas: PERSONAS,
     defaultAgentName: "Sam",
     sampleConversation: [
-      { who: "caller", text: "There's water coming through my kitchen ceiling from the flat above." },
-      { who: "agent",  text: "That sounds stressful — let's deal with it. Is the water still coming in, and is it near any light fittings or electrics?" },
+      { who: "caller", text: "Er komt water door mijn keukenplafond, vanuit de flat erboven." },
+      { who: "agent",  text: "Dat klinkt vervelend — laten we dat meteen oppakken. Komt het water nog steeds naar binnen, en zit dit in de buurt van lichtpunten of elektra?" },
     ],
     useCases: [
-      { emoji: "🌙", label: "Out-of-hours repairs" },
-      { emoji: "🚨", label: "Emergency vs routine triage" },
-      { emoji: "💧", label: "Water leaks & flooding" },
-      { emoji: "🔥", label: "Heating & hot water loss" },
-      { emoji: "⚡", label: "Electrical faults" },
-      { emoji: "🔑", label: "Lockouts" },
-      { emoji: "📋", label: "Logging non-urgent repairs" },
-      { emoji: "🔄", label: "Chasing existing jobs" },
-      { emoji: "🏗", label: "Communal area issues" },
-      { emoji: "📞", label: "Escalating to on-call" },
+      { emoji: "🌙", label: "Reparaties buiten kantooruren" },
+      { emoji: "🚨", label: "Triage: spoed of routine" },
+      { emoji: "💧", label: "Waterlekkages & overstroming" },
+      { emoji: "🔥", label: "Uitval van verwarming & warm water" },
+      { emoji: "⚡", label: "Elektrische storingen" },
+      { emoji: "🔑", label: "Buitengesloten" },
+      { emoji: "📋", label: "Niet-urgente reparaties registreren" },
+      { emoji: "🔄", label: "Status van lopende meldingen" },
+      { emoji: "🏗", label: "Problemen in gemeenschappelijke ruimtes" },
+      { emoji: "📞", label: "Doorschakelen naar de wachtdienst" },
     ],
     scenarios: [
-      { emoji: "💧", label: "Water leak" },
-      { emoji: "🔥", label: "No heating" },
-      { emoji: "🔑", label: "I'm locked out" },
-      { emoji: "🚨", label: "Something urgent" },
+      { emoji: "💧", label: "Waterlekkage" },
+      { emoji: "🔥", label: "Geen verwarming" },
+      { emoji: "🔑", label: "Ik ben buitengesloten" },
+      { emoji: "🚨", label: "Iets urgents" },
     ],
-    greeting: "Hello, you've reached the out-of-hours line for {{company_name}}. What's the issue, and which property is it at?",
-    redFlags: ["flooding near electrics", "no heat for a vulnerable tenant in winter", "smell of gas", "fire or smoke", "broken door or window / security breach", "someone trapped in a lift"],
+    greeting: "Hallo, u spreekt met de bereikbaarheidslijn buiten kantooruren van {{company_name}}. Wat is het probleem, en om welk pand gaat het?",
+    redFlags: ["overstroming in de buurt van elektra", "geen verwarming voor een kwetsbare huurder in de winter", "gaslucht", "brand of rook", "kapotte deur of raam / inbraak", "iemand die vastzit in een lift"],
     systemPrompt: `You are {{agent_name}}, the out-of-hours assistant for {{company_name}}, a property management / housing organisation. You take tenant calls so the team only gets pulled in for genuine emergencies.
 
 TONE: {{personality}}. Reassuring and clear. One question at a time.
@@ -148,18 +162,18 @@ COLLECT: tenant name, callback number, property address / unit, the issue, and a
 
 RULES: short replies, one question at a time, never repeat what they've said, never promise a specific engineer arrival time — say the team or contractor will confirm.
 
-CLOSING: confirm whether it's been escalated now or logged for the morning, then end warmly.`,
+CLOSING: confirm whether it's been escalated now or logged for the morning, then end warmly.${DUTCH_LANGUAGE_DIRECTIVE}`,
     dataCollection: [
-      { name: "tenant_name",     type: "string", instruction: "Tenant's name, or empty." },
-      { name: "caller_phone",    type: "string", instruction: "Callback number, or empty." },
-      { name: "property_address",type: "string", instruction: "Property address / unit, or empty." },
-      { name: "issue_type",      type: "string", instruction: "The reported issue in a few words." },
-      { name: "urgency",         type: "string", instruction: "One of: emergency | routine, per the health/safety/security test." },
-      { name: "access_notes",    type: "string", instruction: "Any access details (key safe, availability), or empty." },
-      { name: "action",          type: "string", instruction: "Outcome: contractor dispatched / logged for working hours / callback requested." },
-      { name: "summary",         type: "string", instruction: "2–3 neutral sentences." },
+      { name: "tenant_name",     label: "Naam huurder",      type: "string", instruction: "Tenant's name, or empty." },
+      { name: "caller_phone",    label: "Telefoonnummer",    type: "string", instruction: "Callback number, or empty." },
+      { name: "property_address",label: "Adres pand",        type: "string", instruction: "Property address / unit, or empty." },
+      { name: "issue_type",      label: "Type probleem",     type: "string", instruction: "The reported issue in a few words." },
+      { name: "urgency",         label: "Urgentie",          type: "string", instruction: "One of: emergency | routine, per the health/safety/security test." },
+      { name: "access_notes",    label: "Toegangsnotities",  type: "string", instruction: "Any access details (key safe, availability), or empty." },
+      { name: "action",          label: "Actie",             type: "string", instruction: "Outcome: contractor dispatched / logged for working hours / callback requested." },
+      { name: "summary",         label: "Samenvatting",      type: "string", instruction: "2–3 neutral sentences, written in Dutch." },
     ],
-    emailSubject: "Repair report — {{issue}} at {{property}}",
+    emailSubject: "Reparatiemelding — {{issue}} op {{property}}",
   },
 
   /* ══════════════════════════════════════════════════════════════
@@ -167,39 +181,39 @@ CLOSING: confirm whether it's been escalated now or logged for the morning, then
      ══════════════════════════════════════════════════════════════ */
   vet: {
     id: "vet",
-    label: "Veterinary Clinics",
+    label: "Dierenklinieken",
     emoji: "🐾",
-    eyebrow: "AI Phone Agent for Veterinary Practices",
-    headline: "Emergencies get a human in 30 seconds. Everyone else gets a callback slot.",
-    subheadline: "An AI assistant answers every call, separates real emergencies from routine appointments, and sends your team a clean summary.",
-    pitch: "Emergencies get a human in 30 seconds. Everyone else gets a callback slot.",
+    eyebrow: "AI-telefoonassistent voor dierenartspraktijken",
+    headline: "Noodgevallen krijgen binnen 30 seconden een mens aan de lijn. Alle andere bellers krijgen een terugbelafspraak.",
+    subheadline: "Een AI-assistent beantwoordt elk gesprek, onderscheidt echte noodgevallen van reguliere afspraken en stuurt uw team een heldere samenvatting.",
+    pitch: "Noodgevallen krijgen binnen 30 seconden een mens aan de lijn. Alle andere bellers krijgen een terugbelafspraak.",
     perks: PERKS,
     personas: PERSONAS,
     defaultAgentName: "Emma",
     sampleConversation: [
-      { who: "caller", text: "My dog has been limping since this morning." },
-      { who: "agent",  text: "I'm sorry to hear that. I'll ask a few quick questions so the practice knows what's going on. What is your dog's name?" },
+      { who: "caller", text: "Mijn hond loopt sinds vanochtend mank." },
+      { who: "agent",  text: "Wat vervelend om te horen. Ik stel u een paar korte vragen zodat de praktijk weet wat er aan de hand is. Hoe heet uw hond?" },
     ],
     useCases: [
-      { emoji: "📅", label: "Booking appointments" },
-      { emoji: "🔄", label: "Changing or cancelling" },
-      { emoji: "🚨", label: "Emergency calls" },
-      { emoji: "🕐", label: "Opening hours" },
-      { emoji: "💊", label: "Medication & repeat prescriptions" },
-      { emoji: "📋", label: "Test results & callbacks" },
-      { emoji: "💰", label: "Pricing questions" },
-      { emoji: "🩺", label: "Treatment information" },
-      { emoji: "🐾", label: "Registering new animals" },
-      { emoji: "📞", label: "Transferring callers" },
+      { emoji: "📅", label: "Afspraken inplannen" },
+      { emoji: "🔄", label: "Wijzigen of annuleren" },
+      { emoji: "🚨", label: "Spoedgevallen" },
+      { emoji: "🕐", label: "Openingstijden" },
+      { emoji: "💊", label: "Medicatie & herhaalrecepten" },
+      { emoji: "📋", label: "Testuitslagen & terugbelverzoeken" },
+      { emoji: "💰", label: "Prijsvragen" },
+      { emoji: "🩺", label: "Informatie over behandelingen" },
+      { emoji: "🐾", label: "Nieuwe dieren aanmelden" },
+      { emoji: "📞", label: "Doorverbinden" },
     ],
     scenarios: [
-      { emoji: "🐶", label: "My dog is limping" },
-      { emoji: "🐱", label: "Book an appointment" },
-      { emoji: "💊", label: "I need more medication" },
-      { emoji: "🚨", label: "Possible emergency" },
+      { emoji: "🐶", label: "Mijn hond loopt mank" },
+      { emoji: "🐱", label: "Een afspraak maken" },
+      { emoji: "💊", label: "Ik heb meer medicatie nodig" },
+      { emoji: "🚨", label: "Mogelijk spoedgeval" },
     ],
-    greeting: "Good afternoon, you're speaking with {{agent_name}}, the digital assistant of {{company_name}}. How can I help you today?",
-    redFlags: ["difficulty breathing", "collapse or unresponsiveness", "seizures", "suspected poisoning (chocolate, grapes, lilies, antifreeze, xylitol)", "major trauma", "bloated or distended abdomen", "repeated unproductive retching", "heavy bleeding", "inability to urinate"],
+    greeting: "Goedemiddag, u spreekt met {{agent_name}}, de digitale assistent van {{company_name}}. Waarmee kan ik u vandaag helpen?",
+    redFlags: ["ademhalingsproblemen", "instorten of niet reageren", "toevallen", "vermoeden van vergiftiging (chocolade, druiven, lelies, antivries, xylitol)", "ernstig trauma", "opgezette of gezwollen buik", "herhaaldelijk kokhalzen zonder resultaat", "hevige bloeding", "niet kunnen plassen"],
     systemPrompt: `You are {{agent_name}}, the digital phone assistant for {{company_name}}, a veterinary practice. You answer incoming calls so the team has fewer phone interruptions.
 
 TONE: {{personality}}. Speak naturally and briefly, the way a warm receptionist would. Ask ONE question at a time.
@@ -212,18 +226,18 @@ EMERGENCY HANDLING — SAFETY CRITICAL. Watch for: difficulty breathing, collaps
 
 RULES: short replies, one question at a time, never repeat what they've given, never invent hours/prices/medical facts — say the team will follow up. Confirm name, number and pet name once before ending.
 
-CLOSING: confirm what happens next, thank them warmly, and end.`,
+CLOSING: confirm what happens next, thank them warmly, and end.${DUTCH_LANGUAGE_DIRECTIVE}`,
     dataCollection: [
-      { name: "caller_name",   type: "string", instruction: "Owner's name, or empty." },
-      { name: "caller_phone",  type: "string", instruction: "Callback number, or empty." },
-      { name: "animal_name",   type: "string", instruction: "Pet's name, or empty." },
-      { name: "animal_species",type: "string", instruction: "Species (dog, cat, etc.), or empty." },
-      { name: "reason",        type: "string", instruction: "Reason for calling, one sentence." },
-      { name: "urgency",       type: "string", instruction: "One of: normal | urgent. 'urgent' only for genuine red flags." },
-      { name: "action",        type: "string", instruction: "Outcome: appointment booked / callback requested / info given / transferred." },
-      { name: "summary",       type: "string", instruction: "2–3 neutral sentences. Never state a diagnosis or treatment." },
+      { name: "caller_name",   label: "Naam eigenaar",  type: "string", instruction: "Owner's name, or empty." },
+      { name: "caller_phone",  label: "Telefoonnummer", type: "string", instruction: "Callback number, or empty." },
+      { name: "animal_name",   label: "Naam dier",      type: "string", instruction: "Pet's name, or empty." },
+      { name: "animal_species",label: "Diersoort",      type: "string", instruction: "Species (dog, cat, etc.), or empty." },
+      { name: "reason",        label: "Reden",          type: "string", instruction: "Reason for calling, one sentence." },
+      { name: "urgency",       label: "Urgentie",       type: "string", instruction: "One of: normal | urgent. 'urgent' only for genuine red flags." },
+      { name: "action",        label: "Actie",          type: "string", instruction: "Outcome: appointment booked / callback requested / info given / transferred." },
+      { name: "summary",       label: "Samenvatting",   type: "string", instruction: "2–3 neutral sentences, written in Dutch. Never state a diagnosis or treatment." },
     ],
-    emailSubject: "Call summary — {{animal_name}} ({{reason}})",
+    emailSubject: "Gespreksoverzicht — {{animal_name}} ({{reason}})",
   },
 
   /* ══════════════════════════════════════════════════════════════
@@ -231,39 +245,39 @@ CLOSING: confirm what happens next, thank them warmly, and end.`,
      ══════════════════════════════════════════════════════════════ */
   clinic: {
     id: "clinic",
-    label: "Dental & Medical Practices",
+    label: "Tandarts- & Huisartsenpraktijken",
     emoji: "🩺",
-    eyebrow: "AI Phone Agent for Dental & Medical Practices",
-    headline: "Urgent cases reach a clinician. Routine ones get booked — without tying up the front desk.",
-    subheadline: "An AI assistant handles booking, out-of-hours triage and routine questions, so reception isn't on the phone all morning.",
-    pitch: "Urgent cases reach a clinician. Routine ones get booked — without a single hold-music minute.",
+    eyebrow: "AI-telefoonassistent voor tandarts- & huisartsenpraktijken",
+    headline: "Spoedgevallen bereiken direct een zorgverlener. Reguliere afspraken worden ingepland — zonder de balie te bezetten.",
+    subheadline: "Een AI-assistent regelt afspraken, triage buiten kantooruren en standaardvragen, zodat de balie niet de hele ochtend aan de telefoon zit.",
+    pitch: "Spoedgevallen bereiken direct een zorgverlener. Reguliere afspraken worden ingepland — zonder ook maar één minuut wachtmuziek.",
     perks: PERKS,
     personas: PERSONAS,
     defaultAgentName: "Olivia",
     sampleConversation: [
-      { who: "caller", text: "I've knocked out a tooth and it's bleeding." },
-      { who: "agent",  text: "I'm sorry, that sounds painful. So I can get you the right help quickly — did this happen in the last hour, and is the bleeding heavy?" },
+      { who: "caller", text: "Ik heb een tand eruit geslagen en hij bloedt." },
+      { who: "agent",  text: "Wat vervelend, dat klinkt pijnlijk. Om u snel de juiste hulp te bieden — is dit in het afgelopen uur gebeurd, en bloedt het hevig?" },
     ],
     useCases: [
-      { emoji: "📅", label: "Booking appointments" },
-      { emoji: "🔄", label: "Cancelling & rescheduling" },
-      { emoji: "🚨", label: "Out-of-hours triage" },
-      { emoji: "💊", label: "Prescription & repeat requests" },
-      { emoji: "🕐", label: "Opening hours & directions" },
-      { emoji: "❓", label: "Pre-appointment questions" },
-      { emoji: "🧾", label: "Registering new patients" },
-      { emoji: "💰", label: "Insurance & pricing" },
-      { emoji: "⚖️", label: "Urgent vs routine sorting" },
-      { emoji: "📞", label: "Transferring to a clinician" },
+      { emoji: "📅", label: "Afspraken inplannen" },
+      { emoji: "🔄", label: "Annuleren & verzetten" },
+      { emoji: "🚨", label: "Triage buiten kantooruren" },
+      { emoji: "💊", label: "Recepten & herhaalaanvragen" },
+      { emoji: "🕐", label: "Openingstijden & routebeschrijving" },
+      { emoji: "❓", label: "Vragen voorafgaand aan een afspraak" },
+      { emoji: "🧾", label: "Nieuwe patiënten inschrijven" },
+      { emoji: "💰", label: "Verzekering & tarieven" },
+      { emoji: "⚖️", label: "Onderscheid spoed en routine" },
+      { emoji: "📞", label: "Doorverbinden met een zorgverlener" },
     ],
     scenarios: [
-      { emoji: "🦷", label: "Dental emergency" },
-      { emoji: "📅", label: "Book an appointment" },
-      { emoji: "💊", label: "Repeat prescription" },
-      { emoji: "🚨", label: "Urgent symptom" },
+      { emoji: "🦷", label: "Tandheelkundig spoedgeval" },
+      { emoji: "📅", label: "Een afspraak maken" },
+      { emoji: "💊", label: "Herhaalrecept" },
+      { emoji: "🚨", label: "Urgente klacht" },
     ],
-    greeting: "Good afternoon, you've reached {{company_name}}. How can I help — are you booking, or is this something more urgent?",
-    redFlags: ["chest pain", "difficulty breathing", "severe or uncontrolled bleeding", "facial swelling affecting breathing or swallowing", "signs of stroke (face drooping, arm weakness, slurred speech)", "severe allergic reaction", "high fever in an infant"],
+    greeting: "Goedemiddag, u spreekt met {{company_name}}. Waarmee kan ik u helpen — wilt u een afspraak maken, of is dit iets urgents?",
+    redFlags: ["pijn op de borst", "ademhalingsproblemen", "ernstige of onbeheersbare bloeding", "gezwollen gezicht met invloed op ademhalen of slikken", "tekenen van een beroerte (scheve mond, zwakte in de arm, onduidelijke spraak)", "ernstige allergische reactie", "hoge koorts bij een baby"],
     systemPrompt: `You are {{agent_name}}, the phone assistant for {{company_name}}, a dental / medical practice. You handle booking and routine questions and safely route anything urgent.
 
 TONE: {{personality}}. Calm, professional, reassuring. One question at a time.
@@ -278,17 +292,17 @@ COLLECT, minimally and respectfully: patient name, a callback number, and the re
 
 RULES: short replies, one question at a time, never repeat what they've said, never quote clinical or pricing specifics you're unsure of — say the team will confirm.
 
-CLOSING: confirm whether it's booked, escalated, or a callback, then end warmly.`,
+CLOSING: confirm whether it's booked, escalated, or a callback, then end warmly.${DUTCH_LANGUAGE_DIRECTIVE}`,
     dataCollection: [
-      { name: "patient_name",  type: "string", instruction: "Patient's name, or empty." },
-      { name: "caller_phone",  type: "string", instruction: "Callback number, or empty." },
-      { name: "reason",        type: "string", instruction: "High-level reason for the call, one sentence. Do not record detailed clinical information." },
-      { name: "urgency",       type: "string", instruction: "One of: emergency | urgent | routine. 'emergency' for red-flag symptoms routed to emergency services." },
-      { name: "requested_action", type: "string", instruction: "What the caller wanted: appointment / prescription / question / callback." },
-      { name: "action",        type: "string", instruction: "Outcome: booked / routed to emergency services / callback requested / info given." },
-      { name: "summary",       type: "string", instruction: "2–3 neutral sentences. Never contains a diagnosis or clinical advice." },
+      { name: "patient_name",  label: "Naam patiënt",     type: "string", instruction: "Patient's name, or empty." },
+      { name: "caller_phone",  label: "Telefoonnummer",   type: "string", instruction: "Callback number, or empty." },
+      { name: "reason",        label: "Reden",            type: "string", instruction: "High-level reason for the call, one sentence. Do not record detailed clinical information." },
+      { name: "urgency",       label: "Urgentie",         type: "string", instruction: "One of: emergency | urgent | routine. 'emergency' for red-flag symptoms routed to emergency services." },
+      { name: "requested_action", label: "Gevraagde actie", type: "string", instruction: "What the caller wanted: appointment / prescription / question / callback." },
+      { name: "action",        label: "Actie",            type: "string", instruction: "Outcome: booked / routed to emergency services / callback requested / info given." },
+      { name: "summary",       label: "Samenvatting",     type: "string", instruction: "2–3 neutral sentences, written in Dutch. Never contains a diagnosis or clinical advice." },
     ],
-    emailSubject: "Front-desk summary — {{patient_name}}",
+    emailSubject: "Baliesamenvatting — {{patient_name}}",
   },
 
   /* ══════════════════════════════════════════════════════════════
@@ -296,39 +310,39 @@ CLOSING: confirm whether it's booked, escalated, or a callback, then end warmly.
      ══════════════════════════════════════════════════════════════ */
   msp: {
     id: "msp",
-    label: "IT Managed Service Providers",
+    label: "IT-Dienstverleners",
     emoji: "💻",
-    eyebrow: "AI Phone Agent for IT Managed Service Providers",
-    headline: "First-line helpdesk that resolves the easy tickets and escalates the rest.",
-    subheadline: "An AI assistant answers helpdesk calls, walks users through the obvious fixes, and raises a proper ticket with everything your engineers need.",
-    pitch: "Resolve the password resets. Escalate the outages. Every call becomes a ticket.",
+    eyebrow: "AI-telefoonassistent voor IT-dienstverleners",
+    headline: "Eerstelijns helpdesk die de eenvoudige meldingen oplost en de rest escaleert.",
+    subheadline: "Een AI-assistent beantwoordt helpdeskgesprekken, begeleidt gebruikers bij voor de hand liggende oplossingen en maakt een compleet ticket aan met alles wat uw engineers nodig hebben.",
+    pitch: "Los de wachtwoordresets zelf op. Escaleer de storingen. Elk gesprek wordt een ticket.",
     perks: PERKS,
     personas: PERSONAS,
     defaultAgentName: "Jordan",
     sampleConversation: [
-      { who: "caller", text: "I can't get into my email, it keeps saying my password's wrong." },
-      { who: "agent",  text: "Let's get you back in. Have you tried the self-service reset link, or shall I walk you through it now?" },
+      { who: "caller", text: "Ik kom niet in mijn e-mail, er staat steeds dat mijn wachtwoord onjuist is." },
+      { who: "agent",  text: "Laten we u er weer in krijgen. Heeft u de zelfservice-resetlink al geprobeerd, of loop ik het nu met u door?" },
     ],
     useCases: [
-      { emoji: "🛠", label: "First-line troubleshooting" },
-      { emoji: "🔒", label: "Password & lockout help" },
-      { emoji: "🎫", label: "Raising a ticket" },
-      { emoji: "🔍", label: "Ticket status updates" },
-      { emoji: "🌐", label: "Outage reports" },
-      { emoji: "🧭", label: "Guided self-service" },
-      { emoji: "⚖️", label: "Priority classification" },
-      { emoji: "🌙", label: "After-hours cover" },
-      { emoji: "🔀", label: "Routing to the right engineer" },
-      { emoji: "🚨", label: "Escalating P1 incidents" },
+      { emoji: "🛠", label: "Eerstelijns storingzoeken" },
+      { emoji: "🔒", label: "Hulp bij wachtwoorden & uitsluiting" },
+      { emoji: "🎫", label: "Een ticket aanmaken" },
+      { emoji: "🔍", label: "Status van tickets opvragen" },
+      { emoji: "🌐", label: "Storingsmeldingen" },
+      { emoji: "🧭", label: "Begeleide zelfservice" },
+      { emoji: "⚖️", label: "Prioriteit bepalen" },
+      { emoji: "🌙", label: "Bereikbaarheid buiten kantooruren" },
+      { emoji: "🔀", label: "Doorsturen naar de juiste engineer" },
+      { emoji: "🚨", label: "P1-incidenten escaleren" },
     ],
     scenarios: [
-      { emoji: "🔒", label: "Locked out" },
-      { emoji: "📧", label: "Email issue" },
-      { emoji: "🌐", label: "Something's down" },
-      { emoji: "🚨", label: "Major outage" },
+      { emoji: "🔒", label: "Buitengesloten" },
+      { emoji: "📧", label: "Probleem met e-mail" },
+      { emoji: "🌐", label: "Iets ligt eruit" },
+      { emoji: "🚨", label: "Grote storing" },
     ],
-    greeting: "Hi, you've reached {{company_name}} support. Tell me what's not working and I'll either fix it or get it to an engineer.",
-    redFlags: ["full site or service outage", "suspected security breach", "ransomware or malware", "data loss", "multiple users affected at once"],
+    greeting: "Hallo, u spreekt met de support van {{company_name}}. Vertel me wat er niet werkt, dan los ik het op of zorg ik dat het bij een engineer terechtkomt.",
+    redFlags: ["volledige storing van site of dienst", "vermoeden van een beveiligingsincident", "ransomware of malware", "gegevensverlies", "meerdere gebruikers tegelijk getroffen"],
     systemPrompt: `You are {{agent_name}}, the first-line (Tier-0) helpdesk assistant for {{company_name}}, an IT managed-service provider. You resolve simple issues and escalate real incidents.
 
 TONE: {{personality}}. Friendly and competent. One question at a time, plain language — no jargon unless the caller uses it.
@@ -345,16 +359,16 @@ CLASSIFY each ticket P1–P4 and route to the right queue.
 
 RULES: short replies, one question at a time, never repeat what they've told you, never guess at root cause on air — log the symptoms.
 
-CLOSING: confirm whether it's resolved, ticketed, or escalated, give the ticket reference if created, then end.`,
+CLOSING: confirm whether it's resolved, ticketed, or escalated, give the ticket reference if created, then end.${DUTCH_LANGUAGE_DIRECTIVE}`,
     dataCollection: [
-      { name: "caller_name",  type: "string", instruction: "Caller's name, or empty." },
-      { name: "company",      type: "string", instruction: "Their company / site, or empty." },
-      { name: "contact",      type: "string", instruction: "Callback number or email, or empty." },
-      { name: "issue",        type: "string", instruction: "The reported issue in a few words." },
-      { name: "priority",     type: "string", instruction: "One of: P1 | P2 | P3 | P4, per the escalation rules." },
-      { name: "steps_tried",  type: "string", instruction: "Self-service steps attempted and results, or empty." },
-      { name: "action",       type: "string", instruction: "Outcome: resolved on call / ticket raised / escalated to on-call." },
-      { name: "summary",      type: "string", instruction: "2–3 neutral sentences of symptoms and status." },
+      { name: "caller_name",  label: "Naam beller",           type: "string", instruction: "Caller's name, or empty." },
+      { name: "company",      label: "Bedrijf",                type: "string", instruction: "Their company / site, or empty." },
+      { name: "contact",      label: "Contactgegevens",        type: "string", instruction: "Callback number or email, or empty." },
+      { name: "issue",        label: "Probleem",               type: "string", instruction: "The reported issue in a few words." },
+      { name: "priority",     label: "Prioriteit",             type: "string", instruction: "One of: P1 | P2 | P3 | P4, per the escalation rules." },
+      { name: "steps_tried",  label: "Geprobeerde stappen",    type: "string", instruction: "Self-service steps attempted and results, or empty." },
+      { name: "action",       label: "Actie",                  type: "string", instruction: "Outcome: resolved on call / ticket raised / escalated to on-call." },
+      { name: "summary",      label: "Samenvatting",           type: "string", instruction: "2–3 neutral sentences of symptoms and status, written in Dutch." },
     ],
     emailSubject: "Ticket — {{issue}} ({{priority}})",
   },
@@ -364,39 +378,39 @@ CLOSING: confirm whether it's resolved, ticketed, or escalated, give the ticket 
      ══════════════════════════════════════════════════════════════ */
   utilities: {
     id: "utilities",
-    label: "Utilities & Energy",
+    label: "Nutsbedrijven & Energie",
     emoji: "⚡",
-    eyebrow: "AI Phone Agent for Utilities & Energy",
-    headline: "Answered in zero rings, every day of the year.",
-    subheadline: "An AI assistant takes fault reports and meter queries at any volume, flags safety issues instantly, and logs the rest for your team.",
-    pitch: "Your phone is answered in zero rings, in two languages, every day of the year.",
+    eyebrow: "AI-telefoonassistent voor nutsbedrijven & energie",
+    headline: "Direct opgenomen, elke dag van het jaar.",
+    subheadline: "Een AI-assistent neemt storingsmeldingen en meterstandvragen aan bij elk volume, signaleert veiligheidsproblemen direct en legt de rest vast voor uw team.",
+    pitch: "Uw telefoon wordt direct opgenomen, in meerdere talen, elke dag van het jaar.",
     perks: PERKS,
     personas: PERSONAS,
     defaultAgentName: "Riley",
     sampleConversation: [
-      { who: "caller", text: "My power's been out for about an hour and my neighbours are off too." },
-      { who: "agent",  text: "Thanks for letting us know. Quick safety check first — is anyone in your home dependent on electrical medical equipment right now?" },
+      { who: "caller", text: "Mijn stroom is al zo'n uur uitgevallen en bij de buren ook." },
+      { who: "agent",  text: "Bedankt dat u dit meldt. Eerst een korte veiligheidscheck — is er bij u thuis op dit moment iemand afhankelijk van elektrische medische apparatuur?" },
     ],
     useCases: [
-      { emoji: "⚡", label: "Power/gas fault reporting" },
-      { emoji: "🔍", label: "Outage checks" },
-      { emoji: "🔢", label: "Meter readings & queries" },
-      { emoji: "💰", label: "Billing questions" },
-      { emoji: "🧑‍🦽", label: "Priority-services register" },
-      { emoji: "🚨", label: "Safety issue triage" },
-      { emoji: "📦", label: "Supply move in/out" },
-      { emoji: "⚖️", label: "Emergency vs routine sorting" },
-      { emoji: "📈", label: "High call-volume overflow" },
-      { emoji: "📞", label: "Transfer to emergency line" },
+      { emoji: "⚡", label: "Storingen in stroom/gas melden" },
+      { emoji: "🔍", label: "Storingen controleren" },
+      { emoji: "🔢", label: "Meterstanden & vragen" },
+      { emoji: "💰", label: "Facturatievragen" },
+      { emoji: "🧑‍🦽", label: "Register voor kwetsbare klanten" },
+      { emoji: "🚨", label: "Triage van veiligheidsmeldingen" },
+      { emoji: "📦", label: "Aan- of afmelden aansluiting" },
+      { emoji: "⚖️", label: "Onderscheid spoed en routine" },
+      { emoji: "📈", label: "Opvang bij drukte" },
+      { emoji: "📞", label: "Doorverbinden met de storingslijn" },
     ],
     scenarios: [
-      { emoji: "⚡", label: "Power outage" },
-      { emoji: "🔥", label: "Gas smell" },
-      { emoji: "🔢", label: "Meter reading" },
-      { emoji: "💡", label: "Report a fault" },
+      { emoji: "⚡", label: "Stroomstoring" },
+      { emoji: "🔥", label: "Gaslucht" },
+      { emoji: "🔢", label: "Meterstand doorgeven" },
+      { emoji: "💡", label: "Een storing melden" },
     ],
-    greeting: "Hello, you've reached {{company_name}}. Are you reporting a fault, or is this a meter or billing question?",
-    redFlags: ["smell of gas or a gas leak", "a downed power line", "sparking or burning equipment", "carbon monoxide", "a medically-dependent customer off supply"],
+    greeting: "Hallo, u spreekt met {{company_name}}. Belt u om een storing te melden, of gaat het om een meterstand of factuur?",
+    redFlags: ["gaslucht of gaslek", "een omlaaggevallen stroomkabel", "vonkende of brandende apparatuur", "koolmonoxide", "een medisch afhankelijke klant zonder aansluiting"],
     systemPrompt: `You are {{agent_name}}, the assistant for {{company_name}}, a utility / energy retailer. You take fault reports and account queries at any call volume and flag safety issues instantly.
 
 TONE: {{personality}}. Clear and steady. One question at a time.
@@ -416,17 +430,17 @@ COLLECT: caller name, account number or address, the issue, and any vulnerabilit
 
 RULES: short replies, one question at a time, never repeat information, never speculate on restoration times — give known status only.
 
-CLOSING: confirm whether it's escalated as a safety issue or logged, then end.`,
+CLOSING: confirm whether it's escalated as a safety issue or logged, then end.${DUTCH_LANGUAGE_DIRECTIVE}`,
     dataCollection: [
-      { name: "caller_name",       type: "string", instruction: "Caller's name, or empty." },
-      { name: "account_or_address",type: "string", instruction: "Account number, MPAN, or address, or empty." },
-      { name: "issue_type",        type: "string", instruction: "Fault / outage / meter reading / billing, plus a few words." },
-      { name: "urgency",           type: "string", instruction: "One of: emergency | routine. 'emergency' for gas, downed line, sparking, CO, or medically-dependent off supply." },
-      { name: "vulnerability_flag",type: "string", instruction: "Any additional-needs / priority-services detail, or empty." },
-      { name: "action",            type: "string", instruction: "Outcome: escalated to emergency line / fault logged / reading recorded / query logged." },
-      { name: "summary",           type: "string", instruction: "2–3 neutral sentences." },
+      { name: "caller_name",       label: "Naam beller",              type: "string", instruction: "Caller's name, or empty." },
+      { name: "account_or_address",label: "Klantnummer of adres",     type: "string", instruction: "Account number, MPAN, or address, or empty." },
+      { name: "issue_type",        label: "Type melding",             type: "string", instruction: "Fault / outage / meter reading / billing, plus a few words." },
+      { name: "urgency",           label: "Urgentie",                 type: "string", instruction: "One of: emergency | routine. 'emergency' for gas, downed line, sparking, CO, or medically-dependent off supply." },
+      { name: "vulnerability_flag",label: "Kwetsbaarheidsindicatie",  type: "string", instruction: "Any additional-needs / priority-services detail, or empty." },
+      { name: "action",            label: "Actie",                    type: "string", instruction: "Outcome: escalated to emergency line / fault logged / reading recorded / query logged." },
+      { name: "summary",           label: "Samenvatting",             type: "string", instruction: "2–3 neutral sentences, written in Dutch." },
     ],
-    emailSubject: "Fault/query — {{issue}} at {{address}}",
+    emailSubject: "Storing/vraag — {{issue}} op {{address}}",
   },
 
   /* ══════════════════════════════════════════════════════════════
@@ -434,39 +448,39 @@ CLOSING: confirm whether it's escalated as a safety issue or logged, then end.`,
      ══════════════════════════════════════════════════════════════ */
   hospitality: {
     id: "hospitality",
-    label: "Hotels & Short Stays",
+    label: "Hotels & Verblijfsaccommodaties",
     emoji: "🏨",
-    eyebrow: "AI Phone Agent for Hotels & Short Stays",
-    headline: "A 24/7 night-desk that costs less than one shift.",
-    subheadline: "An AI assistant handles guest calls around the clock — requests, questions, and the occasional 2am problem — and hands your team a tidy log.",
-    pitch: "A 24/7 night-desk that costs less than one shift.",
+    eyebrow: "AI-telefoonassistent voor hotels & verblijfsaccommodaties",
+    headline: "Een receptie die 24/7 bereikbaar is, voor minder dan de kosten van één dienst.",
+    subheadline: "Een AI-assistent behandelt gastgesprekken dag en nacht — verzoeken, vragen en het incidentele probleem om 2 uur 's nachts — en levert uw team een overzichtelijk logboek.",
+    pitch: "Een receptie die 24/7 bereikbaar is, voor minder dan de kosten van één dienst.",
     perks: PERKS,
     personas: PERSONAS,
     defaultAgentName: "Charlie",
     sampleConversation: [
-      { who: "caller", text: "Hi, the heating in room 12 isn't working and it's freezing." },
-      { who: "agent",  text: "Sorry about that — let's get you warm. Would you like someone to come up now, or a portable heater in the meantime?" },
+      { who: "caller", text: "Hallo, de verwarming op kamer 12 doet het niet en het is ijskoud." },
+      { who: "agent",  text: "Wat vervelend — laten we zorgen dat u het warm krijgt. Wilt u dat er nu iemand langskomt, of alvast een extra kacheltje?" },
     ],
     useCases: [
-      { emoji: "🌙", label: "After-hours guest requests" },
-      { emoji: "🛏", label: "Room issues & maintenance" },
-      { emoji: "🔑", label: "Check-in/out questions" },
-      { emoji: "🗺", label: "Local info & directions" },
-      { emoji: "📅", label: "Booking & availability" },
-      { emoji: "🚪", label: "Late arrivals" },
-      { emoji: "⏰", label: "Wake-up & housekeeping" },
-      { emoji: "🍽", label: "Restaurant / amenity queries" },
-      { emoji: "🚨", label: "Escalating urgent issues" },
-      { emoji: "📝", label: "Messages for the day team" },
+      { emoji: "🌙", label: "Gastverzoeken buiten kantooruren" },
+      { emoji: "🛏", label: "Kamerproblemen & onderhoud" },
+      { emoji: "🔑", label: "Vragen over in-/uitchecken" },
+      { emoji: "🗺", label: "Lokale info & routebeschrijving" },
+      { emoji: "📅", label: "Boekingen & beschikbaarheid" },
+      { emoji: "🚪", label: "Late aankomst" },
+      { emoji: "⏰", label: "Wekdienst & housekeeping" },
+      { emoji: "🍽", label: "Vragen over restaurant & voorzieningen" },
+      { emoji: "🚨", label: "Urgente zaken escaleren" },
+      { emoji: "📝", label: "Berichten voor het dagteam" },
     ],
     scenarios: [
-      { emoji: "🛏", label: "Room issue" },
-      { emoji: "🔑", label: "Late check-in" },
-      { emoji: "❓", label: "A quick question" },
-      { emoji: "🚨", label: "Something urgent" },
+      { emoji: "🛏", label: "Probleem met kamer" },
+      { emoji: "🔑", label: "Laat inchecken" },
+      { emoji: "❓", label: "Een korte vraag" },
+      { emoji: "🚨", label: "Iets urgents" },
     ],
-    greeting: "Good evening, you've reached the front desk at {{company_name}}. How can I help?",
-    redFlags: ["fire, smoke, or an alarm sounding", "a medical emergency", "a security or safety threat", "flooding", "a guest locked out with no way in"],
+    greeting: "Goedenavond, u spreekt met de receptie van {{company_name}}. Waarmee kan ik u helpen?",
+    redFlags: ["brand, rook of een afgaand alarm", "een medisch noodgeval", "een dreiging voor veiligheid of beveiliging", "wateroverlast", "een gast die buitengesloten is zonder toegang"],
     systemPrompt: `You are {{agent_name}}, the night-desk assistant for {{company_name}}, a hotel / short-stay property. You look after guests around the clock and keep a clean log for the day team.
 
 TONE: {{personality}}. Warm, hospitable, unflappable. One question at a time.
@@ -481,16 +495,16 @@ COLLECT: guest name, room number, and the request.
 
 RULES: short, warm replies, one question at a time, never repeat what they've said, never invent policies or prices — say the team will confirm.
 
-CLOSING: confirm what you've arranged or escalated, then wish them a good stay.`,
+CLOSING: confirm what you've arranged or escalated, then wish them a good stay.${DUTCH_LANGUAGE_DIRECTIVE}`,
     dataCollection: [
-      { name: "guest_name",   type: "string", instruction: "Guest's name, or empty." },
-      { name: "room",         type: "string", instruction: "Room number, or empty." },
-      { name: "request_type", type: "string", instruction: "The request or question in a few words." },
-      { name: "urgency",      type: "string", instruction: "One of: emergency | routine." },
-      { name: "action",       type: "string", instruction: "Outcome: resolved / maintenance logged / message for day team / escalated to duty manager." },
-      { name: "summary",      type: "string", instruction: "2–3 neutral sentences." },
+      { name: "guest_name",   label: "Naam gast",       type: "string", instruction: "Guest's name, or empty." },
+      { name: "room",         label: "Kamer",           type: "string", instruction: "Room number, or empty." },
+      { name: "request_type", label: "Type verzoek",    type: "string", instruction: "The request or question in a few words." },
+      { name: "urgency",      label: "Urgentie",        type: "string", instruction: "One of: emergency | routine." },
+      { name: "action",       label: "Actie",           type: "string", instruction: "Outcome: resolved / maintenance logged / message for day team / escalated to duty manager." },
+      { name: "summary",      label: "Samenvatting",    type: "string", instruction: "2–3 neutral sentences, written in Dutch." },
     ],
-    emailSubject: "Guest request — Room {{room}} ({{request}})",
+    emailSubject: "Gastverzoek — Kamer {{room}} ({{request}})",
   },
 
   /* ══════════════════════════════════════════════════════════════
@@ -498,39 +512,39 @@ CLOSING: confirm what you've arranged or escalated, then wish them a good stay.`
      ══════════════════════════════════════════════════════════════ */
   contactcentre: {
     id: "contactcentre",
-    label: "Contact Centres (Tier-0)",
+    label: "Klantcontactcentra (Tier-0)",
     emoji: "🎧",
-    eyebrow: "AI Tier-0 Agent for Contact Centres",
-    headline: "Deflect 30–60% of calls before they ever hit a queue.",
-    subheadline: "An AI assistant answers first, resolves the routine, and only passes through the calls that genuinely need a person.",
-    pitch: "A Tier-0 step that deflects 30–60% of calls before they reach the queue.",
+    eyebrow: "AI Tier-0-assistent voor klantcontactcentra",
+    headline: "Vang 30–60% van de gesprekken op voordat ze in de wachtrij komen.",
+    subheadline: "Een AI-assistent neemt als eerste op, handelt routinevragen af en verbindt alleen door wat écht een mens nodig heeft.",
+    pitch: "Een Tier-0-stap die 30–60% van de gesprekken opvangt voordat ze de wachtrij bereiken.",
     perks: PERKS,
     personas: PERSONAS,
     defaultAgentName: "Robin",
     sampleConversation: [
-      { who: "caller", text: "I just want to check where my order is." },
-      { who: "agent",  text: "I can help with that. Do you have your order number handy, or the email address you used?" },
+      { who: "caller", text: "Ik wil graag weten waar mijn bestelling blijft." },
+      { who: "agent",  text: "Daar kan ik u mee helpen. Heeft u uw bestelnummer bij de hand, of het e-mailadres dat u heeft gebruikt?" },
     ],
     useCases: [
-      { emoji: "🧭", label: "Tier-0 self-service" },
-      { emoji: "❓", label: "FAQ handling" },
-      { emoji: "📦", label: "Order & status checks" },
-      { emoji: "🔀", label: "Routing by intent" },
-      { emoji: "📅", label: "Callback booking" },
-      { emoji: "📈", label: "Overflow at peak" },
-      { emoji: "🌙", label: "Out-of-hours cover" },
-      { emoji: "🗂", label: "Data capture before transfer" },
-      { emoji: "⚖️", label: "Priority classification" },
-      { emoji: "👤", label: "Warm transfer to an agent" },
+      { emoji: "🧭", label: "Tier-0 zelfservice" },
+      { emoji: "❓", label: "Veelgestelde vragen afhandelen" },
+      { emoji: "📦", label: "Bestel- & statuscontrole" },
+      { emoji: "🔀", label: "Doorverbinden op basis van vraag" },
+      { emoji: "📅", label: "Terugbelverzoek inplannen" },
+      { emoji: "📈", label: "Opvang bij piekdrukte" },
+      { emoji: "🌙", label: "Bereikbaarheid buiten kantooruren" },
+      { emoji: "🗂", label: "Gegevens vastleggen vóór doorverbinden" },
+      { emoji: "⚖️", label: "Prioriteit bepalen" },
+      { emoji: "👤", label: "Warm doorverbinden naar een medewerker" },
     ],
     scenarios: [
-      { emoji: "📦", label: "Order status" },
-      { emoji: "❓", label: "A common question" },
-      { emoji: "📅", label: "Book a callback" },
-      { emoji: "👤", label: "Speak to someone" },
+      { emoji: "📦", label: "Status bestelling" },
+      { emoji: "❓", label: "Een veelgestelde vraag" },
+      { emoji: "📅", label: "Terugbelverzoek plannen" },
+      { emoji: "👤", label: "Met iemand spreken" },
     ],
-    greeting: "Hi, you've reached {{company_name}}. Tell me what you need and I'll help or put you through.",
-    redFlags: ["an explicit request to speak to a human", "a complaint", "signs the caller is vulnerable or distressed", "anything outside the agent's scope"],
+    greeting: "Hallo, u spreekt met {{company_name}}. Vertel me waarmee ik kan helpen, of ik verbind u door.",
+    redFlags: ["een expliciet verzoek om met een mens te spreken", "een klacht", "signalen dat de beller kwetsbaar of overstuur is", "iets buiten het bereik van de assistent"],
     systemPrompt: `You are {{agent_name}}, the first-answer (Tier-0) assistant for {{company_name}}. You resolve routine calls and pass through only what needs a person.
 
 TONE: {{personality}}. Friendly and efficient. One question at a time.
@@ -545,15 +559,15 @@ COLLECT: caller's name, a contact detail, and what they need.
 
 RULES: short replies, one question at a time, never repeat what they've said, never guess at account-specific facts — capture and route.
 
-CLOSING: confirm whether it's resolved or being passed through, then end.`,
+CLOSING: confirm whether it's resolved or being passed through, then end.${DUTCH_LANGUAGE_DIRECTIVE}`,
     dataCollection: [
-      { name: "caller_name",     type: "string", instruction: "Caller's name, or empty." },
-      { name: "contact",         type: "string", instruction: "Contact detail (number/email), or empty." },
-      { name: "intent",          type: "string", instruction: "What the caller wanted, in a few words." },
-      { name: "resolved_or_routed", type: "string", instruction: "One of: resolved | routed | callback booked." },
-      { name: "summary",         type: "string", instruction: "2–3 neutral sentences with any context an agent would need." },
+      { name: "caller_name",     label: "Naam beller",              type: "string", instruction: "Caller's name, or empty." },
+      { name: "contact",         label: "Contactgegevens",          type: "string", instruction: "Contact detail (number/email), or empty." },
+      { name: "intent",          label: "Vraag/doel",               type: "string", instruction: "What the caller wanted, in a few words." },
+      { name: "resolved_or_routed", label: "Afgehandeld of doorverbonden", type: "string", instruction: "One of: resolved | routed | callback booked." },
+      { name: "summary",         label: "Samenvatting",             type: "string", instruction: "2–3 neutral sentences with any context an agent would need, written in Dutch." },
     ],
-    emailSubject: "Call summary — {{intent}}",
+    emailSubject: "Gespreksoverzicht — {{intent}}",
   },
 
 };

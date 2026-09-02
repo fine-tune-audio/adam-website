@@ -104,20 +104,24 @@ function conversationConfigFor(cfg) {
         llm: LLM
       },
       first_message: cfg.greeting,
-      language: 'en',
+      language: 'nl',
       dynamic_variables: {
         dynamic_variable_placeholders: {
           company_name: cfg.label,
           agent_name: cfg.defaultAgentName,
           use_cases: cfg.useCases.map((u) => u.label).join(', '),
-          personality: 'warm and reassuring',
+          personality: 'warm en geruststellend',
           contact_name: '',
           website: ''
         }
       }
     },
     tts: {
-      voice_id: FEMALE_VOICE_ID
+      voice_id: FEMALE_VOICE_ID,
+      // Non-English agents must use turbo or flash_v2_5 (confirmed via a
+      // live 400: "Non-english Agents must use turbo or flash v2_5") —
+      // the opposite constraint from English agents, which reject v2_5.
+      model_id: 'eleven_flash_v2_5'
     }
   };
 }
