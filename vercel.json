@@ -1,5 +1,9 @@
 {
   "version": 2,
   "builds": [{ "src": "vet-server/server.js", "use": "@vercel/node" }],
-  "routes": [{ "src": "/(.*)", "dest": "vet-server/server.js" }]
+  "routes": [
+    { "src": "/vet-demo.html", "dest": "/demo.html", "status": 301 },
+    { "src": "/vet-demo", "dest": "/demo.html", "status": 301 },
+    { "src": "/(.*)", "dest": "vet-server/server.js" }
+  ]
 }

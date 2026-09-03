@@ -7,6 +7,8 @@
 //   - client_events already include user_transcript/agent_response by default
 //   - overrides: first_message + tts.voice_id enabled, prompt override OFF,
 //     conversation.text_only enabled
+//   - tts.supported_voices = [Eric/Daan] so the demo's "Man" card resolves
+//     to a Dutch-capable male voice per industry at runtime
 //   - trust_context = "low"
 //
 // Idempotent: elevenlabs-setup/industry-agents.json is the source of truth
@@ -26,6 +28,8 @@ if (!API_KEY) {
 const MAP_FILE = path.join(__dirname, 'industry-agents.json');
 const VET_AGENT_ID = 'agent_1401m0z366vwfbebvka3kbevhpn2';
 const FEMALE_VOICE_ID = 'EXAVITQu4vr4xnSDxMaL'; // "Sarah" — picked and confirmed working for the vet agent
+const MALE_VOICE_ID = 'cjVigY5qzO86Huf0OWal';   // "Eric" — confirmed working with Dutch (eleven_flash_v2_5)
+const MALE_VOICE_LABEL = 'Daan';                 // spoken name surfaced to the caller when "Man" is picked
 const LLM = 'claude-sonnet-4-5'; // confirmed accepted when the vet agent was configured
 
 // Both port-qualified AND bare-hostname entries: live testing found the
@@ -119,10 +123,15 @@ function conversationConfigFor(cfg) {
     },
     tts: {
       voice_id: FEMALE_VOICE_ID,
-      // Non-English agents must use turbo or flash_v2_5 (confirmed via a
-      // live 400: "Non-english Agents must use turbo or flash v2_5") —
-      // the opposite constraint from English agents, which reject v2_5.
-      model_id: 'eleven_flash_v2_5'
+      // supported_voices = the "Add additional voice" list in the dashboard.
+      // The demo's "Man" card picks supported_voices[0] at runtime (see
+      // /api/agent-voices/:industry in vet-server/server.js), so adding
+      // Eric here wires up a Dutch-capable male voice for every industry
+      // agent without needing per-agent dashboard clicks.
+      supported_voices: [
+        { voice_id: MALE_VOICE_ID, label: MALE_VOICE_LABEL }
+      ],
+      model_id: 'eleven_expressive_v1'
     }
   };
 }

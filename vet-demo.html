@@ -2759,7 +2759,7 @@
     (cfg.scenarios || []).forEach((s, i) => {
       const el = document.createElement('div');
       el.className = 'suggestion';
-      el.textContent = s.emoji + ' ' + s.label;
+      el.textContent = s.label;
       el.addEventListener('click', () => runScenario(i));
       list.appendChild(el);
     });
