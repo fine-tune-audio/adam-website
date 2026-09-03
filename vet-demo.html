@@ -252,7 +252,24 @@
     }
 
     /* ---------- step scaffolding ---------- */
+    .dark-block{
+      position:relative;
+      background:var(--black);
+      overflow:hidden;
+    }
+
+    .dark-block-canvas{
+      position:absolute;
+      top:0;
+      left:0;
+      width:100%;
+      height:100%;
+      pointer-events:none;
+    }
+
     .funnel{
+      position:relative;
+      z-index:2;
       padding-top:67px;
       min-height:100vh;
     }
@@ -1744,6 +1761,9 @@
 
 <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
 
+<div class="dark-block">
+  <canvas class="dark-block-canvas" id="darkBlockCanvas"></canvas>
+
 <div class="funnel">
 
   <!-- STEP 0: industry picker -->
@@ -2043,6 +2063,8 @@
       </div>
     </div>
   </section>
+
+</div>
 
 </div>
 
@@ -3371,6 +3393,47 @@
       boot();
     });
   }
+</script>
+
+<script>
+/* DARK BLOCK CANVAS — matches the "Who we are" section background on the main site */
+(function(){
+  const canvas=document.getElementById('darkBlockCanvas');
+  if(!canvas)return;
+  const ctx=canvas.getContext('2d');
+  const block=canvas.parentElement;
+  let W=0,H=0,t=0;
+  const YR=206,YG=255,YB=26;
+  function resize(){W=block.offsetWidth;H=block.offsetHeight;canvas.width=W;canvas.height=H;}
+  function draw(){
+    if(W===0||H===0){requestAnimationFrame(draw);return;}
+    t+=.003;
+    ctx.fillStyle='#0A0A0A';ctx.fillRect(0,0,W,H);
+    const blobs=[
+      {x:.85,y:.12,r:.5,s:.14},
+      {x:.1,y:.35,r:.45,s:.10},
+      {x:.5,y:.6,r:.4,s:.18},
+      {x:.8,y:.82,r:.42,s:.12},
+      {x:.2,y:.9,r:.38,s:.16},
+    ];
+    blobs.forEach((b,i)=>{
+      const cx=(b.x+Math.sin(t*b.s+i*1.6)*.1)*W;
+      const cy=(b.y+Math.cos(t*b.s*.8+i)*.08)*H;
+      const r=b.r*Math.min(W,H*.5);
+      const g=ctx.createRadialGradient(cx,cy,0,cx,cy,r);
+      g.addColorStop(0,`rgba(${YR},${YG},${YB},.11)`);
+      g.addColorStop(.5,`rgba(${YR},${YG},${YB},.035)`);
+      g.addColorStop(1,`rgba(${YR},${YG},${YB},0)`);
+      ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.fillStyle=g;ctx.fill();
+    });
+    const bg=ctx.createRadialGradient(W*.5,H*.5,0,W*.5,H*.5,W*.4);
+    bg.addColorStop(0,'rgba(29,46,216,0.18)');
+    bg.addColorStop(1,'rgba(29,46,216,0)');
+    ctx.beginPath();ctx.arc(W*.5,H*.5,W*.4,0,Math.PI*2);ctx.fillStyle=bg;ctx.fill();
+    requestAnimationFrame(draw);
+  }
+  window.addEventListener('resize',resize);resize();draw();
+})();
 </script>
 </body>
 </html>
