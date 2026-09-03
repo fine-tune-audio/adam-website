@@ -2557,6 +2557,16 @@
     return String(name).replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
   }
 
+  // Matches the two voice_id overrides every agent already exposes via
+  // platform_settings.overrides.conversation_config_override.tts.voice_id
+  // (set in elevenlabs-setup/create-industry-agents.js) — "female" is the
+  // agent's own configured default voice (Sarah), "male" is Eric, verified
+  // to work with Dutch (eleven_flash_v2_5) before wiring this up.
+  const VOICE_IDS = {
+    female: 'EXAVITQu4vr4xnSDxMaL', // Sarah
+    male: 'cjVigY5qzO86Huf0OWal'    // Eric
+  };
+
   const demoState = {
     companyName: '',
     website: '',
@@ -3184,6 +3194,9 @@
         overrides: {
           agent: {
             firstMessage: demoState.greeting || defaultGreeting()
+          },
+          tts: {
+            voiceId: VOICE_IDS[demoState.voice] || VOICE_IDS.female
           }
         },
 
