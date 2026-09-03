@@ -4,11 +4,24 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
-  <title>ADAM | Van gesprek naar actie. Automatisch.</title>
-  <meta name="description" content="ADAM is de conversational layer voor klantcontact. Gesprekken worden automatisch omgezet in acties. Schaalbaar bereikbaar zonder extra personeel."/>
+  <title data-i18n="meta.index.title">ADAM | Van gesprek naar actie. Automatisch.</title>
+  <meta name="description" data-i18n-content="meta.index.desc" content="ADAM is de conversational layer voor klantcontact. Gesprekken worden automatisch omgezet in acties. Schaalbaar bereikbaar zonder extra personeel."/>
+  <link rel="alternate" hreflang="nl" href="https://adamagents.nl/index.html">
+  <link rel="alternate" hreflang="en" href="https://adamagents.nl/index.html?lang=en">
+  <link rel="alternate" hreflang="de" href="https://adamagents.nl/index.html?lang=de">
+  <link rel="alternate" hreflang="x-default" href="https://adamagents.nl/index.html">
   <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&display=swap" rel="stylesheet"/>
+  <script>
+    try {
+      var __p = new URLSearchParams(location.search).get('lang'),
+          __l = __p || localStorage.getItem('adam.lang') || 'nl';
+      if (__l !== 'nl') document.documentElement.classList.add('i18n-pending');
+    } catch (e) {}
+  </script>
+  <script type="module" src="i18n.js"></script>
   <style>
     *{margin:0;padding:0;box-sizing:border-box;}
+    .i18n-pending body{visibility:hidden;}
     :root{
       --blue:#1D2ED8;
       --yellow:#CEFF1A;
@@ -64,6 +77,26 @@
     }
     .nav-logo svg path {
       transition: fill 0.25s ease;
+    }
+
+    /* ── LANGUAGE SWITCHER ── */
+    .lang-switch{display:flex;align-items:center;gap:2px;margin-right:6px;}
+    .lang-switch-btn{
+      background:transparent;border:none;cursor:pointer;
+      font-family:'Sora',sans-serif;font-size:12px;font-weight:700;letter-spacing:0.03em;
+      padding:6px 8px;border-radius:3px;transition:opacity 0.2s,background 0.2s,color 0.2s;
+      color:rgba(0,0,0,0.55);
+    }
+    .lang-switch-btn:hover{color:var(--black);}
+    .lang-switch-btn.active{color:var(--black);background:rgba(0,0,0,0.06);}
+    .nav.scrolled .lang-switch-btn,.nav.nav-dark .lang-switch-btn{color:rgba(255,255,255,0.55);}
+    .nav.scrolled .lang-switch-btn:hover,.nav.nav-dark .lang-switch-btn:hover{color:#fff;}
+    .nav.scrolled .lang-switch-btn.active,.nav.nav-dark .lang-switch-btn.active{color:#fff;background:rgba(255,255,255,0.12);}
+    .nav-menu .lang-switch{padding:16px 0 4px;border-bottom:1px solid rgba(255,255,255,0.06);gap:8px;}
+    .nav-menu .lang-switch-btn{font-size:14px;padding:8px 10px;color:rgba(255,255,255,0.55);}
+    .nav-menu .lang-switch-btn.active{color:#fff;background:rgba(255,255,255,0.12);}
+    @media(max-width:768px){
+      .nav-right .lang-switch{display:none;}
     }
 
     /* ── HERO ── */
@@ -557,10 +590,11 @@
       <span class="nav-logo-text">ADAM</span>
     </a>
     <div class="nav-right">
-      <a class="nav-link" href="cases.html">Cases</a>
-      <a class="nav-link" href="about.html">Over ons</a>
-      <a class="nav-cta" href="contact.html">Plan een demo</a>
-      <button class="nav-hamburger" id="hamburger" aria-label="Menu">
+      <a class="nav-link" href="cases.html" data-i18n="nav.cases">Cases</a>
+      <a class="nav-link" href="about.html" data-i18n="nav.about">Over ons</a>
+      <a class="nav-cta" href="contact.html" data-i18n="nav.cta">Plan een demo</a>
+      <div data-lang-switcher></div>
+      <button class="nav-hamburger" id="hamburger" data-i18n-aria-label="nav.menuAria" aria-label="Menu">
         <span></span><span></span><span></span>
       </button>
     </div>
@@ -569,31 +603,32 @@
   <div class="hero-content">
     <div class="hero-label">Artificially Developed Autonomous Minds</div>
     <h1 class="hero-title">
-      <span class="line"><span>Je klant praat.</span></span>
-      <span class="line"><span>Het systeem handelt.</span></span>
+      <span class="line"><span data-i18n="index.hero.title1">Je klant praat.</span></span>
+      <span class="line"><span data-i18n="index.hero.title2">Het systeem handelt.</span></span>
     </h1>
-    <p class="hero-sub">ADAM zorgt dat elk klantgesprek direct wordt afgehandeld, met agents die natuurlijk aanvoelen, afgestemd zijn op je processen en direct tot actie leiden.</p>
+    <p class="hero-sub" data-i18n="index.hero.sub">ADAM zorgt dat elk klantgesprek direct wordt afgehandeld, met agents die natuurlijk aanvoelen, afgestemd zijn op je processen en direct tot actie leiden.</p>
     <div class="hero-actions">
-      <a class="btn-primary" href="demo.html">Bekijk hoe het werkt</a>
+      <a class="btn-primary" href="demo.html" data-i18n="index.hero.cta">Bekijk hoe het werkt</a>
       </a>
     </div>
   </div>
 </section>
 
 <div class="nav-menu" id="navMenu">
-  <a href="cases.html">Cases</a>
-  <a href="about.html">Over ons</a>
-  <a href="contact.html">Plan een demo</a>
+  <a href="cases.html" data-i18n="nav.cases">Cases</a>
+  <a href="about.html" data-i18n="nav.about">Over ons</a>
+  <a href="contact.html" data-i18n="nav.cta">Plan een demo</a>
+  <div data-lang-switcher></div>
 </div>
 
 <!-- TRUST BAR -->
 <div class="trust-bar">
-  <span class="trust-bar-label">Ingezet bij</span>
+  <span class="trust-bar-label" data-i18n="trust.label">Ingezet bij</span>
   <div class="trust-items">
-    <span class="trust-item">Installatietechniek</span>
-    <span class="trust-item">Woningcorporaties</span>
-    <span class="trust-item">Uitzendbureaus</span>
-    <span class="trust-item">Horeca</span>
+    <span class="trust-item" data-i18n="trust.item1">Installatietechniek</span>
+    <span class="trust-item" data-i18n="trust.item2">Woningcorporaties</span>
+    <span class="trust-item" data-i18n="trust.item3">Uitzendbureaus</span>
+    <span class="trust-item" data-i18n="trust.item4">Horeca</span>
   </div>
 </div>
 
@@ -603,14 +638,14 @@
     <div class="problem-grid">
 
       <div class="reveal-left">
-        <div class="label">Waarom ADAM</div>
-        <h2 class="problem-title">
+        <div class="label" data-i18n="index.problem.label">Waarom ADAM</div>
+        <h2 class="problem-title" data-i18n-html="index.problem.title">
           Het probleem is niet bereikbaarheid.<br>
           Het probleem is hoe gesprekken worden <em>afgehandeld.</em>
         </h2>
-        <p class="problem-body">
-          Wachttijden, keuzemenu's, medewerkers die steeds dezelfde vragen beantwoorden. 
-          ADAM vervangt die frictie door een conversational layer die luistert, begrijpt en direct handelt. 
+        <p class="problem-body" data-i18n="index.problem.body">
+          Wachttijden, keuzemenu's, medewerkers die steeds dezelfde vragen beantwoorden.
+          ADAM vervangt die frictie door een conversational layer die luistert, begrijpt en direct handelt.
           Zonder scripts. Zonder omwegen.
         </p>
       </div>
@@ -619,26 +654,26 @@
         <div class="app-item">
           <div class="app-item-left">
             <span class="app-num">01</span>
-            <span class="app-name">Intake</span>
-            <span class="app-result">Minder onnodige gesprekken, betere gesprekken</span>
+            <span class="app-name" data-i18n="index.app1.name">Intake</span>
+            <span class="app-result" data-i18n="index.app1.result">Minder onnodige gesprekken, betere gesprekken</span>
           </div>
-          <span class="app-tag">Filter & stuur</span>
+          <span class="app-tag" data-i18n="index.app1.tag">Filter & stuur</span>
         </div>
         <div class="app-item">
           <div class="app-item-left">
             <span class="app-num">02</span>
-            <span class="app-name">Informatie verzamelen</span>
-            <span class="app-result">Minder handmatig werk, consistente data</span>
+            <span class="app-name" data-i18n="index.app2.name">Informatie verzamelen</span>
+            <span class="app-result" data-i18n="index.app2.result">Minder handmatig werk, consistente data</span>
           </div>
-          <span class="app-tag">Data collection</span>
+          <span class="app-tag" data-i18n="index.app2.tag">Data collection</span>
         </div>
         <div class="app-item">
           <div class="app-item-left">
             <span class="app-num">03</span>
-            <span class="app-name">Reserveringen</span>
-            <span class="app-result">Geen gemiste omzet, altijd bereikbaar</span>
+            <span class="app-name" data-i18n="index.app3.name">Reserveringen</span>
+            <span class="app-result" data-i18n="index.app3.result">Geen gemiste omzet, altijd bereikbaar</span>
           </div>
-          <span class="app-tag">Booking</span>
+          <span class="app-tag" data-i18n="index.app3.tag">Booking</span>
         </div>
       </div>
 
@@ -650,32 +685,32 @@
 <section class="how-section">
   <div class="inner">
     <div class="how-header reveal">
-      <h2 class="how-title">Van eerste woord<br>tot afgehandelde actie.</h2>
-      <a class="how-demo-link" href="demo.html">Probeer het zelf →</a>
+      <h2 class="how-title" data-i18n-html="index.how.title">Van eerste woord<br>tot afgehandelde actie.</h2>
+      <a class="how-demo-link" href="demo.html" data-i18n="index.how.link">Probeer het zelf →</a>
     </div>
     <div class="how-steps stagger">
       <div class="how-step">
         <div class="how-step-num">01</div>
-        <div class="how-step-title">Luisteren</div>
-        <p class="how-step-body">De klant spreekt zoals hij dat normaal zou doen. Geen menu's, geen instructies.</p>
+        <div class="how-step-title" data-i18n="index.how.step1.title">Luisteren</div>
+        <p class="how-step-body" data-i18n="index.how.step1.body">De klant spreekt zoals hij dat normaal zou doen. Geen menu's, geen instructies.</p>
         <div class="how-step-connector">→</div>
       </div>
       <div class="how-step">
         <div class="how-step-num">02</div>
-        <div class="how-step-title">Begrijpen</div>
-        <p class="how-step-body">ADAM herkent bedoeling, context en urgentie. Niet alleen wat iemand zegt, maar wat er nodig is.</p>
+        <div class="how-step-title" data-i18n="index.how.step2.title">Begrijpen</div>
+        <p class="how-step-body" data-i18n="index.how.step2.body">ADAM herkent bedoeling, context en urgentie. Niet alleen wat iemand zegt, maar wat er nodig is.</p>
         <div class="how-step-connector">→</div>
       </div>
       <div class="how-step">
         <div class="how-step-num">03</div>
-        <div class="how-step-title">Beslissen</div>
-        <p class="how-step-body">Elke agent werkt volgens jouw regels en processen. Het systeem bepaalt zelfstandig wat er moet gebeuren.</p>
+        <div class="how-step-title" data-i18n="index.how.step3.title">Beslissen</div>
+        <p class="how-step-body" data-i18n="index.how.step3.body">Elke agent werkt volgens jouw regels en processen. Het systeem bepaalt zelfstandig wat er moet gebeuren.</p>
         <div class="how-step-connector">→</div>
       </div>
       <div class="how-step">
         <div class="how-step-num">04</div>
-        <div class="how-step-title">Handelen</div>
-        <p class="how-step-body">Het gesprek wordt direct omgezet in actie. Een taak wordt uitgevoerd of gericht doorgezet, zonder vertraging.</p>
+        <div class="how-step-title" data-i18n="index.how.step4.title">Handelen</div>
+        <p class="how-step-body" data-i18n="index.how.step4.body">Het gesprek wordt direct omgezet in actie. Een taak wordt uitgevoerd of gericht doorgezet, zonder vertraging.</p>
         <div class="how-step-connector">→</div>
       </div>
     </div>
@@ -692,8 +727,8 @@
 
       <!-- Titel over volle breedte -->
       <div class="reveal" style="margin-bottom:56px;">
-        <div class="label-yellow" style="font-size:11px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:var(--yellow);margin-bottom:20px;">Wie wij zijn</div>
-        <h2 style="font-size:clamp(32px,4vw,56px);font-weight:800;color:#fff;letter-spacing:-0.03em;line-height:1.0;max-width:780px;">
+        <div class="label-yellow" style="font-size:11px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:var(--yellow);margin-bottom:20px;" data-i18n="index.social.label">Wie wij zijn</div>
+        <h2 style="font-size:clamp(32px,4vw,56px);font-weight:800;color:#fff;letter-spacing:-0.03em;line-height:1.0;max-width:780px;" data-i18n="index.social.title">
           Gebouwd door mensen met achtergrond in audio en voice.
         </h2>
       </div>
@@ -701,27 +736,27 @@
       <!-- Twee kolommen: tekst links, kaartjes rechts -->
       <div class="wie-dark-cols stagger" style="display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:start;">
         <div>
-          <p style="font-size:16px;color:rgba(255,255,255,0.65);line-height:1.8;margin-bottom:18px;">ADAM is geen generiek AI-bureau. Onze wortels liggen in audio technologie, sound design en voice interfaces. Dat maakt het verschil in hoe wij agents ontwerpen.</p>
-          <p style="font-size:16px;color:rgba(255,255,255,0.65);line-height:1.8;margin-bottom:18px;">Wij begrijpen hoe gesprekken werken. Niet alleen de woorden, maar de toon, het ritme, de pauze. Die kennis zit ingebakken in elke agent die wij bouwen.</p>
-          <p style="font-size:16px;color:rgba(255,255,255,0.65);line-height:1.8;margin-bottom:32px;">Gevestigd in Groningen, actief voor organisaties door heel Nederland.</p>
-          <a href="about.html" style="display:inline-flex;align-items:center;gap:8px;font-size:14px;font-weight:700;color:var(--yellow);text-decoration:none;border-bottom:1px solid rgba(206,255,26,0.3);padding-bottom:4px;transition:gap 0.2s;">Meer over ons →</a>
+          <p style="font-size:16px;color:rgba(255,255,255,0.65);line-height:1.8;margin-bottom:18px;" data-i18n="index.social.p1">ADAM is geen generiek AI-bureau. Onze wortels liggen in audio technologie, sound design en voice interfaces. Dat maakt het verschil in hoe wij agents ontwerpen.</p>
+          <p style="font-size:16px;color:rgba(255,255,255,0.65);line-height:1.8;margin-bottom:18px;" data-i18n="index.social.p2">Wij begrijpen hoe gesprekken werken. Niet alleen de woorden, maar de toon, het ritme, de pauze. Die kennis zit ingebakken in elke agent die wij bouwen.</p>
+          <p style="font-size:16px;color:rgba(255,255,255,0.65);line-height:1.8;margin-bottom:32px;" data-i18n="index.social.p3">Gevestigd in Groningen, actief voor organisaties door heel Nederland.</p>
+          <a href="about.html" style="display:inline-flex;align-items:center;gap:8px;font-size:14px;font-weight:700;color:var(--yellow);text-decoration:none;border-bottom:1px solid rgba(206,255,26,0.3);padding-bottom:4px;transition:gap 0.2s;" data-i18n="index.social.link">Meer over ons →</a>
         </div>
         <div class="wie-dark-cards" style="display:grid;grid-template-columns:1fr 1fr;gap:2px;">
           <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-top:3px solid var(--yellow);padding:28px 24px;">
-            <div style="font-size:15px;font-weight:800;color:#fff;margin-bottom:8px;">Audio & voice expertise</div>
-            <p style="font-size:13px;color:rgba(255,255,255,0.48);line-height:1.6;">Jarenlange ervaring in sound design en voice interfaces vormt de basis van onze aanpak.</p>
+            <div style="font-size:15px;font-weight:800;color:#fff;margin-bottom:8px;" data-i18n="index.social.card1.title">Audio & voice expertise</div>
+            <p style="font-size:13px;color:rgba(255,255,255,0.48);line-height:1.6;" data-i18n="index.social.card1.body">Jarenlange ervaring in sound design en voice interfaces vormt de basis van onze aanpak.</p>
           </div>
           <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-top:3px solid var(--yellow);padding:28px 24px;">
-            <div style="font-size:15px;font-weight:800;color:#fff;margin-bottom:8px;">AI development</div>
-            <p style="font-size:13px;color:rgba(255,255,255,0.48);line-height:1.6;">Eigen ontwikkeling van agent architectuur, geoptimaliseerd voor conversationele context.</p>
+            <div style="font-size:15px;font-weight:800;color:#fff;margin-bottom:8px;" data-i18n="index.social.card2.title">AI development</div>
+            <p style="font-size:13px;color:rgba(255,255,255,0.48);line-height:1.6;" data-i18n="index.social.card2.body">Eigen ontwikkeling van agent architectuur, geoptimaliseerd voor conversationele context.</p>
           </div>
           <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-top:3px solid var(--yellow);padding:28px 24px;">
-            <div style="font-size:15px;font-weight:800;color:#fff;margin-bottom:8px;">Implementatie & integratie</div>
-            <p style="font-size:13px;color:rgba(255,255,255,0.48);line-height:1.6;">Van briefing tot live agent, inclusief koppelingen met uw bestaande systemen.</p>
+            <div style="font-size:15px;font-weight:800;color:#fff;margin-bottom:8px;" data-i18n="index.social.card3.title">Implementatie & integratie</div>
+            <p style="font-size:13px;color:rgba(255,255,255,0.48);line-height:1.6;" data-i18n="index.social.card3.body">Van briefing tot live agent, inclusief koppelingen met uw bestaande systemen.</p>
           </div>
           <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-top:3px solid var(--yellow);padding:28px 24px;">
-            <div style="font-size:15px;font-weight:800;color:#fff;margin-bottom:8px;">Groningen, NL</div>
-            <p style="font-size:13px;color:rgba(255,255,255,0.48);line-height:1.6;">Lokaal geworteld, nationaal actief. Persoonlijk contact bij elk project.</p>
+            <div style="font-size:15px;font-weight:800;color:#fff;margin-bottom:8px;" data-i18n="index.social.card4.title">Groningen, NL</div>
+            <p style="font-size:13px;color:rgba(255,255,255,0.48);line-height:1.6;" data-i18n="index.social.card4.body">Lokaal geworteld, nationaal actief. Persoonlijk contact bij elk project.</p>
           </div>
         </div>
       </div>
@@ -733,19 +768,19 @@
 <section class="demo-section">
   <div class="demo-inner">
     <div class="demo-left reveal-left">
-      <div class="demo-eyebrow">Live demo</div>
-      <h2 class="demo-title">
+      <div class="demo-eyebrow" data-i18n="index.demo.eyebrow">Live demo</div>
+      <h2 class="demo-title" data-i18n-html="index.demo.title">
         Probeer het zelf.<br>
         Kies uw branche.
       </h2>
-      <p class="demo-body">
+      <p class="demo-body" data-i18n="index.demo.body">
         Maak in enkele minuten een gepersonaliseerde AI-telefoonassistent voor uw branche en test hem direct.
       </p>
-      <a class="demo-cta" href="vet-demo.html">
+      <a class="demo-cta" href="vet-demo.html" data-i18n-html="index.demo.cta">
         Start de demo
         <span class="demo-cta-arr">→</span>
       </a>
-      <p style="font-size:12px;color:rgba(255,255,255,0.25);margin-top:16px;">Geen verplichtingen. Direct te testen, geen installatie.</p>
+      <p style="font-size:12px;color:rgba(255,255,255,0.25);margin-top:16px;" data-i18n="index.demo.micro">Geen verplichtingen. Direct te testen, geen installatie.</p>
     </div>
     <div class="demo-right reveal-right">
       <a href="vet-demo.html" style="text-decoration:none;">
@@ -765,7 +800,7 @@
               </svg>
             </div>
           </div>
-          <div class="orb-preview-label">Klik om te starten</div>
+          <div class="orb-preview-label" data-i18n="index.demo.orbLabel">Klik om te starten</div>
         </div>
       </a>
     </div>
@@ -779,29 +814,29 @@
   <div class="inner">
     <div class="wie-grid">
       <div class="reveal-left">
-        <div class="label">Wat er concreet verandert</div>
-        <h2 class="wie-title">Minder gesprekken die niets opleveren.<br>Meer <em style="font-style:normal;color:var(--blue);">directe actie.</em></h2>
+        <div class="label" data-i18n="index.wie.label">Wat er concreet verandert</div>
+        <h2 class="wie-title" data-i18n-html="index.wie.title">Minder gesprekken die niets opleveren.<br>Meer <em style="font-style:normal;color:var(--blue);">directe actie.</em></h2>
         <div class="wie-body">
-          <p>ADAM vervangt geen mensen. Het zorgt dat mensen alleen doen wat écht menselijk contact vraagt. De rest handelt het systeem zelfstandig af — consistent, direct en zonder omwegen.</p>
-          <p><a href="cases.html" style="font-size:14px;font-weight:700;color:var(--blue);text-decoration:none;">Bekijk case: Dijk van een Wijf →</a></p>
+          <p data-i18n="index.wie.p1">ADAM vervangt geen mensen. Het zorgt dat mensen alleen doen wat écht menselijk contact vraagt. De rest handelt het systeem zelfstandig af — consistent, direct en zonder omwegen.</p>
+          <p><a href="cases.html" style="font-size:14px;font-weight:700;color:var(--blue);text-decoration:none;" data-i18n="index.wie.link">Bekijk case: Dijk van een Wijf →</a></p>
         </div>
       </div>
       <div class="wie-cards stagger">
         <div class="wie-card" style="display:flex;flex-direction:column;gap:6px;">
           <div style="font-size:clamp(40px,5vw,60px);font-weight:800;letter-spacing:-0.04em;color:var(--blue);line-height:1;" class="count-zero">47</div>
-          <div class="wie-card-body">Keuzemenu's of scripts nodig. De agent begrijpt het gesprek direct.</div>
+          <div class="wie-card-body" data-i18n="index.wie.card1.body">Keuzemenu's of scripts nodig. De agent begrijpt het gesprek direct.</div>
         </div>
         <div class="wie-card" style="display:flex;flex-direction:column;gap:6px;">
           <div style="font-size:clamp(40px,5vw,60px);font-weight:800;letter-spacing:-0.04em;color:var(--blue);line-height:1;">24/7</div>
-          <div class="wie-card-body">Bereikbaar. Altijd dezelfde kwaliteit, ook buiten kantooruren.</div>
+          <div class="wie-card-body" data-i18n="index.wie.card2.body">Bereikbaar. Altijd dezelfde kwaliteit, ook buiten kantooruren.</div>
         </div>
         <div class="wie-card" style="display:flex;flex-direction:column;gap:6px;">
           <div style="font-size:clamp(48px,6vw,72px);font-weight:800;color:var(--blue);line-height:1;">∞</div>
-          <div class="wie-card-body">Gesprekken tegelijk verwerken, zonder wachtrij of extra personeel.</div>
+          <div class="wie-card-body" data-i18n="index.wie.card3.body">Gesprekken tegelijk verwerken, zonder wachtrij of extra personeel.</div>
         </div>
         <div class="wie-card" style="display:flex;flex-direction:column;gap:6px;border-top-color:var(--yellow);">
-          <div style="font-size:clamp(28px,3vw,38px);font-weight:800;letter-spacing:-0.03em;color:var(--black);line-height:1.1;">Binnen<br>dagen live</div>
-          <div class="wie-card-body">Van briefing tot werkende agent, zonder lange implementatietrajecten.</div>
+          <div style="font-size:clamp(28px,3vw,38px);font-weight:800;letter-spacing:-0.03em;color:var(--black);line-height:1.1;" data-i18n-html="index.wie.card4.stat">Binnen<br>dagen live</div>
+          <div class="wie-card-body" data-i18n="index.wie.card4.body">Van briefing tot werkende agent, zonder lange implementatietrajecten.</div>
         </div>
       </div>
     </div>
@@ -812,14 +847,14 @@
 <section class="cta-section">
   <canvas class="cta-canvas" id="ctaCanvas"></canvas>
   <div class="cta-inner reveal">
-    <div class="cta-lbl">Klaar voor de volgende stap</div>
-    <h2 class="cta-title">Laten we beginnen.</h2>
-    <p class="cta-sub">Vertel ons welk vraagstuk u wil oplossen. Wij laten zien hoe een ADAM agent dat aanpakt.</p>
+    <div class="cta-lbl" data-i18n="index.cta.label">Klaar voor de volgende stap</div>
+    <h2 class="cta-title" data-i18n="index.cta.title">Laten we beginnen.</h2>
+    <p class="cta-sub" data-i18n="index.cta.sub">Vertel ons welk vraagstuk u wil oplossen. Wij laten zien hoe een ADAM agent dat aanpakt.</p>
     <div class="cta-buttons">
-      <a class="cta-btn-primary" href="contact.html">Plan een demo</a>
-      <a class="cta-btn-secondary" href="demo.html">Bekijk hoe het werkt →</a>
+      <a class="cta-btn-primary" href="contact.html" data-i18n="nav.cta">Plan een demo</a>
+      <a class="cta-btn-secondary" href="demo.html" data-i18n="index.cta.secondary">Bekijk hoe het werkt →</a>
     </div>
-    <p class="cta-micro">Geen verplichtingen. Reactie binnen één werkdag.</p>
+    <p class="cta-micro" data-i18n="index.cta.micro">Geen verplichtingen. Reactie binnen één werkdag.</p>
   </div>
 </section>
 
@@ -835,47 +870,47 @@
         </svg>
         <span class="foot-logo-text">ADAM</span>
       </a>
-      <p class="foot-tagline">Van gesprek naar actie. Automatisch.</p>
+      <p class="foot-tagline" data-i18n="foot.tagline">Van gesprek naar actie. Automatisch.</p>
     </div>
 
     <!-- DIENSTEN -->
     <div>
-      <div class="foot-col-title">Diensten</div>
+      <div class="foot-col-title" data-i18n="foot.services.title">Diensten</div>
       <div class="foot-col-links">
-        <a href="contact.html">Voice AI agents</a>
-        <a href="contact.html">Conversational design</a>
-        <a href="contact.html">Audio experiences</a>
+        <a href="contact.html" data-i18n="foot.services.1">Voice AI agents</a>
+        <a href="contact.html" data-i18n="foot.services.2">Conversational design</a>
+        <a href="contact.html" data-i18n="foot.services.3">Audio experiences</a>
       </div>
     </div>
 
     <!-- CASES -->
     <div>
-      <div class="foot-col-title">Cases</div>
+      <div class="foot-col-title" data-i18n="foot.cases.title">Cases</div>
       <div class="foot-col-links">
         <a href="case-fraeylemaborg.html">Fraeylemaborg</a>
         <a href="case-dijk-van-een-wijf.html">Dijk van een Wijf</a>
         <a href="case-blauvolt.html">Blauvolt</a>
         <a href="case-belmaatje.html">BelMaatje</a>
-        <a href="cases.html">Alle cases</a>
+        <a href="cases.html" data-i18n="foot.cases.all">Alle cases</a>
       </div>
     </div>
 
     <!-- BEDRIJF -->
     <div>
-      <div class="foot-col-title">Bedrijf</div>
+      <div class="foot-col-title" data-i18n="foot.company.title">Bedrijf</div>
       <div class="foot-col-links">
-        <a href="index.html">Home</a>
-        <a href="about.html">Over ons</a>
-        <a href="cases.html">Cases</a>
-        <a href="contact.html">Contact</a>
+        <a href="index.html" data-i18n="foot.company.home">Home</a>
+        <a href="about.html" data-i18n="nav.about">Over ons</a>
+        <a href="cases.html" data-i18n="nav.cases">Cases</a>
+        <a href="contact.html" data-i18n="foot.company.contact">Contact</a>
       </div>
     </div>
 
     <!-- CONTACT -->
     <div>
-      <div class="foot-col-title">Contact</div>
+      <div class="foot-col-title" data-i18n="foot.contact.title">Contact</div>
       <div class="foot-contact-block">
-        <div class="foot-contact-label">Kantoor</div>
+        <div class="foot-contact-label" data-i18n="foot.contact.officeLabel">Kantoor</div>
         <div class="foot-contact-text">
           Kerklaan 30B<br>9751 NN Haren
         </div>
