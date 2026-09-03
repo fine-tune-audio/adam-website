@@ -2326,10 +2326,6 @@
         <canvas class="dark-block-canvas" id="bgCanvas" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;display:none;"></canvas>
 
         <div class="orb-wrapper">
-          <div class="mode-toggle">
-            <button class="mode-btn active" id="voiceModeBtn" onclick="setMode('voice')">Spraak</button>
-            <button class="mode-btn" id="textModeBtn" onclick="setMode('text')">Tekst</button>
-          </div>
 
           <div class="calm-notice" id="calmNotice" style="display:none;"></div>
 
@@ -2367,16 +2363,6 @@
 
             <div class="orb-label" id="orbLabel" style="margin-top:1rem;background:rgba(255,255,255,0.05);padding:0.5rem 2rem;border-radius:60px;font-size:0.95rem;font-weight:500;color:rgba(255,255,255,0.7);border:1px solid rgba(255,255,255,0.08);">KLIK OP DE ORB OM TE STARTEN</div>
             <div class="scenario-hint" id="scenarioHint" style="margin-top:0.5rem;font-size:0.85rem;color:#3a4b60;"></div>
-          </div>
-
-          <div class="chat-wrap" id="chatUI" style="display:none;width:100%;margin-top:1.5rem;">
-            <div class="chat-messages" id="chatMessages"></div>
-            <div class="chat-input-row">
-              <input type="text" id="chatInput" placeholder="Typ een bericht..." onkeydown="if(event.key==='Enter')sendChat()">
-              <button onclick="sendChat()" aria-label="Versturen">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 12L20 4L13 20L11 13L4 12Z" fill="#0A0A0A"/></svg>
-              </button>
-            </div>
           </div>
 
           <div class="assistant-message" id="voiceTranscriptArea" style="margin-top:1.5rem;background:rgba(255,255,255,0.04);border-radius:20px;padding:1rem 1.8rem;width:100%;text-align:center;border:1px solid rgba(255,255,255,0.07);color:rgba(255,255,255,0.7);font-weight:450;font-size:0.95rem;line-height:1.5;">
@@ -2843,7 +2829,7 @@
     });
 
     hideCalmNotice();
-    setMode(sdkStatus === 'failed' ? 'text' : 'voice');
+    setMode('voice');
     preRequestMic();
   }
 
@@ -2867,53 +2853,15 @@
   }
 
   function setMode(mode){
-    if (mode === 'voice' && sdkStatus === 'failed') mode = 'text';
-
     const voiceUI = document.getElementById('voiceUI');
-    const chatUI = document.getElementById('chatUI');
     const voiceStatus = document.getElementById('voiceStatus');
     const voiceTranscript = document.getElementById('voiceTranscriptArea');
-    const voiceBtn = document.getElementById('voiceModeBtn');
-    const textBtn = document.getElementById('textModeBtn');
 
     hideCalmNotice();
 
-    if (mode === 'text'){
-      voiceUI.style.display = 'none';
-      voiceStatus.style.display = 'none';
-      voiceTranscript.style.display = 'none';
-      chatUI.classList.add('visible');
-      voiceBtn.classList.remove('active');
-      textBtn.classList.add('active');
-      if (conversation) stopConversation();
-      startTextConversation();
-    } else {
-      voiceUI.style.display = 'flex';
-      voiceStatus.style.display = 'block';
-      voiceTranscript.style.display = 'block';
-      chatUI.classList.remove('visible');
-      textBtn.classList.remove('active');
-      voiceBtn.classList.add('active');
-      if (textConversation) stopTextConversation();
-    }
-  }
-
-  function sendChat(){
-    if (!textConversation) return;
-    const input = document.getElementById('chatInput');
-    const text = input.value.trim();
-    if (!text) return;
-    transcript.push({ role:'user', text, ts: Date.now() });
-    appendChatBubble('user', text);
-    input.value = '';
-    showTyping();
-    try {
-      textConversation.sendUserMessage(text);
-    } catch (err) {
-      console.error('sendUserMessage failed:', err);
-      hideTyping();
-      appendChatBubble('agent', "Sorry, dat bericht is niet verzonden. Probeer het opnieuw.");
-    }
+    voiceUI.style.display = 'flex';
+    voiceStatus.style.display = 'block';
+    voiceTranscript.style.display = 'block';
   }
 
   function runScenario(index){
@@ -3176,19 +3124,17 @@
   }
 
   function handleMicUnavailable(){
-    setMode('text');
-    showCalmNotice('Microfoon niet beschikbaar — u kunt ook typen.');
+    showCalmNotice('Microfoon niet beschikbaar — sta microfoontoegang toe in uw browser om de assistent te starten.');
   }
 
   function handleVoiceSessionFailure(){
-    setMode('text');
-    showCalmNotice("Spraak is nu niet beschikbaar — u kunt ook typen.");
+    showCalmNotice("Spraak is nu niet beschikbaar — probeer het opnieuw.");
   }
 
   async function startConversation(){
     if (isTransitioning) return;
     if (sdkStatus === 'failed' || !window.ElevenLabsConversation){
-      setMode('text');
+      handleVoiceSessionFailure();
       return;
     }
     isTransitioning = true;
@@ -3332,171 +3278,14 @@
   function handleAgentMessage(message){
     if (!message.message) return;
     const role = message.source === 'user' ? 'user' : 'agent';
-    const inTextMode = document.getElementById('chatUI').classList.contains('visible');
-
-    if (inTextMode){
-      // the user's own message is already recorded + rendered optimistically by sendChat()
-      if (role === 'user') return;
-      hideTyping();
-      transcript.push({ role, text: message.message, ts: Date.now() });
-      appendChatBubble(role, message.message);
-    } else {
-      transcript.push({ role, text: message.message, ts: Date.now() });
-      updateTranscript(role, message.message);
-    }
+    transcript.push({ role, text: message.message, ts: Date.now() });
+    updateTranscript(role, message.message);
   }
 
-  // ---------- text mode (ElevenLabs textOnly session, no mic) ----------
-  let textConversation = null;
-  let textConnecting = false;
-  let textSessionHadMessage = false;
-  let scriptedTimers = [];
-
-  function clearScriptedTimers(){
-    scriptedTimers.forEach(t => clearTimeout(t));
-    scriptedTimers = [];
-  }
-
-  // Fully local, offline conversation used when neither a voice nor a text
-  // session can be established — the demo still plays out end to end, using
-  // the current industry's own sample conversation as the seed.
-  // Never wipes a transcript that already has real caller turns in it.
-  function playScriptedConversation(){
-    if (transcript.length){
-      showCalmNotice("Verbinding verbroken — u kunt doorgaan, we hebben bewaard wat er al is gezegd.");
-      return;
-    }
-    clearScriptedTimers();
-    const messages = document.getElementById('chatMessages');
-    if (messages) messages.innerHTML = '';
-    showCalmNotice('Live verbinding niet beschikbaar — een voorbeeldgesprek wordt afgespeeld.');
-
-    const script = (cfg.sampleConversation || []).map(t => ({ role: t.who === 'agent' ? 'agent' : 'user', text: t.text }));
-    if (!script.length) return;
-
-    const stepDelay = reducedMotion() ? 60 : 1300;
-    script.forEach((turn, i) => {
-      const t1 = setTimeout(() => {
-        if (turn.role === 'agent') showTyping();
-        const t2 = setTimeout(() => {
-          hideTyping();
-          transcript.push({ role: turn.role, text: turn.text, ts: Date.now() });
-          appendChatBubble(turn.role, turn.text);
-        }, turn.role === 'agent' ? Math.min(600, stepDelay * 0.4) : 0);
-        scriptedTimers.push(t2);
-      }, stepDelay * i);
-      scriptedTimers.push(t1);
-    });
-  }
-
-  function appendChatBubble(role, text){
-    const messages = document.getElementById('chatMessages');
-    const el = document.createElement('div');
-    el.className = 'chat-msg ' + (role === 'user' ? 'user' : 'agent');
-    el.textContent = text;
-    messages.appendChild(el);
-    messages.scrollTop = messages.scrollHeight;
-  }
-
-  function showTyping(){
-    hideTyping();
-    const messages = document.getElementById('chatMessages');
-    const el = document.createElement('div');
-    el.className = 'chat-msg typing';
-    el.id = 'typingIndicator';
-    el.innerHTML = '<div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>';
-    messages.appendChild(el);
-    messages.scrollTop = messages.scrollHeight;
-  }
-
-  function hideTyping(){
-    const el = document.getElementById('typingIndicator');
-    if (el) el.remove();
-  }
-
-  async function startTextConversation(){
-    if (textConversation || textConnecting) return;
-
-    if (!window.ElevenLabsConversation){
-      playScriptedConversation();
-      return;
-    }
-
-    textConnecting = true;
-    textSessionHadMessage = false;
-    clearScriptedTimers();
-
-    try {
-      textConversation = await window.ElevenLabsConversation.startSession({
-        agentId: getAgentId(),
-        textOnly: true,
-
-        dynamicVariables: {
-          company_name: demoState.companyName,
-          website: demoState.website,
-          contact_name: demoState.contactName,
-          use_cases: demoState.useCases.join(', '),
-          personality: demoState.personality,
-          agent_name: getAgentName()
-        },
-
-        overrides: {
-          agent: {
-            firstMessage: demoState.greeting || defaultGreeting()
-          }
-        },
-
-        onConnect: () => {
-          textConnecting = false;
-        },
-
-        onDisconnect: () => {
-          textConversation = null;
-          textConnecting = false;
-          hideTyping();
-        },
-
-        onMessage: (message) => {
-          textSessionHadMessage = true;
-          handleAgentMessage(message);
-        },
-
-        onError: (error) => {
-          console.error('Text agent error:', error);
-          hideTyping();
-          textConversation = null;
-          textConnecting = false;
-          if (textSessionHadMessage){
-            appendChatBubble('agent', "Connection dropped — you can keep typing, we've kept your conversation so far.");
-          } else {
-            playScriptedConversation();
-          }
-        }
-      });
-    } catch (err) {
-      console.error('Text session start error:', err);
-      textConversation = null;
-      textConnecting = false;
-      playScriptedConversation();
-    }
-  }
-
-  async function stopTextConversation(){
-    clearScriptedTimers();
-    hideTyping();
-    if (!textConversation) return;
-    const current = textConversation;
-    textConversation = null;
-    try {
-      await current.endSession();
-    } catch (err) {
-      console.error('Text stop error:', err);
-    }
-  }
+  // ---------- show / hide result skeletons ----------
 
   async function finishCall(){
     if (conversation) await stopConversation();
-    if (textConversation) await stopTextConversation();
 
     const approveBtn = document.getElementById('approveBtn');
     const sendStatus = document.getElementById('sendStatus');
@@ -3737,8 +3526,6 @@
   function presenterEscape(){
     try {
       if (conversation) stopConversation().catch(err => console.error('Escape stop voice failed:', err && err.message));
-      if (textConversation) stopTextConversation().catch(err => console.error('Escape stop text failed:', err && err.message));
-      clearScriptedTimers();
       hideCalmNotice();
 
       const approveBtn = document.getElementById('approveBtn');
