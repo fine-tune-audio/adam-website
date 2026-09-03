@@ -275,6 +275,30 @@
       max-width:640px;
     }
 
+    .step-inner.step-centered{
+      max-width:760px;
+      text-align:center;
+    }
+
+    .step-inner.step-centered .step-title,
+    .step-inner.step-centered .eyebrow,
+    .step-inner.step-centered .info-block-label,
+    .step-inner.step-centered .field{
+      text-align:left;
+    }
+
+    .step-inner.step-centered .setup-grid,
+    .step-inner.step-centered .voice-row-large,
+    .step-inner.step-centered textarea,
+    .step-inner.step-centered input{
+      margin-left:auto;
+      margin-right:auto;
+    }
+
+    .step-actions-center{
+      justify-content:center;
+    }
+
     /* ---------- shared type / buttons ---------- */
     .eyebrow{
       font-size:11px;
@@ -1773,7 +1797,7 @@
 
   <!-- STEP 3: combined setup (handling + voice + greeting) -->
   <section class="step" data-step="3">
-    <div class="step-inner">
+    <div class="step-inner step-centered">
       <div class="eyebrow">Stap 2 van 3</div>
       <h2 class="step-title">Wat moet de assistent afhandelen?</h2>
 
@@ -1787,7 +1811,7 @@
         <textarea id="customGreeting" placeholder="Goedemiddag, u spreekt met de digitale assistent van [Bedrijfsnaam]. Waarmee kan ik u vandaag helpen?"></textarea>
       </div>
 
-      <div class="step-actions">
+      <div class="step-actions step-actions-center">
         <button class="btn btn-ghost" onclick="goStep(2)">Terug</button>
         <button class="btn btn-primary" onclick="captureStep3();startGenerating()">Genereer mijn assistent</button>
       </div>
