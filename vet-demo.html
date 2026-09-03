@@ -517,6 +517,13 @@
       margin-bottom:28px;
     }
 
+    .setup-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:14px;
+      margin-bottom:8px;
+    }
+
     .check-item{
       display:flex;
       align-items:flex-start;
@@ -524,7 +531,7 @@
       background:rgba(255,255,255,0.03);
       border:1px solid rgba(255,255,255,0.1);
       border-radius:8px;
-      padding:14px 16px;
+      padding:18px 20px;
       cursor:pointer;
       transition:border-color 0.2s,background 0.2s;
     }
@@ -572,9 +579,14 @@
     }
 
     .check-label{
-      font-size:13.5px;
+      font-size:15px;
       color:rgba(255,255,255,0.75);
       line-height:1.4;
+    }
+
+    .setup-grid .check-label{
+      font-size:16px;
+      color:rgba(255,255,255,0.85);
     }
 
     .check-emoji{
@@ -633,6 +645,22 @@
       gap:14px;
       max-width:400px;
       margin-bottom:32px;
+    }
+
+    .voice-row-large{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:14px;
+      max-width:600px;
+    }
+
+    .voice-row-large .pick-card{
+      padding:32px 18px;
+      text-align:center;
+    }
+
+    .voice-row-large .pick-card-title{
+      font-size:18px;
     }
 
     /* ---------- STEP 5: generating ---------- */
@@ -1555,7 +1583,15 @@
         grid-template-columns:1fr;
       }
 
+      .setup-grid{
+        grid-template-columns:1fr;
+      }
+
       .voice-row{
+        max-width:none;
+      }
+
+      .voice-row-large{
         max-width:none;
       }
 
@@ -1707,7 +1743,7 @@
   <!-- STEP 2: company details -->
   <section class="step" data-step="2">
     <div class="step-inner narrow">
-      <div class="eyebrow">Stap 1 van 4</div>
+      <div class="eyebrow">Stap 1 van 3</div>
       <h2 class="step-title">Vertel ons over uw bedrijf</h2>
       <p class="step-desc">We gebruiken dit om de kennis en begroeting van de assistent te personaliseren.</p>
 
@@ -1735,23 +1771,25 @@
     </div>
   </section>
 
-  <!-- STEP 3: use cases -->
+  <!-- STEP 3: combined setup (handling + voice + greeting) -->
   <section class="step" data-step="3">
     <div class="step-inner">
-      <div class="eyebrow">Stap 2 van 4</div>
+      <div class="eyebrow">Stap 2 van 3</div>
       <h2 class="step-title">Wat moet de assistent afhandelen?</h2>
-      <p class="step-desc">Selecteer elk type gesprek dat de assistent op zich mag nemen.</p>
 
-      <div class="checkbox-grid" id="useCaseGrid"></div>
+      <div class="setup-grid" id="setupOptionsGrid"></div>
 
-      <div class="field">
-        <label>Wat wilt u het liefst van de telefoonlast van uw team afhalen?</label>
-        <textarea id="workloadNote" placeholder="bijv. terugkerende telefoontjes tijdens piekuren"></textarea>
+      <div class="info-block-label" style="margin:36px 0 14px;">Stem</div>
+      <div class="voice-row-large" id="voiceCards"></div>
+
+      <div class="field" style="margin-top:36px;">
+        <label>Eigen begroeting (optioneel)</label>
+        <textarea id="customGreeting" placeholder="Goedemiddag, u spreekt met de digitale assistent van [Bedrijfsnaam]. Waarmee kan ik u vandaag helpen?"></textarea>
       </div>
 
       <div class="step-actions">
         <button class="btn btn-ghost" onclick="goStep(2)">Terug</button>
-        <button class="btn btn-primary" onclick="captureStep3();goStep(4)">Verder</button>
+        <button class="btn btn-primary" onclick="captureStep3();startGenerating()">Genereer mijn assistent</button>
       </div>
     </div>
   </section>
@@ -1759,7 +1797,7 @@
   <!-- STEP 4: personality & voice -->
   <section class="step" data-step="4">
     <div class="step-inner">
-      <div class="eyebrow">Stap 3 van 4</div>
+      <div class="eyebrow">Stap 3 van 3</div>
       <h2 class="step-title">Geef de assistent een persoonlijkheid</h2>
       <p class="step-desc">Kies de toon en de stem die uw bellers te horen krijgen.</p>
 
@@ -2147,7 +2185,8 @@
     document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
     document.querySelector('.step[data-step="' + n + '"]').classList.add('active');
     document.getElementById('progressFill').style.width = (n / TOTAL_STEPS * 100) + '%';
-    document.getElementById('statusText').textContent = 'Stap ' + n + ' van ' + TOTAL_STEPS;
+    const displayTotal = n >= 1 && n <= 3 ? 3 : TOTAL_STEPS;
+    document.getElementById('statusText').textContent = 'Stap ' + n + ' van ' + displayTotal;
     window.scrollTo(0, 0);
   }
 
@@ -2204,8 +2243,7 @@
     document.title = cfg.label + ' — AI-telefoonassistent demo | ADAM AI Agents';
 
     renderHero();
-    renderUseCaseGrid();
-    renderPersonalityCards();
+    renderSetupOptions();
     renderVoiceCards();
     renderScenarioList();
     buildResultRows();
@@ -2245,35 +2283,19 @@
     });
   }
 
-  function renderUseCaseGrid(){
-    const grid = document.getElementById('useCaseGrid');
+  function renderSetupOptions(){
+    const grid = document.getElementById('setupOptionsGrid');
     grid.innerHTML = '';
-    (cfg.useCases || []).forEach(uc => {
+    (cfg.setupOptions || []).forEach(label => {
       const el = document.createElement('label');
       el.className = 'check-item';
-      el.dataset.id = slugify(uc.label);
-      el.innerHTML = '<input type="checkbox"><div class="check-box">' + checkSvg + '</div><span class="check-emoji">' + uc.emoji + '</span><span class="check-label">' + uc.label + '</span>';
+      el.dataset.id = slugify(label);
+      el.innerHTML = '<input type="checkbox"><div class="check-box">' + checkSvg + '</div><span class="check-label">' + label + '</span>';
       el.addEventListener('click', (e) => {
         e.preventDefault();
         el.classList.toggle('selected');
       });
       grid.appendChild(el);
-    });
-  }
-
-  function renderPersonalityCards(){
-    const wrap = document.getElementById('personalityCards');
-    wrap.innerHTML = '';
-    (cfg.personas || []).forEach(p => {
-      const el = document.createElement('div');
-      el.className = 'pick-card' + (p.id === demoState.personality ? ' selected' : '');
-      el.dataset.id = p.id;
-      el.innerHTML = '<div class="pick-card-icon">' + (p.icon || '') + '</div><div class="pick-card-title">' + p.title + '</div><div class="pick-card-desc">' + (p.blurb || p.desc || '') + '</div>';
-      el.addEventListener('click', () => {
-        wrap.querySelectorAll('.pick-card').forEach(c => c.classList.remove('selected'));
-        el.classList.add('selected');
-      });
-      wrap.appendChild(el);
     });
   }
 
@@ -2340,20 +2362,12 @@
     document.getElementById('step2Next').disabled = !ok;
   }
 
-  // ---------- step 3 ----------
+  // ---------- step 3: combined setup ----------
   function captureStep3(){
-    const grid = document.getElementById('useCaseGrid');
+    const grid = document.getElementById('setupOptionsGrid');
     demoState.useCases = Array.from(grid.querySelectorAll('.check-item.selected')).map(el => el.querySelector('.check-label').textContent);
-    demoState.workload = document.getElementById('workloadNote').value.trim();
-  }
-
-  // ---------- step 4 ----------
-  function captureStep4(){
-    const personalityWrap = document.getElementById('personalityCards');
     const voiceWrap = document.getElementById('voiceCards');
-    const selP = personalityWrap.querySelector('.pick-card.selected');
     const selV = voiceWrap.querySelector('.pick-card.selected');
-    demoState.personality = selP ? selP.dataset.id : 'warm';
     demoState.voice = selV ? selV.dataset.id : 'female';
     demoState.greeting = document.getElementById('customGreeting').value.trim();
   }

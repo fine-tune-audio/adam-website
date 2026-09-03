@@ -58,6 +58,14 @@ export const INDUSTRIES = {
     perks: PERKS,
     personas: PERSONAS,
     defaultAgentName: "Alex",
+    setupOptions: [
+      "Spoed en storingen",
+      "Verwarming en cv",
+      "Elektrische storingen",
+      "Lekkages en loodgieterswerk",
+      "Monteurs en afspraken",
+      "Offertes en vragen"
+    ],
     sampleConversation: [
       { who: "caller", text: "Ik heb geen warm water en de ketel maakt een tikkend geluid." },
       { who: "agent",  text: "Daar kan ik u mee helpen. Eerst een korte veiligheidscheck — ruikt u gas, of lekt er op dit moment ergens water?" },
@@ -124,6 +132,14 @@ CLOSING: confirm what happens next (someone will call back, or an engineer is on
     perks: PERKS,
     personas: PERSONAS,
     defaultAgentName: "Sam",
+    setupOptions: [
+      "Spoed en storingen",
+      "Waterlekkages",
+      "Verwarming en warm water",
+      "Elektrische storingen",
+      "Reparaties en meldingen",
+      "Status en doorverbinden"
+    ],
     sampleConversation: [
       { who: "caller", text: "Er komt water door mijn keukenplafond, vanuit de flat erboven." },
       { who: "agent",  text: "Dat klinkt vervelend — laten we dat meteen oppakken. Komt het water nog steeds naar binnen, en zit dit in de buurt van lichtpunten of elektra?" },
@@ -190,6 +206,14 @@ CLOSING: confirm whether it's been escalated now or logged for the morning, then
     perks: PERKS,
     personas: PERSONAS,
     defaultAgentName: "Emma",
+    setupOptions: [
+      "Afspraken maken en wijzigen",
+      "Spoedgevallen",
+      "Openingstijden en route",
+      "Medicatie en recepten",
+      "Uitslagen en terugbelverzoeken",
+      "Behandelingen en algemene informatie"
+    ],
     sampleConversation: [
       { who: "caller", text: "Mijn hond loopt sinds vanochtend mank." },
       { who: "agent",  text: "Wat vervelend om te horen. Ik stel u een paar korte vragen zodat de praktijk weet wat er aan de hand is. Hoe heet uw hond?" },
@@ -254,6 +278,14 @@ CLOSING: confirm what happens next, thank them warmly, and end.${DUTCH_LANGUAGE_
     perks: PERKS,
     personas: PERSONAS,
     defaultAgentName: "Olivia",
+    setupOptions: [
+      "Afspraken maken en wijzigen",
+      "Spoed en triage",
+      "Recepten en herhaalrecepten",
+      "Openingstijden en route",
+      "Patiëntvragen en inschrijving",
+      "Verzekering en tarieven"
+    ],
     sampleConversation: [
       { who: "caller", text: "Ik heb een tand eruit geslagen en hij bloedt." },
       { who: "agent",  text: "Wat vervelend, dat klinkt pijnlijk. Om u snel de juiste hulp te bieden — is dit in het afgelopen uur gebeurd, en bloedt het hevig?" },
@@ -319,6 +351,14 @@ CLOSING: confirm whether it's booked, escalated, or a callback, then end warmly.
     perks: PERKS,
     personas: PERSONAS,
     defaultAgentName: "Jordan",
+    setupOptions: [
+      "Storingen oplossen",
+      "Wachtwoorden en toegang",
+      "Tickets aanmaken en opvolgen",
+      "Storingsmeldingen",
+      "Zelfservice en prioriteit",
+      "Doorverbinden met een engineer"
+    ],
     sampleConversation: [
       { who: "caller", text: "Ik kom niet in mijn e-mail, er staat steeds dat mijn wachtwoord onjuist is." },
       { who: "agent",  text: "Laten we u er weer in krijgen. Heeft u de zelfservice-resetlink al geprobeerd, of loop ik het nu met u door?" },
@@ -387,6 +427,14 @@ CLOSING: confirm whether it's resolved, ticketed, or escalated, give the ticket 
     perks: PERKS,
     personas: PERSONAS,
     defaultAgentName: "Riley",
+    setupOptions: [
+      "Storingen melden en controleren",
+      "Meterstanden en vragen",
+      "Facturatie",
+      "Aansluiting aan- en afmelden",
+      "Veiligheid en spoed",
+      "Doorverbinden met de storingslijn"
+    ],
     sampleConversation: [
       { who: "caller", text: "Mijn stroom is al zo'n uur uitgevallen en bij de buren ook." },
       { who: "agent",  text: "Bedankt dat u dit meldt. Eerst een korte veiligheidscheck — is er bij u thuis op dit moment iemand afhankelijk van elektrische medische apparatuur?" },
@@ -457,6 +505,14 @@ CLOSING: confirm whether it's escalated as a safety issue or logged, then end.${
     perks: PERKS,
     personas: PERSONAS,
     defaultAgentName: "Charlie",
+    setupOptions: [
+      "Boekingen en beschikbaarheid",
+      "Kamerproblemen en onderhoud",
+      "In- en uitchecken",
+      "Lokale informatie en route",
+      "Hotelvoorzieningen en verzoeken",
+      "Urgente zaken en doorverbinden"
+    ],
     sampleConversation: [
       { who: "caller", text: "Hallo, de verwarming op kamer 12 doet het niet en het is ijskoud." },
       { who: "agent",  text: "Wat vervelend — laten we zorgen dat u het warm krijgt. Wilt u dat er nu iemand langskomt, of alvast een extra kacheltje?" },
@@ -521,6 +577,14 @@ CLOSING: confirm what you've arranged or escalated, then wish them a good stay.$
     perks: PERKS,
     personas: PERSONAS,
     defaultAgentName: "Robin",
+    setupOptions: [
+      "Veelgestelde vragen",
+      "Bestellingen en status",
+      "Zelfservice",
+      "Terugbelverzoeken",
+      "Piekdrukke en prioriteit",
+      "Doorverbinden met een medewerker"
+    ],
     sampleConversation: [
       { who: "caller", text: "Ik wil graag weten waar mijn bestelling blijft." },
       { who: "agent",  text: "Daar kan ik u mee helpen. Heeft u uw bestelnummer bij de hand, of het e-mailadres dat u heeft gebruikt?" },
