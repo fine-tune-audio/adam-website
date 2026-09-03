@@ -50,7 +50,7 @@ export const INDUSTRIES = {
   trades: {
     id: "trades",
     label: "Vakmensen & Huisservice",
-    emoji: "🔧",
+    emoji: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M7 10h3v-3l-3.5 -3.5a6 6 0 0 1 8 8l6 6a2 2 0 0 1 -3 3l-6 -6a6 6 0 0 1 -8 -8l3.5 3.5"/></svg>',
     eyebrow: "AI-telefoonassistent voor vakmensen & huisservice",
     headline: "Laat uw storingsdienst niet meer wakker bellen voor een doorgeslagen stop.",
     subheadline: "Een AI-assistent beantwoordt elk gesprek, onderscheidt een echte noodsituatie van werk dat kan wachten, en stuurt uw team hoe dan ook een heldere samenvatting.",
@@ -116,7 +116,7 @@ CLOSING: confirm what happens next (someone will call back, or an engineer is on
   property: {
     id: "property",
     label: "Vastgoedbeheer & Woningcorporaties",
-    emoji: "🏢",
+    emoji: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M5 12l-2 0l9 -9l9 9l-2 0"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7"/><path d="M10 12h4v4h-4l0 -4"/></svg>',
     eyebrow: "AI-telefoonassistent voor vastgoedbeheer",
     headline: "Huurders voeren om 3 uur 's nachts een echt gesprek. Uw team leest de e-mail om 9 uur.",
     subheadline: "Een AI-assistent neemt dag en nacht onderhoudsmeldingen aan, handelt echte noodgevallen af en legt de rest vast voor de volgende ochtend.",
@@ -246,7 +246,7 @@ CLOSING: confirm what happens next, thank them warmly, and end.${DUTCH_LANGUAGE_
   clinic: {
     id: "clinic",
     label: "Tandarts- & Huisartsenpraktijken",
-    emoji: "🩺",
+    emoji: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 5.5c-1.074 -.586 -2.583 -1.5 -4 -1.5c-2.1 0 -4 1.247 -4 5c0 4.899 1.056 8.41 2.671 10.537c.573 .756 1.97 .521 2.567 -.236c.398 -.505 .819 -1.439 1.262 -2.801c.292 -.771 .892 -1.504 1.5 -1.5c.602 0 1.21 .737 1.5 1.5c.443 1.362 .864 2.295 1.262 2.8c.597 .759 2 .993 2.567 .237c1.615 -2.127 2.671 -5.637 2.671 -10.537c0 -3.74 -1.908 -5 -4 -5c-1.423 0 -2.92 .911 -4 1.5"/><path d="M12 5.5l3 1.5"/></svg>',
     eyebrow: "AI-telefoonassistent voor tandarts- & huisartsenpraktijken",
     headline: "Spoedgevallen bereiken direct een zorgverlener. Reguliere afspraken worden ingepland — zonder de balie te bezetten.",
     subheadline: "Een AI-assistent regelt afspraken, triage buiten kantooruren en standaardvragen, zodat de balie niet de hele ochtend aan de telefoon zit.",
@@ -311,7 +311,7 @@ CLOSING: confirm whether it's booked, escalated, or a callback, then end warmly.
   msp: {
     id: "msp",
     label: "IT-Dienstverleners",
-    emoji: "💻",
+    emoji: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 5a1 1 0 0 1 1 -1h16a1 1 0 0 1 1 1v10a1 1 0 0 1 -1 1h-16a1 1 0 0 1 -1 -1v-10"/><path d="M7 20h10"/><path d="M9 16v4"/><path d="M15 16v4"/></svg>',
     eyebrow: "AI-telefoonassistent voor IT-dienstverleners",
     headline: "Eerstelijns helpdesk die de eenvoudige meldingen oplost en de rest escaleert.",
     subheadline: "Een AI-assistent beantwoordt helpdeskgesprekken, begeleidt gebruikers bij voor de hand liggende oplossingen en maakt een compleet ticket aan met alles wat uw engineers nodig hebben.",
@@ -379,7 +379,7 @@ CLOSING: confirm whether it's resolved, ticketed, or escalated, give the ticket 
   utilities: {
     id: "utilities",
     label: "Nutsbedrijven & Energie",
-    emoji: "⚡",
+    emoji: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M13 3l0 7l6 0l-8 11l0 -7l-6 0l8 -11"/></svg>',
     eyebrow: "AI-telefoonassistent voor nutsbedrijven & energie",
     headline: "Direct opgenomen, elke dag van het jaar.",
     subheadline: "Een AI-assistent neemt storingsmeldingen en meterstandvragen aan bij elk volume, signaleert veiligheidsproblemen direct en legt de rest vast voor uw team.",
@@ -449,7 +449,7 @@ CLOSING: confirm whether it's escalated as a safety issue or logged, then end.${
   hospitality: {
     id: "hospitality",
     label: "Hotels & Verblijfsaccommodaties",
-    emoji: "🏨",
+    emoji: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 21l18 0"/><path d="M5 21v-14l8 -4v18"/><path d="M19 21v-10l-6 -4"/><path d="M9 9l0 .01"/><path d="M9 12l0 .01"/><path d="M9 15l0 .01"/><path d="M9 18l0 .01"/></svg>',
     eyebrow: "AI-telefoonassistent voor hotels & verblijfsaccommodaties",
     headline: "Een receptie die 24/7 bereikbaar is, voor minder dan de kosten van één dienst.",
     subheadline: "Een AI-assistent behandelt gastgesprekken dag en nacht — verzoeken, vragen en het incidentele probleem om 2 uur 's nachts — en levert uw team een overzichtelijk logboek.",
@@ -513,7 +513,7 @@ CLOSING: confirm what you've arranged or escalated, then wish them a good stay.$
   contactcentre: {
     id: "contactcentre",
     label: "Klantcontactcentra (Tier-0)",
-    emoji: "🎧",
+    emoji: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 14v-3a8 8 0 1 1 16 0v3"/><path d="M18 19c0 1.657 -2.686 3 -6 3"/><path d="M4 14a2 2 0 0 1 2 -2h1a2 2 0 0 1 2 2v3a2 2 0 0 1 -2 2h-1a2 2 0 0 1 -2 -2v-3"/><path d="M15 14a2 2 0 0 1 2 -2h1a2 2 0 0 1 2 2v3a2 2 0 0 1 -2 2h-1a2 2 0 0 1 -2 -2v-3"/></svg>',
     eyebrow: "AI Tier-0-assistent voor klantcontactcentra",
     headline: "Vang 30–60% van de gesprekken op voordat ze in de wachtrij komen.",
     subheadline: "Een AI-assistent neemt als eerste op, handelt routinevragen af en verbindt alleen door wat écht een mens nodig heeft.",
