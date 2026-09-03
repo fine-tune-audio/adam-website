@@ -62,9 +62,10 @@ ${fieldLines}
 }
 
 HARD RULES:
-- "summary" MUST be a clean 2-3 sentence paraphrase, in your own words, of what the caller wanted and what was agreed. NEVER copy or closely echo the transcript verbatim. Strip filler ("um", "yeah", "you know") and disfluencies.
+- The transcript is in Dutch. Write "summary" and every other free-text field value (reason, action, notes, etc.) in Dutch too, matching the transcript's language. Leave enum-style status fields (e.g. urgency, priority) in their defined English tokens (urgent/normal/routine/emergency/P1-P4 etc, per that field's own instruction below) — those are internal values, not prose.
+- "summary" MUST be a clean 2-3 sentence Dutch paraphrase, in your own words, of what the caller wanted and what was agreed. NEVER copy or closely echo the transcript verbatim. Strip filler ("uh", "eh", "nou") and disfluencies.
 - ${redFlagRule}
-- For any field the caller did not actually provide, return the literal string "Not specified" — do not guess, infer, or invent a plausible-sounding value.
+- For any free-text field the caller did not actually provide, return the literal string "Niet opgegeven" — do not guess, infer, or invent a plausible-sounding value.
 - Never invent names, phone numbers, addresses, room numbers, or any other identifying detail not explicitly stated.
 - Never invent a diagnosis, professional/technical assessment, or advice beyond what's appropriate for this industry.
 - Any "action"-type field describes what was arranged or logged, not advice.`;
@@ -155,13 +156,13 @@ app.post('/api/summarise', async (req, res) => {
       return res.status(200).json({ ok: false, fallback: true, error: 'Model did not return valid JSON', raw: rawText });
     }
 
-    // The model mostly follows the "Not specified" instruction, but not
+    // The model mostly follows the "Niet opgegeven" instruction, but not
     // always (e.g. an empty string instead) — normalise deterministically
     // rather than trust it every time.
     Object.keys(parsed).forEach((key) => {
       if (key === 'summary') return;
       if (parsed[key] === null || parsed[key] === undefined || parsed[key] === '') {
-        parsed[key] = 'Not specified';
+        parsed[key] = 'Niet opgegeven';
       }
     });
 
@@ -220,6 +221,10 @@ process.on('uncaughtException', (err) => {
 });
 
 const PORT = process.env.PORT || 3002;
-app.listen(PORT, () => {
-  console.log(`Vet demo server listening on http://localhost:${PORT}`);
-});
+if (!process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`Vet demo server listening on http://localhost:${PORT}`);
+  });
+}
+
+module.exports = app;

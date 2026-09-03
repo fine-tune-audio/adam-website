@@ -1,0 +1,15 @@
+# Only vet-server/server.js + industry-configs.js are actually deployed
+# (see vercel.json). Everything below is excluded from the upload — the
+# rest of this repo is a static site served separately via GitHub Pages,
+# and .env files must never leave this machine.
+.env
+**/.env
+**/.env.local
+**/node_modules
+elevenlabs-setup/
+.claude-flow/
+**/.claude-flow/
+server/
+images/
+*.html
+vet-server/leads.json

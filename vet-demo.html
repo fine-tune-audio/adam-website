@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="nl">
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
-  <title>AI Phone Agent Demo | ADAM AI Agents</title>
-  <meta name="description" content="Create a personalised AI phone assistant for your business and test it immediately."/>
+  <title>AI Telefoonassistent Demo | ADAM AI Agents</title>
+  <meta name="description" content="Maak een gepersonaliseerde AI-telefoonassistent voor uw bedrijf en test hem direct."/>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <!-- warms the DNS/TCP/TLS handshake to ElevenLabs ahead of the click, so
@@ -1657,10 +1657,10 @@
 
   <div class="nav-status">
     <div class="nav-status-dot" id="statusDot"></div>
-    <span id="statusText">Choose your industry</span>
+    <span id="statusText">Kies uw branche</span>
   </div>
 
-  <a class="nav-back" href="index.html">← Back</a>
+  <a class="nav-back" href="index.html">← Terug</a>
 </nav>
 
 <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
@@ -1670,9 +1670,9 @@
   <!-- STEP 0: industry picker -->
   <section class="step active" data-step="0">
     <div class="picker">
-      <div class="eyebrow" style="text-align:center;">AI Phone Agent Demo</div>
-      <h1 class="picker-title">Which industry are you in?</h1>
-      <p class="picker-sub">Pick your industry and we'll tailor the whole demo to it.</p>
+      <div class="eyebrow" style="text-align:center;">AI-telefoonassistent demo</div>
+      <h1 class="picker-title">In welke branche bent u actief?</h1>
+      <p class="picker-sub">Kies uw branche en wij stemmen de hele demo daarop af.</p>
       <div class="industry-grid" id="industryGrid"></div>
     </div>
   </section>
@@ -1682,15 +1682,15 @@
     <div class="hero">
       <canvas class="hero-canvas" id="heroCanvas"></canvas>
       <div class="hero-inner">
-        <div class="eyebrow" id="heroEyebrow">AI Veterinary Phone Agent</div>
-        <h1 id="heroHeadline">Spend less time on the phone. More time with animals.</h1>
-        <p class="hero-sub" id="heroSub">Create a personalised AI phone assistant for your practice and test it immediately.</p>
-        <button class="btn btn-primary" onclick="goStep(2)">Create my demo</button>
+        <div class="eyebrow" id="heroEyebrow">AI-telefoonassistent voor dierenartspraktijken</div>
+        <h1 id="heroHeadline">Besteed minder tijd aan de telefoon. Meer tijd aan de dieren.</h1>
+        <p class="hero-sub" id="heroSub">Maak een gepersonaliseerde AI-telefoonassistent voor uw praktijk en test hem direct.</p>
+        <button class="btn btn-primary" onclick="goStep(2)">Start mijn demo</button>
         <div class="perk-row" id="perkRow"></div>
 
         <div class="sample-convo" id="sampleConvo"></div>
 
-        <a href="javascript:void(0)" onclick="backToPicker()" class="change-industry-link">Not the right fit? Choose a different industry</a>
+        <a href="javascript:void(0)" onclick="backToPicker()" class="change-industry-link">Niet de juiste branche? Kies een andere branche</a>
       </div>
     </div>
   </section>
@@ -1698,30 +1698,30 @@
   <!-- STEP 2: company details -->
   <section class="step" data-step="2">
     <div class="step-inner narrow">
-      <div class="eyebrow">Step 1 of 4</div>
-      <h2 class="step-title">Tell us about your business</h2>
-      <p class="step-desc">We use this to personalise the assistant's knowledge and greeting.</p>
+      <div class="eyebrow">Stap 1 van 4</div>
+      <h2 class="step-title">Vertel ons over uw bedrijf</h2>
+      <p class="step-desc">We gebruiken dit om de kennis en begroeting van de assistent te personaliseren.</p>
 
       <div class="field">
-        <label>Company name <span class="req">*</span></label>
-        <input type="text" id="companyName" placeholder="e.g. Riverside Veterinary Clinic">
+        <label>Bedrijfsnaam <span class="req">*</span></label>
+        <input type="text" id="companyName" placeholder="bijv. Dierenkliniek Rivierzicht">
       </div>
       <div class="field">
-        <label>Company website <span class="req">*</span></label>
-        <input type="url" id="companyWebsite" placeholder="https://yourcompany.com">
+        <label>Website <span class="req">*</span></label>
+        <input type="url" id="companyWebsite" placeholder="https://uwbedrijf.nl">
       </div>
       <div class="field">
-        <label>Contact name</label>
-        <input type="text" id="contactName" placeholder="Your name">
+        <label>Naam contactpersoon</label>
+        <input type="text" id="contactName" placeholder="Uw naam">
       </div>
       <div class="field">
-        <label>Email <span class="req">*</span></label>
-        <input type="email" id="contactEmail" placeholder="you@yourcompany.com">
+        <label>E-mail <span class="req">*</span></label>
+        <input type="email" id="contactEmail" placeholder="u@uwbedrijf.nl">
       </div>
 
       <div class="step-actions">
-        <button class="btn btn-ghost" onclick="goStep(1)">Back</button>
-        <button class="btn btn-primary" id="step2Next" onclick="captureStep2();goStep(3)" disabled>Continue</button>
+        <button class="btn btn-ghost" onclick="goStep(1)">Terug</button>
+        <button class="btn btn-primary" id="step2Next" onclick="captureStep2();goStep(3)" disabled>Verder</button>
       </div>
     </div>
   </section>
@@ -1729,20 +1729,20 @@
   <!-- STEP 3: use cases -->
   <section class="step" data-step="3">
     <div class="step-inner">
-      <div class="eyebrow">Step 2 of 4</div>
-      <h2 class="step-title">What should it handle?</h2>
-      <p class="step-desc">Select every call type you'd like the assistant to take on.</p>
+      <div class="eyebrow">Stap 2 van 4</div>
+      <h2 class="step-title">Wat moet de assistent afhandelen?</h2>
+      <p class="step-desc">Selecteer elk type gesprek dat de assistent op zich mag nemen.</p>
 
       <div class="checkbox-grid" id="useCaseGrid"></div>
 
       <div class="field">
-        <label>What would you most like to take off your team's phone workload?</label>
-        <textarea id="workloadNote" placeholder="e.g. repetitive calls during peak hours"></textarea>
+        <label>Wat wilt u het liefst van de telefoonlast van uw team afhalen?</label>
+        <textarea id="workloadNote" placeholder="bijv. terugkerende telefoontjes tijdens piekuren"></textarea>
       </div>
 
       <div class="step-actions">
-        <button class="btn btn-ghost" onclick="goStep(2)">Back</button>
-        <button class="btn btn-primary" onclick="captureStep3();goStep(4)">Continue</button>
+        <button class="btn btn-ghost" onclick="goStep(2)">Terug</button>
+        <button class="btn btn-primary" onclick="captureStep3();goStep(4)">Verder</button>
       </div>
     </div>
   </section>
@@ -1750,23 +1750,23 @@
   <!-- STEP 4: personality & voice -->
   <section class="step" data-step="4">
     <div class="step-inner">
-      <div class="eyebrow">Step 3 of 4</div>
-      <h2 class="step-title">Give it a personality</h2>
-      <p class="step-desc">Choose the tone and voice your callers will hear.</p>
+      <div class="eyebrow">Stap 3 van 4</div>
+      <h2 class="step-title">Geef de assistent een persoonlijkheid</h2>
+      <p class="step-desc">Kies de toon en de stem die uw bellers te horen krijgen.</p>
 
       <div class="card-row" id="personalityCards"></div>
 
-      <div class="info-block-label" style="margin-bottom:14px;">Voice</div>
+      <div class="info-block-label" style="margin-bottom:14px;">Stem</div>
       <div class="voice-row" id="voiceCards"></div>
 
       <div class="field">
-        <label>Custom greeting (optional)</label>
-        <textarea id="customGreeting" placeholder="Good afternoon, you're speaking with the digital assistant of [Company Name]. How can I help you today?"></textarea>
+        <label>Eigen begroeting (optioneel)</label>
+        <textarea id="customGreeting" placeholder="Goedemiddag, u spreekt met de digitale assistent van [Bedrijfsnaam]. Waarmee kan ik u vandaag helpen?"></textarea>
       </div>
 
       <div class="step-actions">
-        <button class="btn btn-ghost" onclick="goStep(3)">Back</button>
-        <button class="btn btn-primary" onclick="captureStep4();startGenerating()">Generate my assistant</button>
+        <button class="btn btn-ghost" onclick="goStep(3)">Terug</button>
+        <button class="btn btn-primary" onclick="captureStep4();startGenerating()">Genereer mijn assistent</button>
       </div>
     </div>
   </section>
@@ -1775,27 +1775,27 @@
   <section class="step" data-step="5">
     <div class="generating">
       <div class="gen-orb"></div>
-      <h2 class="step-title" style="margin-bottom:32px;">Setting up your assistant...</h2>
+      <h2 class="step-title" style="margin-bottom:32px;">Uw assistent wordt ingesteld...</h2>
       <div class="checklist" id="genChecklist">
-        <div class="check-row" data-label="Reading company website">
+        <div class="check-row" data-label="Website wordt gelezen">
           <div class="check-row-dot"><svg viewBox="0 0 24 24" fill="none"><path d="M5 12l5 5L19 8" stroke="#0A0A0A" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-          <span>Reading company website</span>
+          <span>Website wordt gelezen</span>
         </div>
-        <div class="check-row" data-label="Extracting company information">
+        <div class="check-row" data-label="Bedrijfsinformatie wordt geëxtraheerd">
           <div class="check-row-dot"><svg viewBox="0 0 24 24" fill="none"><path d="M5 12l5 5L19 8" stroke="#0A0A0A" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-          <span>Extracting company information</span>
+          <span>Bedrijfsinformatie wordt geëxtraheerd</span>
         </div>
-        <div class="check-row" data-label="Configuring personality">
+        <div class="check-row" data-label="Persoonlijkheid wordt ingesteld">
           <div class="check-row-dot"><svg viewBox="0 0 24 24" fill="none"><path d="M5 12l5 5L19 8" stroke="#0A0A0A" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-          <span>Configuring personality</span>
+          <span>Persoonlijkheid wordt ingesteld</span>
         </div>
-        <div class="check-row" data-label="Setting up use cases &amp; knowledge">
+        <div class="check-row" data-label="Use cases &amp; kennis worden ingericht">
           <div class="check-row-dot"><svg viewBox="0 0 24 24" fill="none"><path d="M5 12l5 5L19 8" stroke="#0A0A0A" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-          <span>Setting up use cases &amp; knowledge</span>
+          <span>Use cases &amp; kennis worden ingericht</span>
         </div>
-        <div class="check-row" data-label="Connecting voice agent">
+        <div class="check-row" data-label="Voice agent wordt verbonden">
           <div class="check-row-dot"><svg viewBox="0 0 24 24" fill="none"><path d="M5 12l5 5L19 8" stroke="#0A0A0A" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-          <span>Connecting voice agent</span>
+          <span>Voice agent wordt verbonden</span>
         </div>
       </div>
     </div>
@@ -1806,26 +1806,26 @@
     <div class="layout">
       <div class="left-panel">
         <div class="left-header">
-          <div class="left-eyebrow">Your Assistant</div>
-          <div class="left-title" id="agentNameTitle">Business Assistant</div>
-          <div class="left-subtitle">Try a real scenario, or say anything a caller might.</div>
+          <div class="left-eyebrow">Uw assistent</div>
+          <div class="left-title" id="agentNameTitle">Bedrijfsassistent</div>
+          <div class="left-subtitle">Probeer een echt scenario, of zeg iets wat een beller zou kunnen zeggen.</div>
         </div>
 
         <div class="left-body">
           <div class="info-block">
-            <div class="info-block-label">Try a scenario</div>
+            <div class="info-block-label">Probeer een scenario</div>
             <div class="suggestion-list" id="scenarioList"></div>
           </div>
 
           <div class="info-block">
-            <div class="info-block-label">This assistant handles</div>
+            <div class="info-block-label">Deze assistent behandelt</div>
             <div class="capability-list" id="capabilityList"></div>
           </div>
         </div>
 
         <div class="left-footer">
           <div class="api-notice">
-            <span>Live voice agent</span> — click the orb to start, or switch to text mode.
+            <span>Live voice agent</span> — klik op de orb om te starten, of schakel over naar tekst.
           </div>
         </div>
       </div>
@@ -1834,8 +1834,8 @@
         <canvas class="right-canvas" id="bgCanvas"></canvas>
 
         <div class="mode-toggle">
-          <button class="mode-btn active" id="voiceModeBtn" onclick="setMode('voice')">Voice</button>
-          <button class="mode-btn" id="textModeBtn" onclick="setMode('text')">Text</button>
+          <button class="mode-btn active" id="voiceModeBtn" onclick="setMode('voice')">Spraak</button>
+          <button class="mode-btn" id="textModeBtn" onclick="setMode('text')">Tekst</button>
         </div>
 
         <div class="calm-notice" id="calmNotice" style="display:none;"></div>
@@ -1865,7 +1865,7 @@
           <div class="orb-status" id="voiceStatus">
             <div class="orb-status-badge">
               <div class="orb-status-dot"></div>
-              <span id="badgeText">Click the orb to start</span>
+              <span id="badgeText">Klik op de orb om te starten</span>
             </div>
           </div>
 
@@ -1876,15 +1876,15 @@
             <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
           </div>
 
-          <div class="orb-label" id="orbLabel">Click to start</div>
+          <div class="orb-label" id="orbLabel">Klik om te starten</div>
           <div class="scenario-hint" id="scenarioHint"></div>
         </div>
 
         <div class="chat-wrap" id="chatUI">
           <div class="chat-messages" id="chatMessages"></div>
           <div class="chat-input-row">
-            <input type="text" id="chatInput" placeholder="Type a message..." onkeydown="if(event.key==='Enter')sendChat()">
-            <button onclick="sendChat()" aria-label="Send">
+            <input type="text" id="chatInput" placeholder="Typ een bericht..." onkeydown="if(event.key==='Enter')sendChat()">
+            <button onclick="sendChat()" aria-label="Versturen">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 12L20 4L13 20L11 13L4 12Z" fill="#0A0A0A"/></svg>
             </button>
           </div>
@@ -1892,42 +1892,42 @@
 
         <div class="transcript-area" id="voiceTranscriptArea">
           <div class="transcript-bubble visible" id="transcriptBubble">
-            <div class="transcript-role agent-role" id="transcriptRole">Agent</div>
-            <div class="transcript-text" id="transcriptText">Click the orb or pick a scenario on the left to try the assistant.</div>
+            <div class="transcript-role agent-role" id="transcriptRole">Assistent</div>
+            <div class="transcript-text" id="transcriptText">Klik op de orb of kies links een scenario om de assistent te proberen.</div>
           </div>
         </div>
       </div>
     </div>
 
     <div style="text-align:center;padding:28px 24px 48px;">
-      <button class="btn btn-primary" onclick="finishCall()">See call outcome →</button>
+      <button class="btn btn-primary" onclick="finishCall()">Bekijk het gespreksresultaat →</button>
     </div>
   </section>
 
   <!-- STEP 7: result -->
   <section class="step" data-step="7">
     <div class="step-inner">
-      <div class="eyebrow">Call complete</div>
-      <h2 class="step-title">Here's what your assistant captured</h2>
+      <div class="eyebrow">Gesprek afgerond</div>
+      <h2 class="step-title">Dit heeft uw assistent vastgelegd</h2>
 
       <div class="result-card" id="resultCard"></div>
 
       <div class="email-card" id="emailCard">
         <div class="email-meta">
-          To: <b id="emailTo">you@example.com</b><br>
-          Subject: <b id="emailSubject">Call summary</b>
+          Aan: <b id="emailTo">u@voorbeeld.nl</b><br>
+          Onderwerp: <b id="emailSubject">Gespreksoverzicht</b>
         </div>
         <div class="email-body" id="emailBody">—</div>
         <div class="email-actions">
-          <button class="btn btn-primary btn-small" id="approveBtn" onclick="approveSend()">Approve &amp; send</button>
-          <button class="btn btn-ghost btn-small">Edit</button>
+          <button class="btn btn-primary btn-small" id="approveBtn" onclick="approveSend()">Goedkeuren &amp; versturen</button>
+          <button class="btn btn-ghost btn-small">Bewerken</button>
           <span class="pill" id="sendStatus" style="display:none;"></span>
         </div>
       </div>
 
       <div class="conversion-box">
-        <p>Your team would not have needed to answer this call themselves.</p>
-        <button class="btn btn-primary btn-small" onclick="goStep(8)">See how many hours this saves →</button>
+        <p>Uw team had dit gesprek niet zelf hoeven beantwoorden.</p>
+        <button class="btn btn-primary btn-small" onclick="goStep(8)">Bekijk hoeveel uren dit bespaart →</button>
       </div>
     </div>
   </section>
@@ -1935,18 +1935,18 @@
   <!-- STEP 8: lead qualification -->
   <section class="step" data-step="8">
     <div class="step-inner narrow">
-      <div class="eyebrow">Almost there</div>
-      <h2 class="step-title">Help us size this for your business</h2>
+      <div class="eyebrow">Bijna klaar</div>
+      <h2 class="step-title">Help ons dit voor uw bedrijf in te schatten</h2>
 
-      <div class="info-block-label" style="margin-bottom:14px;">How many calls do you get per day?</div>
+      <div class="info-block-label" style="margin-bottom:14px;">Hoeveel telefoontjes krijgt u per dag?</div>
       <div class="radio-list" id="callsRadioList"></div>
 
-      <div class="info-block-label" style="margin-bottom:14px;">What does your team struggle with most?</div>
+      <div class="info-block-label" style="margin-bottom:14px;">Waar heeft uw team het meeste last van?</div>
       <div class="chip-grid" id="struggleChips"></div>
 
       <div class="step-actions">
-        <button class="btn btn-ghost" onclick="goStep(7)">Back</button>
-        <button class="btn btn-primary" onclick="captureStep8();goStep(9)">Book a call with our team</button>
+        <button class="btn btn-ghost" onclick="goStep(7)">Terug</button>
+        <button class="btn btn-primary" onclick="captureStep8();goStep(9)">Plan een gesprek met ons team</button>
       </div>
     </div>
   </section>
@@ -1955,10 +1955,10 @@
   <section class="step" data-step="9">
     <div class="thanks">
       <div class="thanks-orb"></div>
-      <h1 id="thanksHeadline">Thank you.</h1>
-      <p>We'll reach out shortly to walk through your custom AI phone assistant and get it live for your business.</p>
+      <h1 id="thanksHeadline">Bedankt.</h1>
+      <p>We nemen binnenkort contact met u op om uw eigen AI-telefoonassistent door te nemen en live te zetten voor uw bedrijf.</p>
       <div class="step-actions" style="margin-top:32px;">
-        <button class="btn btn-ghost" onclick="resetDemo()">Start over</button>
+        <button class="btn btn-ghost" onclick="resetDemo()">Opnieuw beginnen</button>
       </div>
     </div>
   </section>
@@ -1967,7 +1967,7 @@
 
 <script>
   const TOTAL_STEPS = 9;
-  const API_BASE = 'http://localhost:3002';
+  const API_BASE = 'https://adam-vet-server.vercel.app';
 
   // Real per-industry ElevenLabs agent ids (Prompt 2's create-industry-agents.js
   // output). Any industry missing here falls back to the vet agent + a console
@@ -1998,48 +1998,48 @@
   // original single-industry vet demo so the page is never blank.
   const FALLBACK_CFG = {
     id: 'vet',
-    label: 'Veterinary Clinics',
+    label: 'Dierenklinieken',
     emoji: '🐾',
-    eyebrow: 'AI Veterinary Phone Agent',
-    headline: 'Spend less time on the phone. More time with animals.',
-    subheadline: 'Create a personalised AI phone assistant for your practice and test it immediately.',
-    perks: ['Ready in ~2 minutes', 'No installation', 'Personalised', 'Test immediately'],
+    eyebrow: 'AI-telefoonassistent voor dierenartspraktijken',
+    headline: 'Besteed minder tijd aan de telefoon. Meer tijd aan de dieren.',
+    subheadline: 'Maak een gepersonaliseerde AI-telefoonassistent voor uw praktijk en test hem direct.',
+    perks: ['Klaar in ~2 minuten', 'Geen installatie', 'Gepersonaliseerd', 'Direct testen'],
     personas: [
-      { id: 'warm', icon: '🤗', title: 'Warm & reassuring', blurb: 'Calm and supportive for stressed callers' },
-      { id: 'professional', icon: '👔', title: 'Professional & clear', blurb: 'Efficient, concise and practical' },
-      { id: 'personal', icon: '😊', title: 'Personal & informal', blurb: 'Friendly, like a member of the team' }
+      { id: 'warm', icon: '🤗', title: 'Warm & geruststellend', blurb: 'Kalm en ondersteunend voor gestreste bellers' },
+      { id: 'professional', icon: '👔', title: 'Professioneel & duidelijk', blurb: 'Efficiënt, bondig en praktisch' },
+      { id: 'personal', icon: '😊', title: 'Persoonlijk & informeel', blurb: 'Vriendelijk, als een collega aan de lijn' }
     ],
     defaultAgentName: 'Emma',
     sampleConversation: [
-      { who: 'caller', text: "My dog has been limping since this morning." },
-      { who: 'agent', text: "I'm sorry to hear that. I'll ask a few quick questions so the practice knows what's going on. What is your dog's name?" }
+      { who: 'caller', text: "Mijn hond loopt sinds vanochtend mank." },
+      { who: 'agent', text: "Wat vervelend om te horen. Ik stel u een paar korte vragen zodat de praktijk weet wat er aan de hand is. Hoe heet uw hond?" }
     ],
     useCases: [
-      { emoji: '📅', label: 'Booking appointments' },
-      { emoji: '🔄', label: 'Changing or cancelling' },
-      { emoji: '🚨', label: 'Emergency calls' },
-      { emoji: '🕐', label: 'Opening hours' },
-      { emoji: '💊', label: 'Medication & repeat prescriptions' },
-      { emoji: '📋', label: 'Test results & callbacks' }
+      { emoji: '📅', label: 'Afspraken inplannen' },
+      { emoji: '🔄', label: 'Wijzigen of annuleren' },
+      { emoji: '🚨', label: 'Spoedgevallen' },
+      { emoji: '🕐', label: 'Openingstijden' },
+      { emoji: '💊', label: 'Medicatie & herhaalrecepten' },
+      { emoji: '📋', label: 'Testuitslagen & terugbelverzoeken' }
     ],
     scenarios: [
-      { emoji: '🐶', label: 'My dog is limping' },
-      { emoji: '🐱', label: 'Book an appointment' },
-      { emoji: '💊', label: 'I need more medication' },
-      { emoji: '🚨', label: 'Possible emergency' }
+      { emoji: '🐶', label: 'Mijn hond loopt mank' },
+      { emoji: '🐱', label: 'Een afspraak maken' },
+      { emoji: '💊', label: 'Ik heb meer medicatie nodig' },
+      { emoji: '🚨', label: 'Mogelijk spoedgeval' }
     ],
-    greeting: "Good afternoon, you're speaking with {{agent_name}}, the digital assistant of {{company_name}}. How can I help you today?",
-    redFlags: ['difficulty breathing', 'collapse or unresponsiveness', 'seizures', 'suspected poisoning', 'major trauma', 'bloated or distended abdomen', 'heavy bleeding'],
+    greeting: "Goedemiddag, u spreekt met {{agent_name}}, de digitale assistent van {{company_name}}. Waarmee kan ik u vandaag helpen?",
+    redFlags: ['ademhalingsproblemen', 'instorten of niet reageren', 'toevallen', 'vermoeden van vergiftiging', 'ernstig trauma', 'opgezette of gezwollen buik', 'hevige bloeding'],
     dataCollection: [
-      { name: 'caller_name', type: 'string', instruction: "Owner's name, or empty." },
-      { name: 'animal_name', type: 'string', instruction: "Pet's name, or empty." },
-      { name: 'animal_species', type: 'string', instruction: 'Species, or empty.' },
-      { name: 'reason', type: 'string', instruction: 'Reason for calling, one sentence.' },
-      { name: 'urgency', type: 'string', instruction: 'One of: normal | urgent.' },
-      { name: 'action', type: 'string', instruction: 'Outcome of the call.' },
-      { name: 'summary', type: 'string', instruction: '2-3 neutral sentences.' }
+      { name: 'caller_name', label: 'Naam eigenaar', type: 'string', instruction: "Owner's name, or empty." },
+      { name: 'animal_name', label: 'Naam dier', type: 'string', instruction: "Pet's name, or empty." },
+      { name: 'animal_species', label: 'Diersoort', type: 'string', instruction: 'Species, or empty.' },
+      { name: 'reason', label: 'Reden', type: 'string', instruction: 'Reason for calling, one sentence.' },
+      { name: 'urgency', label: 'Urgentie', type: 'string', instruction: 'One of: normal | urgent.' },
+      { name: 'action', label: 'Actie', type: 'string', instruction: 'Outcome of the call.' },
+      { name: 'summary', label: 'Samenvatting', type: 'string', instruction: '2-3 neutral sentences.' }
     ],
-    emailSubject: 'Call summary — {{animal_name}} ({{reason}})'
+    emailSubject: 'Gespreksoverzicht — {{animal_name}} ({{reason}})'
   };
 
   let cfg = null;
@@ -2098,7 +2098,7 @@
   };
 
   const CALLS_PER_DAY = ['<25','25–50','50–100','100–200','200+'];
-  const STRUGGLES = ['Missed calls', 'Long hold times', 'Repetitive questions', 'After-hours coverage', 'Staff burnout', 'No-shows'];
+  const STRUGGLES = ['Gemiste telefoontjes', 'Lange wachttijden', 'Terugkerende vragen', 'Bereikbaarheid buiten kantooruren', 'Overbelast personeel', 'No-shows'];
 
   const checkSvg = '<svg viewBox="0 0 24 24" fill="none"><path d="M5 12l5 5L19 8" stroke="#0A0A0A" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
@@ -2114,7 +2114,7 @@
     const voiceBtn = document.getElementById('voiceModeBtn');
     if (voiceBtn){
       voiceBtn.disabled = true;
-      voiceBtn.title = 'Voice mode unavailable right now';
+      voiceBtn.title = 'Spraakmodus is nu niet beschikbaar';
     }
   }
 
@@ -2138,7 +2138,7 @@
     document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
     document.querySelector('.step[data-step="' + n + '"]').classList.add('active');
     document.getElementById('progressFill').style.width = (n / TOTAL_STEPS * 100) + '%';
-    document.getElementById('statusText').textContent = 'Step ' + n + ' of ' + TOTAL_STEPS;
+    document.getElementById('statusText').textContent = 'Stap ' + n + ' van ' + TOTAL_STEPS;
     window.scrollTo(0, 0);
   }
 
@@ -2192,7 +2192,7 @@
   }
 
   function activateIndustry(){
-    document.title = cfg.label + ' — AI Phone Agent Demo | ADAM AI Agents';
+    document.title = cfg.label + ' — AI-telefoonassistent demo | ADAM AI Agents';
 
     renderHero();
     renderUseCaseGrid();
@@ -2229,7 +2229,7 @@
       bubble.className = 'convo-bubble ' + (turn.who === 'agent' ? 'agent' : 'caller');
       const role = document.createElement('div');
       role.className = 'convo-role';
-      role.textContent = turn.who === 'agent' ? 'Agent' : 'Caller';
+      role.textContent = turn.who === 'agent' ? 'Assistent' : 'Beller';
       bubble.appendChild(role);
       bubble.appendChild(document.createTextNode(turn.text));
       convo.appendChild(bubble);
@@ -2275,7 +2275,7 @@
       const el = document.createElement('div');
       el.className = 'pick-card' + (v === demoState.voice ? ' selected' : '');
       el.dataset.id = v;
-      el.innerHTML = '<div class="pick-card-title">' + (v === 'female' ? 'Female' : 'Male') + '</div>';
+      el.innerHTML = '<div class="pick-card-title">' + (v === 'female' ? 'Vrouw' : 'Man') + '</div>';
       el.addEventListener('click', () => {
         wrap.querySelectorAll('.pick-card').forEach(c => c.classList.remove('selected'));
         el.classList.add('selected');
@@ -2304,7 +2304,7 @@
       row.className = 'result-row';
       const label = document.createElement('div');
       label.className = 'result-label';
-      label.textContent = humanizeFieldName(field.name);
+      label.textContent = field.label || humanizeFieldName(field.name);
       const value = document.createElement('div');
       value.className = 'result-value';
       value.id = 'res_' + field.name;
@@ -2366,8 +2366,7 @@
 
   // ---------- step 6 ----------
   function populateStep6(){
-    const name = demoState.companyName || (cfg.label + ' Assistant').replace(' Assistant Assistant', ' Assistant');
-    document.getElementById('agentNameTitle').textContent = demoState.companyName ? (demoState.companyName + ' Assistant') : (cfg.label + ' Assistant');
+    document.getElementById('agentNameTitle').textContent = demoState.companyName ? (demoState.companyName + ' Assistent') : (cfg.label + ' Assistent');
 
     const list = document.getElementById('capabilityList');
     list.innerHTML = '';
@@ -2449,7 +2448,7 @@
     } catch (err) {
       console.error('sendUserMessage failed:', err);
       hideTyping();
-      appendChatBubble('agent', "Sorry, that message didn't go through. Please try again.");
+      appendChatBubble('agent', "Sorry, dat bericht is niet verzonden. Probeer het opnieuw.");
     }
   }
 
@@ -2457,14 +2456,14 @@
     const s = (cfg.scenarios || [])[index];
     if (!s) return;
     const hint = document.getElementById('scenarioHint');
-    hint.innerHTML = 'Try saying: <span>"' + s.label + '"</span>';
+    hint.innerHTML = 'Zeg bijvoorbeeld: <span>"' + s.label + '"</span>';
   }
 
   function updateTranscript(role, text){
     const transcriptRole = document.getElementById('transcriptRole');
     const transcriptText = document.getElementById('transcriptText');
     const transcriptBubble = document.getElementById('transcriptBubble');
-    transcriptRole.textContent = role === 'user' ? 'Caller' : 'Agent';
+    transcriptRole.textContent = role === 'user' ? 'Beller' : 'Assistent';
     transcriptRole.className = role === 'user' ? 'transcript-role' : 'transcript-role agent-role';
     transcriptText.textContent = text;
     transcriptBubble.classList.add('visible');
@@ -2475,7 +2474,7 @@
   CALLS_PER_DAY.forEach(v => {
     const el = document.createElement('label');
     el.className = 'radio-item';
-    el.innerHTML = '<input type="radio" name="callsPerDay"><div class="radio-dot"></div><span>' + v + ' calls / day</span>';
+    el.innerHTML = '<input type="radio" name="callsPerDay"><div class="radio-dot"></div><span>' + v + ' gesprekken per dag</span>';
     el.addEventListener('click', (e) => {
       e.preventDefault();
       callsRadioList.querySelectorAll('.radio-item').forEach(r => r.classList.remove('selected'));
@@ -2498,7 +2497,7 @@
     demoState.callsPerDay = selCalls ? selCalls.textContent : '';
     demoState.struggles = Array.from(struggleChips.querySelectorAll('.chip-select.selected')).map(el => el.textContent);
     const headline = document.getElementById('thanksHeadline');
-    headline.textContent = demoState.companyName ? 'Thank you, ' + demoState.companyName + '.' : 'Thank you.';
+    headline.textContent = demoState.companyName ? 'Bedankt, ' + demoState.companyName + '.' : 'Bedankt.';
 
     fetch(API_BASE + '/api/lead', {
       method: 'POST',
@@ -2694,7 +2693,7 @@
   const badgeText = document.getElementById('badgeText');
 
   function getAgentName(){
-    return cfg.defaultAgentName || 'Assistant';
+    return cfg.defaultAgentName || 'Assistent';
   }
 
   function greetingVars(){
@@ -2714,12 +2713,12 @@
 
   function handleMicUnavailable(){
     setMode('text');
-    showCalmNotice('Microphone unavailable — you can type instead.');
+    showCalmNotice('Microfoon niet beschikbaar — u kunt ook typen.');
   }
 
   function handleVoiceSessionFailure(){
     setMode('text');
-    showCalmNotice("Voice isn't available right now — you can type instead.");
+    showCalmNotice("Spraak is nu niet beschikbaar — u kunt ook typen.");
   }
 
   async function startConversation(){
@@ -2753,8 +2752,8 @@
 
     try {
       document.getElementById('scenarioHint').textContent = '';
-      orbLabel.textContent = 'Connecting...';
-      badgeText.textContent = 'Connecting...';
+      orbLabel.textContent = 'Verbinden...';
+      badgeText.textContent = 'Verbinden...';
 
       const agentName = getAgentName();
       const clickTime = performance.now();
@@ -2782,21 +2781,21 @@
           console.log('Voice connect time: ' + Math.round(performance.now() - clickTime) + 'ms');
           isTransitioning = false;
           statusDot.className = 'nav-status-dot ready';
-          orbLabel.textContent = 'Listening...';
+          orbLabel.textContent = 'Aan het luisteren...';
           orbLabel.className = 'orb-label active-label';
-          badgeText.textContent = 'Click again to stop';
+          badgeText.textContent = 'Klik nogmaals om te stoppen';
         },
 
         onDisconnect: () => {
           conversation = null;
           isTransitioning = false;
           statusDot.className = 'nav-status-dot';
-          orbLabel.textContent = 'Click to start';
+          orbLabel.textContent = 'Klik om te starten';
           orbLabel.className = 'orb-label';
           waveform.classList.remove('visible');
           orb.classList.remove('speaking');
           document.querySelectorAll('.wave-bar').forEach(b => b.classList.remove('speaking'));
-          badgeText.textContent = 'Click the orb to start';
+          badgeText.textContent = 'Klik op de orb om te starten';
         },
 
         onModeChange: (mode) => {
@@ -2804,12 +2803,12 @@
             waveform.classList.add('visible');
             document.querySelectorAll('.wave-bar').forEach(b => b.classList.add('speaking'));
             orb.classList.add('speaking');
-            orbLabel.textContent = agentName + ' is speaking...';
+            orbLabel.textContent = agentName + ' spreekt...';
           } else {
             waveform.classList.remove('visible');
             document.querySelectorAll('.wave-bar').forEach(b => b.classList.remove('speaking'));
             orb.classList.remove('speaking');
-            orbLabel.textContent = 'Listening...';
+            orbLabel.textContent = 'Aan het luisteren...';
           }
         },
 
@@ -2817,9 +2816,9 @@
 
         onError: (error) => {
           console.error('Agent error:', error);
-          orbLabel.textContent = 'Click to start';
+          orbLabel.textContent = 'Klik om te starten';
           orbLabel.className = 'orb-label';
-          badgeText.textContent = 'Click the orb to start';
+          badgeText.textContent = 'Klik op de orb om te starten';
           conversation = null;
           isTransitioning = false;
           handleVoiceSessionFailure();
@@ -2828,9 +2827,9 @@
 
     } catch (err) {
       console.error('Start error:', err);
-      orbLabel.textContent = 'Click to start';
+      orbLabel.textContent = 'Klik om te starten';
       orbLabel.className = 'orb-label';
-      badgeText.textContent = 'Click the orb to start';
+      badgeText.textContent = 'Klik op de orb om te starten';
       conversation = null;
       isTransitioning = false;
       handleVoiceSessionFailure();
@@ -2900,13 +2899,13 @@
   // Never wipes a transcript that already has real caller turns in it.
   function playScriptedConversation(){
     if (transcript.length){
-      showCalmNotice("Connection lost — you can keep going, we've kept what was said so far.");
+      showCalmNotice("Verbinding verbroken — u kunt doorgaan, we hebben bewaard wat er al is gezegd.");
       return;
     }
     clearScriptedTimers();
     const messages = document.getElementById('chatMessages');
     if (messages) messages.innerHTML = '';
-    showCalmNotice('Live connection unavailable — playing a sample conversation.');
+    showCalmNotice('Live verbinding niet beschikbaar — een voorbeeldgesprek wordt afgespeeld.');
 
     const script = (cfg.sampleConversation || []).map(t => ({ role: t.who === 'agent' ? 'agent' : 'user', text: t.text }));
     if (!script.length) return;
@@ -3128,6 +3127,21 @@
     return v === 'urgent' || v === 'emergency' || v === 'p1';
   }
 
+  // The model (and the local fallback) is instructed in English and returns
+  // English enum tokens for status-like fields (urgent/normal/routine/P1…) —
+  // that's an internal contract, kept simple on purpose. This maps those
+  // tokens to Dutch for display only; the English value still drives
+  // isElevatedStatus()'s colour logic above.
+  const STATUS_LABELS_NL = {
+    urgent: 'Dringend', emergency: 'Noodgeval', normal: 'Normaal', routine: 'Routine'
+  };
+
+  function localizeStatusValue(value){
+    if (!value) return value;
+    const mapped = STATUS_LABELS_NL[String(value).toLowerCase()];
+    return mapped || value; // P1-P4 etc pass through unchanged
+  }
+
   function populateResultFromSummary(r){
     (cfg.dataCollection || []).forEach(field => {
       const el = document.getElementById('res_' + field.name);
@@ -3136,22 +3150,22 @@
 
       const elevated = isElevatedStatus(field.name, value);
       if (elevated !== null){
-        el.textContent = value || (elevated ? 'Urgent' : 'Normal');
-        el.className = 'result-value';
+        const displayValue = localizeStatusValue(value) || (elevated ? 'Dringend' : 'Normaal');
         const pill = document.createElement('span');
         pill.className = elevated ? 'pill urgent' : 'pill normal';
-        pill.textContent = value || (elevated ? 'Urgent' : 'Normal');
+        pill.textContent = displayValue;
         el.textContent = '';
+        el.className = 'result-value';
         el.appendChild(pill);
       } else {
-        el.textContent = value || 'Not specified';
+        el.textContent = value || 'Niet opgegeven';
       }
     });
 
     const emailVars = Object.assign({}, r);
-    document.getElementById('emailTo').textContent = demoState.contactEmail || 'you@example.com';
+    document.getElementById('emailTo').textContent = demoState.contactEmail || 'u@voorbeeld.nl';
     const renderedSubject = substituteVars(cfg.emailSubject, emailVars).replace(/\s+/g, ' ').trim();
-    document.getElementById('emailSubject').textContent = renderedSubject || ((demoState.companyName || cfg.label) + ' — new call summary');
+    document.getElementById('emailSubject').textContent = renderedSubject || ((demoState.companyName || cfg.label) + ' — nieuw gespreksoverzicht');
     document.getElementById('emailBody').textContent = r.email_body || r.summary || '—';
   }
 
@@ -3170,7 +3184,7 @@
   // for a vulnerable person in cold weather") — callers never say the phrase
   // verbatim, so matching it as one literal substring almost never fires.
   // Instead, pull out its meaningful words and match on any one of them.
-  const KEYWORD_STOPWORDS = new Set(['and','the','a','an','of','or','in','on','at','to','for','with','near','is','are','someone','anyone','without','from','into','their','your','any','signs','sounding','affecting','genuine','major','severe','suspected']);
+  const KEYWORD_STOPWORDS = new Set(['en','de','het','een','van','of','in','op','bij','voor','met','naar','die','dat','iemand','zonder','hun','uw','tekenen','ernstige','vermoeden','grote']);
 
   function phraseKeywords(phrase){
     return String(phrase)
@@ -3186,34 +3200,34 @@
       const lower = allText.toLowerCase();
 
       const callerName = extractFirstMatch([
-        /my name is ([a-z]+)/i,
-        /this is ([a-z]+) calling/i,
-        /it'?s ([a-z]+) here/i,
-        /i'?m ([a-z]+)(?:,| calling| speaking|$)/i
+        /mijn naam is ([a-zà-ÿ]+)/i,
+        /ik ben ([a-zà-ÿ]+)(?:,| hier| aan de lijn|$)/i,
+        /met ([a-zà-ÿ]+) (?:hier|aan de lijn)/i,
+        /dit is ([a-zà-ÿ]+)/i
       ], userText);
 
       const redFlags = cfg.redFlags || [];
       const urgent = redFlags.some(flag => phraseKeywords(flag).some(word => lower.includes(word)));
 
       const firstUserLine = callTranscript.find(t => t.role === 'user');
-      const reason = firstUserLine ? firstUserLine.text : 'General enquiry';
+      const reason = firstUserLine ? firstUserLine.text : 'Algemene vraag';
 
       const summary = callTranscript
         .filter(t => t.role === 'user')
         .slice(0, 2)
         .map(t => t.text)
-        .join(' ') || 'Caller reached out with a general enquiry.';
+        .join(' ') || 'Beller nam contact op met een algemene vraag.';
 
       const action = urgent
-        ? 'Flagged as urgent for the team to follow up immediately.'
-        : 'Logged the enquiry for the team to follow up.';
+        ? 'Gemarkeerd als dringend — team volgt dit direct op.'
+        : 'Vraag vastgelegd voor opvolging door het team.';
 
       const companyLabel = demoState.companyName || cfg.label;
-      const transcriptText = callTranscript.map(t => (t.role === 'user' ? 'Caller' : 'Agent') + ': ' + t.text).join('\n');
+      const transcriptText = callTranscript.map(t => (t.role === 'user' ? 'Beller' : 'Assistent') + ': ' + t.text).join('\n');
       const emailBody =
-        'Hi team,\n\nThe AI assistant just handled a call' +
-        (callerName ? ' from ' + callerName : '') + '.\n\n' +
-        transcriptText + '\n\n— Sent by your AI phone assistant for ' + companyLabel;
+        'Hoi team,\n\nDe AI-assistent heeft zojuist een gesprek afgehandeld' +
+        (callerName ? ' met ' + callerName : '') + '.\n\n' +
+        transcriptText + '\n\n— Verstuurd door uw AI-telefoonassistent namens ' + companyLabel;
 
       const result = {
         caller_name: callerName,
@@ -3238,10 +3252,10 @@
     } catch (err) {
       console.error('Local summariser failed, using static placeholder:', err && err.message);
       return {
-        reason: 'See transcript',
-        summary: 'Caller reached out with a general enquiry.',
-        action: 'Logged for your team.',
-        email_body: 'Hi team,\n\nThe AI assistant just handled a call. Details are in the transcript.\n\n— Sent by your AI phone assistant'
+        reason: 'Zie transcript',
+        summary: 'Beller nam contact op met een algemene vraag.',
+        action: 'Vastgelegd voor uw team.',
+        email_body: 'Hoi team,\n\nDe AI-assistent heeft zojuist een gesprek afgehandeld. Details staan in het transcript.\n\n— Verstuurd door uw AI-telefoonassistent'
       };
     }
   }
@@ -3249,7 +3263,7 @@
   function approveSend(){
     const status = document.getElementById('sendStatus');
     const btn = document.getElementById('approveBtn');
-    status.textContent = 'Sent';
+    status.textContent = 'Verstuurd';
     status.className = 'pill normal';
     status.style.display = 'inline-flex';
     btn.disabled = true;
