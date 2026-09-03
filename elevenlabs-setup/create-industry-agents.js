@@ -38,8 +38,9 @@ const ALLOWLIST = [
   { hostname: 'localhost:5173' },
   { hostname: '127.0.0.1:5500' },
   { hostname: 'localhost' },
-  { hostname: '127.0.0.1' }
-  // TODO: add the real deployed demo hostname here once known
+  { hostname: '127.0.0.1' },
+  { hostname: 'adamagents.nl' },
+  { hostname: 'www.adamagents.nl' }
 ];
 
 function loadMap() {
