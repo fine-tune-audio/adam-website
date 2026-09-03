@@ -2684,6 +2684,7 @@
     renderVoiceCards();
     renderScenarioList();
     buildResultRows();
+    agentVoicesPromise = loadAgentVoices();
 
     ['companyName','companyWebsite','contactEmail'].forEach(id => {
       document.getElementById(id).addEventListener('input', validateStep2);
@@ -3118,10 +3119,53 @@
     return cfg.defaultAgentName || 'Assistent';
   }
 
-  function greetingVars(){
+  // Fetched once per industry activation (vet-server/server.js's
+  // /api/agent-voices/:industry) so a voice added in the ElevenLabs
+  // dashboard's "Add additional voice" list takes effect here without a
+  // redeploy. Falls back to the hardcoded ids/name below on any failure —
+  // never blocks the demo on this call.
+  let agentVoicesPromise = null;
+
+  async function loadAgentVoices(){
+    try {
+      const res = await fetch(API_BASE + '/api/agent-voices/' + cfg.id);
+      const data = await res.json();
+      return data && data.ok ? data : null;
+    } catch (err) {
+      console.error('Failed to load agent voices:', err && err.message);
+      return null;
+    }
+  }
+
+  // Resolves the picked "Vrouw"/"Man" card to an actual {voiceId, name}.
+  // Female always keeps this industry's own configured name (cfg.defaultAgentName,
+  // e.g. "Emma") since the dashboard's primary voice has no label field to
+  // draw a name from. Male takes both the voice_id AND the spoken name from
+  // the dashboard's first additional voice — labelling that voice "Daan" in
+  // ElevenLabs is what makes the agent introduce itself as Daan.
+  function resolveVoice(voices, genderKey){
+    if (genderKey === 'male'){
+      const extra = voices && voices.additional && voices.additional[0];
+      return {
+        voiceId: (extra && extra.voiceId) || VOICE_IDS.male,
+        name: (extra && extra.label) || 'Daan'
+      };
+    }
+    return {
+      voiceId: (voices && voices.primary && voices.primary.voiceId) || VOICE_IDS.female,
+      name: cfg.defaultAgentName || 'Emma'
+    };
+  }
+
+  // agentName defaults to getAgentName() (the industry's plain default,
+  // e.g. "Emma") for callers that haven't resolved a gender-matched name
+  // yet; startConversation() passes the resolved one explicitly so the
+  // greeting text itself — not just the dynamic variable — uses the right
+  // name for the selected voice.
+  function greetingVars(agentName){
     return {
       company_name: demoState.companyName || cfg.label,
-      agent_name: getAgentName(),
+      agent_name: agentName || getAgentName(),
       use_cases: demoState.useCases.join(', ') || (cfg.useCases || []).map(u => u.label).join(', '),
       personality: demoState.personality,
       contact_name: demoState.contactName,
@@ -3129,8 +3173,8 @@
     };
   }
 
-  function defaultGreeting(){
-    return substituteVars(cfg.greeting, greetingVars());
+  function defaultGreeting(agentName){
+    return substituteVars(cfg.greeting, greetingVars(agentName));
   }
 
   function handleMicUnavailable(){
@@ -3175,7 +3219,9 @@
       orbLabel.textContent = 'Verbinden...';
       badgeText.textContent = 'Verbinden...';
 
-      const agentName = getAgentName();
+      const voices = await (agentVoicesPromise || Promise.resolve(null));
+      const chosenVoice = resolveVoice(voices, demoState.voice);
+      const agentName = chosenVoice.name;
       const clickTime = performance.now();
 
       conversation = await window.ElevenLabsConversation.startSession({
@@ -3193,10 +3239,10 @@
 
         overrides: {
           agent: {
-            firstMessage: demoState.greeting || defaultGreeting()
+            firstMessage: demoState.greeting || defaultGreeting(agentName)
           },
           tts: {
-            voiceId: VOICE_IDS[demoState.voice] || VOICE_IDS.female
+            voiceId: chosenVoice.voiceId
           }
         },
 

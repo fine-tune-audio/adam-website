@@ -19,7 +19,29 @@ app.use(cors({
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const OPENAI_MODEL = 'gpt-5.4-mini'; // verified against GET /v1/models with the live key before use
+const ELEVENLABS_API_KEY = process.env.ELEVENLABS_API_KEY;
 const LEADS_FILE = path.join(__dirname, 'leads.json');
+
+// Mirrors elevenlabs-setup/industry-agents.json — kept as a literal here
+// rather than imported, since that file lives in a directory excluded from
+// the Vercel deploy (.vercelignore) to keep secrets/unrelated tooling out
+// of the function bundle. Update both together if an agent is recreated.
+const INDUSTRY_AGENT_IDS = {
+  vet: 'agent_1401m0z366vwfbebvka3kbevhpn2',
+  trades: 'agent_8401m13xyypdek1tfgf8zhbjdy14',
+  property: 'agent_0601m13xyztwfkjsrm5f8445bhd7',
+  clinic: 'agent_5701m13xz2preem8h915z85ymmww',
+  msp: 'agent_2401m13xz3vge0ebykwberwa8ryw',
+  utilities: 'agent_7901m13xz4sxffgrtqy1hj03n2am',
+  hospitality: 'agent_7301m13xz5y3f19bh2b2kn3bn7dn',
+  contactcentre: 'agent_8901m13xz6xsf7nar8wp8qtg9k6b'
+};
+
+// Short cache so every visitor reaching the voice-picker step doesn't fire
+// a fresh ElevenLabs API call — dashboard voice changes still show up within
+// a few minutes, which is the actual requirement (not sub-second freshness).
+const AGENT_VOICES_CACHE_MS = 5 * 60 * 1000;
+const agentVoicesCache = new Map(); // industry -> { data, expires }
 
 // industry-configs.js is an ES module living one directory up (repo root).
 // require() can't load ESM directly, so it's loaded once via dynamic
@@ -171,6 +193,49 @@ app.post('/api/summarise', async (req, res) => {
     return res.status(200).json({ ok: false, fallback: true, error: 'Unexpected error while summarising', detail: err.message });
   } finally {
     clearTimeout(timer);
+  }
+});
+
+// Reads the agent's actual configured voices straight from the ElevenLabs
+// dashboard (conversation_config.tts.voice_id = primary, .supported_voices
+// = the "Add additional voice" list) so changing a voice in the dashboard
+// takes effect on the live demo without a redeploy. supported_voices[0]'s
+// own "label" (set in the dashboard) is returned too, so the picked voice's
+// name can be spoken correctly instead of a hardcoded default.
+app.get('/api/agent-voices/:industry', async (req, res) => {
+  const industry = req.params.industry;
+  const agentId = INDUSTRY_AGENT_IDS[industry];
+
+  if (!agentId) {
+    return res.status(200).json({ ok: false, error: 'Unknown industry' });
+  }
+
+  const cached = agentVoicesCache.get(industry);
+  if (cached && cached.expires > Date.now()) {
+    return res.status(200).json({ ok: true, ...cached.data });
+  }
+
+  if (!ELEVENLABS_API_KEY) {
+    return res.status(200).json({ ok: false, error: 'Server is not configured with ELEVENLABS_API_KEY' });
+  }
+
+  try {
+    const response = await fetch(`https://api.elevenlabs.io/v1/convai/agents/${agentId}`, {
+      headers: { 'xi-api-key': ELEVENLABS_API_KEY }
+    });
+    if (!response.ok) {
+      return res.status(200).json({ ok: false, error: `ElevenLabs API error (${response.status})` });
+    }
+    const agent = await response.json();
+    const tts = (agent.conversation_config && agent.conversation_config.tts) || {};
+    const data = {
+      primary: { voiceId: tts.voice_id || null, label: null },
+      additional: (tts.supported_voices || []).map((v) => ({ voiceId: v.voice_id, label: v.label || null }))
+    };
+    agentVoicesCache.set(industry, { data, expires: Date.now() + AGENT_VOICES_CACHE_MS });
+    return res.status(200).json({ ok: true, ...data });
+  } catch (err) {
+    return res.status(200).json({ ok: false, error: 'Failed to reach ElevenLabs API', detail: err.message });
   }
 });
 
