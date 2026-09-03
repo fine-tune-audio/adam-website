@@ -251,7 +251,384 @@
       color:rgba(255,255,255,0.6);
     }
 
-    /* ---------- step scaffolding ---------- */
+    /* ---------- step 6: card layout ---------- */
+    .assistant-card{
+      max-width:1300px;
+      width:100%;
+      background:#ffffff;
+      border-radius:2.5rem;
+      box-shadow:0 25px 50px -12px rgba(0,0,0,0.15),0 8px 20px -8px rgba(0,0,0,0.05);
+      display:grid;
+      grid-template-columns:1fr 1.1fr;
+      gap:0;
+      overflow:hidden;
+      margin:0 auto;
+    }
+    .info-panel{
+      background:#fafcff;
+      padding:2.5rem 2.2rem;
+      display:flex;
+      flex-direction:column;
+      border-right:1px solid rgba(0,0,0,0.04);
+    }
+    .brand{
+      display:flex;
+      align-items:baseline;
+      gap:0.5rem;
+      margin-bottom:1.75rem;
+      flex-wrap:wrap;
+    }
+    .brand h1{
+      font-size:2rem;
+      font-weight:700;
+      letter-spacing:-0.02em;
+      color:#0b1a2f;
+      margin:0;
+      line-height:1.2;
+    }
+    .brand .badge{
+      font-size:0.8rem;
+      font-weight:600;
+      background:#eef3fc;
+      color:#1f4e8c;
+      padding:0.25rem 0.9rem;
+      border-radius:30px;
+      letter-spacing:0.3px;
+      margin-left:0.25rem;
+    }
+    .subhead{
+      font-size:1rem;
+      color:#3a4b60;
+      font-weight:400;
+      margin-bottom:2rem;
+      line-height:1.5;
+      background:#f0f6ff;
+      border-left:4px solid #2a7de1;
+      border-radius:0 12px 12px 0;
+      padding:0.9rem 1.2rem;
+    }
+    .subhead strong{
+      font-weight:600;
+      color:#0b1a2f;
+    }
+    .section-title{
+      font-size:0.85rem;
+      text-transform:uppercase;
+      letter-spacing:0.5px;
+      font-weight:600;
+      color:#68778d;
+      margin:1.5rem 0 0.75rem 0;
+    }
+    .scenario-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:0.6rem;
+      margin-bottom:1.8rem;
+    }
+    .scenario-list-wrap{
+      grid-column:1 / -1;
+    }
+    .scenario-list-wrap .suggestion-list{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:0.6rem;
+    }
+    .scenario-list-wrap .suggestion{
+      background:#f8faff;
+      border:1px solid #e2e8f0;
+      border-radius:60px;
+      padding:0.7rem 1rem;
+      font-size:0.9rem;
+      font-weight:500;
+      color:#1b2b40;
+      transition:all 0.15s ease;
+      cursor:pointer;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      box-shadow:0 1px 2px rgba(0,0,0,0.02);
+      letter-spacing:-0.01em;
+      white-space:nowrap;
+    }
+    .scenario-list-wrap .suggestion:hover{
+      background:#e9effa;
+      border-color:#b0c7e5;
+      transform:translateY(-1px);
+      box-shadow:0 4px 8px rgba(0,40,100,0.06);
+    }
+    .scenario-list-wrap .suggestion:active{
+      transform:scale(0.97);
+    }
+    .capabilities{
+      background:#f4f8fe;
+      border-radius:20px;
+      padding:1.2rem 1.5rem;
+      margin:0.5rem 0 1.2rem 0;
+    }
+    .capabilities p{
+      font-size:0.95rem;
+      font-weight:500;
+      color:#10345e;
+      margin-bottom:0.5rem;
+    }
+    .capability-list{
+      display:flex;
+      flex-wrap:wrap;
+      gap:0.8rem 1.8rem;
+      font-size:0.9rem;
+      color:#1f3b5c;
+    }
+    .capability-list span{
+      display:flex;
+      align-items:center;
+      gap:0.3rem;
+    }
+    .capability-list span::before{
+      content:"•";
+      color:#2a7de1;
+      font-weight:700;
+      font-size:1.2rem;
+      line-height:1;
+    }
+    .step-indicator{
+      margin-top:auto;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      border-top:1px solid #dfe7f0;
+      padding-top:1.5rem;
+      gap:1rem;
+    }
+    .step-badge{
+      background:#eef3fc;
+      padding:0.3rem 1.2rem;
+      border-radius:60px;
+      font-size:0.8rem;
+      font-weight:600;
+      color:#1f4e8c;
+      letter-spacing:0.2px;
+    }
+    .back-link{
+      color:#4b6a8f;
+      font-weight:500;
+      font-size:0.9rem;
+      text-decoration:none;
+      border:1px solid transparent;
+      padding:0.2rem 0.8rem;
+      border-radius:40px;
+      transition:0.1s ease;
+      cursor:pointer;
+    }
+    .back-link:hover{
+      background:#eef3fc;
+      border-color:#d0ddee;
+    }
+    .orb-panel{
+      background:#ffffff;
+      padding:2.5rem 2rem;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      position:relative;
+    }
+    .orb-wrapper{
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      width:100%;
+    }
+    .orb-container{
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+    }
+    .orb-wrap{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+    .orb-ring{
+      position:absolute;
+      border-radius:50%;
+      border:2px solid rgba(42,125,225,0.2);
+      animation:spinRing 8s linear infinite;
+      pointer-events:none;
+    }
+    .orb-wrap > .orb-ring:nth-child(1){
+      inset:-8px;
+    }
+    .orb-wrap > .orb-ring:nth-child(2){
+      inset:-16px;
+      border-color:rgba(42,125,225,0.08);
+      animation-duration:12s;
+      animation-direction:reverse;
+    }
+    .orb-wrap > .orb-ring:nth-child(3){
+      display:none;
+    }
+    .orb-wrap > #orb:hover{
+      transform:scale(1.02);
+    }
+    .orb-wrap > #orb:active{
+      transform:scale(0.96);
+    }
+    @keyframes pulseGlowCard{
+      0%{box-shadow:0 15px 40px -8px rgba(23,78,181,0.4),0 0 0 2px rgba(255,255,255,0.6) inset,0 0 0 6px rgba(255,255,255,0.2) inset;}
+      50%{box-shadow:0 20px 60px -6px rgba(23,78,181,0.7),0 0 0 3px rgba(255,255,255,0.8) inset,0 0 0 10px rgba(255,255,255,0.15) inset;}
+      100%{box-shadow:0 15px 40px -8px rgba(23,78,181,0.4),0 0 0 2px rgba(255,255,255,0.6) inset,0 0 0 6px rgba(255,255,255,0.2) inset;}
+    }
+    @keyframes spinRing{
+      0%{transform:rotate(0deg);}
+      100%{transform:rotate(360deg);}
+    }
+    .orb-status{
+      display:flex;
+      justify-content:center;
+    }
+    .orb-status-badge{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      background:#f2f7ff;
+      padding:0.5rem 1.2rem;
+      border-radius:60px;
+      border:1px solid rgba(42,125,225,0.1);
+      font-size:0.85rem;
+      font-weight:500;
+      color:#1f3b5c;
+    }
+    .orb-status-dot{
+      width:8px;
+      height:8px;
+      border-radius:50%;
+      background:#2a7de1;
+      box-shadow:0 0 0 4px rgba(42,125,225,0.15);
+    }
+    .mode-toggle{
+      display:inline-flex;
+      background:#f1f5fb;
+      border-radius:60px;
+      padding:0.2rem;
+      border:1px solid #e2eaf5;
+    }
+    .mode-btn{
+      background:transparent;
+      border:none;
+      padding:0.4rem 1.2rem;
+      border-radius:40px;
+      font-weight:500;
+      font-size:0.85rem;
+      color:#3f5a79;
+      cursor:pointer;
+      transition:0.1s ease;
+    }
+    .mode-btn.active{
+      background:white;
+      box-shadow:0 2px 8px rgba(0,0,0,0.04);
+      color:#0b1a2f;
+      font-weight:600;
+    }
+    .chat-wrap{
+      width:100%;
+    }
+    .chat-messages{
+      background:#f8faff;
+      border:1px solid #e8eff8;
+      border-radius:16px;
+      padding:1rem;
+      max-height:280px;
+      overflow-y:auto;
+      margin-bottom:0.75rem;
+    }
+    .chat-input-row{
+      display:flex;
+      gap:8px;
+    }
+    .chat-input-row input{
+      flex:1;
+      background:#f8faff;
+      border:1px solid #e2e8f0;
+      border-radius:60px;
+      padding:0.7rem 1.2rem;
+      font-size:0.9rem;
+      color:#0b1a2f;
+      font-family:inherit;
+    }
+    .chat-input-row input:focus{
+      outline:none;
+      border-color:#2a7de1;
+      background:white;
+    }
+    .chat-input-row button{
+      background:#2a7de1;
+      border:none;
+      border-radius:50%;
+      width:42px;
+      height:42px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      cursor:pointer;
+      transition:0.1s ease;
+    }
+    .chat-input-row button:hover{
+      background:#1b5bc0;
+    }
+    .wave-bar{
+      display:inline-block;
+      width:3px;
+      background:#2a7de1;
+      border-radius:2px;
+      animation:waveAnim 1.1s infinite ease-in-out;
+    }
+    .wave-bar:nth-child(2n){animation-delay:0.15s;}
+    .wave-bar:nth-child(3n){animation-delay:0.3s;}
+    .wave-bar:nth-child(4n){animation-delay:0.45s;}
+    .wave-bar:nth-child(5n){animation-delay:0.6s;}
+    @keyframes waveAnim{
+      0%,100%{height:6px;}
+      50%{height:24px;}
+    }
+    .calm-notice{
+      background:#fff8e1;
+      border:1px solid #ffe082;
+      color:#5d4037;
+      border-radius:12px;
+      padding:0.6rem 1rem;
+      font-size:0.85rem;
+      margin-bottom:1rem;
+      text-align:center;
+    }
+    @media (max-width:900px){
+      .assistant-card{
+        grid-template-columns:1fr;
+        border-radius:2rem;
+      }
+      .info-panel{
+        border-right:none;
+        border-bottom:1px solid #eef2f7;
+        padding:1.8rem;
+      }
+      .orb-panel{
+        padding:2rem 1.5rem;
+      }
+    }
+    @media (max-width:500px){
+      .scenario-list-wrap .suggestion-list{
+        grid-template-columns:1fr;
+      }
+      .brand h1{
+        font-size:1.8rem;
+      }
+      .orb-wrap{
+        width:160px !important;
+        height:160px !important;
+      }
+    }
+
     .dark-block{
       position:relative;
       background:var(--black);
@@ -1902,106 +2279,100 @@
     </div>
   </section>
 
-  <!-- STEP 6: test call -->
+  <!-- STEP 6: test call (new card layout) -->
   <section class="step" data-step="6">
-    <div class="layout">
-      <div class="left-panel">
-        <div class="left-header">
-          <div class="left-eyebrow">Uw assistent</div>
-          <div class="left-title" id="agentNameTitle">Bedrijfsassistent</div>
-          <div class="left-subtitle">Probeer een echt scenario, of zeg iets wat een beller zou kunnen zeggen.</div>
+    <div class="assistant-card">
+      <div class="info-panel">
+        <div class="brand">
+          <h1 id="agentNameTitle">ADAM</h1>
+          <span class="badge">UW ASSISTENT</span>
         </div>
 
-        <div class="left-body">
-          <div class="info-block">
-            <div class="info-block-label">Probeer een scenario</div>
-            <div class="suggestion-list" id="scenarioList"></div>
-          </div>
-
-          <div class="info-block">
-            <div class="info-block-label">Deze assistent behandelt</div>
-            <div class="capability-list" id="capabilityList"></div>
-          </div>
+        <div class="subhead">
+          <strong>Probeer een echt scenario</strong> · of zeg iets wat een beller zou kunnen zeggen.
         </div>
 
-        <div class="left-footer">
-          <div class="api-notice">
-            <span>Live voice agent</span> — klik op de orb om te starten, of schakel over naar tekst.
-          </div>
+        <div class="section-title">Probeer een scenario</div>
+        <div class="scenario-grid">
+          <div class="scenario-list-wrap"><div class="suggestion-list" id="scenarioList"></div></div>
+        </div>
+
+        <div class="capabilities">
+          <p>Deze assistent behandelt</p>
+          <div class="capability-list" id="capabilityList"></div>
+        </div>
+
+        <div class="step-indicator">
+          <span class="step-badge">Stap 3 van 3</span>
+          <span class="back-link" onclick="finishCall()">Bekijk het gespreksresultaat →</span>
         </div>
       </div>
 
-      <div class="right-panel">
-        <canvas class="right-canvas" id="bgCanvas"></canvas>
+      <div class="orb-panel">
+        <canvas class="dark-block-canvas" id="bgCanvas" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;display:none;"></canvas>
 
-        <div class="mode-toggle">
-          <button class="mode-btn active" id="voiceModeBtn" onclick="setMode('voice')">Spraak</button>
-          <button class="mode-btn" id="textModeBtn" onclick="setMode('text')">Tekst</button>
-        </div>
+        <div class="orb-wrapper">
+          <div class="mode-toggle">
+            <button class="mode-btn active" id="voiceModeBtn" onclick="setMode('voice')">Spraak</button>
+            <button class="mode-btn" id="textModeBtn" onclick="setMode('text')">Tekst</button>
+          </div>
 
-        <div class="calm-notice" id="calmNotice" style="display:none;"></div>
+          <div class="calm-notice" id="calmNotice" style="display:none;"></div>
 
-        <div class="orb-container" id="voiceUI">
-          <div class="orb-wrap" id="orbWrap">
-            <div class="orb-rings">
+          <div class="orb-container" id="voiceUI" style="margin-top:1.5rem;">
+            <div class="orb-wrap" id="orbWrap" style="position:relative;width:200px;height:200px;">
               <div class="orb-ring"></div>
               <div class="orb-ring"></div>
-              <div class="orb-ring"></div>
-            </div>
-
-            <div class="orb" id="orb">
-              <canvas class="orb-canvas" id="orbCanvas"></canvas>
-              <div class="orb-icon">
-                <div class="orb-mic">
-                  <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <rect x="11" y="4" width="10" height="16" rx="5" fill="white" opacity="0.9"/>
-                    <path d="M7 16C7 21 9.5 24 16 24C22.5 24 25 21 25 16" stroke="white" stroke-width="2" stroke-linecap="round" opacity="0.7"/>
-                    <line x1="16" y1="24" x2="16" y2="28" stroke="white" stroke-width="2" stroke-linecap="round" opacity="0.7"/>
-                  </svg>
+              <div class="orb" id="orb" style="position:relative;width:100%;height:100%;border-radius:50%;background:radial-gradient(circle at 35% 30%, #6d9df5, #1b5bc0 70%, #0d347a);box-shadow:0 15px 40px -8px rgba(23,78,181,0.4),0 0 0 2px rgba(255,255,255,0.6) inset,0 0 0 6px rgba(255,255,255,0.2) inset;animation:pulseGlowCard 2.8s infinite ease-in-out;display:flex;align-items:center;justify-content:center;cursor:pointer;">
+                <canvas class="orb-canvas" id="orbCanvas" style="position:absolute;inset:0;width:100%;height:100%;border-radius:50%;"></canvas>
+                <div class="orb-icon" style="position:relative;z-index:2;">
+                  <div class="orb-mic">
+                    <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" width="56" height="56">
+                      <rect x="11" y="4" width="10" height="16" rx="5" fill="white" opacity="0.9"/>
+                      <path d="M7 16C7 21 9.5 24 16 24C22.5 24 25 21 25 16" stroke="white" stroke-width="2" stroke-linecap="round" opacity="0.7"/>
+                      <line x1="16" y1="24" x2="16" y2="28" stroke="white" stroke-width="2" stroke-linecap="round" opacity="0.7"/>
+                    </svg>
+                  </div>
                 </div>
               </div>
             </div>
+
+            <div class="orb-status" id="voiceStatus" style="margin-top:1.5rem;">
+              <div class="orb-status-badge">
+                <div class="orb-status-dot"></div>
+                <span id="badgeText">Klik op de orb om te starten</span>
+              </div>
+            </div>
+
+            <div class="waveform-wrap" id="waveform" style="display:none;margin-top:1rem;align-items:center;justify-content:center;gap:4px;height:32px;">
+              <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
+              <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
+              <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
+              <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
+            </div>
+
+            <div class="orb-label" id="orbLabel" style="margin-top:1rem;background:#f2f7ff;padding:0.5rem 2rem;border-radius:60px;font-size:1rem;font-weight:500;color:#1f3b5c;border:1px solid rgba(42,125,225,0.1);">KLIK OP DE ORB OM TE STARTEN</div>
+            <div class="scenario-hint" id="scenarioHint" style="margin-top:0.5rem;font-size:0.85rem;color:#3a4b60;"></div>
           </div>
 
-          <div class="orb-status" id="voiceStatus">
-            <div class="orb-status-badge">
-              <div class="orb-status-dot"></div>
-              <span id="badgeText">Klik op de orb om te starten</span>
+          <div class="chat-wrap" id="chatUI" style="display:none;width:100%;margin-top:1.5rem;">
+            <div class="chat-messages" id="chatMessages"></div>
+            <div class="chat-input-row">
+              <input type="text" id="chatInput" placeholder="Typ een bericht..." onkeydown="if(event.key==='Enter')sendChat()">
+              <button onclick="sendChat()" aria-label="Versturen">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 12L20 4L13 20L11 13L4 12Z" fill="#0A0A0A"/></svg>
+              </button>
             </div>
           </div>
 
-          <div class="waveform-wrap" id="waveform">
-            <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
-            <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
-            <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
-            <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
-          </div>
-
-          <div class="orb-label" id="orbLabel">Klik om te starten</div>
-          <div class="scenario-hint" id="scenarioHint"></div>
-        </div>
-
-        <div class="chat-wrap" id="chatUI">
-          <div class="chat-messages" id="chatMessages"></div>
-          <div class="chat-input-row">
-            <input type="text" id="chatInput" placeholder="Typ een bericht..." onkeydown="if(event.key==='Enter')sendChat()">
-            <button onclick="sendChat()" aria-label="Versturen">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 12L20 4L13 20L11 13L4 12Z" fill="#0A0A0A"/></svg>
-            </button>
-          </div>
-        </div>
-
-        <div class="transcript-area" id="voiceTranscriptArea">
-          <div class="transcript-bubble visible" id="transcriptBubble">
-            <div class="transcript-role agent-role" id="transcriptRole">Assistent</div>
-            <div class="transcript-text" id="transcriptText">Klik op de orb of kies links een scenario om de assistent te proberen.</div>
+          <div class="assistant-message" id="voiceTranscriptArea" style="margin-top:1.5rem;background:#f8faff;border-radius:20px;padding:1rem 1.8rem;width:100%;text-align:center;border:1px solid #e8eff8;color:#1e3b60;font-weight:450;font-size:0.95rem;line-height:1.5;">
+            <span class="transcript-role" id="transcriptRole" style="font-weight:600;color:#0d2b50;">ASSISTENT</span>
+            <span> · </span>
+            <span class="transcript-text" id="transcriptText">Klik op de orb of kies links een scenario om de assistent te proberen.</span>
+            <span class="transcript-bubble" id="transcriptBubble" style="display:none;"></span>
           </div>
         </div>
       </div>
-    </div>
-
-    <div style="text-align:center;padding:28px 24px 48px;">
-      <button class="btn btn-primary" onclick="finishCall()">Bekijk het gespreksresultaat →</button>
     </div>
   </section>
 
