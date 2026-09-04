@@ -131,7 +131,14 @@ function conversationConfigFor(cfg) {
       supported_voices: [
         { voice_id: MALE_VOICE_ID, label: MALE_VOICE_LABEL }
       ],
-      model_id: 'eleven_expressive_v1'
+      // eleven_v3_conversational, not "eleven_expressive_v1" (not a real
+      // model — that name doesn't appear anywhere in ElevenLabs' docs).
+      // Per ElevenLabs: "an ultra-low-latency version of Eleven v3,
+      // optimized for live, back-and-forth dialogue" — selecting it enables
+      // Expressive Mode automatically. Verified live with Dutch text on
+      // both the primary and additional voice before applying here.
+      model_id: 'eleven_v3_conversational',
+      expressive_mode: true
     }
   };
 }
