@@ -343,7 +343,7 @@ CLOSING: confirm whether it's booked, escalated, or a callback, then end warmly.
   msp: {
     id: "msp",
     label: "Horeca",
-    emoji: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 5a1 1 0 0 1 1 -1h16a1 1 0 0 1 1 1v10a1 1 0 0 1 -1 1h-16a1 1 0 0 1 -1 -1v-10"/><path d="M7 20h10"/><path d="M9 16v4"/><path d="M15 16v4"/></svg>',
+    emoji: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M19 3v12h-5c-.923 0 -2 -.673 -2 -2v-10" /><path d="M14 3v12" /><path d="M5 3c-.5 0 -1 .5 -1 1v3h3v-3c0 -.5 -.5 -1 -1 -1z" /><path d="M4 7v13" /></svg>',
     eyebrow: "Ontdek hoe een virtuele telefonische assistent werkt voor jouw organisatie",
     headline: "Maak in een paar minuten jouw telefonische assistent.",
     subheadline: "Vul je praktijkgegevens in, kies de functies en test de assistent zelf.",
@@ -569,7 +569,7 @@ CLOSING: confirm what you've arranged or escalated, then wish them a good stay.$
   contactcentre: {
     id: "contactcentre",
     label: "Haar & Schoonheid",
-    emoji: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 14v-3a8 8 0 1 1 16 0v3"/><path d="M18 19c0 1.657 -2.686 3 -6 3"/><path d="M4 14a2 2 0 0 1 2 -2h1a2 2 0 0 1 2 2v3a2 2 0 0 1 -2 2h-1a2 2 0 0 1 -2 -2v-3"/><path d="M15 14a2 2 0 0 1 2 -2h1a2 2 0 0 1 2 2v3a2 2 0 0 1 -2 2h-1a2 2 0 0 1 -2 -2v-3"/></svg>',
+    emoji: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M6 7m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0" /><path d="M6 17m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0" /><path d="M20 6l-10.662 10.662" /><path d="M20 18l-10.662 -10.662" /></svg>',
     eyebrow: "Ontdek hoe een virtuele telefonische assistent werkt voor jouw organisatie",
     headline: "Maak in een paar minuten jouw telefonische assistent.",
     subheadline: "Vul je praktijkgegevens in, kies de functies en test de assistent zelf.",
