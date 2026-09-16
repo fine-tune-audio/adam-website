@@ -66,16 +66,11 @@ window.adamSubmitLead = async function () {
     alert('Vink het toestemmingsvakje aan om verder te gaan.');
     return;
   }
-  var emailEl = document.getElementById('adam-contact-email');
-  var email = emailEl ? emailEl.value.trim() : '';
-  if (!email || email.indexOf('@') === -1) {
-    alert('Vul een geldig e-mailadres in.');
-    return;
-  }
   var notesEl = document.getElementById('adam-notes');
   var notes = notesEl ? notesEl.value.trim() : '';
 
   var f = window.adamFunnelGet();
+  var email = f.company_email || '';
   var log = [];
   try { log = JSON.parse(sessionStorage.getItem('adam_funnel_log') || '[]'); } catch (e) {}
 
