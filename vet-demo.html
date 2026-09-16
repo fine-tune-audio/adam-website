@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
+  <script src="/adam-tracking.js"></script>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
@@ -2175,7 +2176,7 @@
         <div class="eyebrow" id="heroEyebrow">Ontdek hoe een virtuele telefonische assistent werkt voor jouw organisatie</div>
         <h1 id="heroHeadline">Maak in een paar minuten jouw telefonische assistent.</h1>
         <p class="hero-sub" id="heroSub">Vul je praktijkgegevens in, kies de functies en test de assistent zelf.</p>
-        <button class="btn btn-primary" onclick="goStep(2)">Start mijn demo</button>
+        <button class="btn btn-primary" onclick="window.adamTrack && window.adamTrack('demo_clicked');goStep(2)">Start mijn demo</button>
         <div class="perk-row" id="perkRow"></div>
 
         <div class="sample-convo" id="sampleConvo"></div>
@@ -2407,18 +2408,46 @@
   <!-- STEP 8: lead qualification -->
   <section class="step" data-step="8">
     <div class="step-inner narrow">
-      <div class="eyebrow">Bijna klaar</div>
-      <h2 class="step-title">Help ons dit voor uw bedrijf in te schatten</h2>
+      <div id="step8Questions">
+        <div class="eyebrow">Bijna klaar</div>
+        <h2 class="step-title">Help ons dit voor uw bedrijf in te schatten</h2>
 
-      <div class="info-block-label" style="margin-bottom:14px;">Hoeveel telefoontjes krijgt u per dag?</div>
-      <div class="radio-list" id="callsRadioList"></div>
+        <div class="info-block-label" style="margin-bottom:14px;">Hoeveel telefoontjes krijgt u per dag?</div>
+        <div class="radio-list" id="callsRadioList"></div>
 
-      <div class="info-block-label" style="margin-bottom:14px;">Waar heeft uw team het meeste last van?</div>
-      <div class="chip-grid" id="struggleChips"></div>
+        <div class="info-block-label" style="margin-bottom:14px;">Waar heeft uw team het meeste last van?</div>
+        <div class="chip-grid" id="struggleChips"></div>
 
-      <div class="step-actions">
-        <button class="btn btn-ghost" onclick="goStep(7)">Terug</button>
-        <button class="btn btn-primary" onclick="captureStep8();goStep(9)">Plan een gesprek met ons team</button>
+        <div class="step-actions">
+          <button class="btn btn-ghost" onclick="goStep(7)">Terug</button>
+          <button class="btn btn-primary" onclick="captureStep8();showLeadPanel()">Plan een gesprek met ons team</button>
+        </div>
+      </div>
+
+      <div id="leadPanel" style="display:none;">
+        <div class="eyebrow">Bijna klaar</div>
+        <h2 class="step-title">Waar mogen we u bereiken?</h2>
+
+        <div class="field">
+          <label>E-mailadres <span class="req">*</span></label>
+          <input type="email" id="adam-contact-email" placeholder="u@uwbedrijf.nl">
+        </div>
+        <div class="field">
+          <label>Opmerkingen (optioneel)</label>
+          <textarea id="adam-notes" placeholder="Eventuele opmerkingen of vragen"></textarea>
+        </div>
+
+        <label style="display:flex;gap:8px;align-items:flex-start;margin:12px 0;font-size:14px">
+          <input type="checkbox" id="adam-consent-lead"
+            data-consent-text="Ik geef ADAM toestemming om mijn gegevens te gebruiken om contact met mij op te nemen over deze demo en mijn aanvraag te verwerken, zoals beschreven in de privacyverklaring.">
+          <span>Ik geef ADAM toestemming om mijn gegevens te gebruiken om contact met mij op te nemen over deze demo, zoals beschreven in de
+          <a href="/privacyverklaring.html" target="_blank" rel="noopener">privacyverklaring</a>.</span>
+        </label>
+
+        <div class="step-actions">
+          <button class="btn btn-ghost" onclick="hideLeadPanel()">Terug</button>
+          <button class="btn btn-primary" id="adam-lead-submit" onclick="window.adamSubmitLead()">Versturen</button>
+        </div>
       </div>
     </div>
   </section>
@@ -2670,6 +2699,8 @@
     const industries = window.INDUSTRIES || {};
     if (!industries[id]) return;
     cfg = industries[id];
+    window.adamTrack && window.adamTrack('service_selected', { service: cfg.label || null });
+    window.adamFunnelSet && window.adamFunnelSet({ service_selected: cfg.label || null });
     const params = new URLSearchParams(window.location.search);
     params.set('industry', id);
     window.history.replaceState(null, '', '?' + params.toString());
@@ -2791,6 +2822,14 @@
     demoState.website = document.getElementById('companyWebsite').value.trim();
     demoState.contactName = document.getElementById('contactName').value.trim();
     demoState.contactEmail = document.getElementById('contactEmail').value.trim();
+
+    window.adamFunnelSet && window.adamFunnelSet({
+      company_name: demoState.companyName || '',
+      company_website: demoState.website || '',
+      contact_name: demoState.contactName || '',
+      company_email: demoState.contactEmail || ''
+    });
+    window.adamTrack && window.adamTrack('company_form_completed');
   }
 
   function validateStep2(){
@@ -2808,6 +2847,14 @@
     const selV = voiceWrap.querySelector('.pick-card.selected');
     demoState.voice = selV ? selV.dataset.id : 'female';
     demoState.greeting = document.getElementById('customGreeting').value.trim();
+
+    const voiceLabel = demoState.voice === 'male' ? 'Man' : (demoState.voice === 'female' ? 'Vrouw' : '');
+    window.adamFunnelSet && window.adamFunnelSet({
+      tasks: demoState.useCases || [],
+      voice: voiceLabel,
+      greeting: demoState.greeting || ''
+    });
+    window.adamTrack && window.adamTrack('assistant_configured');
   }
 
   // ---------- step 5: generating ----------
@@ -2919,6 +2966,13 @@
     const selCalls = callsRadioList.querySelector('.radio-item.selected span');
     demoState.callsPerDay = selCalls ? selCalls.textContent : '';
     demoState.struggles = Array.from(struggleChips.querySelectorAll('.chip-select.selected')).map(el => el.textContent);
+
+    window.adamFunnelSet && window.adamFunnelSet({
+      estimate_calls: demoState.callsPerDay || '',
+      estimate_pains: demoState.struggles || []
+    });
+    window.adamTrack && window.adamTrack('estimate_completed');
+
     const headline = document.getElementById('thanksHeadline');
     headline.textContent = demoState.companyName ? 'Bedankt, ' + demoState.companyName + '.' : 'Bedankt.';
 
@@ -2929,7 +2983,36 @@
     }).catch(err => console.error('Lead submit failed:', err));
   }
 
+  // ---------- lead-capture panel (final step, before n8n submit) ----------
+  function showLeadPanel(){
+    const q = document.getElementById('step8Questions');
+    const panel = document.getElementById('leadPanel');
+    if (q) q.style.display = 'none';
+    if (panel) panel.style.display = 'block';
+  }
+
+  function hideLeadPanel(){
+    const q = document.getElementById('step8Questions');
+    const panel = document.getElementById('leadPanel');
+    if (panel) panel.style.display = 'none';
+    if (q) q.style.display = '';
+  }
+
+  window.adamShowThankYou = function(){
+    hideLeadPanel();
+    goStep(9);
+  };
+
   function resetDemo(){
+    hideLeadPanel();
+    const emailEl = document.getElementById('adam-contact-email');
+    const notesEl = document.getElementById('adam-notes');
+    const consentEl = document.getElementById('adam-consent-lead');
+    const submitBtn = document.getElementById('adam-lead-submit');
+    if (emailEl) emailEl.value = '';
+    if (notesEl) notesEl.value = '';
+    if (consentEl) consentEl.checked = false;
+    if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Versturen'; }
     goStep(1);
   }
 
@@ -3550,6 +3633,9 @@
     const renderedSubject = substituteVars(cfg.emailSubject, emailVars).replace(/\s+/g, ' ').trim();
     document.getElementById('emailSubject').textContent = renderedSubject || ((demoState.companyName || cfg.label) + ' — nieuw gespreksoverzicht');
     document.getElementById('emailBody').textContent = r.email_body || r.summary || '—';
+
+    window.adamFunnelSet && window.adamFunnelSet({ call_report: r || null });
+    window.adamTrack && window.adamTrack('report_generated');
   }
 
   // ---------- pure-JS local summariser: used whenever the backend is unreachable, ----------
@@ -3735,6 +3821,31 @@
     requestAnimationFrame(draw);
   }
   window.addEventListener('resize',resize);resize();draw();
+})();
+</script>
+<div id="adam-consent-banner" style="display:none;position:fixed;left:16px;right:16px;bottom:16px;z-index:9999;max-width:680px;margin:0 auto;background:#111;color:#fff;padding:16px 18px;border-radius:12px;font:14px/1.5 system-ui,sans-serif;box-shadow:0 10px 30px rgba(0,0,0,.3)">
+  <div style="margin-bottom:10px">
+    Wij gebruiken privacyvriendelijke, cookieloze statistieken om onze site te
+    verbeteren. Functionele opslag die nodig is om de demo te laten werken,
+    gebruiken we altijd. Meer in onze
+    <a href="/privacyverklaring.html" style="color:#8ab4ff">privacyverklaring</a>.
+  </div>
+  <div style="display:flex;gap:10px;flex-wrap:wrap">
+    <button type="button" id="adam-consent-accept" style="background:#fff;color:#111;border:0;border-radius:8px;padding:8px 14px;cursor:pointer;font-weight:600">Accepteren</button>
+    <button type="button" id="adam-consent-deny" style="background:transparent;color:#fff;border:1px solid #555;border-radius:8px;padding:8px 14px;cursor:pointer">Weigeren</button>
+  </div>
+</div>
+<script>
+(function () {
+  var k = 'adam_consent_analytics';
+  var banner = document.getElementById('adam-consent-banner');
+  if (!localStorage.getItem(k)) banner.style.display = 'block';
+  document.getElementById('adam-consent-accept').onclick = function () {
+    window.adamGrantAnalytics && window.adamGrantAnalytics(); banner.style.display = 'none';
+  };
+  document.getElementById('adam-consent-deny').onclick = function () {
+    window.adamDenyAnalytics && window.adamDenyAnalytics(); banner.style.display = 'none';
+  };
 })();
 </script>
 </body>

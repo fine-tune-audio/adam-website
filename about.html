@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
+  <script src="/adam-tracking.js"></script>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
@@ -389,6 +390,31 @@ document.getElementById('hamburger').addEventListener('click',()=>{
   menu.classList.toggle('open');
   burger.classList.toggle('open');
 });
+</script>
+<div id="adam-consent-banner" style="display:none;position:fixed;left:16px;right:16px;bottom:16px;z-index:9999;max-width:680px;margin:0 auto;background:#111;color:#fff;padding:16px 18px;border-radius:12px;font:14px/1.5 system-ui,sans-serif;box-shadow:0 10px 30px rgba(0,0,0,.3)">
+  <div style="margin-bottom:10px">
+    Wij gebruiken privacyvriendelijke, cookieloze statistieken om onze site te
+    verbeteren. Functionele opslag die nodig is om de demo te laten werken,
+    gebruiken we altijd. Meer in onze
+    <a href="/privacyverklaring.html" style="color:#8ab4ff">privacyverklaring</a>.
+  </div>
+  <div style="display:flex;gap:10px;flex-wrap:wrap">
+    <button type="button" id="adam-consent-accept" style="background:#fff;color:#111;border:0;border-radius:8px;padding:8px 14px;cursor:pointer;font-weight:600">Accepteren</button>
+    <button type="button" id="adam-consent-deny" style="background:transparent;color:#fff;border:1px solid #555;border-radius:8px;padding:8px 14px;cursor:pointer">Weigeren</button>
+  </div>
+</div>
+<script>
+(function () {
+  var k = 'adam_consent_analytics';
+  var banner = document.getElementById('adam-consent-banner');
+  if (!localStorage.getItem(k)) banner.style.display = 'block';
+  document.getElementById('adam-consent-accept').onclick = function () {
+    window.adamGrantAnalytics && window.adamGrantAnalytics(); banner.style.display = 'none';
+  };
+  document.getElementById('adam-consent-deny').onclick = function () {
+    window.adamDenyAnalytics && window.adamDenyAnalytics(); banner.style.display = 'none';
+  };
+})();
 </script>
 </body>
 </html>
