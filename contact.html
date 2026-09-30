@@ -1,12 +1,20 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
+  <meta name="i18n-page" content="contact">
+  <link rel="alternate" hreflang="nl" href="https://adamagents.nl/contact.html">
+  <link rel="alternate" hreflang="en" href="https://adamagents.nl/contact.html?lang=en">
+  <link rel="alternate" hreflang="de" href="https://adamagents.nl/contact.html?lang=de">
+  <link rel="alternate" hreflang="x-default" href="https://adamagents.nl/contact.html">
+  <script>try{var __p=new URLSearchParams(location.search).get('lang'),__l=(__p||localStorage.getItem('adam.lang')||'nl').toLowerCase();if(__l!=='nl')document.documentElement.classList.add('i18n-pending');}catch(e){}</script>
+  <script type="module" src="i18n.js"></script>
+  <style>.i18n-pending body{visibility:hidden;}</style>
   <script src="/adam-tracking.js"></script>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
-  <title>Demo aanvragen | ADAM AI Agents</title>
-  <meta name="description" content="Plan een kennismaking met ADAM. Vertel ons welk vraagstuk u wil oplossen. Wij laten zien hoe een AI agent dat voor uw organisatie aanpakt."/>
+  <title data-i18n="contact.demo_aanvragen_adam_ai_5c0c0e">Demo aanvragen | ADAM AI Agents</title>
+  <meta data-i18n-content="contact.plan_een_kennismaking_met_3d16cd" name="description" content="Plan een kennismaking met ADAM. Vertel ons welk vraagstuk u wil oplossen. Wij laten zien hoe een AI agent dat voor uw organisatie aanpakt."/>
   <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&display=swap" rel="stylesheet"/>
   <style>
     *{margin:0;padding:0;box-sizing:border-box;}
@@ -144,27 +152,30 @@
     <span class="nav-logo-text">ADAM</span>
   </a>
   <div class="nav-right">
-    <a class="nav-link" href="index.html">Home</a>
-    <a class="nav-link" href="about.html">Over ons</a>
-    <a class="nav-cta active" href="contact.html">Plan een demo</a>
-    <button class="nav-hamburger" id="hamburger" aria-label="Menu">
+    <a data-i18n="foot.company.home" class="nav-link" href="index.html">Home</a>
+    <a data-i18n="nav.pricing" class="nav-link" href="pricing.html">Prijzen</a>
+    <a data-i18n="nav.about" class="nav-link" href="about.html">Over ons</a>
+    <a data-i18n="nav.cta" class="nav-cta active" href="contact.html">Plan een demo</a>
+    <div data-lang-switcher></div>
+    <button data-i18n-aria-label="nav.menuAria" class="nav-hamburger" id="hamburger" aria-label="Menu">
       <span></span><span></span><span></span>
     </button>
   </div>
 </nav>
 
 <div class="nav-menu" id="navMenu">
-  <a href="index.html">Home</a>
-  <a href="about.html">Over ons</a>
-  <a href="contact.html">Plan een demo</a>
+  <a data-i18n="foot.company.home" href="index.html">Home</a>
+  <a data-i18n="nav.pricing" href="pricing.html">Prijzen</a>
+  <a data-i18n="nav.about" href="about.html">Over ons</a>
+  <a data-i18n="nav.cta" href="contact.html">Plan een demo</a>
 </div>
 
 <div class="contact-hero">
   <canvas id="heroC"></canvas>
   <div class="contact-hero-inner">
-    <div class="hero-label">Demo aanvragen</div>
-    <h1 class="hero-title">Laten we het<br>gesprek starten.</h1>
-    <p class="hero-sub">Vertel ons welk vraagstuk u wil oplossen. Binnen één werkdag plannen wij een kennismaking.</p>
+    <div data-i18n="contact.demo_aanvragen_72c2f6" class="hero-label">Demo aanvragen</div>
+    <h1 data-i18n-html="contact.laten_we_het_br_11eb5b" class="hero-title">Laten we het<br>gesprek starten.</h1>
+    <p data-i18n="contact.vertel_ons_welk_vraagstuk_c6c9b2" class="hero-sub">Vertel ons welk vraagstuk u wil oplossen. Binnen één werkdag plannen wij een kennismaking.</p>
   </div>
 </div>
 
@@ -172,72 +183,72 @@
   <div class="contact-inner">
 
     <div>
-      <div class="form-section-label">Stuur een bericht</div>
+      <div data-i18n="contact.stuur_een_bericht_e0c45b" class="form-section-label">Stuur een bericht</div>
       <div id="contactForm">
         <div class="form-row">
           <div class="form-group">
-            <label for="fname">Voornaam</label>
-            <input type="text" id="fname" placeholder="Jan"/>
+            <label data-i18n="contact.voornaam_5fecc5" for="fname">Voornaam</label>
+            <input data-i18n-placeholder="contact.jan_efed36" type="text" id="fname" placeholder="Jan"/>
           </div>
           <div class="form-group">
-            <label for="lname">Achternaam</label>
-            <input type="text" id="lname" placeholder="de Vries"/>
+            <label data-i18n="contact.achternaam_345120" for="lname">Achternaam</label>
+            <input data-i18n-placeholder="contact.de_vries_4a0134" type="text" id="lname" placeholder="de Vries"/>
           </div>
         </div>
         <div class="form-group">
-          <label for="email">E-mailadres</label>
-          <input type="email" id="email" placeholder="jan@bedrijf.nl"/>
+          <label data-i18n="contact.e_mailadres_f72754" for="email">E-mailadres</label>
+          <input data-i18n-placeholder="contact.jan_bedrijf_nl_6a6a27" type="email" id="email" placeholder="jan@bedrijf.nl"/>
         </div>
         <div class="form-group">
-          <label for="company">Bedrijfsnaam</label>
-          <input type="text" id="company" placeholder="Naam van uw organisatie"/>
+          <label data-i18n="contact.bedrijfsnaam_b9196c" for="company">Bedrijfsnaam</label>
+          <input data-i18n-placeholder="contact.naam_van_uw_organisatie_3f02fd" type="text" id="company" placeholder="Naam van uw organisatie"/>
         </div>
         <div class="form-group">
-          <label for="usecase">Waarvoor wilt u een agent inzetten?</label>
+          <label data-i18n="contact.waarvoor_wilt_u_een_3dfc60" for="usecase">Waarvoor wilt u een agent inzetten?</label>
           <select id="usecase">
-            <option value="" disabled selected>Selecteer een toepassing</option>
-            <option>Telefonische klantenservice of support</option>
-            <option>Voice agent voor bestellingen of reserveringen</option>
-            <option>Digitale intake of leadkwalificatie</option>
-            <option>Interne AI copilot voor medewerkers</option>
-            <option>Meerdere toepassingen tegelijk</option>
-            <option>Nog niet zeker, wil meer informatie</option>
+            <option data-i18n="contact.selecteer_een_toepassing_7274be" value="" disabled selected>Selecteer een toepassing</option>
+            <option data-i18n="contact.telefonische_klantenservice_of_support_234330" value="Telefonische klantenservice of support">Telefonische klantenservice of support</option>
+            <option data-i18n="contact.voice_agent_voor_bestellingen_e8c1b9" value="Voice agent voor bestellingen of reserveringen">Voice agent voor bestellingen of reserveringen</option>
+            <option data-i18n="contact.digitale_intake_of_leadkwalificatie_985700" value="Digitale intake of leadkwalificatie">Digitale intake of leadkwalificatie</option>
+            <option data-i18n="contact.interne_ai_copilot_voor_43a4b7" value="Interne AI copilot voor medewerkers">Interne AI copilot voor medewerkers</option>
+            <option data-i18n="contact.meerdere_toepassingen_tegelijk_63bcd3" value="Meerdere toepassingen tegelijk">Meerdere toepassingen tegelijk</option>
+            <option data-i18n="contact.nog_niet_zeker_wil_8fcf30" value="Nog niet zeker, wil meer informatie">Nog niet zeker, wil meer informatie</option>
           </select>
         </div>
         <div class="form-group">
-          <label for="message">Beschrijf uw situatie</label>
-          <textarea id="message" placeholder="Wat loopt er nu niet soepel? Welk volume verwerkt u? Wat is uw tijdlijn?"></textarea>
+          <label data-i18n="contact.beschrijf_uw_situatie_91c3c5" for="message">Beschrijf uw situatie</label>
+          <textarea data-i18n-placeholder="contact.wat_loopt_er_nu_1fcbc4" id="message" placeholder="Wat loopt er nu niet soepel? Welk volume verwerkt u? Wat is uw tijdlijn?"></textarea>
         </div>
-        <button class="form-submit" onclick="submitForm()">Verstuur aanvraag</button>
-        <p class="form-note">Geen verplichtingen. Reactie binnen één werkdag van een echt persoon.</p>
+        <button data-i18n="contact.verstuur_aanvraag_95c1da" class="form-submit" onclick="submitForm()">Verstuur aanvraag</button>
+        <p data-i18n="contact.geen_verplichtingen_reactie_binnen_522c89" class="form-note">Geen verplichtingen. Reactie binnen één werkdag van een echt persoon.</p>
       </div>
       <div class="form-success" id="formSuccess">
         <div class="success-mark">✓</div>
-        <div class="success-title">Aanvraag ontvangen.</div>
-        <p class="success-body">We nemen binnen één werkdag contact op.</p>
+        <div data-i18n="contact.aanvraag_ontvangen_25af8a" class="success-title">Aanvraag ontvangen.</div>
+        <p data-i18n="contact.we_nemen_binnen_een_e7aa7d" class="success-body">We nemen binnen één werkdag contact op.</p>
       </div>
     </div>
 
     <div>
-      <div class="info-section-label">Pricing</div>
+      <div data-i18n="contact.pricing_a0d9bb" class="info-section-label">Pricing</div>
       <div class="info-block">
-        <div class="info-block-sub" style="font-size:14px;color:#555;line-height:1.7;">Elke oplossing die we bouwen is maatwerk. De prijs hangt af van factoren zoals complexiteit, integraties en gebruik. Daarom werken we niet met vaste pakketten, maar stellen we altijd een voorstel op dat past bij jouw situatie.<br><br>Tijdens een eerste gesprek brengen we dit helder in kaart en ontvang je een indicatie.</div>
+        <div data-i18n-html="contact.elke_oplossing_die_we_966e9c" class="info-block-sub" style="font-size:14px;color:#555;line-height:1.7;">Elke oplossing die we bouwen is maatwerk. De prijs hangt af van factoren zoals complexiteit, integraties en gebruik. Daarom werken we niet met vaste pakketten, maar stellen we altijd een voorstel op dat past bij jouw situatie.<br><br>Tijdens een eerste gesprek brengen we dit helder in kaart en ontvang je een indicatie.</div>
       </div>
-      <div class="info-section-label" style="margin-top:40px;">Contactgegevens</div>
+      <div data-i18n="contact.contactgegevens_75cd01" class="info-section-label" style="margin-top:40px;">Contactgegevens</div>
       <div class="info-block">
-        <div class="info-block-title">E-mail</div>
-        <div class="info-block-value"><a href="mailto:hello@adamagents.com">support@adamagents.nl</a></div>
-        <div class="info-block-sub">Voor vragen, samenwerkingen en demo aanvragen.</div>
-      </div>
-      <div class="info-block">
-        <div class="info-block-title">Locatie</div>
-        <div class="info-block-value">Groningen, Nederland</div>
-        <div class="info-block-sub">Actief voor organisaties door heel Nederland. De meeste gesprekken starten online.</div>
+        <div data-i18n="contact.e_mail_0d01e2" class="info-block-title">E-mail</div>
+        <div class="info-block-value"><a data-i18n="contact.support_adamagents_nl_9fbd38" href="mailto:hello@adamagents.com">support@adamagents.nl</a></div>
+        <div data-i18n="contact.voor_vragen_samenwerkingen_en_a39b4b" class="info-block-sub">Voor vragen, samenwerkingen en demo aanvragen.</div>
       </div>
       <div class="info-block">
-        <div class="info-block-title">Reactietijd</div>
-        <div class="info-block-value">Binnen één werkdag</div>
-        <div class="info-block-sub">U krijgt een reactie van iemand van het ADAM team, geen geautomatiseerd antwoord.</div>
+        <div data-i18n="contact.locatie_d3057b" class="info-block-title">Locatie</div>
+        <div data-i18n="contact.groningen_nederland_cee35a" class="info-block-value">Groningen, Nederland</div>
+        <div data-i18n="contact.actief_voor_organisaties_door_adfe1e" class="info-block-sub">Actief voor organisaties door heel Nederland. De meeste gesprekken starten online.</div>
+      </div>
+      <div class="info-block">
+        <div data-i18n="contact.reactietijd_99aa0b" class="info-block-title">Reactietijd</div>
+        <div data-i18n="contact.binnen_een_werkdag_ec2917" class="info-block-value">Binnen één werkdag</div>
+        <div data-i18n="contact.u_krijgt_een_reactie_a7dcfd" class="info-block-sub">U krijgt een reactie van iemand van het ADAM team, geen geautomatiseerd antwoord.</div>
       </div>
     </div>
 
@@ -246,22 +257,22 @@
 
 <section class="process-section">
   <div class="process-inner">
-    <div class="process-label">Hoe het verloopt</div>
+    <div data-i18n="contact.hoe_het_verloopt_4776b9" class="process-label">Hoe het verloopt</div>
     <div class="process-grid stagger">
       <div class="process-tile">
         <div class="process-num">01</div>
-        <div class="process-title">Wij lezen uw bericht zorgvuldig.</div>
-        <p class="process-body">Geen geautomatiseerde opvolging. Iemand van het ADAM team beoordeelt uw situatie en denkt na over de beste aanpak.</p>
+        <div data-i18n="contact.wij_lezen_uw_bericht_4cc4f7" class="process-title">Wij lezen uw bericht zorgvuldig.</div>
+        <p data-i18n="contact.geen_geautomatiseerde_opvolging_iemand_ad3c92" class="process-body">Geen geautomatiseerde opvolging. Iemand van het ADAM team beoordeelt uw situatie en denkt na over de beste aanpak.</p>
       </div>
       <div class="process-tile">
         <div class="process-num">02</div>
-        <div class="process-title">We plannen een kort gesprek.</div>
-        <p class="process-body">30 minuten. Wij luisteren naar uw situatie, stellen gerichte vragen en leggen uit hoe ADAM agents in de praktijk werken.</p>
+        <div data-i18n="contact.we_plannen_een_kort_2fbd94" class="process-title">We plannen een kort gesprek.</div>
+        <p data-i18n="contact.30_minuten_wij_luisteren_1e90f7" class="process-body">30 minuten. Wij luisteren naar uw situatie, stellen gerichte vragen en leggen uit hoe ADAM agents in de praktijk werken.</p>
       </div>
       <div class="process-tile">
         <div class="process-num">03</div>
-        <div class="process-title">U ontvangt een concreet voorstel.</div>
-        <p class="process-body">Op maat, afgestemd op uw context. Geen generiek pakket, geen verborgen kosten. Duidelijk wat we bouwen en wat het oplevert.</p>
+        <div data-i18n="contact.u_ontvangt_een_concreet_63dc17" class="process-title">U ontvangt een concreet voorstel.</div>
+        <p data-i18n="contact.op_maat_afgestemd_op_bb472d" class="process-body">Op maat, afgestemd op uw context. Geen generiek pakket, geen verborgen kosten. Duidelijk wat we bouwen en wat het oplevert.</p>
       </div>
     </div>
   </div>
@@ -275,12 +286,13 @@
     <span class="foot-logo-text">ADAM</span>
   </a>
   <nav class="foot-nav">
-    <a href="index.html">Home</a>
-    <a href="about.html">Over ons</a>
-    <a href="contact.html">Contact</a>
-    <a href="privacyverklaring.html">Privacyverklaring</a>
+    <a data-i18n="foot.company.home" href="index.html">Home</a>
+    <a data-i18n="nav.pricing" href="pricing.html">Prijzen</a>
+    <a data-i18n="nav.about" href="about.html">Over ons</a>
+    <a data-i18n="foot.contact.title" href="contact.html">Contact</a>
+    <a data-i18n="common.privacyverklaring_871fa2" href="privacyverklaring.html">Privacyverklaring</a>
   </nav>
-  <span class="foot-right">© 2026 ADAM — Groningen, NL</span>
+  <span data-i18n="common.2026_adam_groningen_nl_26fadd" class="foot-right">© 2026 ADAM — Groningen, NL</span>
 </footer>
 
 <script>
@@ -295,9 +307,10 @@
     window.addEventListener('resize',resize);resize();draw();
   })();
 
+function tr(key, fallback){ return window.adamI18n ? window.adamI18n.t(key) : fallback; }
 async function submitForm(){
   const email = document.getElementById('email').value;
-  if(!email){alert('Vul uw e-mailadres in.');return;}
+  if(!email){alert(tr('contact.js.emailRequired','Vul uw e-mailadres in.'));return;}
 
   const data = {
     voornaam: document.getElementById('fname').value,
@@ -318,7 +331,7 @@ async function submitForm(){
     document.getElementById('contactForm').style.display='none';
     document.getElementById('formSuccess').classList.add('visible');
   } else {
-    alert('Er ging iets mis. Probeer het opnieuw.');
+    alert(tr('contact.js.submitFailed','Er ging iets mis. Probeer het opnieuw.'));
   }
 }
 
@@ -335,15 +348,15 @@ document.getElementById('hamburger').addEventListener('click',()=>{
 
 </script>
 <div id="adam-consent-banner" style="display:none;position:fixed;left:16px;right:16px;bottom:16px;z-index:9999;max-width:680px;margin:0 auto;background:#111;color:#fff;padding:16px 18px;border-radius:12px;font:14px/1.5 system-ui,sans-serif;box-shadow:0 10px 30px rgba(0,0,0,.3)">
-  <div style="margin-bottom:10px">
+  <div data-i18n-html="common.wij_gebruiken_privacyvriendelijke_cookieloze_ba2e4a" style="margin-bottom:10px">
     Wij gebruiken privacyvriendelijke, cookieloze statistieken om onze site te
     verbeteren. Functionele opslag die nodig is om de demo te laten werken,
     gebruiken we altijd. Meer in onze
     <a href="/privacyverklaring.html" style="color:#8ab4ff">privacyverklaring</a>.
   </div>
   <div style="display:flex;gap:10px;flex-wrap:wrap">
-    <button type="button" id="adam-consent-accept" style="background:#fff;color:#111;border:0;border-radius:8px;padding:8px 14px;cursor:pointer;font-weight:600">Accepteren</button>
-    <button type="button" id="adam-consent-deny" style="background:transparent;color:#fff;border:1px solid #555;border-radius:8px;padding:8px 14px;cursor:pointer">Weigeren</button>
+    <button data-i18n="common.accepteren_b9b470" type="button" id="adam-consent-accept" style="background:#fff;color:#111;border:0;border-radius:8px;padding:8px 14px;cursor:pointer;font-weight:600">Accepteren</button>
+    <button data-i18n="common.weigeren_6b74af" type="button" id="adam-consent-deny" style="background:transparent;color:#fff;border:1px solid #555;border-radius:8px;padding:8px 14px;cursor:pointer">Weigeren</button>
   </div>
 </div>
 <script>

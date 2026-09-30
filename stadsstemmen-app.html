@@ -1621,6 +1621,10 @@ applySound(); updateProgress();
 
 /* ===== i18n + welkom + taalkiezer ===== */
 let lang='nl', uiLang='nl', otherMode=false;
+/* Site-brede taalkeuze (adam.lang) — gedeeld met de rest van adamagents.nl; alleen nl/en/de */
+const SITE_LANG_KEY='adam.lang', SITE_LANGS=['nl','en','de'];
+function siteLangRead(){ try{ const v=localStorage.getItem(SITE_LANG_KEY); return SITE_LANGS.includes(v)?v:null; }catch(e){ return null; } }
+function siteLangWrite(l){ if(!SITE_LANGS.includes(l)) return; try{ localStorage.setItem(SITE_LANG_KEY,l); }catch(e){} }
 const LANGS=[['af','Afrikaans'],['ar','العربية'],['hy','Հայերեն'],['as','অসমীয়া'],['ast','Asturianu'],['az','Azərbaycan'],['be','Беларуская'],['bn','বাংলা'],['bs','Bosanski'],['bg','Български'],['my','မြန်မာ'],['yue','粵語'],['ca','Català'],['zh','中文'],['hr','Hrvatski'],['cs','Čeština'],['da','Dansk'],['nl','Nederlands'],['en','English'],['et','Eesti'],['fil','Filipino'],['fi','Suomi'],['fr','Français'],['gl','Galego'],['ka','ქართული'],['de','Deutsch'],['el','Ελληνικά'],['gu','ગુજરાતી'],['ha','Hausa'],['he','עברית'],['hi','हिन्दी'],['hu','Magyar'],['is','Íslenska'],['id','Bahasa Indonesia'],['ga','Gaeilge'],['it','Italiano'],['ja','日本語'],['jv','Basa Jawa'],['kn','ಕನ್ನಡ'],['kk','Қазақша'],['ky','Кыргызча'],['ko','한국어'],['lv','Latviešu'],['lt','Lietuvių'],['lb','Lëtzebuergesch'],['mk','Македонски'],['ms','Bahasa Melayu'],['ml','മലയാളം'],['mt','Malti'],['mi','Māori'],['mr','मराठी'],['mn','Монгол'],['ne','नेपाली'],['no','Norsk'],['oc','Occitan'],['or','ଓଡ଼ିଆ'],['ps','پښتو'],['fa','فارسی'],['pl','Polski'],['pt-br','Português (Brasil)'],['pt','Português'],['pa','ਪੰਜਾਬੀ'],['ro','Română'],['ru','Русский'],['sr','Српски'],['sd','سنڌي'],['sk','Slovenčina'],['sl','Slovenščina'],['so','Soomaali'],['es','Español'],['sw','Kiswahili'],['sv','Svenska'],['tg','Тоҷикӣ'],['ta','தமிழ்'],['te','తెలుగు'],['th','ไทย'],['tr','Türkçe'],['uk','Українська'],['ur','اردو'],['uz','Oʻzbek'],['vi','Tiếng Việt'],['cy','Cymraeg'],['yo','Yorùbá']];
 const T={
   wEyebrow:{nl:'Audio tour · Stadsstemmen',en:'Audio tour · Stadsstemmen',de:'Audiotour · Stadsstemmen',it:'Audioguida · Stadsstemmen',pt:'Áudio tour · Stadsstemmen',es:'Audioguía · Stadsstemmen',pl:'Audioprzewodnik · Stadsstemmen',da:'Audiotur · Stadsstemmen',sv:'Ljudtur · Stadsstemmen',no:'Lydtur · Stadsstemmen',fi:'Ääniopas · Stadsstemmen',el:'Ξενάγηση ήχου · Stadsstemmen'},
@@ -1730,7 +1734,7 @@ function applyI18n(){ uiLang=(lang==='pt-br')?'pt':(UI_LANGS.includes(lang)?lang
   const REST=LANGS.filter(([c])=>!UI_LANGS.includes(c)).map(([c])=>c);
   let showAll=false;
   function choose(c){ lang=c; otherMode=!['nl','en','de'].includes(c); applyI18n();
-    try{ localStorage.setItem('ss_lang',lang); }catch(_){}
+    try{ localStorage.setItem('ss_lang',lang); }catch(_){} siteLangWrite(lang);
     const ws=$('#wsel'); if(ws) ws.value=c;
     document.querySelectorAll('#langRow button').forEach(x=>{ const v=x.dataset.l; x.classList.toggle('on', otherMode? v==='other': v===c); });
     pick.classList.remove('open'); showAll=false; }
@@ -1773,12 +1777,12 @@ function applyI18n(){ uiLang=(lang==='pt-br')?'pt':(UI_LANGS.includes(lang)?lang
     const sep=document.createElement('option'); sep.disabled=true; sep.textContent='\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500'; sel.appendChild(sep);
     LANGS.forEach(([c,n])=>{ if(SKIP.includes(c)) return; const o=document.createElement('option'); o.value=c; o.textContent=n; sel.appendChild(o); }); }
   function paint(){ document.querySelectorAll('#langRow button').forEach(b=>{ const v=b.dataset.l; b.classList.toggle('on', otherMode ? v==='other' : v===lang); }); }
-  function saveLang(){ try{ localStorage.setItem('ss_lang',lang); }catch(_){} }
+  function saveLang(){ try{ localStorage.setItem('ss_lang',lang); }catch(_){} siteLangWrite(lang); }
   document.querySelectorAll('#langRow button').forEach(b=>{ b.onclick=()=>{ startBg(); const v=b.dataset.l; if(v==='other'){ otherMode=true; $('#wsel').classList.add('show'); lang=$('#wsel').value; } else { otherMode=false; $('#wsel').classList.remove('show'); lang=v; } paint(); applyI18n(); saveLang(); }; });
   if(sel) sel.onchange=e=>{ startBg(); lang=e.target.value; otherMode=true; paint(); applyI18n(); saveLang(); };
   const st=$('#wstart'); if(st) st.onclick=()=>{ saveLang(); fadeOutBg(); $('#welcome').classList.add('hide'); primeMic(); if(window.startIntro) window.startIntro(true); };
   /* eerdere taalkeuze herstellen */
-  try{ const sl=localStorage.getItem('ss_lang'); if(sl){ lang=sl;
+  try{ let sl=localStorage.getItem('ss_lang'); if(!sl || SITE_LANGS.includes(sl)) sl=siteLangRead()||sl; if(sl){ lang=sl;
     if(['nl','en','de'].includes(sl)){ otherMode=false; } else { otherMode=true; if(sel){ sel.value=sl; sel.classList.add('show'); } } } }catch(_){}
   paint();
   applyI18n();

@@ -1,11 +1,19 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
+  <meta name="i18n-page" content="polygon-walker">
+  <link rel="alternate" hreflang="nl" href="https://adamagents.nl/polygon-walker.html">
+  <link rel="alternate" hreflang="en" href="https://adamagents.nl/polygon-walker.html?lang=en">
+  <link rel="alternate" hreflang="de" href="https://adamagents.nl/polygon-walker.html?lang=de">
+  <link rel="alternate" hreflang="x-default" href="https://adamagents.nl/polygon-walker.html">
+  <script>try{var __p=new URLSearchParams(location.search).get('lang'),__l=(__p||localStorage.getItem('adam.lang')||'nl').toLowerCase();if(__l!=='nl')document.documentElement.classList.add('i18n-pending');}catch(e){}</script>
+  <script type="module" src="i18n.js"></script>
+  <style>.i18n-pending body{visibility:hidden;}</style>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
   <meta name="robots" content="noindex, nofollow"/>
   <meta name="theme-color" content="#0A0A0A"/>
-  <title>Polygon Walker | ADAM Tools</title>
+  <title data-i18n="polygon-walker.polygon_walker_adam_tools_678401">Polygon Walker | ADAM Tools</title>
 
   <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
@@ -501,21 +509,22 @@
         <circle cx="12" cy="12" r="2" fill="#CEFF1A"/>
       </svg>
     </div>
-    <div class="perm-title">Polygon Walker</div>
-    <div class="perm-sub">Loop rond een gebouw en leg per hoek je GPS positie vast. Vooraf gevuld met vleugel a t/m g — voeg toe of verwijder naar wens.</div>
-    <button class="perm-btn" id="permBtn">GPS toestaan</button>
+    <div data-i18n="polygon-walker.polygon_walker_88baf2" class="perm-title">Polygon Walker</div>
+    <div data-i18n="polygon-walker.loop_rond_een_gebouw_e24527" class="perm-sub">Loop rond een gebouw en leg per hoek je GPS positie vast. Vooraf gevuld met vleugel a t/m g — voeg toe of verwijder naar wens.</div>
+    <button data-i18n="polygon-walker.gps_toestaan_8586da" class="perm-btn" id="permBtn">GPS toestaan</button>
     <div class="perm-error" id="permError" style="display:none;"></div>
   </div>
 
-  <nav class="nav">
+  <nav class="nav nav-dark">
     <a href="/" class="nav-logo">
-      <div class="nav-logo-mark">A</div>
+      <div data-i18n="common.a_6dcd4c" class="nav-logo-mark">A</div>
       <span class="nav-logo-text">ADAM</span>
     </a>
-    <div class="nav-title">Polygon Walker</div>
+    <div data-i18n="common.polygon_walker_88baf2" class="nav-title">Polygon Walker</div>
+    <div data-lang-switcher></div>
     <div class="nav-acc" id="navAcc">
       <div class="nav-acc-dot"></div>
-      <span id="navAccText">— m</span>
+      <span data-i18n="common.m_c5a8b7" id="navAccText">— m</span>
     </div>
   </nav>
 
@@ -523,8 +532,8 @@
     <div class="wing-bar" id="wingBar"></div>
   </div>
 
-  <button class="tips-toggle" id="tipsToggle" aria-label="Tips">?</button>
-  <div class="tips-popup" id="tipsPopup">
+  <button data-i18n-aria-label="polygon-walker.tips_4cf1b5" class="tips-toggle" id="tipsToggle" aria-label="Tips">?</button>
+  <div data-i18n-html="polygon-walker.b_telefoon_gps_b_dccf6f" class="tips-popup" id="tipsPopup">
     <b>Telefoon (GPS)</b><br>
     • Wacht 10-15 sec bij elke hoek<br>
     • Houd telefoon hoog, weg van lichaam<br>
@@ -542,14 +551,14 @@
   </div>
 
   <div class="mode-stack">
-    <button class="mode-fab" id="satelliteFab" aria-label="Satelliet view" title="Satelliet view">
+    <button data-i18n-title="polygon-walker.satelliet_view_000b61" data-i18n-aria-label="polygon-walker.satelliet_view_000b61" class="mode-fab" id="satelliteFab" aria-label="Satelliet view" title="Satelliet view">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
         <path d="M4.5 9.5L14.5 19.5C15 20 16 20 16.5 19.5L19.5 16.5C20 16 20 15 19.5 14.5L9.5 4.5C9 4 8 4 7.5 4.5L4.5 7.5C4 8 4 9 4.5 9.5Z" stroke="currentColor" stroke-width="1.8"/>
         <path d="M2 16C2 18 4 20 6 20M2 12C2 16 6 22 12 22M8 2C5 2 2 5 2 8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
         <circle cx="12" cy="12" r="1.5" fill="currentColor"/>
       </svg>
     </button>
-    <button class="mode-fab" id="clickFab" aria-label="Klik modus" title="Klik op kaart om hoek toe te voegen">
+    <button data-i18n-title="polygon-walker.klik_op_kaart_om_6a08c9" data-i18n-aria-label="polygon-walker.klik_modus_a8a5fd" class="mode-fab" id="clickFab" aria-label="Klik modus" title="Klik op kaart om hoek toe te voegen">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
         <path d="M9 3L12 12L21 9L12 21L9 3Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
       </svg>
@@ -565,16 +574,16 @@
   <div class="bottom-bar">
     <div class="bottom-inner">
       <div class="status-strip">
-        <div><span>Actief</span> <b id="curWing">—</b></div>
-        <div><span>Hoeken</span> <b id="curCount">0</b></div>
-        <div><span>Acc.</span> <b id="curAcc" class="warn">—</b></div>
+        <div><span data-i18n="polygon-walker.actief_a36f20">Actief</span> <b id="curWing">—</b></div>
+        <div><span data-i18n="polygon-walker.hoeken_0f3bfd">Hoeken</span> <b id="curCount">0</b></div>
+        <div><span data-i18n="polygon-walker.acc_0f6229">Acc.</span> <b id="curAcc" class="warn">—</b></div>
       </div>
       <div class="capture-row">
-        <button class="icon-btn" id="undoBtn" disabled aria-label="Ongedaan maken">
+        <button data-i18n-aria-label="polygon-walker.ongedaan_maken_7066cd" class="icon-btn" id="undoBtn" disabled aria-label="Ongedaan maken">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
             <path d="M3 8L7 4M3 8L7 12M3 8H15C18.866 8 22 11.134 22 15V15C22 18.866 18.866 22 15 22H10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
-          <span>Undo</span>
+          <span data-i18n="polygon-walker.undo_39fc72">Undo</span>
         </button>
         <button class="capture-btn" id="captureBtn" disabled>
           <span class="ic">
@@ -583,13 +592,13 @@
               <circle cx="12" cy="12" r="3" fill="currentColor"/>
             </svg>
           </span>
-          Punt vastleggen
+          <span data-i18n="polygon-walker.punt_vastleggen_dda647">Punt vastleggen</span>
         </button>
-        <button class="icon-btn primary" id="listBtn" aria-label="Lijst en export">
+        <button data-i18n-aria-label="polygon-walker.lijst_en_export_ad5167" class="icon-btn primary" id="listBtn" aria-label="Lijst en export">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
             <path d="M4 6H20M4 12H20M4 18H20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
           </svg>
-          <span>Lijst</span>
+          <span data-i18n="polygon-walker.lijst_dbcc9b">Lijst</span>
         </button>
       </div>
     </div>
@@ -599,7 +608,7 @@
   <div class="sheet" id="sheet">
     <div class="sheet-handle"></div>
     <div class="sheet-header">
-      <div class="sheet-title" id="sheetTitle">Hoeken</div>
+      <div data-i18n="polygon-walker.hoeken_0f3bfd" class="sheet-title" id="sheetTitle">Hoeken</div>
       <button class="sheet-close" id="sheetClose">×</button>
     </div>
     <div class="sheet-body" id="sheetBody"></div>
@@ -607,17 +616,17 @@
 
   <div class="prompt-overlay" id="promptOverlay">
     <div class="prompt-box">
-      <div class="prompt-title" id="promptTitle">Nieuwe vleugel</div>
-      <div class="prompt-sub" id="promptSub">Geef een naam.</div>
-      <input type="text" class="prompt-input" id="promptInput" placeholder="Naam" maxlength="40"/>
+      <div data-i18n="polygon-walker.nieuwe_vleugel_ac6496" class="prompt-title" id="promptTitle">Nieuwe vleugel</div>
+      <div data-i18n="polygon-walker.geef_een_naam_5f8c9e" class="prompt-sub" id="promptSub">Geef een naam.</div>
+      <input data-i18n-placeholder="polygon-walker.naam_263d57" type="text" class="prompt-input" id="promptInput" placeholder="Naam" maxlength="40"/>
       <div class="prompt-actions">
-        <button id="promptCancel">Annuleer</button>
-        <button class="primary" id="promptOk">OK</button>
+        <button data-i18n="polygon-walker.annuleer_06a425" id="promptCancel">Annuleer</button>
+        <button data-i18n="polygon-walker.ok_9ce3bd" class="primary" id="promptOk">OK</button>
       </div>
     </div>
   </div>
 
-  <div class="copied-toast" id="toast">Gekopieerd</div>
+  <div data-i18n="polygon-walker.gekopieerd_d0954a" class="copied-toast" id="toast">Gekopieerd</div>
 
 <script>
 const STORAGE_KEY = 'adam_polygon_walker_v2';
