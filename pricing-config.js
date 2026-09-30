@@ -8,7 +8,8 @@
 //   - SLA
 //   - how minutes are counted (per second vs rounded up)
 //   - what happens when all concurrent call slots are busy
-//   - annual prices (set `annualMonthly` on EVERY plan to enable the toggle)
+//   - annual prices are placeholders (~16% below monthly, close to "2 months free"); confirm or change `annualMonthly`.
+//     Unset it on ANY plan and the monthly/yearly toggle disappears.
 
 /**
  * @typedef {Object} Plan
@@ -24,9 +25,9 @@
 
 /** @type {readonly Plan[]} */
 export const PLANS = Object.freeze([
-  { id: 'starter', monthly: 49, annualMonthly: undefined, includedMinutes: 250, extraMinuteRate: 0.25, phoneNumbers: 1, concurrentCalls: 1, highlighted: false },
-  { id: 'growth', monthly: 129, annualMonthly: undefined, includedMinutes: 750, extraMinuteRate: 0.2, phoneNumbers: 1, concurrentCalls: 2, highlighted: true },
-  { id: 'pro', monthly: 299, annualMonthly: undefined, includedMinutes: 2000, extraMinuteRate: 0.15, phoneNumbers: 3, concurrentCalls: 3, highlighted: false }
+  { id: 'starter', monthly: 49, annualMonthly: 41, includedMinutes: 250, extraMinuteRate: 0.25, phoneNumbers: 1, concurrentCalls: 1, highlighted: false },
+  { id: 'growth', monthly: 129, annualMonthly: 108, includedMinutes: 750, extraMinuteRate: 0.2, phoneNumbers: 1, concurrentCalls: 2, highlighted: true },
+  { id: 'pro', monthly: 299, annualMonthly: 249, includedMinutes: 2000, extraMinuteRate: 0.15, phoneNumbers: 3, concurrentCalls: 3, highlighted: false }
 ]);
 
 export const ADDONS = Object.freeze({

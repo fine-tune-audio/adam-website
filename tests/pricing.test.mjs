@@ -29,8 +29,9 @@ test('money: whole euros without decimals, small amounts with two', () => {
   assert.match(formatMoney(0.25, { lang: 'de' }), /0,25/);
 });
 
-test('annual toggle stays hidden while any plan lacks an annual price', () => {
-  assert.equal(hasAnnualPricing(PLANS), false);
+test('annual toggle shows only when every plan has an annual price', () => {
+  assert.equal(hasAnnualPricing(PLANS), true);
+  assert.equal(hasAnnualPricing(PLANS.map((p) => ({ ...p, annualMonthly: undefined }))), false);
   const partial = PLANS.map((p, i) => ({ ...p, annualMonthly: i === 0 ? 40 : undefined }));
   assert.equal(hasAnnualPricing(partial), false);
   const full = PLANS.map((p) => ({ ...p, annualMonthly: p.monthly - 5 }));
@@ -38,7 +39,7 @@ test('annual toggle stays hidden while any plan lacks an annual price', () => {
 });
 
 test('priceFor and saving fall back to monthly without annual price', () => {
-  const p = plan('starter');
+  const p = { ...plan('starter'), annualMonthly: undefined };
   assert.equal(priceFor(p, 'annual'), 49);
   assert.equal(annualSavingPerMonth(p), 0);
   const annual = { ...p, annualMonthly: 42 };
