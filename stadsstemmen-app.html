@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 <title>Stadsstemmen · Groningen</title>
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/maplibre-gl@5.24.0/dist/maplibre-gl.css">
+<script src="https://cdn.jsdelivr.net/npm/maplibre-gl@5.24.0/dist/maplibre-gl.js"></script>
 <script type="module">
   // ElevenLabs voice SDK — eigen interface, geen pop-up widget
   try {
@@ -39,9 +39,15 @@
 
   /* ===== KAART ===== */
   #map{position:absolute;inset:0;z-index:1;background:#e9eae5;}
-  .leaflet-container{background:#e9eae5;font-family:inherit;}
-  .leaflet-tile{filter:grayscale(.35) brightness(1.04) contrast(.96);}
-  .leaflet-div-icon{background:transparent;border:none;}
+  .maplibregl-map{background:#e9eae5;font:inherit;}
+  .maplibregl-canvas{outline:none;}
+  /* marker-elementen klikbaar + onderlinge stapelvolgorde */
+  .place-pin,.spot-wrap,.me-pin{cursor:pointer;}
+  .place-pin{z-index:2;} .spot-wrap{z-index:1;} .me-pin{z-index:4;}
+  /* subtiele bronvermelding (OpenStreetMap-licentie) net boven de ingeklapte balk */
+  .mapattr{position:absolute;z-index:5;left:12px;bottom:84px;font-size:9px;font-weight:600;color:var(--muted);
+    background:rgba(251,251,248,.58);padding:2px 7px;border-radius:7px;backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);}
+  .mapattr a{color:var(--muted);text-decoration:none;}
   .place-pin{width:0;height:0;}
   .place-pin .ppin{position:absolute;left:0;top:0;transform:translate(-50%,-50%);width:50px;height:50px;border-radius:50%;box-sizing:border-box;
     background:linear-gradient(135deg,var(--lime-l),var(--lime) 55%,var(--lime-d));padding:3px;box-shadow:0 4px 12px rgba(0,0,0,.3);transition:box-shadow .25s,transform .25s;}
@@ -624,6 +630,7 @@
 <div class="stage">
   <div class="app" id="app">
     <div id="map"></div>
+    <div class="mapattr"><a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap</a></div>
 
     <div class="top">
       <div class="chip"><span class="mk">Stads<b>stemmen</b></span></div>
@@ -906,35 +913,52 @@ const markersById={};
 const ME_HTML='<span class="halo"></span><span class="nav"><svg viewBox="0 0 24 24"><path class="body" d="M12 2 L20 21 L12 16 L4 21 Z"/></svg></span>';
 function setActiveMarker(id){ for(const k in markersById){ const el=markersById[k].getElement&&markersById[k].getElement(); if(el) el.classList.toggle('active', k===id); } }
 
-/* ===== KAART ===== */
+/* ===== KAART (MapLibre GL JS + OpenFreeMap vectortegels, geen API-key) ===== */
 let map=null, bounds=[];
+/* Eigen, rustige stijl in Stadsstemmen-kleuren (off-white basis, zachte watertint, subtiele
+   gebouwen/wegen, lichtgroene parken; geen straatnamen/POI's/grenzen) staat in
+   stadsstemmen-mapstyle.json en wordt als stijl-URL geladen (object-stijlen met een
+   externe vectorbron laden niet betrouwbaar; een stijl-URL wel). */
+const SS_MAP_STYLE='stadsstemmen-mapstyle.json';
+/* content-data staat als [lat,lng]; MapLibre wil [lng,lat] */
+function toLngLat(x){ if(!x) return x; if(Array.isArray(x)) return [x[1],x[0]]; return [x.lng,x.lat]; }
+function polyCenter(poly){ let aLa=Infinity,bLa=-Infinity,aLo=Infinity,bLo=-Infinity;
+  (poly||[]).forEach(p=>{ aLa=Math.min(aLa,p[0]); bLa=Math.max(bLa,p[0]); aLo=Math.min(aLo,p[1]); bLo=Math.max(bLo,p[1]); });
+  return {lat:(aLa+bLa)/2, lng:(aLo+bLo)/2}; }
+function mkEl(cls,html){ const e=document.createElement('div'); e.className=cls; if(html!=null) e.innerHTML=html; return e; }
+/* Leaflet-achtige helpers bovenop MapLibre, zodat de rest van de code herkenbaar blijft */
+function mapSetView(ll,zoom,animate){ if(!map||!ll) return; const o={center:toLngLat(ll)}; if(zoom!=null) o.zoom=zoom; try{ animate?map.easeTo(o):map.jumpTo(o); }catch(_){} }
+function mapPanTo(ll,animate){ if(!map||!ll) return; try{ animate?map.panTo(toLngLat(ll)):map.jumpTo({center:toLngLat(ll)}); }catch(_){} }
+function fitToBounds(pts,animate){ if(!map||!pts||!pts.length) return; try{ const b=new maplibregl.LngLatBounds(); pts.forEach(p=>b.extend(toLngLat(p)));
+  map.fitBounds(b,{padding:{top:150,bottom:300,left:60,right:60},maxZoom:17,animate:!!animate}); }catch(_){} }
 try{
-  map=L.map('map',{zoomControl:false,attributionControl:false,zoomSnap:0}).setView([53.2185,6.5662],16);
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{subdomains:'abcd',maxZoom:20}).addTo(map);
-  const path=[];
+  map=new maplibregl.Map({ container:'map', style:SS_MAP_STYLE,
+    center:[6.5662,53.2185], zoom:16, minZoom:11, maxZoom:20,
+    attributionControl:false, dragRotate:false, pitchWithRotate:false, touchPitch:false, renderWorldCopies:false });
+  try{ map.touchZoomRotate.disableRotation(); map.keyboard.disable(); }catch(_){}
+
   ZONES.forEach(z=>{
-    const poly=L.polygon(z.polygon); // onzichtbaar: alleen voor geofence + midden
     // marker op eigen 'point' (bv. midden op de vaart) als die is opgegeven, anders het polygon-midden
-    const ctr=(z.point&&z.point.length===2)?L.latLng(z.point[0],z.point[1]):poly.getBounds().getCenter(); path.push(ctr);
-    const m=L.marker(ctr,{icon:L.divIcon({className:'place-pin',iconSize:[0,0],iconAnchor:[0,0],html:'<span class="pulse"></span><span class="check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg></span><span class="ppin"><img src="'+(z.pin||'')+'" alt="" onerror="this.style.display=\'none\'"></span>'})}).addTo(map);
-    m.bindTooltip(z.name,{direction:'top',className:'lm-tip',offset:[0,-28]});
-    m.on('click',()=>openSpot(z.id));
+    const ctr=(z.point&&z.point.length===2)?{lat:z.point[0],lng:z.point[1]}:polyCenter(z.polygon);
+    const el=mkEl('place-pin','<span class="pulse"></span><span class="check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg></span><span class="ppin"><img src="'+(z.pin||'')+'" alt="" onerror="this.style.display=\'none\'"></span>');
+    el.title=z.name;
+    const m=new maplibregl.Marker({element:el,anchor:'center'}).setLngLat([ctr.lng,ctr.lat]).addTo(map);
+    el.addEventListener('click',e=>{ e.stopPropagation(); openSpot(z.id); });
     markersById[z.id]=m;
-    z._center=ctr; z.polygon.forEach(p=>bounds.push(p));
+    z._center=ctr; (z.polygon||[]).forEach(p=>bounds.push(p));
   });
-  // (geen routelijn)
   SPOTS.forEach(s=>{
+    if(!s.point) return;
     const HORECA_ICO='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3v7a2 2 0 0 0 4 0V3M8 10v11M16 3c-1.5 0-2.5 1.5-2.5 4s1 4 2.5 4v10"/></svg>';
-    const inner = '<span class="spot-pin '+s.type+'">'+(s.type==='horeca'?HORECA_ICO:'')+'</span>';
-    const html = '<span class="spot-hit">'+inner+'</span>';
-    const m=L.marker(s.point,{icon:L.divIcon({className:'spot-wrap',iconSize:[0,0],iconAnchor:[0,0],html:html})}).addTo(map);
-    m.bindTooltip(s.name,{direction:'top',className:'lm-tip',offset:[0,-14]});
-    m.on('click',()=>openSpot(s.id));
+    const inner='<span class="spot-pin '+s.type+'">'+(s.type==='horeca'?HORECA_ICO:'')+'</span>';
+    const el=mkEl('spot-wrap','<span class="spot-hit">'+inner+'</span>'); el.title=s.name;
+    const m=new maplibregl.Marker({element:el,anchor:'center'}).setLngLat([s.point[1],s.point[0]]).addTo(map);
+    el.addEventListener('click',e=>{ e.stopPropagation(); openSpot(s.id); });
     spotMarkers[s.id]=m;
   });
   const fit=()=>{ applyDemoView(false); };
-  fit(); setTimeout(fit,300); window.addEventListener('load',()=>setTimeout(fit,200));
-  window.addEventListener('resize',()=>{try{map.invalidateSize();}catch(e){}});
+  map.on('load',fit); fit(); setTimeout(fit,300);
+  window.addEventListener('resize',()=>{try{map.resize();}catch(e){}});
 }catch(e){}
 
 /* Hoofdlocaties (voorheen pratende plekken) als content-plekken:
@@ -947,9 +971,9 @@ try{
 })();
 
 /* start-/demoweergave van de kaart (zelfde als bij het opstarten) */
-function applyDemoView(animate){ if(!map) return; try{ map.invalidateSize();
-  if(MAP_START_CENTER){ map.setView(MAP_START_CENTER,MAP_START_ZOOM,{animate:!!animate}); }
-  else if(bounds.length){ map.fitBounds(bounds,{paddingTopLeft:[60,150],paddingBottomRight:[60,300]}); map.setZoom(map.getZoom()+MAP_ZOOM_BOOST); }
+function applyDemoView(animate){ if(!map) return; try{ map.resize();
+  if(MAP_START_CENTER){ mapSetView(MAP_START_CENTER,MAP_START_ZOOM,!!animate); }
+  else if(bounds.length){ fitToBounds(bounds,!!animate); }
 }catch(e){} }
 
 /* ===== SLIDE ===== */
@@ -1000,7 +1024,7 @@ const guideMini=$('#guideMini');   // zwevende gids-balk (gids praat door als he
 function updateVoiceFab(){ if(!voiceFab) return; voiceFab.classList.remove('show'); /* vervangen door de gids-balk (#guideMini) */ }
 function showConvoPanel(){ if(!active) return; const z=ZONES.find(x=>x.id===active);
   sheet.classList.remove('info'); sheet.classList.add('detail');
-  if(map&&z&&z._center) map.panTo(z._center,{animate:true}); setH(snaps()[1]); }
+  if(map&&z&&z._center) mapPanTo(z._center,true); setH(snaps()[1]); }
 function minimizeConvo(){ sheet.classList.remove('detail'); sheet.classList.remove('info'); setH(snaps()[0]); updateVoiceFab(); }
 voiceFab.onclick=()=>{ if(guideOpen) showGuidePanel(); else showConvoPanel(); };
 
@@ -1011,8 +1035,8 @@ const cardById={};
 function setMode(m){ if(m==='live') tourStarted=true; mode=m; $('#mLive').classList.toggle('on',m==='live'); $('#mDemo').classList.toggle('on',m==='demo');
   $('#eyebrow').textContent=m==='live'?'Je staat bij':'Demo · je bezoekt';
   if(m==='live'){ hideDemoMe(); $('#maphint').classList.add('hide'); primeMic(); startGeo(); startCompass();
-    if(LIVE_AUTO_CENTER){ liveNeedsCenter=true; if(map && livePos){ map.setView([livePos.lat,livePos.lng],LIVE_CENTER_ZOOM,{animate:true}); liveNeedsCenter=false; } } }
-  else { stopGeo(); if(liveMe&&map){map.removeLayer(liveMe);liveMe=null;} showDemoMe(); applyDemoView(true); if(!active)$('#maphint').classList.remove('hide'); }
+    if(LIVE_AUTO_CENTER){ liveNeedsCenter=true; if(map && livePos){ mapSetView([livePos.lat,livePos.lng],LIVE_CENTER_ZOOM,true); liveNeedsCenter=false; } } }
+  else { stopGeo(); if(liveMe){liveMe.remove();liveMe=null;} showDemoMe(); applyDemoView(true); if(!active)$('#maphint').classList.remove('hide'); }
   showRecenter(false);
   updateNavHud();
 }
@@ -1021,15 +1045,15 @@ $('#mLive').onclick=()=>setMode('live'); $('#mDemo').onclick=()=>setMode('demo')
 /* ===== VERSCHUIFBARE LOCATIE (demo) ===== */
 function showDemoMe(){
   if(!map||demoMe) return;
-  demoMe=L.marker(DEMO_CURSOR_START,{draggable:true,zIndexOffset:1000,
-    icon:L.divIcon({className:'me-pin demo',iconSize:[34,34],iconAnchor:[17,17],html:ME_HTML})}).addTo(map);
+  const el=mkEl('me-pin demo',ME_HTML); el.style.zIndex='1000';
+  demoMe=new maplibregl.Marker({element:el,anchor:'center',draggable:true}).setLngLat([DEMO_CURSOR_START[1],DEMO_CURSOR_START[0]]).addTo(map);
   demoMe.on('drag',()=>{updateNavHud();checkSpots();});
-  demoMe.on('dragend',()=>{ const p=demoMe.getLatLng(); const here=ZONES.find(z=>inPoly(p.lat,p.lng,z.polygon)); const sp=here?null:spotAt({lat:p.lat,lng:p.lng});
+  demoMe.on('dragend',()=>{ const p=demoMe.getLngLat(); const here=ZONES.find(z=>inPoly(p.lat,p.lng,z.polygon)); const sp=here?null:spotAt({lat:p.lat,lng:p.lng});
     if(here){ unlockedSpots.add(here.id); markVisited(here.id); openSpot(here.id); }
     else if(sp){ unlockedSpots.add(sp.id); openSpot(sp.id); }
     else if(activeSpot){ closeToList(); } updateNavHud(); checkSpots(); });
 }
-function hideDemoMe(){ if(demoMe&&map){map.removeLayer(demoMe);demoMe=null;} demoZone=null; }
+function hideDemoMe(){ if(demoMe){demoMe.remove();demoMe=null;} demoZone=null; }
 
 /* ===== OPENEN / SLUITEN ===== */
 function closeToList(){ stopVoice(); stopSpotAudio(); stopSlides(); stopSpotSlides(); setActiveMarker(null);
@@ -1243,7 +1267,7 @@ function openSpot(id, noPan){ const s=spotById[id]; if(!s) return;
   }
   { const rb=$('#iRouteBtn'); if(rb) rb.onclick=()=>askRoute(s); updateRouteBtn(); }
   $('#iFoot').innerHTML='';
-  if(map && s.point && !noPan) map.panTo(s.point,{animate:true});
+  if(map && s.point && !noPan) mapPanTo(s.point,true);
   if(overGuide){ sheet.classList.add('info'); /* detail+guide blijven staan, info komt eroverheen */ }
   else { sheet.classList.remove('detail'); sheet.classList.add('info'); }
   setH(snaps()[1]); const ib=$('.info-body'); if(ib) ib.scrollTop=0;
@@ -1295,7 +1319,7 @@ function checkSpots(){ let changed=false; SPOTS.forEach(s=>{ if(!unlockedSpots.h
 /* ===== Filter: toon/verberg categorieën op de kaart ===== */
 const filterState={agent:true,sight:true,horeca:true};
 function applyFilter(){ if(!map) return;
-  const set=(m,on)=>{ if(!m) return; try{ if(on){ if(!(map.hasLayer&&map.hasLayer(m))) m.addTo(map); } else { if(map.removeLayer) map.removeLayer(m); } }catch(e){} };
+  const set=(m,on)=>{ if(!m) return; const el=m.getElement&&m.getElement(); if(el) el.style.display=on?'':'none'; };
   Object.keys(markersById).forEach(id=>set(markersById[id],filterState.agent));
   SPOTS.forEach(s=>set(spotMarkers[s.id],filterState[s.type])); }
 { const fh=$('#filterHead'); if(fh) fh.onclick=()=>{ const lp=$('#langPick'); if(lp) lp.classList.remove('open'); $('#filter').classList.toggle('open'); };
@@ -1539,9 +1563,9 @@ function geoTrigger(la,lo,acc){
   return best;
 }
 function startGeo(){ if(!navigator.geolocation){ showToast(tr('geoUnsupported')); if(mode==='live') setMode('demo'); return; } watch=navigator.geolocation.watchPosition(pos=>{ const {latitude:la,longitude:lo}=pos.coords; livePos={lat:la,lng:lo};
-  if(map){ if(!liveMe){ liveMe=L.marker([la,lo],{icon:L.divIcon({className:'me-pin',iconSize:[34,34],iconAnchor:[17,17],html:ME_HTML})}).addTo(map); applyHeading(); } else liveMe.setLatLng([la,lo]);
-    if(liveNeedsCenter){ map.setView([la,lo],LIVE_CENTER_ZOOM,{animate:true}); liveNeedsCenter=false; showRecenter(false); }
-    else if(LIVE_FOLLOW && mode==='live'){ map.panTo([la,lo],{animate:true}); showRecenter(false); } }
+  if(map){ if(!liveMe){ const el=mkEl('me-pin',ME_HTML); liveMe=new maplibregl.Marker({element:el,anchor:'center'}).setLngLat([lo,la]).addTo(map); applyHeading(); } else liveMe.setLngLat([lo,la]);
+    if(liveNeedsCenter){ mapSetView([la,lo],LIVE_CENTER_ZOOM,true); liveNeedsCenter=false; showRecenter(false); }
+    else if(LIVE_FOLLOW && mode==='live'){ mapPanTo([la,lo],true); showRecenter(false); } }
   updateNavHud();
   const acc = pos.coords && pos.coords.accuracy;
   if(acc==null || acc<=GEO_MAX_ACC) checkSpots();   /* alleen ontgrendelen bij een bruikbare fix */
@@ -1554,7 +1578,7 @@ function stopGeo(){ if(watch!=null){ navigator.geolocation.clearWatch(watch); wa
 
 /* centreer-knop: alleen in live, verschijnt zodra je de kaart verschuift */
 function showRecenter(on){ const b=$('#recenterBtn'); if(b) b.classList.toggle('show', !!on && mode==='live'); }
-function recenterLive(){ if(map && livePos){ map.panTo([livePos.lat,livePos.lng],{animate:true}); } showRecenter(false); }
+function recenterLive(){ if(map && livePos){ mapPanTo([livePos.lat,livePos.lng],true); } showRecenter(false); }
 { const rb=$('#recenterBtn'); if(rb) rb.onclick=recenterLive; }
 if(map) map.on('dragstart',()=>{ if(mode==='live') showRecenter(true); });
 
@@ -1577,7 +1601,7 @@ function updatePinVisited(id){ const m=markersById[id]; const el=m&&m.getElement
 function updateProgress(){ const n=visited.size; const pc=$('#progCount'); if(pc) pc.textContent=n; const pt=$('#progTotal'); if(pt) pt.textContent=TOTAL;
   const ring=$('#progRing'); if(ring){ const C=2*Math.PI*15.5; ring.setAttribute('stroke-dasharray',C.toFixed(1)); ring.setAttribute('stroke-dashoffset',(C*(1-n/TOTAL)).toFixed(1)); } }
 
-function curPos(){ if(mode==='live') return livePos; if(demoMe){ const p=demoMe.getLatLng(); return {lat:p.lat,lng:p.lng}; } return null; }
+function curPos(){ if(mode==='live') return livePos; if(demoMe){ const p=demoMe.getLngLat(); return {lat:p.lat,lng:p.lng}; } return null; }
 function bearing(la1,lo1,la2,lo2){ const t=Math.PI/180; const y=Math.sin((lo2-lo1)*t)*Math.cos(la2*t);
   const x=Math.cos(la1*t)*Math.sin(la2*t)-Math.sin(la1*t)*Math.cos(la2*t)*Math.cos((lo2-lo1)*t); return (Math.atan2(y,x)/t+360)%360; }
 function fmtDist(m){ if(m>=1000) return (m/1000).toFixed(m<10000?1:0)+' km'; return Math.max(0,Math.round(m/5)*5)+' m'; }
@@ -1621,10 +1645,6 @@ applySound(); updateProgress();
 
 /* ===== i18n + welkom + taalkiezer ===== */
 let lang='nl', uiLang='nl', otherMode=false;
-/* Site-brede taalkeuze (adam.lang) — gedeeld met de rest van adamagents.nl; alleen nl/en/de */
-const SITE_LANG_KEY='adam.lang', SITE_LANGS=['nl','en','de'];
-function siteLangRead(){ try{ const v=localStorage.getItem(SITE_LANG_KEY); return SITE_LANGS.includes(v)?v:null; }catch(e){ return null; } }
-function siteLangWrite(l){ if(!SITE_LANGS.includes(l)) return; try{ localStorage.setItem(SITE_LANG_KEY,l); }catch(e){} }
 const LANGS=[['af','Afrikaans'],['ar','العربية'],['hy','Հայերեն'],['as','অসমীয়া'],['ast','Asturianu'],['az','Azərbaycan'],['be','Беларуская'],['bn','বাংলা'],['bs','Bosanski'],['bg','Български'],['my','မြန်မာ'],['yue','粵語'],['ca','Català'],['zh','中文'],['hr','Hrvatski'],['cs','Čeština'],['da','Dansk'],['nl','Nederlands'],['en','English'],['et','Eesti'],['fil','Filipino'],['fi','Suomi'],['fr','Français'],['gl','Galego'],['ka','ქართული'],['de','Deutsch'],['el','Ελληνικά'],['gu','ગુજરાતી'],['ha','Hausa'],['he','עברית'],['hi','हिन्दी'],['hu','Magyar'],['is','Íslenska'],['id','Bahasa Indonesia'],['ga','Gaeilge'],['it','Italiano'],['ja','日本語'],['jv','Basa Jawa'],['kn','ಕನ್ನಡ'],['kk','Қазақша'],['ky','Кыргызча'],['ko','한국어'],['lv','Latviešu'],['lt','Lietuvių'],['lb','Lëtzebuergesch'],['mk','Македонски'],['ms','Bahasa Melayu'],['ml','മലയാളം'],['mt','Malti'],['mi','Māori'],['mr','मराठी'],['mn','Монгол'],['ne','नेपाली'],['no','Norsk'],['oc','Occitan'],['or','ଓଡ଼ିଆ'],['ps','پښتو'],['fa','فارسی'],['pl','Polski'],['pt-br','Português (Brasil)'],['pt','Português'],['pa','ਪੰਜਾਬੀ'],['ro','Română'],['ru','Русский'],['sr','Српски'],['sd','سنڌي'],['sk','Slovenčina'],['sl','Slovenščina'],['so','Soomaali'],['es','Español'],['sw','Kiswahili'],['sv','Svenska'],['tg','Тоҷикӣ'],['ta','தமிழ்'],['te','తెలుగు'],['th','ไทย'],['tr','Türkçe'],['uk','Українська'],['ur','اردو'],['uz','Oʻzbek'],['vi','Tiếng Việt'],['cy','Cymraeg'],['yo','Yorùbá']];
 const T={
   wEyebrow:{nl:'Audio tour · Stadsstemmen',en:'Audio tour · Stadsstemmen',de:'Audiotour · Stadsstemmen',it:'Audioguida · Stadsstemmen',pt:'Áudio tour · Stadsstemmen',es:'Audioguía · Stadsstemmen',pl:'Audioprzewodnik · Stadsstemmen',da:'Audiotur · Stadsstemmen',sv:'Ljudtur · Stadsstemmen',no:'Lydtur · Stadsstemmen',fi:'Ääniopas · Stadsstemmen',el:'Ξενάγηση ήχου · Stadsstemmen'},
@@ -1734,7 +1754,7 @@ function applyI18n(){ uiLang=(lang==='pt-br')?'pt':(UI_LANGS.includes(lang)?lang
   const REST=LANGS.filter(([c])=>!UI_LANGS.includes(c)).map(([c])=>c);
   let showAll=false;
   function choose(c){ lang=c; otherMode=!['nl','en','de'].includes(c); applyI18n();
-    try{ localStorage.setItem('ss_lang',lang); }catch(_){} siteLangWrite(lang);
+    try{ localStorage.setItem('ss_lang',lang); }catch(_){}
     const ws=$('#wsel'); if(ws) ws.value=c;
     document.querySelectorAll('#langRow button').forEach(x=>{ const v=x.dataset.l; x.classList.toggle('on', otherMode? v==='other': v===c); });
     pick.classList.remove('open'); showAll=false; }
@@ -1777,12 +1797,12 @@ function applyI18n(){ uiLang=(lang==='pt-br')?'pt':(UI_LANGS.includes(lang)?lang
     const sep=document.createElement('option'); sep.disabled=true; sep.textContent='\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500'; sel.appendChild(sep);
     LANGS.forEach(([c,n])=>{ if(SKIP.includes(c)) return; const o=document.createElement('option'); o.value=c; o.textContent=n; sel.appendChild(o); }); }
   function paint(){ document.querySelectorAll('#langRow button').forEach(b=>{ const v=b.dataset.l; b.classList.toggle('on', otherMode ? v==='other' : v===lang); }); }
-  function saveLang(){ try{ localStorage.setItem('ss_lang',lang); }catch(_){} siteLangWrite(lang); }
+  function saveLang(){ try{ localStorage.setItem('ss_lang',lang); }catch(_){} }
   document.querySelectorAll('#langRow button').forEach(b=>{ b.onclick=()=>{ startBg(); const v=b.dataset.l; if(v==='other'){ otherMode=true; $('#wsel').classList.add('show'); lang=$('#wsel').value; } else { otherMode=false; $('#wsel').classList.remove('show'); lang=v; } paint(); applyI18n(); saveLang(); }; });
   if(sel) sel.onchange=e=>{ startBg(); lang=e.target.value; otherMode=true; paint(); applyI18n(); saveLang(); };
   const st=$('#wstart'); if(st) st.onclick=()=>{ saveLang(); fadeOutBg(); $('#welcome').classList.add('hide'); primeMic(); if(window.startIntro) window.startIntro(true); };
   /* eerdere taalkeuze herstellen */
-  try{ let sl=localStorage.getItem('ss_lang'); if(!sl || SITE_LANGS.includes(sl)) sl=siteLangRead()||sl; if(sl){ lang=sl;
+  try{ const sl=localStorage.getItem('ss_lang'); if(sl){ lang=sl;
     if(['nl','en','de'].includes(sl)){ otherMode=false; } else { otherMode=true; if(sel){ sel.value=sl; sel.classList.add('show'); } } } }catch(_){}
   paint();
   applyI18n();
@@ -1861,7 +1881,7 @@ restoreProgress();
   function finish(){ open=false; ov.classList.remove('show'); ov.setAttribute('aria-hidden','true');
     /* na de uitleg (klaar én overslaan) wat verder inzoomen; centreren op het demo-middelpunt zodat
        zowel de Martinitoren als de locatiestip in beeld blijven */
-    try{ if(map){ if(MAP_START_CENTER) map.setView(MAP_START_CENTER, INTRO_END_ZOOM, {animate:true}); else map.setZoom(INTRO_END_ZOOM,{animate:true}); } }catch(_){} }
+    try{ if(map){ if(MAP_START_CENTER) mapSetView(MAP_START_CENTER, INTRO_END_ZOOM, true); else map.easeTo({zoom:INTRO_END_ZOOM}); } }catch(_){} }
 
   btnNext.onclick=()=>{ if(idx>=steps.length-1) finish(); else show(idx+1); };
   btnPrev.onclick=()=>show(idx-1);
@@ -1872,7 +1892,7 @@ restoreProgress();
   window.startIntro=function(fromStart){ startGps=!!fromStart; steps=buildSteps(); idx=0; open=true;
     try{ setH(snaps()[0],false); }catch(_){}
     /* de uitleg begint bij de Martinitoren: kaart daar alvast op centreren, zodat niets verspringt */
-    try{ const z=ZONES[0]; if(map&&z&&z._center) map.setView(z._center, Math.max(map.getZoom(),16), {animate:false}); }catch(_){}
+    try{ const z=ZONES[0]; if(map&&z&&z._center) mapSetView(z._center, Math.max(map.getZoom(),16), false); }catch(_){}
     ov.classList.add('show'); ov.setAttribute('aria-hidden','false');
     show(0,true);
   };
