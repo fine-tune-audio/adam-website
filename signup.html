@@ -85,7 +85,7 @@
   // Placeholder for the payment step: go straight to the real app signup + onboarding.
   const APP_SIGNUP = 'https://app.adamagents.nl/signup';
   $('payBtn').addEventListener('click', () => {
-    location.href = `${APP_SIGNUP}?plan=${encodeURIComponent(plan.id)}&interval=${interval}`;
+    location.href = `${APP_SIGNUP}?code=pasta123&plan=${encodeURIComponent(plan.id)}&interval=${interval}`;
   });
 </script>
 </body>
