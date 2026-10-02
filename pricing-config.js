@@ -40,7 +40,7 @@ export const CURRENCY = 'EUR';
 
 /** Routes used by the CTAs. */
 export const ROUTES = Object.freeze({
-  signup: 'contact.html', // no signup flow exists yet; params are passed for billing to pick up later
+  signup: 'signup.html', // placeholder signup (password gate); no billing yet. Params are passed for billing to pick up later
   contact: 'contact.html'
 });
 
@@ -92,7 +92,7 @@ export function formatInt(n, lang = 'nl') {
   return new Intl.NumberFormat(INTL_LOCALES[lang] || INTL_LOCALES.nl).format(n);
 }
 
-/** CTA link: signup route plus plan/interval params. */
-export function ctaHref(planId, interval = 'monthly') {
-  return `${ROUTES.signup}?plan=${encodeURIComponent(planId)}&interval=${encodeURIComponent(interval)}`;
+/** CTA link: route (default contact) plus plan/interval params. */
+export function ctaHref(planId, interval = 'monthly', route = ROUTES.contact) {
+  return `${route}?plan=${encodeURIComponent(planId)}&interval=${encodeURIComponent(interval)}`;
 }

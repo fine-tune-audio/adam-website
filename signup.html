@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Aanmelden | ADAM AI Agents</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;}
+    :root{--blue:#1D2ED8;--yellow:#CEFF1A;--black:#0A0A0A;--white:#FFFFFF;--gray:#E5E7EB;--gray-mid:#6B7280;--off:#F8F8F8;}
+    body{font-family:'Sora',sans-serif;background:var(--black);color:var(--white);min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px 16px;}
+    :focus-visible{outline:3px solid var(--yellow);outline-offset:2px;}
+    .box{background:var(--white);color:var(--black);border-radius:8px;padding:36px 32px;width:min(440px,100%);}
+    .label{font-size:12px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--blue);margin-bottom:12px;}
+    h1{font-size:26px;font-weight:800;letter-spacing:-0.03em;margin-bottom:8px;}
+    p.sub{font-size:14px;color:var(--gray-mid);line-height:1.6;margin-bottom:24px;}
+    label{display:block;font-size:13px;font-weight:700;margin-bottom:6px;}
+    input{width:100%;font-family:inherit;font-size:15px;padding:12px 14px;border:1px solid var(--gray);border-radius:4px;margin-bottom:16px;}
+    button.go{width:100%;font-family:inherit;font-size:15px;font-weight:700;padding:14px 20px;border:0;border-radius:4px;background:var(--blue);color:#fff;cursor:pointer;}
+    button.go:hover{opacity:0.85;}
+    .err{color:#B91C1C;font-size:13px;font-weight:600;margin:-8px 0 16px;}
+    .summary{background:var(--off);border-radius:6px;padding:16px 18px;margin-bottom:20px;font-size:14px;line-height:1.7;}
+    .summary strong{font-weight:800;}
+    .note{font-size:12px;color:var(--gray-mid);margin-top:16px;line-height:1.5;}
+    a.back{display:inline-block;margin-top:20px;font-size:13px;font-weight:600;color:var(--gray-mid);text-decoration:none;}
+    [hidden]{display:none!important;}
+  </style>
+</head>
+<body>
+<main class="box">
+  <div class="label">ADAM</div>
+
+  <section id="gate">
+    <h1>Aanmelden</h1>
+    <p class="sub">Voer het wachtwoord in om verder te gaan.</p>
+    <form id="gateForm" autocomplete="off">
+      <label for="pw">Wachtwoord</label>
+      <input id="pw" type="password" required autofocus>
+      <p class="err" id="gateErr" hidden>Onjuist wachtwoord.</p>
+      <button class="go" type="submit">Doorgaan</button>
+    </form>
+  </section>
+
+  <section id="account" hidden>
+    <h1>Account aanmaken</h1>
+    <p class="sub">Dit is een voorbeeld van de aanmeldstap. Betalingen zijn nog niet actief.</p>
+    <div class="summary" id="summary"></div>
+    <form id="acctForm">
+      <label for="nm">Naam</label>
+      <input id="nm" type="text" autocomplete="name" required>
+      <label for="em">E-mail</label>
+      <input id="em" type="email" autocomplete="email" required>
+      <label for="co">Bedrijf</label>
+      <input id="co" type="text" autocomplete="organization">
+      <button class="go" type="submit">Account aanmaken</button>
+    </form>
+    <p class="note">Er wordt niets opgeslagen of in rekening gebracht.</p>
+  </section>
+
+  <section id="done" hidden>
+    <h1>Bedankt!</h1>
+    <p class="sub" id="doneMsg"></p>
+  </section>
+
+  <a class="back" href="pricing.html">&larr; Terug naar prijzen</a>
+</main>
+
+<script type="module">
+  import { PLANS, priceFor, formatMoney } from './pricing-config.js';
+
+  // Placeholder gate only. Not real security: replace with real signup + billing.
+  const PASSWORD = 'pasta123';
+  const KEY = 'adam.signup.unlocked';
+  const q = new URLSearchParams(location.search);
+  const plan = PLANS.find((p) => p.id === q.get('plan')) || PLANS[1];
+  const interval = q.get('interval') === 'annual' ? 'annual' : 'monthly';
+
+  const $ = (id) => document.getElementById(id);
+  const show = (id) => ['gate', 'account', 'done'].forEach((s) => { $(s).hidden = s !== id; });
+
+  const price = formatMoney(priceFor(plan, interval));
+  const name = plan.id.charAt(0).toUpperCase() + plan.id.slice(1);
+  $('summary').innerHTML = `<strong>${name}</strong><br>${price} / maand excl. btw<br>${interval === 'annual' ? 'Jaarlijks gefactureerd' : 'Maandelijks gefactureerd'}`;
+
+  let unlocked = false;
+  try { unlocked = sessionStorage.getItem(KEY) === '1'; } catch (e) { /* storage blocked */ }
+  show(unlocked ? 'account' : 'gate');
+
+  $('gateForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    if ($('pw').value === PASSWORD) {
+      try { sessionStorage.setItem(KEY, '1'); } catch (err) { /* storage blocked */ }
+      show('account');
+    } else {
+      $('gateErr').hidden = false;
+      $('pw').select();
+    }
+  });
+
+  $('acctForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    $('doneMsg').textContent = `Je account voor ${name} is aangemaakt (voorbeeld). Hier komt later de betaalstap.`;
+    show('done');
+  });
+</script>
+</body>
+</html>
