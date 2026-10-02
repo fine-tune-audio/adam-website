@@ -44,24 +44,11 @@
   </section>
 
   <section id="account" hidden>
-    <h1>Account aanmaken</h1>
-    <p class="sub">Dit is een voorbeeld van de aanmeldstap. Betalingen zijn nog niet actief.</p>
+    <h1>Betalen</h1>
+    <p class="sub">Voorbeeldstap: betalingen zijn nog niet actief. Klik hieronder om door te gaan naar het aanmaken van je account.</p>
     <div class="summary" id="summary"></div>
-    <form id="acctForm">
-      <label for="nm">Naam</label>
-      <input id="nm" type="text" autocomplete="name" required>
-      <label for="em">E-mail</label>
-      <input id="em" type="email" autocomplete="email" required>
-      <label for="co">Bedrijf</label>
-      <input id="co" type="text" autocomplete="organization">
-      <button class="go" type="submit">Account aanmaken</button>
-    </form>
-    <p class="note">Er wordt niets opgeslagen of in rekening gebracht.</p>
-  </section>
-
-  <section id="done" hidden>
-    <h1>Bedankt!</h1>
-    <p class="sub" id="doneMsg"></p>
+    <button class="go" id="payBtn" type="button">Betaal hier</button>
+    <p class="note">Er wordt niets in rekening gebracht.</p>
   </section>
 
   <a class="back" href="pricing.html">&larr; Terug naar prijzen</a>
@@ -78,7 +65,7 @@
   const interval = q.get('interval') === 'annual' ? 'annual' : 'monthly';
 
   const $ = (id) => document.getElementById(id);
-  const show = (id) => ['gate', 'account', 'done'].forEach((s) => { $(s).hidden = s !== id; });
+  const show = (id) => ['gate', 'account'].forEach((s) => { $(s).hidden = s !== id; });
 
   const price = formatMoney(priceFor(plan, interval));
   const name = plan.id.charAt(0).toUpperCase() + plan.id.slice(1);
@@ -99,10 +86,10 @@
     }
   });
 
-  $('acctForm').addEventListener('submit', (e) => {
-    e.preventDefault();
-    $('doneMsg').textContent = `Je account voor ${name} is aangemaakt (voorbeeld). Hier komt later de betaalstap.`;
-    show('done');
+  // Placeholder for the payment step: go straight to the real app signup + onboarding.
+  const APP_SIGNUP = 'https://app.adamagents.nl/signup';
+  $('payBtn').addEventListener('click', () => {
+    location.href = `${APP_SIGNUP}?plan=${encodeURIComponent(plan.id)}&interval=${interval}`;
   });
 </script>
 </body>
