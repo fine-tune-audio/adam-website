@@ -1,10 +1,14 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
+  <meta name="i18n-page" content="signup">
+  <script>try{var __p=new URLSearchParams(location.search).get('lang'),__l=(__p||localStorage.getItem('adam.lang')||'nl').toLowerCase();if(__l!=='nl')document.documentElement.classList.add('i18n-pending');}catch(e){}</script>
+  <script type="module" src="i18n.js"></script>
+  <style>.i18n-pending body{visibility:hidden;}</style>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex">
-  <title>Aanmelden | ADAM AI Agents</title>
+  <title data-i18n="meta.signup.title">Aanmelden | ADAM AI Agents</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&display=swap" rel="stylesheet"/>
   <style>
@@ -30,31 +34,32 @@
 </head>
 <body>
 <main class="box">
-  <div class="label">ADAM</div>
+  <div class="label" data-i18n-skip>ADAM</div>
 
   <section id="gate">
-    <h1>Aanmelden</h1>
-    <p class="sub">Voer het wachtwoord in om verder te gaan.</p>
+    <h1 data-i18n="signup.gate.title">Aanmelden</h1>
+    <p class="sub" data-i18n="signup.gate.sub">Voer het wachtwoord in om verder te gaan.</p>
     <form id="gateForm" autocomplete="off">
-      <label for="pw">Wachtwoord</label>
+      <label for="pw" data-i18n="signup.gate.password">Wachtwoord</label>
       <input id="pw" type="password" required autofocus>
-      <p class="err" id="gateErr" hidden>Onjuist wachtwoord.</p>
-      <button class="go" type="submit">Doorgaan</button>
+      <p class="err" id="gateErr" data-i18n="signup.gate.error" hidden>Onjuist wachtwoord.</p>
+      <button class="go" type="submit" data-i18n="signup.gate.continue">Doorgaan</button>
     </form>
   </section>
 
   <section id="account" hidden>
-    <h1>Betalen</h1>
-    <p class="sub">Voorbeeldstap: betalingen zijn nog niet actief. Klik hieronder om door te gaan naar het aanmaken van je account.</p>
+    <h1 data-i18n="signup.pay.title">Betalen</h1>
+    <p class="sub" data-i18n="signup.pay.sub">Voorbeeldstap: betalingen zijn nog niet actief. Klik hieronder om door te gaan naar het aanmaken van je account.</p>
     <div class="summary" id="summary"></div>
-    <button class="go" id="payBtn" type="button">Betaal hier</button>
-    <p class="note">Er wordt niets in rekening gebracht.</p>
+    <button class="go" id="payBtn" type="button" data-i18n="signup.pay.button">Betaal hier</button>
+    <p class="note" data-i18n="signup.pay.note">Er wordt niets in rekening gebracht.</p>
   </section>
 
-  <a class="back" href="pricing.html">&larr; Terug naar prijzen</a>
+  <a class="back" href="pricing.html" data-i18n="signup.back">&larr; Terug naar prijzen</a>
 </main>
 
 <script type="module">
+  import { t, getLang, ready } from './i18n.js';
   import { PLANS, priceFor, formatMoney } from './pricing-config.js';
 
   // Placeholder gate only. Not real security: replace with real signup + billing.
@@ -66,9 +71,14 @@
   const $ = (id) => document.getElementById(id);
   const show = (id) => ['gate', 'account'].forEach((s) => { $(s).hidden = s !== id; });
 
-  const price = formatMoney(priceFor(plan, interval));
   const name = plan.id.charAt(0).toUpperCase() + plan.id.slice(1);
-  $('summary').innerHTML = `<strong>${name}</strong><br>${price} / maand excl. btw<br>${interval === 'annual' ? 'Jaarlijks gefactureerd' : 'Maandelijks gefactureerd'}`;
+  function renderSummary() {
+    const price = formatMoney(priceFor(plan, interval), { lang: getLang() });
+    const line = t('signup.summary.price').replace('{price}', price);
+    $('summary').innerHTML = `<strong>${name}</strong><br>${line}<br>${t(interval === 'annual' ? 'signup.summary.annual' : 'signup.summary.monthly')}`;
+  }
+  ready.then(renderSummary);
+  document.addEventListener('adam:langchange', renderSummary);
 
   show('gate');
 
