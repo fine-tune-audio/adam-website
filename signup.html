@@ -59,7 +59,6 @@
 
   // Placeholder gate only. Not real security: replace with real signup + billing.
   const PASSWORD = 'pasta123';
-  const KEY = 'adam.signup.unlocked';
   const q = new URLSearchParams(location.search);
   const plan = PLANS.find((p) => p.id === q.get('plan')) || PLANS[1];
   const interval = q.get('interval') === 'annual' ? 'annual' : 'monthly';
@@ -71,14 +70,11 @@
   const name = plan.id.charAt(0).toUpperCase() + plan.id.slice(1);
   $('summary').innerHTML = `<strong>${name}</strong><br>${price} / maand excl. btw<br>${interval === 'annual' ? 'Jaarlijks gefactureerd' : 'Maandelijks gefactureerd'}`;
 
-  let unlocked = false;
-  try { unlocked = sessionStorage.getItem(KEY) === '1'; } catch (e) { /* storage blocked */ }
-  show(unlocked ? 'account' : 'gate');
+  show('gate');
 
   $('gateForm').addEventListener('submit', (e) => {
     e.preventDefault();
     if ($('pw').value === PASSWORD) {
-      try { sessionStorage.setItem(KEY, '1'); } catch (err) { /* storage blocked */ }
       show('account');
     } else {
       $('gateErr').hidden = false;
