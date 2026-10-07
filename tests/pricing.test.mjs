@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  PLANS, PLAN_ORDER, PLAN_FEATURES, ADDONS, BILLING_RULES, CALCULATOR, AVG_CALL_MINUTES, ROUTES,
+  PLANS, PLAN_ORDER, PLAN_FEATURES, COMPARISON_HIDDEN_FEATURES, ADDONS, BILLING_RULES, CALCULATOR, AVG_CALL_MINUTES, ROUTES,
   approxCalls, featuresFor, effectivePerMinute, hasAnnualPricing, priceFor, annualTotal,
   annualSavingPerMonth, monthsFreeAnnual, setupPriceFor, formatMoney, ctaHref, planById
 } from '../pricing-config.js';
@@ -155,4 +155,10 @@ test('no old pricing values or plan names survive in the pricing copy', () => {
   assert.doesNotMatch(all, /Starter|Growth/);
   assert.doesNotMatch(all, /top-?up|pack|pakket|Paket/i);
   assert.doesNotMatch(all, /€\s?(41|108|249)\b/);
+});
+
+test('comparison table hides webhooks, SLA, DPA, dedicated contact and custom integrations; they stay in the config', () => {
+  assert.deepEqual([...COMPARISON_HIDDEN_FEATURES].sort(), ['contact', 'dpa', 'integrations', 'sla', 'webhooks']);
+  const known = Object.values(PLAN_FEATURES).flat();
+  for (const k of COMPARISON_HIDDEN_FEATURES) assert.ok(known.includes(k), `${k} is not a known feature`);
 });

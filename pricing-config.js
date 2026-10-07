@@ -65,6 +65,12 @@ export const PLAN_FEATURES = Object.freeze({
   maatwerk: ['sla', 'dpa', 'contact', 'integrations']
 });
 
+/**
+ * Features that stay on the plan cards but are not shown as rows in the comparison table.
+ * Remove a key from this list to show its row again.
+ */
+export const COMPARISON_HIDDEN_FEATURES = Object.freeze(['webhooks', 'sla', 'dpa', 'contact', 'integrations']);
+
 /** Order in which plans build on each other. */
 export const PLAN_ORDER = Object.freeze(['start', 'groei', 'pro', 'maatwerk']);
 

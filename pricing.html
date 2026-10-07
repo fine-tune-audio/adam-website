@@ -385,7 +385,7 @@
 <script type="module">
   import { t, getLang, ready } from './i18n.js';
   import {
-    PLANS, PLAN_ORDER, PLAN_FEATURES, ADDONS, BILLING_RULES, CALCULATOR, AVG_CALL_MINUTES, VAT_RATE, ROUTES,
+    PLANS, PLAN_ORDER, PLAN_FEATURES, COMPARISON_HIDDEN_FEATURES, ADDONS, BILLING_RULES, CALCULATOR, AVG_CALL_MINUTES, VAT_RATE, ROUTES,
     hasAnnualPricing, priceFor, annualTotal, monthsFreeAnnual, setupPriceFor, featuresFor, planById,
     formatMoney, formatInt, ctaHref
   } from './pricing-config.js';
@@ -486,7 +486,9 @@
     const text = (fn) => (p) => esc(fn(p));
     const group = (key) => `<tr><th scope="rowgroup" colspan="${PLANS.length + 1}">${esc(t(key))}</th></tr>`;
     const fromVal = (p, value) => (p.fromPricing ? fill('pricing.cell.from', { value }) : value);
-    const featureRows = PLAN_ORDER.flatMap((planId) => PLAN_FEATURES[planId].map((k) => ({ k, introAt: PLAN_ORDER.indexOf(planId) })));
+    const featureRows = PLAN_ORDER.flatMap((planId) => PLAN_FEATURES[planId]
+      .filter((k) => !COMPARISON_HIDDEN_FEATURES.includes(k))
+      .map((k) => ({ k, introAt: PLAN_ORDER.indexOf(planId) })));
     const setupCell = (p) => {
       if (p.setupIncluded) return t('pricing.cell.included');
       const price = setupPriceFor(p, interval);
