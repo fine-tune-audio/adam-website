@@ -1193,8 +1193,8 @@ window.addEventListener('scroll',()=>{
   import { t, getLang, ready } from './i18n.js';
   import { PLANS, formatMoney } from './pricing-config.js';
 
-  // The "from" price is the cheapest plan that is billed online, so it can never drift from the pricing page.
-  const fromPrice = () => Math.min(...PLANS.filter((p) => !p.custom).map((p) => p.monthly));
+  // The "from" price is the cheapest plan, so it can never drift from the pricing page.
+  const fromPrice = () => Math.min(...PLANS.map((p) => p.monthly));
   const render = () => {
     document.getElementById('pricingTeaserText').textContent =
       t('index.pricing.text').replace('{price}', formatMoney(fromPrice(), { lang: getLang() }));

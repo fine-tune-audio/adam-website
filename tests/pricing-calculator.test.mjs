@@ -1,16 +1,16 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { PLANS, CALCULATOR, planById } from '../pricing-config.js';
-import {
-  usageFor, planCost, compareAll, recommend, pricePerCall, humanServiceCost,
-  crossoverMinutes, nextPlanUp, calculate, round2
-} from '../pricing-calculator.js';
+import { usageFor, planCost, compareAll, recommend, recommendForCallsPerDay, round2 } from '../pricing-calculator.js';
 
+// The core logic keeps full inputs (share, call length, days) so every scenario of the proposal stays testable;
+// the page only exposes calls per day and uses the fixed assumptions from the config.
 const base = { days: 22, callMinutes: 2.5 };
-const run = (callsPerDay, sharePercent, interval = 'monthly') =>
-  calculate({ ...base, callsPerDay, sharePercent }, interval);
+const run = (callsPerDay, sharePercent, interval = 'monthly') => {
+  const usage = usageFor({ ...base, callsPerDay, sharePercent });
+  return { usage, best: recommend(usage.minutes, interval) };
+};
 
-// The four scenarios from the proposal (monthly billing, 2.5-minute calls, 22 days).
 test('10 calls a day, missed calls (30%): Start, €55.00', () => {
   const r = run(10, 30);
   assert.equal(r.best.plan.id, 'start');
@@ -56,66 +56,56 @@ test('annual billing uses annual / 12 as the base', () => {
   const groei = planCost(planById('groei'), 400, 'annual');
   assert.equal(groei.base, 107.5); // 1290 / 12
   assert.equal(groei.total, 107.5);
-  // maatwerk has no annual price: its base stays the monthly "from" price
-  assert.equal(planCost(planById('maatwerk'), 0, 'annual').base, 799);
 });
 
-test('zero usage recommends the cheapest plan and has no per-call price', () => {
+test('zero usage recommends the cheapest plan', () => {
   const r = run(0, 30);
   assert.equal(r.best.plan.id, 'start');
   assert.equal(r.best.total, 49);
-  assert.equal(r.perCall, null);
-  assert.deepEqual(r.human, { min: 0, max: 0 });
 });
 
-test('very high usage recommends the custom plan (an estimate from the "from" values)', () => {
+test('very high usage recommends Pro (the largest plan)', () => {
   const r = run(60, 100); // 60 x 22 x 2.5 = 3300 minutes
-  assert.equal(r.best.plan.id, 'maatwerk');
-  assert.equal(r.next, null);
+  assert.equal(r.best.plan.id, 'pro');
+  assert.equal(r.best.total, 299 + (3300 - 1000) * 0.25);
 });
 
 test('a tie goes to the lower plan', () => {
-  // Pro and maatwerk both cost 799 at exactly 3000 minutes
-  assert.equal(recommend(3000).plan.id, 'pro');
+  // Start and Groei cost the same at exactly 350 minutes
+  assert.equal(planCost(planById('start'), 350).total, planCost(planById('groei'), 350).total);
+  assert.equal(recommend(350).plan.id, 'start');
+  assert.equal(recommend(351).plan.id, 'groei');
 });
 
-test('price per answered call and the human answering service for the same calls', () => {
-  const r = run(10, 100); // 220 calls, €181.50
-  assert.equal(r.usage.calls, 220);
-  assert.equal(r.perCall, round2(181.5 / 220));
-  assert.deepEqual(r.human, { min: 330, max: 550 });
-  assert.equal(humanServiceCost(100).min, CALCULATOR.humanCostPerCall.min * 100);
-  assert.equal(pricePerCall(55, 0), null);
-});
-
-test('compareAll lists every plan in order at this usage (for the bar chart)', () => {
+test('compareAll lists every plan in order', () => {
   const rows = compareAll(550);
-  assert.deepEqual(rows.map((r) => r.plan.id), ['start', 'groei', 'pro', 'maatwerk']);
-  assert.deepEqual(rows.map((r) => r.total), [209, 181.5, 299, 799]);
+  assert.deepEqual(rows.map((r) => r.plan.id), ['start', 'groei', 'pro']);
+  assert.deepEqual(rows.map((r) => r.total), [209, 181.5, 299]);
 });
 
-test('crossover: from which usage the next plan up becomes cheaper', () => {
-  assert.equal(crossoverMinutes(planById('start'), planById('groei')), 350);
-  assert.ok(Math.abs(crossoverMinutes(planById('groei'), planById('pro')) - (400 + 170 / 0.35)) < 1e-9);
-  assert.equal(crossoverMinutes(planById('pro'), planById('maatwerk')), 3000);
-  // at the crossover both cost the same, just beyond it the next plan is cheaper
-  const [start, groei] = [planById('start'), planById('groei')];
-  assert.equal(planCost(start, 350).total, planCost(groei, 350).total);
-  assert.ok(planCost(groei, 351).total < planCost(start, 351).total);
+test('the page calculator: calls per day in, plan out, with the fixed assumptions', () => {
+  const a = CALCULATOR.assumptions;
+  assert.equal(a.days, 22);
+  assert.equal(a.sharePercent, 100);
+  const cases = [
+    [0, 'start', 49],
+    [5, 'start', 99],
+    [10, 'groei', 181.5],
+    [20, 'pro', 324]
+  ];
+  for (const [callsPerDay, id, total] of cases) {
+    const r = recommendForCallsPerDay(callsPerDay);
+    assert.equal(r.best.plan.id, id, `${callsPerDay} calls a day`);
+    assert.equal(r.best.total, total, `${callsPerDay} calls a day`);
+  }
+  assert.equal(recommendForCallsPerDay(10).usage.calls, 220);
+  assert.equal(recommendForCallsPerDay(10).usage.minutes, 550);
 });
 
-test('next plan up in calls a day', () => {
-  // Start -> Groei at 350 minutes: 350 / 2.5 min / (22 days x 30%) = 21.2 calls a day
-  const n = nextPlanUp('start', { ...base, sharePercent: 30 });
-  assert.equal(n.plan.id, 'groei');
-  assert.equal(n.minutes, 350);
-  assert.equal(Math.round(n.callsPerDay * 10) / 10, 21.2);
-  assert.equal(nextPlanUp('maatwerk', { ...base, sharePercent: 30 }), null);
-});
-
-test('calculate() bundles everything the page shows', () => {
-  const r = run(10, 30);
-  assert.deepEqual(Object.keys(r).sort(), ['all', 'best', 'human', 'next', 'perCall', 'usage']);
-  assert.equal(r.all.length, PLANS.length);
-  assert.equal(r.next.plan.id, 'groei');
+test('the page calculator honours the billing interval', () => {
+  const r = recommendForCallsPerDay(10, 'annual');
+  assert.equal(r.best.plan.id, 'groei');
+  assert.equal(r.best.total, 107.5 + 150 * 0.35);
+  assert.equal(PLANS.length, 3);
+  assert.equal(round2(1 / 3), 0.33);
 });

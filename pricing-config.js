@@ -5,19 +5,16 @@
 
 /**
  * @typedef {Object} Plan
- * @property {'start'|'groei'|'pro'|'maatwerk'} id
- * @property {number} monthly              price per month, EUR excl. VAT ("from" price for maatwerk)
- * @property {number|null} annual          price per year (10 x monthly); null = no annual billing (maatwerk)
- * @property {number} includedMinutes      minutes per month ("from" for maatwerk)
+ * @property {'start'|'groei'|'pro'} id
+ * @property {number} monthly              price per month, EUR excl. VAT
+ * @property {number} annual               price per year (10 x monthly)
+ * @property {number} includedMinutes      minutes per month
  * @property {number} approxCalls          included minutes / AVG_CALL_MINUTES, rounded
- * @property {number} extraMinuteRate      EUR per extra minute ("from" for maatwerk)
- * @property {number} phoneNumbers         included phone numbers ("5+" for maatwerk)
- * @property {number|null} concurrentCalls simultaneous calls; null = custom (maatwerk)
- * @property {number} setupFee             optional setup service, EUR; 0 = included (maatwerk)
- * @property {boolean} setupIncluded       setup is part of the plan (maatwerk)
+ * @property {number} extraMinuteRate      EUR per extra minute
+ * @property {number} phoneNumbers         included phone numbers
+ * @property {number} concurrentCalls      simultaneous calls
+ * @property {number} setupFee             optional setup service, EUR (free with annual billing)
  * @property {boolean} highlighted         marked "most chosen"
- * @property {boolean} custom              custom contract: quote instead of signup
- * @property {boolean} fromPricing         price, minutes, extra-minute rate and numbers are "from" values
  */
 
 /** Average call length used for the "approximately N calls" figures (minutes). */
@@ -34,23 +31,15 @@ const annualOf = (monthly) => monthly * 10;
 export const PLANS = Object.freeze([
   {
     id: 'start', monthly: 49, annual: annualOf(49), includedMinutes: 150, approxCalls: approxCalls(150),
-    extraMinuteRate: 0.4, phoneNumbers: 1, concurrentCalls: 1, setupFee: 149, setupIncluded: false,
-    highlighted: false, custom: false, fromPricing: false
+    extraMinuteRate: 0.4, phoneNumbers: 1, concurrentCalls: 1, setupFee: 149, highlighted: false
   },
   {
     id: 'groei', monthly: 129, annual: annualOf(129), includedMinutes: 400, approxCalls: approxCalls(400),
-    extraMinuteRate: 0.35, phoneNumbers: 1, concurrentCalls: 2, setupFee: 149, setupIncluded: false,
-    highlighted: true, custom: false, fromPricing: false
+    extraMinuteRate: 0.35, phoneNumbers: 1, concurrentCalls: 2, setupFee: 149, highlighted: true
   },
   {
     id: 'pro', monthly: 299, annual: annualOf(299), includedMinutes: 1000, approxCalls: approxCalls(1000),
-    extraMinuteRate: 0.25, phoneNumbers: 3, concurrentCalls: 5, setupFee: 349, setupIncluded: false,
-    highlighted: false, custom: false, fromPricing: false
-  },
-  {
-    id: 'maatwerk', monthly: 799, annual: null, includedMinutes: 3000, approxCalls: approxCalls(3000),
-    extraMinuteRate: 0.2, phoneNumbers: 5, concurrentCalls: null, setupFee: 0, setupIncluded: true,
-    highlighted: false, custom: true, fromPricing: true
+    extraMinuteRate: 0.25, phoneNumbers: 3, concurrentCalls: 5, setupFee: 349, highlighted: false
   }
 ]);
 
@@ -61,18 +50,17 @@ export const PLANS = Object.freeze([
 export const PLAN_FEATURES = Object.freeze({
   start: ['answers', 'messages', 'knowledge', 'forward', 'preset', 'emailSummary'],
   groei: ['calendar', 'sms', 'languages'],
-  pro: ['multiAgent', 'recordings', 'webhooks', 'prioritySupport'],
-  maatwerk: ['sla', 'dpa', 'contact', 'integrations']
+  pro: ['multiAgent', 'recordings', 'webhooks', 'prioritySupport']
 });
 
 /**
  * Features that stay on the plan cards but are not shown as rows in the comparison table.
  * Remove a key from this list to show its row again.
  */
-export const COMPARISON_HIDDEN_FEATURES = Object.freeze(['webhooks', 'sla', 'dpa', 'contact', 'integrations']);
+export const COMPARISON_HIDDEN_FEATURES = Object.freeze(['webhooks']);
 
 /** Order in which plans build on each other. */
-export const PLAN_ORDER = Object.freeze(['start', 'groei', 'pro', 'maatwerk']);
+export const PLAN_ORDER = Object.freeze(['start', 'groei', 'pro']);
 
 /**
  * Features of one plan: what it adds, and the plan it builds on.
@@ -117,19 +105,13 @@ export const BILLING_RULES = Object.freeze({
   paymentMethods: Object.freeze(['direct-debit', 'card'])
 });
 
-/** Calculator defaults, limits, and what a human answering service costs per call. */
+/**
+ * Calculator: one question (calls per day). Everything else is a fixed assumption, shown under the result.
+ * The assumptions err on the high side: ADAM answers every call.
+ */
 export const CALCULATOR = Object.freeze({
   callsPerDay: Object.freeze({ min: 0, max: 60, default: 10 }),
-  sharePresets: Object.freeze([
-    Object.freeze({ id: 'missed', percent: 30 }),
-    Object.freeze({ id: 'half', percent: 50 }),
-    Object.freeze({ id: 'all', percent: 100 })
-  ]),
-  share: Object.freeze({ min: 10, max: 100, step: 5, default: 30 }),
-  callMinutes: Object.freeze({ min: 1, max: 6, step: 0.5, default: AVG_CALL_MINUTES }),
-  daysOpen: Object.freeze([22, 26, 30]),
-  daysOpenDefault: 22,
-  humanCostPerCall: Object.freeze({ min: 1.5, max: 2.5 })
+  assumptions: Object.freeze({ days: 22, callMinutes: AVG_CALL_MINUTES, sharePercent: 100 })
 });
 
 /** Where the CTAs go. */
@@ -148,34 +130,33 @@ export function effectivePerMinute(plan) {
   return plan.monthly / plan.includedMinutes;
 }
 
-/** True when every plan that is billed online has an annual price (custom plans are quoted). */
+/** True when every plan has an annual price (the yearly toggle only shows then). */
 export function hasAnnualPricing(plans = PLANS) {
-  return plans.filter((p) => !p.custom).every((p) => typeof p.annual === 'number' && p.annual > 0);
+  return plans.every((p) => typeof p.annual === 'number' && p.annual > 0);
 }
 
-/** Per-month price for the chosen interval (annual / 12); monthly when the plan has no annual price. */
+/** Per-month price for the chosen interval (annual / 12). */
 export function priceFor(plan, interval) {
-  return interval === 'annual' && typeof plan.annual === 'number' ? plan.annual / 12 : plan.monthly;
+  return interval === 'annual' ? plan.annual / 12 : plan.monthly;
 }
 
-/** Yearly total when billed yearly; null without an annual price. */
+/** Yearly total when billed yearly. */
 export function annualTotal(plan) {
-  return typeof plan.annual === 'number' ? plan.annual : null;
+  return plan.annual;
 }
 
-/** Monthly saving when billed yearly; 0 when no annual price. */
+/** Monthly saving when billed yearly. */
 export function annualSavingPerMonth(plan) {
-  return typeof plan.annual === 'number' ? Math.max(0, plan.monthly - plan.annual / 12) : 0;
+  return Math.max(0, plan.monthly - plan.annual / 12);
 }
 
-/** Months free when billed yearly (12 minus months billed), 0 without an annual price. */
+/** Months free when billed yearly (12 minus months billed). */
 export function monthsFreeAnnual(plan) {
-  return typeof plan.annual === 'number' ? 12 - plan.annual / plan.monthly : 0;
+  return 12 - plan.annual / plan.monthly;
 }
 
-/** Setup service price for the interval: free with annual billing, included for custom plans. */
+/** Setup service price for the interval: free with annual billing. */
 export function setupPriceFor(plan, interval) {
-  if (plan.setupIncluded) return 0;
   if (interval === 'annual' && ADDONS.setupFreeWithAnnual) return 0;
   return plan.setupFee;
 }
@@ -202,13 +183,11 @@ export function formatInt(n, lang = 'nl') {
 }
 
 /**
- * CTA link. Online plans go to the app signup (plan and billing params); custom plans to the contact form.
+ * CTA link to the app signup (plan and billing params).
  * @param {string} planId
  * @param {'monthly'|'annual'} interval
  */
 export function ctaHref(planId, interval = 'monthly') {
-  const plan = planById(planId);
-  if (!plan || plan.custom) return `${ROUTES.contact}?plan=${encodeURIComponent(planId)}`;
   const billing = interval === 'annual' ? '&billing=annual' : '';
   return `${ROUTES.signup}?plan=${encodeURIComponent(planId)}${billing}`;
 }
