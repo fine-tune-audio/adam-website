@@ -410,6 +410,14 @@
     }
 
     /* ── WIE WIJ ZIJN ── */
+    .pricing-teaser{padding:96px 60px;background:var(--off);}
+    .pricing-teaser .inner{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:32px;}
+    .pricing-teaser-copy{max-width:640px;}
+    .pricing-teaser-title{font-size:clamp(28px,4vw,48px);font-weight:800;letter-spacing:-0.03em;line-height:1.05;margin-bottom:16px;}
+    .pricing-teaser-text{font-size:16px;color:#555;line-height:1.7;}
+    .pricing-teaser-btn{display:inline-block;background:var(--blue);color:#fff;font-size:15px;font-weight:700;padding:14px 28px;border-radius:3px;text-decoration:none;transition:opacity 0.2s;}
+    .pricing-teaser-btn:hover{opacity:0.85;}
+    @media (max-width:768px){.pricing-teaser{padding:64px 20px;}}
     .wie-section{padding:96px 60px;background:var(--white);}
     .wie-grid{display:grid;grid-template-columns:1fr 1fr;gap:100px;align-items:start;}
     .wie-title{
@@ -848,6 +856,17 @@
 </section>
 
 <!-- FINAL CTA -->
+<section class="pricing-teaser" aria-labelledby="pricingTeaserTitle">
+  <div class="inner">
+    <div class="pricing-teaser-copy">
+      <div class="label" data-i18n="nav.pricing">Prijzen</div>
+      <h2 class="pricing-teaser-title" id="pricingTeaserTitle" data-i18n="index.pricing.title">ADAM neemt op als jij het niet kunt.</h2>
+      <p class="pricing-teaser-text" id="pricingTeaserText"></p>
+    </div>
+    <a class="pricing-teaser-btn" href="pricing.html" data-i18n="index.pricing.cta">Bekijk de prijzen</a>
+  </div>
+</section>
+
 <section class="cta-section">
   <canvas class="cta-canvas" id="ctaCanvas"></canvas>
   <div class="cta-inner reveal">
@@ -1169,6 +1188,19 @@ window.addEventListener('scroll',()=>{
     window.adamDenyAnalytics && window.adamDenyAnalytics(); banner.style.display = 'none';
   };
 })();
+</script>
+<script type="module">
+  import { t, getLang, ready } from './i18n.js';
+  import { PLANS, formatMoney } from './pricing-config.js';
+
+  // The "from" price is the cheapest plan that is billed online, so it can never drift from the pricing page.
+  const fromPrice = () => Math.min(...PLANS.filter((p) => !p.custom).map((p) => p.monthly));
+  const render = () => {
+    document.getElementById('pricingTeaserText').textContent =
+      t('index.pricing.text').replace('{price}', formatMoney(fromPrice(), { lang: getLang() }));
+  };
+  document.addEventListener('adam:langchange', render);
+  ready.then(render);
 </script>
 </body>
 </html>

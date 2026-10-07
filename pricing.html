@@ -106,6 +106,14 @@
     td.hl,th.hl{background:#F5F6FE;}
     .compare-note{font-size:13px;color:var(--gray-mid);margin-top:16px;}
 
+    .ways{padding-block:48px 0;}
+    .ways h2{font-size:clamp(22px,3vw,30px);font-weight:800;letter-spacing:-0.02em;margin-bottom:20px;}
+    .ways-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;}
+    .way{border:1px solid var(--gray);border-top:3px solid var(--blue);border-radius:8px;padding:24px;background:var(--white);}
+    .way h3{font-size:18px;font-weight:800;margin-bottom:8px;display:flex;flex-wrap:wrap;align-items:center;gap:10px;}
+    .way-badge{font-size:11px;font-weight:800;letter-spacing:0.06em;text-transform:uppercase;background:var(--yellow);color:var(--black);padding:4px 10px;border-radius:999px;}
+    .way p{font-size:15px;line-height:1.7;color:#333;}
+    @media (max-width:700px){.ways-grid{grid-template-columns:1fr;}}
     .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;}
     .toggle-hint{display:inline-block;margin-left:14px;font-size:13px;font-weight:700;color:var(--yellow);}
     .toggle-hint:empty{display:none;}
@@ -249,8 +257,8 @@
   <header class="hero">
     <div class="wrap">
       <div class="hero-label" data-i18n="pricing.label">Prijzen</div>
-      <h1 data-i18n="pricing.title">Eenvoudige prijzen, die meegroeien.</h1>
-      <p class="hero-sub" data-i18n="pricing.sub">Kies het abonnement dat past bij het aantal gesprekken dat je krijgt.</p>
+      <h1 data-i18n="pricing.title">ADAM neemt op als jij het niet kunt.</h1>
+      <p class="hero-sub" data-i18n="pricing.sub">Laat ADAM alleen de gemiste, drukke en late gesprekken opvangen, of laat ADAM elk gesprek beantwoorden. Jij kiest.</p>
       <div class="toggle" id="billingToggle" role="group" data-i18n-aria-label="pricing.toggle.aria" aria-label="Factureringsperiode" hidden>
         <button type="button" data-interval="monthly" aria-pressed="true" data-i18n="pricing.toggle.monthly">Maandelijks</button>
         <button type="button" data-interval="annual" aria-pressed="false" data-i18n="pricing.toggle.annual">Jaarlijks</button>
@@ -258,6 +266,22 @@
       <span class="toggle-hint" id="toggleHint"></span>
     </div>
   </header>
+
+  <section class="ways" aria-labelledby="waysTitle">
+    <div class="wrap">
+      <h2 id="waysTitle" data-i18n="pricing.ways.title">Twee manieren om ADAM te gebruiken</h2>
+      <div class="ways-grid">
+        <div class="way">
+          <h3><span data-i18n="pricing.ways.1.title">Alleen gemiste gesprekken</span> <span class="way-badge" data-i18n="pricing.ways.1.badge">Standaard en goedkoper</span></h3>
+          <p data-i18n="pricing.ways.1.text">Je schakelt gesprekken door die je mist, als je in gesprek bent of buiten openingstijden. ADAM vangt alleen die op, dus je gebruikt minder minuten.</p>
+        </div>
+        <div class="way">
+          <h3 data-i18n="pricing.ways.2.title">Elk gesprek</h3>
+          <p data-i18n="pricing.ways.2.text">ADAM neemt elk gesprek aan. Jij hoeft niet meer op te nemen en je gebruikt meer minuten.</p>
+        </div>
+      </div>
+    </div>
+  </section>
 
   <section class="plans-section">
     <div class="wrap">
