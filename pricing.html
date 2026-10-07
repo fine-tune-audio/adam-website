@@ -54,14 +54,14 @@
     .toggle button:focus-visible{outline-color:var(--yellow);}
 
     .plans-section{padding-block:64px 32px;}
-    .plans{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px;align-items:stretch;}
-    .card{position:relative;display:flex;flex-direction:column;background:var(--white);border:1px solid var(--gray);border-radius:8px;padding:32px 28px;}
+    .plans{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:20px;align-items:stretch;}
+    .card{position:relative;display:flex;flex-direction:column;background:var(--white);border:1px solid var(--gray);border-radius:8px;padding:30px 22px;}
     .card.highlight{border:2px solid var(--blue);box-shadow:0 12px 40px rgba(29,46,216,0.14);}
-    .badge{position:absolute;top:-14px;left:28px;background:var(--yellow);color:var(--black);font-size:12px;font-weight:800;letter-spacing:0.06em;text-transform:uppercase;padding:6px 12px;border-radius:999px;}
+    .badge{position:absolute;top:-14px;left:22px;background:var(--yellow);color:var(--black);font-size:12px;font-weight:800;letter-spacing:0.06em;text-transform:uppercase;padding:6px 12px;border-radius:999px;}
     .card h3{font-size:22px;font-weight:800;letter-spacing:-0.02em;}
     .card-for{font-size:14px;color:var(--gray-mid);line-height:1.6;margin-top:8px;min-height:3.2em;}
     .price{margin-top:24px;display:flex;align-items:baseline;flex-wrap:wrap;gap:6px;}
-    .price-amount{font-size:44px;font-weight:800;letter-spacing:-0.03em;}
+    .price-amount{font-size:38px;font-weight:800;letter-spacing:-0.03em;}
     .price-per{font-size:14px;color:var(--gray-mid);font-weight:600;}
     .price-vat{font-size:12px;color:var(--gray-mid);margin-top:4px;}
     .price-saving{font-size:13px;font-weight:700;color:var(--blue);margin-top:8px;}
@@ -106,17 +106,72 @@
     td.hl,th.hl{background:#F5F6FE;}
     .compare-note{font-size:13px;color:var(--gray-mid);margin-top:16px;}
 
+    .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;}
+    .toggle-hint{display:inline-block;margin-left:14px;font-size:13px;font-weight:700;color:var(--yellow);}
+    .toggle-hint:empty{display:none;}
+    .price-from{font-size:14px;font-weight:700;color:var(--gray-mid);margin-right:2px;}
+    .calc-badge{left:auto;right:22px;background:var(--blue);color:#fff;}
+    .card.calc-rec{border-color:var(--blue);box-shadow:0 0 0 2px var(--blue);}
+    .feat-list{margin-top:16px;padding-top:16px;border-top:1px solid var(--gray);}
+    .feat-list li.built-on{font-weight:700;color:var(--black);padding-left:0;}
+    .feat-list li.built-on::before{display:none;}
+    .notes-currency{margin-top:20px;}
+
+    .calc{padding-block:48px 56px;background:var(--off);}
+    .calc h2{font-size:clamp(26px,3.5vw,40px);font-weight:800;letter-spacing:-0.03em;margin-bottom:10px;}
+    .calc-sub{font-size:16px;color:var(--gray-mid);line-height:1.7;max-width:560px;margin-bottom:28px;}
+    .calc-grid{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,6fr);gap:28px;align-items:start;}
+    .calc-inputs,.calc-result{background:var(--white);border:1px solid var(--gray);border-radius:8px;padding:26px 24px;}
+    .field{margin-bottom:24px;}
+    .field:last-child{margin-bottom:0;}
+    .field-label{display:block;font-size:13px;font-weight:700;margin-bottom:10px;}
+    .stepper{display:inline-flex;align-items:stretch;border:1px solid var(--gray);border-radius:6px;overflow:hidden;}
+    .stepper button{font-family:inherit;font-size:20px;font-weight:700;width:48px;background:var(--off);border:0;cursor:pointer;color:var(--black);}
+    .stepper button:hover{background:var(--gray);}
+    .stepper input{font-family:inherit;font-size:18px;font-weight:700;width:84px;text-align:center;border:0;border-inline:1px solid var(--gray);padding:12px 6px;-moz-appearance:textfield;appearance:textfield;}
+    .stepper input::-webkit-outer-spin-button,.stepper input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
+    .pills{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;}
+    .pill{font-family:inherit;font-size:13px;font-weight:700;padding:9px 14px;border-radius:999px;border:1px solid var(--gray);background:var(--white);color:var(--black);cursor:pointer;}
+    .pill:hover{border-color:var(--black);}
+    .pill[aria-pressed="true"]{background:var(--blue);border-color:var(--blue);color:#fff;}
+    #dayPills{margin-bottom:0;}
+    .range{width:100%;accent-color:var(--blue);margin:4px 0;}
+    .range-out{display:block;font-size:13px;color:var(--gray-mid);margin-top:2px;}
+    .calc-result{position:sticky;top:calc(var(--nav-h) + 16px);}
+    .result-title{font-size:15px;font-weight:700;color:var(--blue);}
+    .result-price{font-size:clamp(28px,4vw,40px);font-weight:800;letter-spacing:-0.03em;margin-top:6px;}
+    .result-breakdown{font-size:14px;color:var(--gray-mid);margin-top:4px;}
+    .result-note{font-size:12px;color:var(--gray-mid);line-height:1.6;margin-top:12px;}
+    .result-lines{list-style:none;margin-top:16px;display:flex;flex-direction:column;gap:10px;}
+    .result-lines li{position:relative;padding-left:20px;font-size:14px;line-height:1.55;color:#333;}
+    .result-lines li::before{content:"";position:absolute;left:0;top:0.6em;width:7px;height:7px;border-radius:50%;background:var(--blue);}
+    .bars{margin-top:22px;}
+    .bars h4{font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--gray-mid);margin-bottom:10px;}
+    .bar-list{list-style:none;display:flex;flex-direction:column;gap:8px;}
+    .bar-row{display:grid;grid-template-columns:84px minmax(0,1fr) auto;gap:10px;align-items:center;font-size:13px;}
+    .bar-name{font-weight:700;}
+    .bar-track{height:12px;background:var(--gray);border-radius:999px;overflow:hidden;}
+    .bar-fill{display:block;height:100%;background:#9aa4f5;border-radius:999px;}
+    .bar-row.is-best .bar-fill{background:var(--blue);}
+    .bar-value{font-weight:700;white-space:nowrap;}
+    .result-cta{margin-top:20px;}
+
+    th.calc-rec-col{box-shadow:inset 0 3px 0 var(--blue);}
+    .table-wrap td.calc-rec-col{background:#F5F6FE;}
+    .faq{padding-block:0 80px;}
+    .faq h2{font-size:clamp(26px,3.5vw,40px);font-weight:800;letter-spacing:-0.03em;margin-bottom:24px;}
+    .faq-item{border-bottom:1px solid var(--gray);padding:16px 0;}
+    .faq-item summary{cursor:pointer;font-size:16px;font-weight:700;list-style:none;display:flex;justify-content:space-between;gap:16px;}
+    .faq-item summary::-webkit-details-marker{display:none;}
+    .faq-item summary::after{content:"+";font-size:20px;line-height:1;color:var(--blue);}
+    .faq-item[open] summary::after{content:"–";}
+    .faq-item p{margin-top:10px;font-size:15px;line-height:1.7;color:#333;max-width:720px;}
+
     .closing{background:var(--black);color:#fff;padding-block:80px;}
     .closing h2{font-size:clamp(28px,4vw,48px);font-weight:800;letter-spacing:-0.03em;margin-bottom:14px;}
     .closing p{font-size:16px;color:rgba(255,255,255,0.65);line-height:1.7;max-width:520px;margin-bottom:28px;}
     .closing .btn{display:inline-block;margin-top:0;padding-inline:32px;}
 
-    dialog.choose{border:0;border-radius:8px;padding:32px 28px;width:min(420px,calc(100vw - 32px));margin:auto;font-family:inherit;}
-    dialog.choose::backdrop{background:rgba(10,10,10,0.6);}
-    dialog.choose h2{font-size:20px;font-weight:800;letter-spacing:-0.02em;margin-bottom:8px;}
-    dialog.choose .btn{margin-top:12px;}
-    dialog.choose .btn.alt{background:var(--white);color:var(--black);border:2px solid var(--black);}
-    dialog.choose .x{background:none;border:0;font-family:inherit;font-size:13px;font-weight:600;color:var(--gray-mid);cursor:pointer;margin-top:16px;padding:4px 0;}
 
     footer{display:flex;align-items:center;justify-content:space-between;padding:28px 60px;border-top:1px solid var(--gray);}
     .foot-logo{display:flex;align-items:center;gap:8px;text-decoration:none;}
@@ -133,10 +188,17 @@
       .card{padding:28px 20px;}
       footer{padding:24px 32px;}
     }
-    @media (max-width:860px){
+    @media (max-width:1100px){
+      .plans{grid-template-columns:repeat(2,minmax(0,1fr));}
+      .card-for{min-height:0;}
+      .calc-grid{grid-template-columns:1fr;}
+      .calc-result{position:static;}
+    }
+    @media (max-width:640px){
       .plans{grid-template-columns:1fr;max-width:480px;margin-inline:auto;}
       .badge{left:20px;}
-      .card-for{min-height:0;}
+      .calc-badge{right:20px;}
+      .bar-row{grid-template-columns:72px minmax(0,1fr) auto;}
     }
     @media (max-width:768px){
       :root{--nav-h:60px;}
@@ -155,13 +217,6 @@
   </style>
 </head>
 <body>
-
-<dialog class="choose" id="chooseDialog" aria-labelledby="chooseTitle">
-  <h2 id="chooseTitle"></h2>
-  <a class="btn alt" id="chooseDemo" href="contact.html" data-i18n="pricing.choose.demo">Plan een demo</a>
-  <a class="btn primary" id="chooseSignup" href="signup.html" data-i18n="pricing.choose.signup">Aanmelden</a>
-  <button type="button" class="x" data-close data-i18n="pricing.choose.close">Sluiten</button>
-</dialog>
 
 <nav class="nav">
   <a class="nav-logo" href="index.html">
@@ -200,25 +255,61 @@
         <button type="button" data-interval="monthly" aria-pressed="true" data-i18n="pricing.toggle.monthly">Maandelijks</button>
         <button type="button" data-interval="annual" aria-pressed="false" data-i18n="pricing.toggle.annual">Jaarlijks</button>
       </div>
+      <span class="toggle-hint" id="toggleHint"></span>
     </div>
   </header>
 
   <section class="plans-section">
     <div class="wrap">
       <div class="plans" id="plans" role="list" data-i18n-aria-label="pricing.plansAria" aria-label="Abonnementen"></div>
+      <p class="notes-currency" id="currencyNote"></p>
+    </div>
+  </section>
+
+  <section class="calc" id="calculator" aria-labelledby="calcTitle">
+    <div class="wrap">
+      <h2 id="calcTitle" data-i18n="calc.title">Wat gaat ADAM jou kosten?</h2>
+      <p class="calc-sub" data-i18n="calc.sub">Vul in hoeveel gesprekken je krijgt. We rekenen uit welk abonnement het goedkoopst is.</p>
+      <div class="calc-grid">
+        <div class="calc-inputs">
+          <div class="field">
+            <label class="field-label" for="calcCalls" data-i18n="calc.callsPerDay">Gesprekken per dag</label>
+            <div class="stepper">
+              <button type="button" id="callsDec" data-i18n-aria-label="calc.callsDec" aria-label="Minder gesprekken per dag">−</button>
+              <input id="calcCalls" type="number" inputmode="numeric" step="1">
+              <button type="button" id="callsInc" data-i18n-aria-label="calc.callsInc" aria-label="Meer gesprekken per dag">+</button>
+            </div>
+          </div>
+
+          <div class="field">
+            <span class="field-label" id="shareLabel" data-i18n="calc.share.title">Aandeel dat ADAM beantwoordt</span>
+            <div class="pills" id="sharePresets" role="group" aria-labelledby="shareLabel"></div>
+            <input id="calcShare" class="range" type="range" aria-labelledby="shareLabel">
+            <output id="shareOut" class="range-out" for="calcShare"></output>
+          </div>
+
+          <div class="field">
+            <label class="field-label" for="calcLength" data-i18n="calc.length">Gemiddelde gespreksduur</label>
+            <input id="calcLength" class="range" type="range">
+            <output id="lengthOut" class="range-out" for="calcLength"></output>
+          </div>
+
+          <div class="field">
+            <span class="field-label" id="daysLabel" data-i18n="calc.days">Dagen open per maand</span>
+            <div class="pills" id="dayPills" role="group" aria-labelledby="daysLabel"></div>
+          </div>
+        </div>
+
+        <div class="calc-result" id="calcResult" aria-live="polite"></div>
+      </div>
     </div>
   </section>
 
   <section class="notes">
     <div class="wrap">
-      <p class="notes-currency" data-i18n="pricing.note.currency">Alle prijzen in EUR, excl. btw.</p>
       <div class="every">
-        <h2 data-i18n="pricing.every.title">Elk abonnement bevat</h2>
-        <ul>
-          <li data-i18n="pricing.every.1">Een voice-agent die gesprekken natuurlijk afhandelt</li>
-          <li data-i18n="pricing.every.2">Een AI-samenvatting van elk gesprek</li>
-          <li data-i18n="pricing.every.3">Een agent afgestemd op jouw branche</li>
-        </ul>
+        <h2 data-i18n="pricing.every.title">Op elk abonnement</h2>
+        <ul id="everyList"></ul>
       </div>
       <a class="talk" href="contact.html" data-i18n="pricing.talk">Praat met ons</a>
     </div>
@@ -230,7 +321,14 @@
       <div class="table-wrap">
         <table id="compareTable"></table>
       </div>
-      <p class="compare-note" data-i18n="pricing.addons.note">Add-ons zijn beschikbaar bij elk abonnement.</p>
+      <p class="compare-note" data-i18n="pricing.addons.note">Extra telefoonnummers en onbeperkt aantal gebruikers gelden voor elk abonnement.</p>
+    </div>
+  </section>
+
+  <section class="faq" aria-labelledby="faqTitle">
+    <div class="wrap">
+      <h2 id="faqTitle" data-i18n="pricing.faq.title">Veelgestelde vragen over prijzen</h2>
+      <div id="faqList"></div>
     </div>
   </section>
 
@@ -263,82 +361,278 @@
 <script type="module">
   import { t, getLang, ready } from './i18n.js';
   import {
-    PLANS, ADDONS, ROUTES, effectivePerMinute, topUpPrice, hasAnnualPricing,
-    priceFor, annualSavingPerMonth, formatMoney, formatInt, ctaHref
+    PLANS, PLAN_ORDER, PLAN_FEATURES, ADDONS, BILLING_RULES, CALCULATOR, AVG_CALL_MINUTES, VAT_RATE, ROUTES,
+    hasAnnualPricing, priceFor, annualTotal, monthsFreeAnnual, setupPriceFor, featuresFor, planById,
+    formatMoney, formatInt, ctaHref
   } from './pricing-config.js';
+  import { calculate } from './pricing-calculator.js';
 
   const plansEl = document.getElementById('plans');
   const tableEl = document.getElementById('compareTable');
   const toggleEl = document.getElementById('billingToggle');
+  const resultEl = document.getElementById('calcResult');
   const annualOn = hasAnnualPricing();
+
   let interval = 'monthly';
   let openTip = null;
   let tipSeq = 0;
+  let recommendedId = null;
+
+  // Calculator state (defaults from the config)
+  const calc = {
+    callsPerDay: CALCULATOR.callsPerDay.default,
+    sharePercent: CALCULATOR.share.default,
+    callMinutes: CALCULATOR.callMinutes.default,
+    days: CALCULATOR.daysOpenDefault
+  };
 
   const fill = (key, vars = {}) =>
     t(key).replace(/\{(\w+)\}/g, (_, k) => (k in vars ? vars[k] : `{${k}}`));
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   const money = (n, decimals) => formatMoney(n, { lang: getLang(), decimals });
   const money2 = (n) => money(n, 2);
+  const int = (n) => formatInt(Math.round(n), getLang());
+  const num = (n) => new Intl.NumberFormat(getLang() === 'nl' ? 'nl-NL' : getLang() === 'de' ? 'de-DE' : 'en-IE', { maximumFractionDigits: 1 }).format(n);
+  const vatPercent = Math.round(VAT_RATE * 100);
 
-  function tip(key) {
-    const id = `tip-${++tipSeq}`;
-    return `<span class="tip"><button type="button" class="tip-btn" aria-expanded="false" aria-describedby="${id}" aria-label="${esc(t('pricing.tip.open'))}">i</button><span class="tip-pop" role="tooltip" id="${id}" hidden>${esc(t(key))}</span></span>`;
+  function tip(key, vars) {
+    tipSeq += 1;
+    const id = `tip-${tipSeq}`;
+    return `<span class="tip"><button type="button" class="tip-btn" aria-expanded="false" aria-describedby="${id}" aria-label="${esc(t('pricing.tip.open'))}">i</button><span class="tip-pop" role="tooltip" id="${id}" hidden>${esc(fill(key, vars))}</span></span>`;
+  }
+
+  // ── plan values, shared by the cards and the comparison table ───────────
+  const planName = (p) => t(`pricing.plan.${p.id}.name`);
+  const minutesText = (p) => fill(p.fromPricing ? 'pricing.inc.minutesFrom' : 'pricing.inc.minutes', { minutes: formatInt(p.includedMinutes, getLang()), calls: formatInt(p.approxCalls, getLang()) });
+  const extraText = (p) => fill(p.fromPricing ? 'pricing.inc.extraFrom' : 'pricing.inc.extra', { rate: money2(p.extraMinuteRate) });
+  const numbersText = (p) => (p.fromPricing ? fill('pricing.inc.numbers.plus', { n: p.phoneNumbers }) : fill(p.phoneNumbers === 1 ? 'pricing.inc.numbers.one' : 'pricing.inc.numbers.many', { n: p.phoneNumbers }));
+  const concurrentText = (p) => (p.concurrentCalls === null ? t('pricing.inc.concurrent.custom') : p.concurrentCalls === 1 ? t('pricing.inc.concurrent.one') : fill('pricing.inc.concurrent.many', { n: p.concurrentCalls }));
+  function setupText(p) {
+    if (p.setupIncluded) return t('pricing.inc.setupIncluded');
+    return interval === 'annual' ? t('pricing.inc.setupFreeAnnual') : fill('pricing.inc.setup', { price: money(p.setupFee) });
+  }
+
+  function featuresHtml(p) {
+    const { builtOn, own } = featuresFor(p.id);
+    const intro = builtOn ? `<li class="built-on">${esc(fill('pricing.feat.builtOn', { plan: t(`pricing.plan.${builtOn}.name`) }))}</li>` : '';
+    return intro + own.map((k) => `<li>${esc(t(`pricing.feat.${k}`))}</li>`).join('');
   }
 
   function cardHtml(p) {
-    const name = t(`pricing.plan.${p.id}.name`);
     const price = priceFor(p, interval);
-    const saving = interval === 'annual' ? annualSavingPerMonth(p) : 0;
-    const numbers = fill(p.phoneNumbers === 1 ? 'pricing.inc.numbers.one' : 'pricing.inc.numbers.many', { n: p.phoneNumbers, price: money(ADDONS.extraPhoneNumberMonthly) });
-    const concurrent = p.concurrentCalls === 1 ? t('pricing.inc.concurrent.one') : fill('pricing.inc.concurrent.many', { n: p.concurrentCalls });
+    const yearly = interval === 'annual' && annualTotal(p) !== null;
+    const saving = yearly ? monthsFreeAnnual(p) : 0;
+    const perKey = yearly ? 'pricing.price.perMonthYearly' : 'pricing.price.perMonth';
     return `
-      <article class="card${p.highlighted ? ' highlight' : ''}" role="listitem" aria-labelledby="plan-${p.id}">
-        ${p.highlighted ? `<span class="badge">${esc(t('pricing.badge.recommended'))}</span>` : ''}
-        <h3 id="plan-${p.id}">${esc(name)}</h3>
+      <article class="card${p.highlighted ? ' highlight' : ''}" role="listitem" aria-labelledby="plan-${p.id}" data-plan-card="${p.id}">
+        ${p.highlighted ? `<span class="badge">${esc(t('pricing.badge.popular'))}</span>` : ''}
+        <span class="badge calc-badge" hidden>${esc(t('pricing.badge.calc'))}</span>
+        <h3 id="plan-${p.id}">${esc(planName(p))}</h3>
         <p class="card-for">${esc(t(`pricing.plan.${p.id}.for`))}</p>
-        <div class="price"><span class="price-amount">${esc(money(price))}</span><span class="price-per">${esc(t(interval === 'annual' ? 'pricing.price.perMonthYearly' : 'pricing.price.perMonth'))}</span></div>
-        <div class="price-vat">${esc(t('pricing.price.exclVat'))}</div>
-        ${saving > 0 ? `<div class="price-saving">${esc(fill('pricing.price.saving', { amount: money(saving) }))}</div>` : ''}
-        <a class="btn${p.highlighted ? ' primary' : ''}" data-plan="${p.id}" href="${esc(ctaHref(p.id, interval))}">${esc(t('pricing.cta'))}</a>
+        <div class="price">
+          ${p.fromPricing ? `<span class="price-from">${esc(t('pricing.price.from'))}</span>` : ''}
+          <span class="price-amount">${esc(money(price))}</span><span class="price-per">${esc(t(perKey))}</span>
+        </div>
+        <div class="price-vat">${esc(t('pricing.price.exclVat'))}${p.custom ? ` · ${esc(t('pricing.price.customContract'))}` : ''}</div>
+        ${yearly ? `<div class="price-vat">${esc(fill('pricing.price.perYear', { amount: money(annualTotal(p)) }))}</div>` : ''}
+        ${saving > 0 ? `<div class="price-saving">${esc(fill('pricing.price.saving', { months: saving }))}</div>` : ''}
+        <a class="btn${p.highlighted ? ' primary' : ''}" href="${esc(ctaHref(p.id, interval))}">${esc(t(p.custom ? 'pricing.cta.quote' : 'pricing.cta.signup'))}</a>
         <div class="inc-title">${esc(t('pricing.included.title'))}</div>
         <ul class="inc-list">
-          <li>${esc(fill('pricing.inc.minutes', { minutes: formatInt(p.includedMinutes, getLang()), perMin: money2(effectivePerMinute(p)) }))}${tip('pricing.tip.effective')}</li>
-          <li>${esc(fill('pricing.inc.extra', { rate: money2(p.extraMinuteRate) }))}${tip('pricing.tip.extra')}</li>
-          <li>${esc(numbers)}</li>
-          <li>${esc(concurrent)}${tip('pricing.tip.concurrent')}</li>
+          <li>${esc(minutesText(p))}${tip('pricing.tip.calls', { minutes: num(AVG_CALL_MINUTES) })}</li>
+          <li>${esc(extraText(p))}${tip('pricing.tip.extra')}</li>
+          <li>${esc(numbersText(p))}</li>
+          <li>${esc(concurrentText(p))}${tip('pricing.tip.concurrent')}</li>
+          <li>${esc(setupText(p))}</li>
         </ul>
+        <ul class="inc-list feat-list">${featuresHtml(p)}</ul>
       </article>`;
   }
 
   function tableHtml() {
-    const hl = (p) => (p.highlighted ? ' class="hl"' : '');
+    const hl = (p) => ` data-plan-col="${p.id}"${p.highlighted ? ' class="hl"' : ''}`;
     const head = PLANS.map((p) => `
       <th scope="col"${hl(p)}>
-        <span class="th-name">${esc(t(`pricing.plan.${p.id}.name`))}</span>
-        <span class="th-price">${esc(money(priceFor(p, interval)))} ${esc(t('pricing.price.perMonth'))}</span>
-        <a class="th-cta${p.highlighted ? ' primary' : ''}" data-plan="${p.id}" href="${esc(ctaHref(p.id, interval))}">${esc(t('pricing.cta'))}</a>
+        <span class="th-name">${esc(planName(p))}</span>
+        <span class="th-price">${p.fromPricing ? `${esc(t('pricing.price.from'))} ` : ''}${esc(money(priceFor(p, interval)))} ${esc(t('pricing.price.perMonth'))}</span>
+        <a class="th-cta${p.highlighted ? ' primary' : ''}" href="${esc(ctaHref(p.id, interval))}">${esc(t(p.custom ? 'pricing.cta.quote' : 'pricing.cta.signup'))}</a>
       </th>`).join('');
-    const row = (labelKey, tipKey, cell) => `
-      <tr><th scope="row">${esc(t(labelKey))}${tipKey ? tip(tipKey) : ''}</th>${PLANS.map((p) => `<td${hl(p)}>${esc(cell(p))}</td>`).join('')}</tr>`;
+    const row = (labelKey, tipHtml, cell) => `
+      <tr><th scope="row">${esc(t(labelKey))}${tipHtml || ''}</th>${PLANS.map((p) => `<td${hl(p)}>${cell(p)}</td>`).join('')}</tr>`;
+    const text = (fn) => (p) => esc(fn(p));
     const group = (key) => `<tr><th scope="rowgroup" colspan="${PLANS.length + 1}">${esc(t(key))}</th></tr>`;
+    const fromVal = (p, value) => (p.fromPricing ? fill('pricing.cell.from', { value }) : value);
+    const featureRows = PLAN_ORDER.flatMap((planId) => PLAN_FEATURES[planId].map((k) => ({ k, introAt: PLAN_ORDER.indexOf(planId) })));
+    const setupCell = (p) => {
+      if (p.setupIncluded) return t('pricing.cell.included');
+      const price = setupPriceFor(p, interval);
+      return price === 0 ? fill('pricing.cell.freeAnnual', { price: money(p.setupFee) }) : money(price);
+    };
     return `
       <caption>${esc(t('pricing.compare.caption'))}</caption>
       <thead><tr><th scope="col">${esc(t('pricing.compare.feature'))}</th>${head}</tr></thead>
       <tbody>
         ${group('pricing.group.usage')}
-        ${row('pricing.row.minutes', null, (p) => formatInt(p.includedMinutes, getLang()))}
-        ${row('pricing.row.effective', 'pricing.tip.effective', (p) => fill('pricing.cell.approx', { price: money2(effectivePerMinute(p)) }))}
-        ${row('pricing.row.extra', 'pricing.tip.extra', (p) => money2(p.extraMinuteRate))}
-        ${row('pricing.row.numbers', null, (p) => String(p.phoneNumbers))}
-        ${row('pricing.row.concurrent', 'pricing.tip.concurrent', (p) => String(p.concurrentCalls))}
-        ${group('pricing.group.addons')}
-        ${row('pricing.row.addonNumber', null, () => fill('pricing.cell.perMonth', { price: money(ADDONS.extraPhoneNumberMonthly) }))}
-        ${row('pricing.row.addonTopup', 'pricing.tip.topup', (p) => fill('pricing.cell.perPack', { price: money(topUpPrice(p, ADDONS.topUpMinutes)) }))}
-        ${row('pricing.row.addonSms', null, () => fill('pricing.cell.perSms', { price: money2(ADDONS.smsEach) }))}
+        ${row('pricing.row.minutes', '', text((p) => fromVal(p, formatInt(p.includedMinutes, getLang()))))}
+        ${row('pricing.row.calls', tip('pricing.tip.calls', { minutes: num(AVG_CALL_MINUTES) }), text((p) => `≈ ${fromVal(p, formatInt(p.approxCalls, getLang()))}`))}
+        ${row('pricing.row.extra', tip('pricing.tip.extra'), text((p) => fromVal(p, money2(p.extraMinuteRate))))}
+        ${row('pricing.row.numbers', '', text((p) => (p.fromPricing ? fill('pricing.cell.plus', { value: p.phoneNumbers }) : String(p.phoneNumbers))))}
+        ${row('pricing.row.concurrent', tip('pricing.tip.concurrent'), text((p) => (p.concurrentCalls === null ? t('pricing.cell.custom') : String(p.concurrentCalls))))}
+        ${row('pricing.row.setup', '', text(setupCell))}
+        ${group('pricing.group.features')}
+        ${featureRows.map(({ k, introAt }) => row(`pricing.feat.${k}`, '', (p) => (PLAN_ORDER.indexOf(p.id) >= introAt
+          ? `<span aria-hidden="true">✓</span><span class="sr">${esc(t('pricing.cell.yes'))}</span>`
+          : `<span aria-hidden="true">–</span><span class="sr">${esc(t('pricing.cell.no'))}</span>`)).trim()).join('')}
+        ${group('pricing.group.extras')}
+        ${row('pricing.row.addonNumber', '', () => esc(fill('pricing.cell.perMonth', { price: money(ADDONS.extraPhoneNumberMonthly) })))}
+        ${row('pricing.row.users', '', () => esc(t('pricing.cell.unlimited')))}
       </tbody>`;
   }
 
+  function everyHtml() {
+    return [
+      fill('pricing.every.1', { price: money(ADDONS.extraPhoneNumberMonthly) }),
+      t('pricing.every.2'),
+      t('pricing.every.3'),
+      t('pricing.every.4'),
+      fill('pricing.every.5', { days: BILLING_RULES.moneyBackDays })
+    ].map((s) => `<li>${esc(s)}</li>`).join('');
+  }
+
+  function faqHtml() {
+    const [a, b] = BILLING_RULES.usageAlertPercents;
+    const setupFees = PLANS.filter((p) => !p.setupIncluded).map((p) => p.setupFee);
+    const vars = {
+      seconds: BILLING_RULES.freeCallUnderSeconds, percentA: a, percentB: b, days: BILLING_RULES.moneyBackDays,
+      vat: vatPercent, low: money(Math.min(...setupFees)), high: money(Math.max(...setupFees))
+    };
+    return [1, 2, 3, 4, 5, 6, 7].map((n) => `
+      <details class="faq-item"><summary>${esc(t(`pricing.faq.q${n}`))}</summary><p>${esc(fill(`pricing.faq.a${n}`, vars))}</p></details>`).join('');
+  }
+
+  // ── calculator ──────────────────────────────────────────────────────────
+  function renderCalcInputs() {
+    const cfg = CALCULATOR;
+    const callsEl = document.getElementById('calcCalls');
+    callsEl.min = cfg.callsPerDay.min; callsEl.max = cfg.callsPerDay.max;
+    callsEl.value = calc.callsPerDay;
+    const shareEl = document.getElementById('calcShare');
+    shareEl.min = cfg.share.min; shareEl.max = cfg.share.max; shareEl.step = cfg.share.step;
+    shareEl.value = calc.sharePercent;
+    const lenEl = document.getElementById('calcLength');
+    lenEl.min = cfg.callMinutes.min; lenEl.max = cfg.callMinutes.max; lenEl.step = cfg.callMinutes.step;
+    lenEl.value = calc.callMinutes;
+
+    document.getElementById('sharePresets').innerHTML = cfg.sharePresets.map((s) =>
+      `<button type="button" class="pill" data-share="${s.percent}" aria-pressed="${calc.sharePercent === s.percent}">${esc(t(`calc.share.${s.id}`))} · ${s.percent}%</button>`).join('');
+    document.getElementById('dayPills').innerHTML = cfg.daysOpen.map((d) =>
+      `<button type="button" class="pill" data-days="${d}" aria-pressed="${calc.days === d}">${esc(fill('calc.days.n', { n: d }))}</button>`).join('');
+    syncCalcOutputs();
+  }
+
+  function syncCalcOutputs() {
+    document.getElementById('shareOut').textContent = fill('calc.share.slider', { percent: calc.sharePercent });
+    document.getElementById('lengthOut').textContent = fill('calc.length.value', { n: num(calc.callMinutes) });
+    document.querySelectorAll('#sharePresets .pill').forEach((b) => b.setAttribute('aria-pressed', String(Number(b.dataset.share) === calc.sharePercent)));
+    document.querySelectorAll('#dayPills .pill').forEach((b) => b.setAttribute('aria-pressed', String(Number(b.dataset.days) === calc.days)));
+  }
+
+  function renderCalcResult() {
+    const r = calculate(calc, interval);
+    const best = r.best;
+    const p = best.plan;
+    recommendedId = p.id;
+    const human = CALCULATOR.humanCostPerCall;
+    const maxTotal = Math.max(...r.all.map((x) => x.total), 1);
+    const total = money2(best.total);
+
+    const breakdown = best.extraMinutes > 0
+      ? fill('calc.result.breakdown', { plan: planName(p), base: money2(best.base), extra: money2(best.extraCost), minutes: int(best.extraMinutes) })
+      : fill('calc.result.noExtra', { plan: planName(p), base: money2(best.base) });
+
+    const lines = [
+      r.usage.calls > 0 ? fill('calc.result.usage', { calls: int(r.usage.calls), minutes: int(r.usage.minutes) }) : t('calc.result.zero'),
+      r.perCall !== null ? fill('calc.result.perCall', { price: money2(r.perCall) }) : null,
+      r.usage.calls > 0 ? fill('calc.result.human', { calls: int(r.usage.calls), min: money(r.human.min), max: money(r.human.max) }) : null,
+      r.next ? fill('calc.result.next', { calls: int(r.next.callsPerDay), plan: t(`pricing.plan.${r.next.plan.id}.name`) }) : t('calc.result.nextNone')
+    ].filter(Boolean);
+
+    const bars = r.all.map((x) => {
+      const value = x.plan.fromPricing ? fill('calc.bars.from', { price: money2(x.total) }) : money2(x.total);
+      const pct = Math.max(2, Math.round((x.total / maxTotal) * 100));
+      return `
+        <li class="bar-row${x.plan.id === p.id ? ' is-best' : ''}">
+          <span class="bar-name">${esc(planName(x.plan))}</span>
+          <span class="bar-track" aria-hidden="true"><span class="bar-fill" style="width:${pct}%"></span></span>
+          <span class="bar-value">${esc(value)}</span>
+        </li>`;
+    }).join('');
+
+    resultEl.innerHTML = `
+      <h3 class="result-title">${esc(fill('calc.result.title', { plan: planName(p) }))}</h3>
+      <p class="result-price">${esc(fill(p.fromPricing ? 'calc.result.perMonthFrom' : 'calc.result.perMonth', { price: total }))}</p>
+      <p class="result-breakdown">${esc(breakdown)}</p>
+      ${p.fromPricing ? `<p class="result-note">${esc(t('calc.result.estimate'))}</p>` : ''}
+      <ul class="result-lines">${lines.map((l) => `<li>${esc(l)}</li>`).join('')}</ul>
+      <div class="bars"><h4>${esc(t('calc.bars.title'))}</h4><ul class="bar-list">${bars}</ul></div>
+      <a class="btn primary result-cta" href="${esc(ctaHref(p.id, interval))}">${esc(p.custom ? t('pricing.cta.quote') : fill('calc.cta', { plan: planName(p) }))}</a>
+      <p class="result-note">${esc(fill('calc.disclaimer', { min: money2(human.min), max: money2(human.max) }))}</p>`;
+    markRecommended();
+  }
+
+  function markRecommended() {
+    document.querySelectorAll('[data-plan-card]').forEach((el) => {
+      const on = el.dataset.planCard === recommendedId;
+      el.classList.toggle('calc-rec', on);
+      const badge = el.querySelector('.calc-badge');
+      if (badge) badge.hidden = !on;
+    });
+    document.querySelectorAll('[data-plan-col]').forEach((el) => el.classList.toggle('calc-rec-col', el.dataset.planCol === recommendedId));
+  }
+
+  const clamp = (n, lo, hi) => Math.min(hi, Math.max(lo, n));
+  function setCalls(n) {
+    const v = Number.isFinite(n) ? Math.round(n) : CALCULATOR.callsPerDay.default;
+    calc.callsPerDay = clamp(v, CALCULATOR.callsPerDay.min, CALCULATOR.callsPerDay.max);
+    document.getElementById('calcCalls').value = calc.callsPerDay;
+    renderCalcResult();
+  }
+
+  document.getElementById('callsDec').addEventListener('click', () => setCalls(calc.callsPerDay - 1));
+  document.getElementById('callsInc').addEventListener('click', () => setCalls(calc.callsPerDay + 1));
+  document.getElementById('calcCalls').addEventListener('input', (e) => {
+    if (e.target.value === '') return;
+    calc.callsPerDay = clamp(Math.round(Number(e.target.value)), CALCULATOR.callsPerDay.min, CALCULATOR.callsPerDay.max);
+    renderCalcResult();
+  });
+  document.getElementById('calcCalls').addEventListener('change', (e) => setCalls(Number(e.target.value)));
+  document.getElementById('calcShare').addEventListener('input', (e) => {
+    calc.sharePercent = Number(e.target.value);
+    syncCalcOutputs();
+    renderCalcResult();
+  });
+  document.getElementById('calcLength').addEventListener('input', (e) => {
+    calc.callMinutes = Number(e.target.value);
+    syncCalcOutputs();
+    renderCalcResult();
+  });
+  document.getElementById('sharePresets').addEventListener('click', (e) => {
+    const b = e.target.closest('button[data-share]');
+    if (!b) return;
+    calc.sharePercent = Number(b.dataset.share);
+    document.getElementById('calcShare').value = calc.sharePercent;
+    syncCalcOutputs();
+    renderCalcResult();
+  });
+  document.getElementById('dayPills').addEventListener('click', (e) => {
+    const b = e.target.closest('button[data-days]');
+    if (!b) return;
+    calc.days = Number(b.dataset.days);
+    syncCalcOutputs();
+    renderCalcResult();
+  });
+
+  // ── tooltips ────────────────────────────────────────────────────────────
   function closeTip() {
     if (!openTip) return;
     openTip.btn.setAttribute('aria-expanded', 'false');
@@ -354,14 +648,22 @@
     openTip = { btn, pop };
   }
 
+  // ── render ──────────────────────────────────────────────────────────────
   function render() {
     tipSeq = 0;
     openTip = null;
     plansEl.innerHTML = PLANS.map(cardHtml).join('');
     tableEl.innerHTML = tableHtml();
+    document.getElementById('everyList').innerHTML = everyHtml();
+    document.getElementById('faqList').innerHTML = faqHtml();
+    document.getElementById('currencyNote').textContent = fill('pricing.note.currency', { vat: vatPercent });
     toggleEl.hidden = !annualOn;
     toggleEl.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.interval === interval)));
+    const hint = document.getElementById('toggleHint');
+    hint.textContent = annualOn ? fill('pricing.toggle.annualHint', { months: monthsFreeAnnual(planById('start')) }) : '';
     document.getElementById('closingCta').href = ROUTES.contact;
+    renderCalcInputs();
+    renderCalcResult();
   }
 
   toggleEl.addEventListener('click', (e) => {
@@ -386,19 +688,6 @@
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && openTip) { const b = openTip.btn; closeTip(); b.focus(); }
   });
-
-  const dlg = document.getElementById('chooseDialog');
-  document.addEventListener('click', (e) => {
-    const cta = e.target.closest('a[data-plan]');
-    if (!cta || !dlg.showModal) return;
-    e.preventDefault();
-    const id = cta.dataset.plan;
-    document.getElementById('chooseTitle').textContent = fill('pricing.choose.title', { plan: t(`pricing.plan.${id}.name`) });
-    document.getElementById('chooseDemo').href = ctaHref(id, interval, ROUTES.contact);
-    document.getElementById('chooseSignup').href = ctaHref(id, interval, ROUTES.signup);
-    dlg.showModal();
-  });
-  dlg.addEventListener('click', (e) => { if (e.target === dlg || e.target.closest('[data-close]')) dlg.close(); });
 
   document.addEventListener('adam:langchange', render);
   ready.then(render);
