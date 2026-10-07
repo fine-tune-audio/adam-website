@@ -24,7 +24,7 @@ export const VAT_RATE = 0.21;
 /** @param {number} minutes */
 export const approxCalls = (minutes) => Math.round(minutes / AVG_CALL_MINUTES);
 
-/** @param {number} monthly annual = 10 x monthly ("2 months free") */
+/** @param {number} monthly annual = 10 x monthly */
 const annualOf = (monthly) => monthly * 10;
 
 /** @type {readonly Plan[]} */
@@ -49,7 +49,7 @@ export const PLANS = Object.freeze([
  */
 export const PLAN_FEATURES = Object.freeze({
   start: ['answers', 'messages', 'knowledge', 'forward', 'preset', 'emailSummary'],
-  groei: ['calendar', 'sms', 'languages'],
+  groei: ['calendar', 'languages'],
   pro: ['multiAgent', 'recordings', 'webhooks', 'prioritySupport']
 });
 
@@ -80,7 +80,7 @@ export const ADDONS = Object.freeze({
 });
 
 /**
- * Billing rules. Shown in the pricing FAQ and read by Phase 3 (billing). Time is in seconds/days,
+ * Billing rules, read by Phase 3 (billing); not shown on the pricing page. Time is in seconds/days,
  * percentages are of the included minutes.
  */
 export const BILLING_RULES = Object.freeze({
@@ -143,16 +143,6 @@ export function priceFor(plan, interval) {
 /** Yearly total when billed yearly. */
 export function annualTotal(plan) {
   return plan.annual;
-}
-
-/** Monthly saving when billed yearly. */
-export function annualSavingPerMonth(plan) {
-  return Math.max(0, plan.monthly - plan.annual / 12);
-}
-
-/** Months free when billed yearly (12 minus months billed). */
-export function monthsFreeAnnual(plan) {
-  return 12 - plan.annual / plan.monthly;
 }
 
 /** Setup service price for the interval: free with annual billing. */

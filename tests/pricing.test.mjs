@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import {
   PLANS, PLAN_ORDER, PLAN_FEATURES, COMPARISON_HIDDEN_FEATURES, ADDONS, BILLING_RULES, CALCULATOR,
   AVG_CALL_MINUTES, ROUTES, approxCalls, featuresFor, effectivePerMinute, hasAnnualPricing, priceFor,
-  annualTotal, annualSavingPerMonth, monthsFreeAnnual, setupPriceFor, formatMoney, ctaHref
+  annualTotal, setupPriceFor, formatMoney, ctaHref
 } from '../pricing-config.js';
 import pricingLocale from '../locales/pricing.js';
 
@@ -32,18 +32,16 @@ test('only groei is marked most chosen', () => {
   assert.deepEqual(PLANS.filter((p) => p.highlighted).map((p) => p.id), ['groei']);
 });
 
-test('annual is 10 x monthly ("2 months free")', () => {
+test('annual is 10 x monthly', () => {
   for (const p of PLANS) {
     assert.equal(p.annual, p.monthly * 10);
-    assert.equal(monthsFreeAnnual(p), 2);
     assert.equal(annualTotal(p), p.annual);
   }
 });
 
-test('priceFor: annual shows the per-month price (annual / 12); saving is two months a year', () => {
+test('priceFor: annual shows the per-month price (annual / 12)', () => {
   assert.equal(priceFor(plan('start'), 'monthly'), 49);
   assert.ok(Math.abs(priceFor(plan('start'), 'annual') - 490 / 12) < 1e-9);
-  assert.ok(Math.abs(annualSavingPerMonth(plan('start')) - (49 - 490 / 12)) < 1e-9);
 });
 
 test('annual toggle shows only when every plan has an annual price', () => {
@@ -68,7 +66,7 @@ test('features: each plan builds on the one below and adds its own', () => {
   assert.deepEqual(featuresFor('groei').builtOn, 'start');
   assert.deepEqual(featuresFor('pro').builtOn, 'groei');
   assert.deepEqual(PLAN_FEATURES.start, ['answers', 'messages', 'knowledge', 'forward', 'preset', 'emailSummary']);
-  assert.deepEqual(PLAN_FEATURES.groei, ['calendar', 'sms', 'languages']);
+  assert.deepEqual(PLAN_FEATURES.groei, ['calendar', 'languages']);
   assert.deepEqual(PLAN_FEATURES.pro, ['multiAgent', 'recordings', 'webhooks', 'prioritySupport']);
   assert.deepEqual(PLAN_ORDER, PLANS.map((p) => p.id));
 });
@@ -157,14 +155,29 @@ test('every static translation key the pricing page asks for exists in every lan
   const html = readFileSync(new URL('../pricing.html', import.meta.url), 'utf8');
   const keys = new Set();
   for (const m of html.matchAll(/data-i18n(?:-html|-aria-label|-content|-placeholder)?="([\w.]+)"/g)) keys.add(m[1]);
-  for (const m of html.matchAll(/(?:t|fill)\(\s*'([\w.]+)'/g)) keys.add(m[1]);
-  for (const m of html.matchAll(/(?:t|fill)\(\s*`([\w.]+)`/g)) keys.add(m[1]);
+  for (const m of html.matchAll(/\b(?:t|fill)\(\s*'([\w.]+)'/g)) keys.add(m[1]);
+  for (const m of html.matchAll(/\b(?:t|fill)\(\s*`([\w.]+)`/g)) keys.add(m[1]);
   const common = Object.keys(pricingLocale.nl);
   const own = (k) => /^(pricing|calc|meta\.pricing)\./.test(k);
-  assert.ok(keys.size > 40);
+  assert.ok(keys.size > 50, `only found ${keys.size} keys: the key scan is broken`);
   for (const l of ['nl', 'en', 'de']) {
     const missing = [...keys].filter((k) => own(k) && !(k in pricingLocale[l]));
     assert.deepEqual(missing, [], `${l} is missing keys used by pricing.html`);
   }
   assert.ok(common.length > 0);
+});
+
+test('the pricing page has no FAQ and no SMS feature', () => {
+  const html = readFileSync(new URL('../pricing.html', import.meta.url), 'utf8');
+  assert.doesNotMatch(html, /faq/i);
+  assert.equal(Object.values(PLAN_FEATURES).flat().includes('sms'), false);
+  for (const l of ['nl', 'en', 'de']) {
+    assert.deepEqual(Object.keys(pricingLocale[l]).filter((k) => k.startsWith('pricing.faq.') || k === 'pricing.feat.sms'), []);
+  }
+});
+
+test('the pricing page does not advertise "2 months free"', () => {
+  const html = readFileSync(new URL('../pricing.html', import.meta.url), 'utf8');
+  assert.doesNotMatch(html, /toggleHint|annualHint|price-saving|monthsFree/);
+  assert.doesNotMatch(JSON.stringify(pricingLocale), /months free|maanden gratis|Monate gratis/i);
 });
