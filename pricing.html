@@ -324,7 +324,7 @@
   import {
     PLANS, PLAN_ORDER, PLAN_FEATURES, COMPARISON_HIDDEN_FEATURES, ADDONS, BILLING_RULES, CALCULATOR,
     AVG_CALL_MINUTES, VAT_RATE, ROUTES,
-    hasAnnualPricing, priceFor, annualTotal, setupPriceFor, featuresFor,
+    hasAnnualPricing, displayPriceFor, annualTotal, setupPriceFor, featuresFor,
     formatMoney, formatInt, ctaHref
   } from './pricing-config.js';
   import { recommendForCallsPerDay } from './pricing-calculator.js';
@@ -370,7 +370,7 @@
   }
 
   function cardHtml(p) {
-    const price = priceFor(p, interval);
+    const price = displayPriceFor(p, interval);
     const yearly = interval === 'annual';
     const perKey = yearly ? 'pricing.price.perMonthYearly' : 'pricing.price.perMonth';
     return `
@@ -400,7 +400,7 @@
     const head = PLANS.map((p) => `
       <th scope="col"${hl(p)}>
         <span class="th-name">${esc(planName(p))}</span>
-        <span class="th-price">${esc(money(priceFor(p, interval)))} ${esc(t('pricing.price.perMonth'))}</span>
+        <span class="th-price">${esc(money(displayPriceFor(p, interval)))} ${esc(t('pricing.price.perMonth'))}</span>
         <a class="th-cta${p.highlighted ? ' primary' : ''}" href="${esc(ctaHref(p.id, interval))}">${esc(t('pricing.cta.signup'))}</a>
       </th>`).join('');
     const row = (labelKey, tipHtml, cell) => `

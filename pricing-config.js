@@ -140,6 +140,14 @@ export function priceFor(plan, interval) {
   return interval === 'annual' ? plan.annual / 12 : plan.monthly;
 }
 
+/**
+ * The per-month price as shown to customers. Yearly billing is rounded to whole euros
+ * (490 / 12 = 40.83 shows as 41); the exact figure stays in priceFor, which the calculator uses.
+ */
+export function displayPriceFor(plan, interval) {
+  return interval === 'annual' ? Math.round(plan.annual / 12) : plan.monthly;
+}
+
 /** Yearly total when billed yearly. */
 export function annualTotal(plan) {
   return plan.annual;

@@ -60,7 +60,7 @@
 
 <script type="module">
   import { t, getLang, ready } from './i18n.js';
-  import { PLANS, priceFor, formatMoney } from './pricing-config.js';
+  import { PLANS, displayPriceFor, formatMoney } from './pricing-config.js';
 
   // Placeholder gate only. Not real security: replace with real signup + billing.
   const PASSWORD = 'pasta123';
@@ -73,7 +73,7 @@
 
   const name = plan.id.charAt(0).toUpperCase() + plan.id.slice(1);
   function renderSummary() {
-    const price = formatMoney(priceFor(plan, interval), { lang: getLang() });
+    const price = formatMoney(displayPriceFor(plan, interval), { lang: getLang() });
     const line = t('signup.summary.price').replace('{price}', price);
     $('summary').innerHTML = `<strong>${name}</strong><br>${line}<br>${t(interval === 'annual' ? 'signup.summary.annual' : 'signup.summary.monthly')}`;
   }

@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import assert from 'node:assert/strict';
 import {
   PLANS, PLAN_ORDER, PLAN_FEATURES, COMPARISON_HIDDEN_FEATURES, ADDONS, BILLING_RULES, CALCULATOR,
-  AVG_CALL_MINUTES, ROUTES, approxCalls, featuresFor, effectivePerMinute, hasAnnualPricing, priceFor,
+  AVG_CALL_MINUTES, ROUTES, approxCalls, featuresFor, effectivePerMinute, hasAnnualPricing, priceFor, displayPriceFor,
   annualTotal, setupPriceFor, formatMoney, ctaHref
 } from '../pricing-config.js';
 import pricingLocale from '../locales/pricing.js';
@@ -180,4 +180,12 @@ test('the pricing page does not advertise "2 months free"', () => {
   const html = readFileSync(new URL('../pricing.html', import.meta.url), 'utf8');
   assert.doesNotMatch(html, /toggleHint|annualHint|price-saving|monthsFree/);
   assert.doesNotMatch(JSON.stringify(pricingLocale), /months free|maanden gratis|Monate gratis/i);
+});
+
+test('displayed yearly prices are whole euros; the exact figure stays available for the calculator', () => {
+  assert.deepEqual(PLANS.map((p) => displayPriceFor(p, 'annual')), [41, 108, 249]);
+  assert.deepEqual(PLANS.map((p) => displayPriceFor(p, 'monthly')), [49, 129, 299]);
+  for (const p of PLANS) assert.ok(Number.isInteger(displayPriceFor(p, 'annual')));
+  assert.ok(Math.abs(priceFor(plan('start'), 'annual') - 490 / 12) < 1e-9); // not rounded
+  assert.equal(formatMoney(displayPriceFor(plan('groei'), 'annual'), { lang: 'en' }), '€108');
 });
