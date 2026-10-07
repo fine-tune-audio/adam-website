@@ -189,3 +189,9 @@ test('displayed yearly prices are whole euros; the exact figure stays available 
   assert.ok(Math.abs(priceFor(plan('start'), 'annual') - 490 / 12) < 1e-9); // not rounded
   assert.equal(formatMoney(displayPriceFor(plan('groei'), 'annual'), { lang: 'en' }), '€108');
 });
+
+test('the two-ways block has no "default and cheaper" badge', () => {
+  const html = readFileSync(new URL('../pricing.html', import.meta.url), 'utf8');
+  assert.doesNotMatch(html, /way-badge|ways\.1\.badge/);
+  assert.doesNotMatch(JSON.stringify(pricingLocale), /Standaard en goedkoper|Default and cheaper|Standard und günstiger/i);
+});
