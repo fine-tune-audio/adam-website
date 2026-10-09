@@ -1,0 +1,11 @@
+Wadlandklanken geofence-test: audiobestanden
+
+Zet hier de fragmenten neer met precies deze namen:
+  zone1.mp3   Zone 1, LOOP: speelt herhalend zolang je in de zone bent (fade in/uit)
+  zone2.mp3   Zone 2, DISTANCE_GAIN: loop, volume groeit richting het midden
+  zone3.mp3   Zone 3, ONE_SHOT: speelt een keer bij binnenkomst (cooldown 60 s)
+  static.mp3  Statische soundscape (niveau 1): fallback als geofencing niet werkt
+
+Ontbreekt een bestand, dan speelt de app automatisch een synth-placeholder.
+Andere namen of formaten (.m4a/.ogg/.wav) kun je instellen in ../config.js.
+Tip: loops naadloos laten aansluiten en exporteren zonder stilte aan begin/eind.

@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#14150f">
+<title>Wadlandklanken · Geofence-test</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/maplibre-gl@5.24.0/dist/maplibre-gl.css">
+<script src="https://cdn.jsdelivr.net/npm/maplibre-gl@5.24.0/dist/maplibre-gl.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@600;700;800&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="stage"><div class="app" id="app">
+
+  <div id="map"></div>
+
+  <!-- status bovenin -->
+  <header class="topbar">
+    <div class="lvl" id="lvlChip" data-l="0">
+      <span class="lvl-num" id="lvlNum">–</span>
+      <span class="lvl-txt"><b id="lvlTitle">Niet gestart</b><small id="lvlWhy">Tik op Start</small></span>
+    </div>
+    <div class="chips">
+      <span class="chip" id="gpsChip" title="GPS-nauwkeurigheid en leeftijd laatste positie">GPS –</span>
+      <span class="chip" id="scrChip" title="Scherm aan houden (Wake Lock)">Scherm –</span>
+    </div>
+  </header>
+
+  <button class="resume-bar" id="resumeBar" hidden>Geluid gepauzeerd door het systeem · tik om te hervatten</button>
+  <div class="simbadge" id="simBadge" hidden>Simulatie · sleep de stip of tik op de kaart</div>
+
+  <div class="mapbtns">
+    <button class="fab" id="btnFit" aria-label="Toon alle zones" title="Toon alle zones">
+      <svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
+    <button class="fab" id="btnMe" aria-label="Naar mijn positie" title="Naar mijn positie">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="7.5"/></svg></button>
+    <button class="fab accent" id="btnNote" aria-label="Notitie in het log" title="Notitie in het log">
+      <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+  </div>
+
+  <!-- onderpaneel -->
+  <section class="sheet" id="sheet">
+    <button class="grip" id="grip" aria-label="Paneel groter/kleiner"><i></i></button>
+    <nav class="tabs" id="tabs">
+      <button data-tab="zones" class="on">Zones</button>
+      <button data-tab="log">Log <span class="badge" id="logBadge">0</span></button>
+      <button data-tab="set">Instellingen</button>
+    </nav>
+
+    <div class="pane on" id="pane-zones">
+      <div class="transport">
+        <button class="btn" id="btnPause">Pauze</button>
+        <label class="vol"><span>Volume</span><input type="range" id="volume" min="0" max="1" step="0.01"></label>
+        <button class="btn ghost" id="btnStop">Stop</button>
+      </div>
+      <div id="zoneList"></div>
+      <div id="staticCard"></div>
+      <button class="btn big" id="btnSleepTest">Start sluimertest</button>
+      <div id="lastSleep"></div>
+    </div>
+
+    <div class="pane" id="pane-log">
+      <div class="stats" id="stats"></div>
+      <div class="logbtns">
+        <button class="btn sm" id="btnCsv">CSV</button>
+        <button class="btn sm" id="btnJson">JSON</button>
+        <button class="btn sm" id="btnShare">Delen</button>
+        <button class="btn sm" id="btnCopy">Kopieer samenvatting</button>
+        <button class="btn sm ghost" id="btnClear">Wis log</button>
+      </div>
+      <div class="filters" id="filters"></div>
+      <ol class="log" id="logList"></ol>
+    </div>
+
+    <div class="pane" id="pane-set">
+      <div class="set-group">
+        <h4>Werking</h4>
+        <div class="set-row"><span>Modus<small>Auto kiest zelf het niveau</small></span>
+          <div class="seg" data-set="mode"><button data-v="auto">Auto</button><button data-v="interactive">Interactief</button><button data-v="static">Statisch</button></div></div>
+        <div class="set-row"><span>Positiebron<small>Simulatie = testen zonder te lopen</small></span>
+          <div class="seg" data-set="source"><button data-v="gps">GPS</button><button data-v="sim">Simulatie</button></div></div>
+        <div class="set-row"><span>Bij scherm uit<small>Zones actief = meten of triggers doorgaan</small></span>
+          <div class="seg" data-set="onHidden"><button data-v="keep">Zones actief</button><button data-v="static">Naar statisch</button></div></div>
+        <div class="set-row"><span>Statische speler<small>HTML-audio overleeft vergrendeling vaak beter</small></span>
+          <div class="seg" data-set="staticPlayer"><button data-v="element">HTML-audio</button><button data-v="webaudio">Web Audio</button></div></div>
+        <div class="set-row"><span>Scherm aan houden<small>Wake Lock; handmatig vergrendelen blijft mogelijk</small></span>
+          <label class="switch"><input type="checkbox" data-set="wakeLock"><i></i></label></div>
+      </div>
+      <div class="set-group">
+        <h4>GPS-drempels</h4>
+        <div class="set-row"><span>Goede nauwkeurigheid<small>niveau 3 tot en met</small></span><label class="num"><input type="number" data-set="goodAccM" min="1" max="200"> m</label></div>
+        <div class="set-row"><span>Max. nauwkeurigheid<small>daarboven geen triggers</small></span><label class="num"><input type="number" data-set="maxAccM" min="1" max="500"> m</label></div>
+        <div class="set-row"><span>Positie verouderd na</span><label class="num"><input type="number" data-set="staleS" min="2" max="300"> s</label></div>
+        <div class="set-row"><span>Exit-marge (hysterese)</span><label class="num"><input type="number" data-set="exitMarginM" min="0" max="100"> m</label></div>
+        <div class="set-row"><span>Dwell voor binnenkomst</span><label class="num"><input type="number" data-set="dwellMs" min="0" max="20000" step="250"> ms</label></div>
+      </div>
+      <div class="set-group">
+        <h4>Radius per zone</h4>
+        <div id="radiusRows"></div>
+      </div>
+      <div class="set-group">
+        <h4>Toestel</h4>
+        <div class="devinfo" id="devInfo"></div>
+        <button class="btn sm ghost" id="btnDefaults">Standaardwaarden</button>
+        <button class="btn sm ghost" id="btnPreflight">Toestelcheck opnieuw bekijken</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- start + toestelcheck -->
+  <div class="overlay" id="startOv">
+    <div class="ov-card">
+      <div class="brand">Wadlandklanken<span>geofence-test</span></div>
+      <p class="lead">Drie zones, drie triggers. Deze test meet wat jouw telefoon doet met locatie en geluid, ook als het scherm uitgaat.</p>
+      <ol class="pf" id="pfList"></ol>
+      <div class="verdict" id="verdict" hidden></div>
+      <div class="ov-actions">
+        <button class="btn big" id="btnStart" disabled>Audio laden…</button>
+        <button class="btn big ghost" id="btnToMap" hidden>Naar de kaart</button>
+        <button class="btn ghost" id="btnUseSim" hidden>Simulatie aanzetten</button>
+      </div>
+      <p class="fine">Gebruik een koptelefoon. Je locatie blijft op dit toestel; het log wordt alleen gedeeld als je het zelf exporteert.</p>
+    </div>
+  </div>
+
+  <div class="modal" id="modal" hidden><div class="modal-card" id="modalCard"></div></div>
+  <div class="toast" id="toast"></div>
+</div></div>
+
+<script src="config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
