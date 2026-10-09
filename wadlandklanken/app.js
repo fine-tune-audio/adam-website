@@ -6,7 +6,7 @@
    staat in localStorage tot je het exporteert of wist. */
 (function(){
 'use strict';
-const APP_VERSION='v5 · 9 okt 2026';   // ophogen bij elke wijziging; staat in beeld zodat je ziet welke versie draait
+const APP_VERSION='v6 · 9 okt 2026';   // ophogen bij elke wijziging; staat in beeld zodat je ziet welke versie draait
 const CFG=window.WK_CONFIG, ZONES=CFG.zones;
 const $=s=>document.querySelector(s);
 const now=()=>Date.now();
@@ -24,17 +24,20 @@ const MODE_LABEL={LOOP:'Loop + fade',DISTANCE_GAIN:'Afstandsvolume',ONE_SHOT:'On
 const LEVEL_TITLE={0:'Niet gestart',1:'Statisch',2:'Beperkt interactief',3:'Interactief'};
 
 /* ===== instellingen ===== */
-const DEF={ mode:'auto', source:'gps', onHidden:'keep', staticPlayer:'element', wakeLock:true,
+const DEF={ mode:'auto', source:'gps', onHidden:'keep', staticPlayer:'auto', wakeLock:true,
   goodAccM:CFG.geo.goodAccuracyM, maxAccM:CFG.geo.maxAccuracyM, staleS:CFG.geo.staleS,
   exitMarginM:CFG.geo.exitMarginM, dwellMs:CFG.geo.dwellMs, master:0.9,
   radius:Object.fromEntries(ZONES.map(z=>[z.id,z.radiusM])) };
 /* Zodra config.js andere zones/drempels krijgt, vervallen de lokaal bewaarde GPS-/radiuswaarden; voorkeuren (modus, speler, volume) blijven. */
 const CFG_SIG=JSON.stringify([ZONES.map(z=>[z.id,z.lat,z.lon,z.radiusM]),CFG.geo]);
 const SAVED=load('wk_settings',{});
+if(SAVED.sv!==2) delete SAVED.staticPlayer;   // v5 en ouder bewaarden 'element' als standaard; nu 'auto'
 if(SAVED.cfgSig!==CFG_SIG){ ['goodAccM','maxAccM','staleS','exitMarginM','dwellMs','radius'].forEach(k=>delete SAVED[k]); }
 const S=Object.assign({},DEF,SAVED); delete S.cfgSig;
 S.radius=Object.assign({},DEF.radius,S.radius||{});
-const saveS=()=>store('wk_settings',Object.assign({cfgSig:CFG_SIG},S));
+const saveS=()=>store('wk_settings',Object.assign({cfgSig:CFG_SIG,sv:2},S));
+/* Auto: HTML-audio als het volume regelbaar is (fades via volume), anders Web Audio (iOS: volume vast, fades via gain) */
+const staticPlayer=()=>S.staticPlayer==='auto'?(volOk?'element':'webaudio'):S.staticPlayer;
 
 /* ===== toestand ===== */
 let running=false, paused=false, level=0, levelWhy='Tik op Start', levelSince=now(), upSince=null;
@@ -202,7 +205,7 @@ function playEl(){
 function setStatic(on){
   if(staticOn===on) return; staticOn=on; const fade=CFG.crossfadeMs;
   log('audio',on?'static-on':'static-off',on?'Statische soundscape aan':'Statische soundscape uit');
-  if(S.staticPlayer==='webaudio'){
+  if(staticPlayer()==='webaudio'){
     if(!ctx) return; const t=ctx.currentTime;
     if(on&&!staticSrc){ staticSrc=ctx.createBufferSource(); staticSrc.buffer=staticBuf; staticSrc.loop=true; staticSrc.connect(staticG); staticSrc.start(t); }
     staticG.gain.cancelScheduledValues(t); staticG.gain.setValueAtTime(staticG.gain.value,t); staticG.gain.linearRampToValueAtTime(on?CFG.static.gain:0,t+fade/1000);
@@ -223,7 +226,7 @@ function updateResumeBar(force){
   const need=running&&!paused&&((ctx&&ctx.state!=='running'&&!document.hidden)||force===true);
   $('#resumeBar').hidden=!need;
 }
-$('#resumeBar').addEventListener('click',()=>{ if(ctx) ctx.resume().catch(()=>{}); if(staticOn&&S.staticPlayer==='element') playEl(); $('#resumeBar').hidden=true; log('audio','user-resume','Geluid hervat via tik'); });
+$('#resumeBar').addEventListener('click',()=>{ if(ctx) ctx.resume().catch(()=>{}); if(staticOn&&staticPlayer()==='element') playEl(); $('#resumeBar').hidden=true; log('audio','user-resume','Geluid hervat via tik'); });
 
 /* =====================================================================
    NIVEAUS (3 interactief · 2 beperkt · 1 statisch)
@@ -473,7 +476,7 @@ function onStartTap(){
     if(p&&p.then) p.then(()=>{ done(); log('audio','primed','Statische speler ontgrendeld'); }).catch(e=>{ priming=false; staticEl.muted=false; log('audio','prime-fail','Statische speler niet ontgrendeld: '+e.message,{warn:1}); });
     else done(); }
   running=true; paused=false; startedAt=now(); firstFixAt=null; level=0; levelSince=now();
-  log('sys','start',`Sessie gestart · ${navigator.userAgent}`,{ua:navigator.userAgent,audioSession:navigator.audioSession?navigator.audioSession.type:null});
+  log('sys','start',`Sessie gestart · statische speler: ${staticPlayer()} · ${navigator.userAgent}`,{ua:navigator.userAgent,audioSession:navigator.audioSession?navigator.audioSession.type:null});
   if(S.source==='gps'){
     startGeo(); pf('fix','wait','Eerste GPS-positie','Zoeken…'); pf('dist','wait','Afstand tot testgebied','Wacht op positie');
     clearTimeout(fixTimeout); fixTimeout=setTimeout(()=>{ if(!firstFixAt&&!geoDenied){ pf('fix','bad','Eerste GPS-positie',`Geen positie binnen ${CFG.geo.firstFixTimeoutS} s`); showVerdict(); } },CFG.geo.firstFixTimeoutS*1000);
@@ -500,7 +503,7 @@ $('#btnPreflight').addEventListener('click',()=>{ $('#startOv').hidden=false; })
 function togglePause(){
   if(!running) return; paused=!paused;
   if(paused){ if(ctx) ctx.suspend(); if(staticEl) staticEl.pause(); log('sys','pause','Gepauzeerd (GPS en log lopen door)'); }
-  else { if(ctx) ctx.resume(); if(staticOn&&S.staticPlayer==='element') playEl(); log('sys','resume','Hervat'); }
+  else { if(ctx) ctx.resume(); if(staticOn&&staticPlayer()==='element') playEl(); log('sys','resume','Hervat'); }
   updateMediaSession(); renderAll();
 }
 function stopSession(){
@@ -643,8 +646,8 @@ function renderZones(){
 }
 function renderStatic(){
   const a=ASSET.static, on=staticOn&&running;
-  $('#staticCard').innerHTML=`<div class="scard ${on?'on':''}"><div class="znum">S</div><div class="zmain"><div class="ztitle">Statische soundscape <span class="mode">${S.staticPlayer==='element'?'HTML-audio':'Web Audio'}</span>${a?` <span class="asset ${a.real?'real':'synth'}">${a.real?'eigen audio':'placeholder'}</span>`:''}</div>
-    <div class="zsub">${on?(paused?'gepauzeerd':(level===1?'speelt · niveau 1 (geen bruikbare locatie)':'speelt · buiten de zones')):'stil · er klinkt een zone'}${!volOk&&S.staticPlayer==='element'?' · volume vast (iOS): harde wissel':''}</div></div></div>`;
+  $('#staticCard').innerHTML=`<div class="scard ${on?'on':''}"><div class="znum">S</div><div class="zmain"><div class="ztitle">Statische soundscape <span class="mode">${staticPlayer()==='element'?'HTML-audio':'Web Audio'}${S.staticPlayer==='auto'?' (auto)':''}</span>${a?` <span class="asset ${a.real?'real':'synth'}">${a.real?'eigen audio':'placeholder'}</span>`:''}</div>
+    <div class="zsub">${on?(paused?'gepauzeerd':(level===1?'speelt · niveau 1 (geen bruikbare locatie)':'speelt · buiten de zones')):'stil · er klinkt een zone'}${!volOk&&staticPlayer()==='element'?' · volume vast (iOS): harde wissel':''}</div></div></div>`;
 }
 function renderStats(){
   if(!$('#pane-log').classList.contains('on')) return;
