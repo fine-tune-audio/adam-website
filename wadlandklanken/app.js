@@ -6,6 +6,7 @@
    staat in localStorage tot je het exporteert of wist. */
 (function(){
 'use strict';
+const APP_VERSION='v5 · 9 okt 2026';   // ophogen bij elke wijziging; staat in beeld zodat je ziet welke versie draait
 const CFG=window.WK_CONFIG, ZONES=CFG.zones;
 const $=s=>document.querySelector(s);
 const now=()=>Date.now();
@@ -636,7 +637,7 @@ function renderZones(){
   ZONES.forEach(z=>{ const c=el.querySelector(`[data-id="${z.id}"]`), st=ZS[z.id];
     c.classList.toggle('in',st.inside); c.classList.toggle('cand',st.cand!=null&&!st.inside);
     const a=ASSET[z.id], ab=c.querySelector('.asset'); ab.className='asset '+(a?(a.real?'real':'synth'):''); ab.textContent=a?(a.real?'eigen audio':'placeholder'):'';
-    c.querySelector('.zsub').textContent=`r ${S.radius[z.id]} m · ${zoneState(z)}`;
+    c.querySelector('.zsub').textContent=st.inside?`${zoneState(z)} · verlaat bij ${S.radius[z.id]+S.exitMarginM} m`:`r ${S.radius[z.id]} m · ${zoneState(z)}`;
     c.querySelector('.zbar i').style.width=Math.round(zoneLevel(z)*100)+'%';
     c.querySelector('.zdist b').textContent=st.dist!=null?fmtM(st.dist):'–'; });
 }
@@ -763,7 +764,7 @@ $('#btnDefaults').addEventListener('click',()=>{ const src=S.source; Object.assi
 
 function renderDevInfo(){
   const standalone=(window.matchMedia&&matchMedia('(display-mode: standalone)').matches)||navigator.standalone;
-  $('#devInfo').innerHTML=[`<b>Browser:</b> ${esc(navigator.userAgent)}`,`<b>Scherm:</b> ${screen.width}×${screen.height} @${devicePixelRatio}x${standalone?' · als app geïnstalleerd':''}`,
+  $('#devInfo').innerHTML=[`<b>Versie:</b> ${APP_VERSION}`,`<b>Browser:</b> ${esc(navigator.userAgent)}`,`<b>Scherm:</b> ${screen.width}×${screen.height} @${devicePixelRatio}x${standalone?' · als app geïnstalleerd':''}`,
     `<b>Audio-sessie (iOS):</b> ${navigator.audioSession?'ja':'nee'} · <b>Wake Lock:</b> ${'wakeLock' in navigator?'ja':'nee'} · <b>Volume regelbaar:</b> ${volOk?'ja':'nee'}`,
     battery?`<b>Batterij:</b> ${Math.round(battery.level*100)}%${battery.charging?' (laden)':''}`:'' ].filter(Boolean).join('<br>');
 }
@@ -795,13 +796,14 @@ async function preflight(){
    ===================================================================== */
 (function boot(){
   const nav=performance.getEntriesByType&&performance.getEntriesByType('navigation')[0];
-  log('sys','session',`Pagina geladen (${nav?nav.type:'?'})${document.wasDiscarded?' · was door het systeem afgesloten':''}`,{nav:nav&&nav.type,discarded:!!document.wasDiscarded,ua:navigator.userAgent});
+  log('sys','session',`${APP_VERSION} · pagina geladen (${nav?nav.type:'?'})${document.wasDiscarded?' · was door het systeem afgesloten':''}`,{nav:nav&&nav.type,discarded:!!document.wasDiscarded,ua:navigator.userAgent});
   const ps=load('wk_sleep',null);
   if(ps&&ps.open&&ps.running){
     log('scr','reload-after-sleep',`Pagina is opnieuw geladen terwijl het scherm uit was (sinds ${fmtClock(ps.at)}). Het systeem heeft de pagina afgesloten.`,{since:ps.at,warn:1});
     store('wk_sleep',{open:false});
     setTimeout(()=>openModal(`<h3>Pagina werd afgesloten</h3><p>Terwijl je scherm uit was (sinds ${fmtClock(ps.at)}) heeft je telefoon deze pagina afgesloten en opnieuw geladen. Locatie en geluid stopten dus volledig.</p><p>Dit staat in het log. Tik op Start om verder te testen.</p><div class="row"><button class="btn" id="mClose">Begrepen</button></div>`)||($('#mClose').onclick=closeModal),400);
   }
+  $('#appVersion').textContent=APP_VERSION;
   paintSettings(); renderLogAll(); renderLastSleep(); renderSleepBtn();
   initMap(); applySource(); renderAll();
   preflight();

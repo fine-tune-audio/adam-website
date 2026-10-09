@@ -11,7 +11,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@600;700;800&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
+<!-- altijd verse bestanden laden: GitHub Pages laat browsers ze anders 10 min cachen -->
+<script>window.WK_BUST=Date.now(); document.write('<link rel="stylesheet" href="style.css?v='+WK_BUST+'">');</script>
 </head>
 <body>
 <div class="stage"><div class="app" id="app">
@@ -123,7 +124,7 @@
         <button class="btn big ghost" id="btnToMap" hidden>Naar de kaart</button>
         <button class="btn ghost" id="btnUseSim" hidden>Simulatie aanzetten</button>
       </div>
-      <p class="fine">Gebruik een koptelefoon. Je locatie blijft op dit toestel; het log wordt alleen gedeeld als je het zelf exporteert.</p>
+      <p class="fine"><b id="appVersion"></b> · Gebruik een koptelefoon. Je locatie blijft op dit toestel; het log wordt alleen gedeeld als je het zelf exporteert.</p>
     </div>
   </div>
 
@@ -131,7 +132,6 @@
   <div class="toast" id="toast"></div>
 </div></div>
 
-<script src="config.js"></script>
-<script src="app.js"></script>
+<script>document.write('<script src="config.js?v='+WK_BUST+'"><\/script><script src="app.js?v='+WK_BUST+'"><\/script>');</script>
 </body>
 </html>
