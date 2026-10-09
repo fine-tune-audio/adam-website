@@ -164,6 +164,7 @@ function applyDistanceGain(z,d){
 function oneShot(z){
   const st=ZS[z.id];
   if(z.oncePerSession&&st.shots>0){ log('zone','skip',`${z.name}: one-shot al gespeeld deze sessie`,{zone:z.id}); return; }
+  if(st.playing){ log('zone','skip',`${z.name}: one-shot speelt nog, niet opnieuw gestart`,{zone:z.id}); return; }
   if(st.lastShot&&now()-st.lastShot<z.cooldownMs){ log('zone','cooldown',`${z.name}: overgeslagen, cooldown nog ${fmtDur(z.cooldownMs-(now()-st.lastShot))}`,{zone:z.id}); return; }
   if(!ctx) return;
   const src=ctx.createBufferSource(); src.buffer=BUF[z.id]; src.connect(zoneG[z.id]); src.start();
