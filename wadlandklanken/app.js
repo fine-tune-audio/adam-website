@@ -161,8 +161,8 @@ function stopLoop(z,ms){
   const v=voices[z.id]; if(!v||v.stopping||!ctx) return; const t=ctx.currentTime, d=(ms==null?z.fadeOutMs:ms)/1000;
   v.g.gain.cancelScheduledValues(t); v.g.gain.setValueAtTime(v.g.gain.value,t); v.g.gain.linearRampToValueAtTime(0,t+d);
   try{ v.src.stop(t+d+0.05); }catch(_){}
-  v.stopping=true; v.src.onended=()=>{ if(voices[z.id]===v) delete voices[z.id]; };
-  log('audio','loop-stop',`${z.name}: loop fade-out ${d.toFixed(1)} s`,{zone:z.id});
+  v.stopping=true; const prev=v.src.onended; v.src.onended=e=>{ if(voices[z.id]===v) delete voices[z.id]; if(prev) prev(e); };
+  log('audio','loop-stop',`${z.name}: ${z.mode==='ONE_SHOT'?'one-shot':'loop'} fade-out ${d.toFixed(1)} s`,{zone:z.id});
 }
 function applyDistanceGain(z,d){
   const st=ZS[z.id], far=S.radius[z.id]+S.exitMarginM, near=z.nearM||0;
@@ -175,13 +175,17 @@ function oneShot(z){
   if(st.playing){ log('zone','skip',`${z.name}: one-shot speelt nog, niet opnieuw gestart`,{zone:z.id}); return; }
   if(st.lastShot&&now()-st.lastShot<z.cooldownMs){ log('zone','cooldown',`${z.name}: overgeslagen, cooldown nog ${fmtDur(z.cooldownMs-(now()-st.lastShot))}`,{zone:z.id}); return; }
   if(!ctx) return;
-  const src=ctx.createBufferSource(); src.buffer=BUF[z.id]; src.connect(zoneG[z.id]); src.start();
-  st.lastShot=now(); st.shots++; st.playing=true;
-  src.onended=()=>{ st.playing=false; renderSoon(); };
+  const src=ctx.createBufferSource(); src.buffer=BUF[z.id]; const g=ctx.createGain(); g.gain.value=1; src.connect(g); g.connect(zoneG[z.id]); src.start();
+  st.lastShot=now(); st.shots++; st.playing=true; const v={src,g}; voices[z.id]=v;
+  src.onended=()=>{ if(voices[z.id]===v) delete voices[z.id]; st.playing=false; if(!v.stopping) log('audio','oneshot-end',`${z.name}: one-shot afgelopen`,{zone:z.id}); updateStatic(); renderSoon(); };
   log('audio','oneshot',`${z.name}: one-shot speelt (${fmtDur(BUF[z.id].duration*1000)})`,{zone:z.id});
 }
 function audioEnter(z,d){ if(z.mode==='ONE_SHOT') return oneShot(z); startLoop(z); if(z.mode==='DISTANCE_GAIN') applyDistanceGain(z,d); }
-function audioExit(z){ if(z.mode!=='ONE_SHOT') stopLoop(z); }
+/* verlaten = altijd stoppen (met fade), ook een one-shot die nog speelt */
+function audioExit(z,ms){ stopLoop(z,ms!=null?ms:(z.fadeOutMs||2500)); }
+/* static speelt buiten de zones; zodra een zone klinkt fadet hij weg en daarna weer terug */
+function zoneSounding(){ return ZONES.some(z=>z.mode==='ONE_SHOT'?ZS[z.id].playing:ZS[z.id].inside); }
+function updateStatic(){ if(!running||level===0) return; setStatic(level===1||!zoneSounding()); }
 
 /* statische soundscape */
 function fadeEl(target,ms,done){
@@ -202,7 +206,7 @@ function setStatic(on){
     if(on&&!staticSrc){ staticSrc=ctx.createBufferSource(); staticSrc.buffer=staticBuf; staticSrc.loop=true; staticSrc.connect(staticG); staticSrc.start(t); }
     staticG.gain.cancelScheduledValues(t); staticG.gain.setValueAtTime(staticG.gain.value,t); staticG.gain.linearRampToValueAtTime(on?CFG.static.gain:0,t+fade/1000);
   } else {
-    if(on){ if(volOk) staticEl.volume=0; if(!paused) playEl(); fadeEl(clamp(CFG.static.gain*S.master,0,1),fade); }
+    if(on){ if(volOk&&staticEl.paused) staticEl.volume=0; if(!paused) playEl(); fadeEl(clamp(CFG.static.gain*S.master,0,1),fade); }
     else fadeEl(0,fade,()=>{ if(!staticOn) staticEl.pause(); });
   }
   updateMediaSession();
@@ -249,8 +253,9 @@ function updateLevel(){
 function applyLevel(l,why){
   const old=level; if(old) levelTime[old]+=now()-levelSince; levelSince=now(); level=l; levelWhy=why;
   log('lvl','level',`Niveau ${old||'–'} → ${l}: ${why}`,{from:old,to:l,warn:l<old?1:0});
-  if(l===1&&old!==1){ ZONES.forEach(z=>stopLoop(z,CFG.crossfadeMs)); setStatic(true); }
-  if(l>=2&&old<=1){ setStatic(false); ZONES.forEach(z=>{ const st=ZS[z.id]; if(st.inside&&z.mode!=='ONE_SHOT'){ startLoop(z); if(z.mode==='DISTANCE_GAIN') applyDistanceGain(z,st.dist); } }); }
+  if(l===1&&old!==1){ ZONES.forEach(z=>audioExit(z,CFG.crossfadeMs)); }
+  if(l>=2&&old<=1){ ZONES.forEach(z=>{ const st=ZS[z.id]; if(st.inside&&z.mode!=='ONE_SHOT'){ startLoop(z); if(z.mode==='DISTANCE_GAIN') applyDistanceGain(z,st.dist); } }); }
+  updateStatic();
   renderAll();
 }
 
@@ -275,7 +280,7 @@ function zoneEnter(z,d,p){
   const st=ZS[z.id]; st.inside=true; st.cand=null; st.enteredAt=now(); st.enters++; stats.enters[z.id]++;
   if(sleep&&document.hidden) sleep.zoneEv++;
   log('zone','enter',`${z.name} binnen · ${Math.round(d)} m van midden · ±${Math.round(p.acc)} m`,{zone:z.id,dist:+d.toFixed(1),acc:+p.acc.toFixed(1),lat:+p.lat.toFixed(6),lon:+p.lon.toFixed(6)});
-  if(level>=2) audioEnter(z,d);
+  if(level>=2){ audioEnter(z,d); updateStatic(); }
   else log('zone','muted',`${z.name}: geen audio-trigger (niveau ${level})`,{zone:z.id});
   updateMapZones(); renderSoon();
 }
@@ -283,7 +288,7 @@ function zoneExit(z,d,p){
   const st=ZS[z.id]; st.inside=false; st.cand=null;
   if(sleep&&document.hidden) sleep.zoneEv++;
   log('zone','exit',`${z.name} verlaten na ${fmtDur(now()-st.enteredAt)} · ${Math.round(d)} m · ±${Math.round(p.acc)} m`,{zone:z.id,dist:+d.toFixed(1),acc:+p.acc.toFixed(1)});
-  audioExit(z); updateMapZones(); renderSoon();
+  audioExit(z); updateStatic(); updateMapZones(); renderSoon();
 }
 function process(p){ evaluateZones(p); updateLevel(); renderSoon(); }
 
@@ -638,7 +643,7 @@ function renderZones(){
 function renderStatic(){
   const a=ASSET.static, on=staticOn&&running;
   $('#staticCard').innerHTML=`<div class="scard ${on?'on':''}"><div class="znum">S</div><div class="zmain"><div class="ztitle">Statische soundscape <span class="mode">${S.staticPlayer==='element'?'HTML-audio':'Web Audio'}</span>${a?` <span class="asset ${a.real?'real':'synth'}">${a.real?'eigen audio':'placeholder'}</span>`:''}</div>
-    <div class="zsub">${on?(paused?'gepauzeerd':'speelt · niveau 1'):'stand-by · speelt zodra geofencing niet werkt'}${!volOk&&S.staticPlayer==='element'?' · volume vast (iOS): harde wissel':''}</div></div></div>`;
+    <div class="zsub">${on?(paused?'gepauzeerd':(level===1?'speelt · niveau 1 (geen bruikbare locatie)':'speelt · buiten de zones')):'stil · er klinkt een zone'}${!volOk&&S.staticPlayer==='element'?' · volume vast (iOS): harde wissel':''}</div></div></div>`;
 }
 function renderStats(){
   if(!$('#pane-log').classList.contains('on')) return;
