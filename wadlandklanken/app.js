@@ -27,9 +27,13 @@ const DEF={ mode:'auto', source:'gps', onHidden:'keep', staticPlayer:'element', 
   goodAccM:CFG.geo.goodAccuracyM, maxAccM:CFG.geo.maxAccuracyM, staleS:CFG.geo.staleS,
   exitMarginM:CFG.geo.exitMarginM, dwellMs:CFG.geo.dwellMs, master:0.9,
   radius:Object.fromEntries(ZONES.map(z=>[z.id,z.radiusM])) };
-const S=Object.assign({},DEF,load('wk_settings',{}));
+/* Zodra config.js andere zones/drempels krijgt, vervallen de lokaal bewaarde GPS-/radiuswaarden; voorkeuren (modus, speler, volume) blijven. */
+const CFG_SIG=JSON.stringify([ZONES.map(z=>[z.id,z.lat,z.lon,z.radiusM]),CFG.geo]);
+const SAVED=load('wk_settings',{});
+if(SAVED.cfgSig!==CFG_SIG){ ['goodAccM','maxAccM','staleS','exitMarginM','dwellMs','radius'].forEach(k=>delete SAVED[k]); }
+const S=Object.assign({},DEF,SAVED); delete S.cfgSig;
 S.radius=Object.assign({},DEF.radius,S.radius||{});
-const saveS=()=>store('wk_settings',S);
+const saveS=()=>store('wk_settings',Object.assign({cfgSig:CFG_SIG},S));
 
 /* ===== toestand ===== */
 let running=false, paused=false, level=0, levelWhy='Tik op Start', levelSince=now(), upSince=null;
@@ -109,6 +113,9 @@ function wavBlob(buf){ const ch=buf.numberOfChannels, len=buf.length, sr=buf.sam
   const chans=[]; for(let c=0;c<ch;c++) chans.push(buf.getChannelData(c)); let o=44;
   for(let i=0;i<len;i++) for(let c=0;c<ch;c++){ const s=clamp(chans[c][i],-1,1); v.setInt16(o,s<0?s*0x8000:s*0x7fff,true); o+=2; }
   return new Blob([ab],{type:'audio/wav'}); }
+/* fade-in/-out in het begin en eind van de buffer zelf; elke herhaling van de loop krijgt zo een zachte overgang zonder JavaScript-timers */
+function applyLoopFade(buf,ms){ const n=Math.min(Math.round(ms/1000*buf.sampleRate),Math.floor(buf.length/4)), len=buf.length;
+  for(let c=0;c<buf.numberOfChannels;c++){ const d=buf.getChannelData(c); for(let i=0;i<n;i++){ const g=Math.sin(Math.PI/2*i/n); d[i]*=g; d[len-1-i]*=g; } } }
 function decode(ab){ const oc=new OAC(2,44100,44100); return new Promise((res,rej)=>{ const p=oc.decodeAudioData(ab,res,rej); if(p&&p.then) p.then(res,rej); }); }
 async function loadOrSynth(key,asset,synth){
   try{ const r=await fetch(CFG.audioBase+asset,{cache:'no-cache'}); if(!r.ok) throw new Error('HTTP '+r.status);
@@ -120,7 +127,8 @@ async function preloadAudio(){
   pf('assets','wait','Audiobestanden','Laden…');
   for(const z of ZONES) BUF[z.id]=await loadOrSynth(z.id,z.asset,z.synth);
   staticBuf=await loadOrSynth('static',CFG.static.asset,CFG.static.synth);
-  staticUrl=ASSET.static.real?CFG.audioBase+CFG.static.asset:URL.createObjectURL(wavBlob(staticBuf));
+  if(CFG.static.loopFadeMs) applyLoopFade(staticBuf,CFG.static.loopFadeMs);
+  staticUrl=URL.createObjectURL(wavBlob(staticBuf));   // ook bij eigen bestand: zo zit de loop-fade in wat de HTML-speler afspeelt
   createStaticEl();
   const keys=[...ZONES.map(z=>z.id),'static'], real=keys.filter(k=>ASSET[k].real).length;
   pf('assets',real===keys.length?'ok':'info','Audiobestanden', real===keys.length?'Alle eigen bestanden geladen':`${real} van ${keys.length} eigen bestanden · rest is synth-placeholder`);
