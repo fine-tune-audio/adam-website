@@ -65,7 +65,16 @@ function stripJsonFence(text) {
 // Builds a per-industry system prompt from that industry's own dataCollection
 // schema and red-flag list, so the JSON shape the model is asked for always
 // matches the fields the frontend actually renders for the selected industry.
-function buildSystemPrompt(industryCfg) {
+// Language of the call and of the summary. The demo sends nl, en or de; anything else is Dutch.
+const SUMMARY_LANGS = {
+  nl: { name: 'Dutch', notGiven: 'Niet opgegeven', fillers: '"uh", "eh", "nou"' },
+  en: { name: 'English', notGiven: 'Not provided', fillers: '"uh", "um", "you know"' },
+  de: { name: 'German', notGiven: 'Nicht angegeben', fillers: '"äh", "ähm", "also"' }
+};
+const summaryLang = (lang) => SUMMARY_LANGS[lang] || SUMMARY_LANGS.nl;
+
+function buildSystemPrompt(industryCfg, lang) {
+  const L = summaryLang(lang);
   const fieldLines = industryCfg.dataCollection
     .map((f) => `  "${f.name}": string  // ${f.instruction}`)
     .join('\n');
@@ -84,10 +93,10 @@ ${fieldLines}
 }
 
 HARD RULES:
-- The transcript is in Dutch. Write "summary" and every other free-text field value (reason, action, notes, etc.) in Dutch too, matching the transcript's language. Leave enum-style status fields (e.g. urgency, priority) in their defined English tokens (urgent/normal/routine/emergency/P1-P4 etc, per that field's own instruction below) — those are internal values, not prose.
-- "summary" MUST be a clean 2-3 sentence Dutch paraphrase, in your own words, of what the caller wanted and what was agreed. NEVER copy or closely echo the transcript verbatim. Strip filler ("uh", "eh", "nou") and disfluencies.
+- The transcript is in ${L.name}. Write "summary" and every other free-text field value (reason, action, notes, etc.) in ${L.name} too, matching the transcript's language. Leave enum-style status fields (e.g. urgency, priority) in their defined English tokens (urgent/normal/routine/emergency/P1-P4 etc, per that field's own instruction below) — those are internal values, not prose.
+- "summary" MUST be a clean 2-3 sentence ${L.name} paraphrase, in your own words, of what the caller wanted and what was agreed. NEVER copy or closely echo the transcript verbatim. Strip filler (${L.fillers}) and disfluencies.
 - ${redFlagRule}
-- For any free-text field the caller did not actually provide, return the literal string "Niet opgegeven" — do not guess, infer, or invent a plausible-sounding value.
+- For any free-text field the caller did not actually provide, return the literal string "${L.notGiven}" — do not guess, infer, or invent a plausible-sounding value.
 - Never invent names, phone numbers, addresses, room numbers, or any other identifying detail not explicitly stated.
 - Never invent a diagnosis, professional/technical assessment, or advice beyond what's appropriate for this industry.
 - Any "action"-type field describes what was arranged or logged, not advice.`;
@@ -98,7 +107,7 @@ app.get('/health', (req, res) => {
 });
 
 app.post('/api/summarise', async (req, res) => {
-  const { transcript, companyName, practiceName, useCases, industry } = req.body || {};
+  const { transcript, companyName, practiceName, useCases, industry, lang } = req.body || {};
   const companyLabel = companyName || practiceName; // practiceName kept for backward compatibility
 
   if (!Array.isArray(transcript) || transcript.length === 0) {
@@ -117,7 +126,7 @@ app.post('/api/summarise', async (req, res) => {
     return res.status(200).json({ ok: false, fallback: true, error: 'Failed to load industry configuration', detail: err.message });
   }
 
-  const systemPrompt = buildSystemPrompt(industryCfg);
+  const systemPrompt = buildSystemPrompt(industryCfg, lang);
 
   const transcriptText = transcript
     .map((turn) => `${turn.role === 'user' ? 'Caller' : 'Agent'}: ${turn.text}`)
@@ -178,13 +187,13 @@ app.post('/api/summarise', async (req, res) => {
       return res.status(200).json({ ok: false, fallback: true, error: 'Model did not return valid JSON', raw: rawText });
     }
 
-    // The model mostly follows the "Niet opgegeven" instruction, but not
+    // The model mostly follows the "not provided" instruction, but not
     // always (e.g. an empty string instead) — normalise deterministically
     // rather than trust it every time.
     Object.keys(parsed).forEach((key) => {
       if (key === 'summary') return;
       if (parsed[key] === null || parsed[key] === undefined || parsed[key] === '') {
-        parsed[key] = 'Niet opgegeven';
+        parsed[key] = summaryLang(lang).notGiven;
       }
     });
 

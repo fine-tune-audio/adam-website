@@ -60,10 +60,18 @@
 })();
 
 // ---- Final funnel step: submit the lead-capture panel to n8n ----
+// Text in the visitor's language when the page has i18n.js and the key; Dutch otherwise.
+function tr(key, fallback) {
+  try {
+    var v = window.adamI18n && window.adamI18n.t(key);
+    return v && v !== key ? v : fallback;
+  } catch (e) { return fallback; }
+}
+
 window.adamSubmitLead = async function () {
   var consent = document.getElementById('adam-consent-lead');
   if (!consent || !consent.checked) {
-    alert('Vink het toestemmingsvakje aan om verder te gaan.');
+    alert(tr('demo.s8.consentAlert', 'Vink het toestemmingsvakje aan om verder te gaan.'));
     return;
   }
   var notesEl = document.getElementById('adam-notes');
@@ -77,6 +85,7 @@ window.adamSubmitLead = async function () {
   var payload = {
     event: 'demo_lead_submitted',
     submitted_at: new Date().toISOString(),
+    lang: (window.adamI18n && window.adamI18n.getLang && window.adamI18n.getLang()) || 'nl',
     industry: f.industry || null,
     service_selected: f.service_selected || null,
     company: {
@@ -112,7 +121,7 @@ window.adamSubmitLead = async function () {
 
   var WEBHOOK_URL = 'https://finetuneaudio.app.n8n.cloud/webhook/adam-demo-lead';
   var btn = document.getElementById('adam-lead-submit');
-  if (btn) { btn.disabled = true; btn.textContent = 'Versturen...'; }
+  if (btn) { btn.disabled = true; btn.textContent = tr('demo.s8.sending', 'Versturen...'); }
   try {
     await fetch(WEBHOOK_URL, {
       method: 'POST',
