@@ -56,6 +56,8 @@
     .legal h2{font-size:22px;font-weight:800;letter-spacing:-0.02em;margin:44px 0 16px;}
     .legal h2:first-child{margin-top:0;}
     .legal p{font-size:16px;line-height:1.85;color:#444;margin-bottom:16px;}
+    .legal h3{font-size:18px;font-weight:800;margin:28px 0 12px;}
+    .legal code{font-size:14px;background:#f1f3f9;padding:1px 6px;border-radius:4px;}
     .legal ul{margin:0 0 16px 20px;}
     .legal li{font-size:16px;line-height:1.85;color:#444;margin-bottom:6px;}
     .legal a{color:var(--blue);}
@@ -175,6 +177,48 @@
     <h2 data-i18n="privacy.cookies_en_opslag_7d12df">Cookies en opslag</h2>
     <p data-i18n="privacy.wij_plaatsen_geen_tracking_e8bcee">Wij plaatsen geen tracking-cookies. Voor het laten werken van de demo gebruiken wij functionele opslag in uw browser. Voor statistieken gebruiken wij een cookieloze oplossing die u via de melding op onze site kunt weigeren.</p>
 
+    <!-- GOOGLE-DATA:BEGIN -->
+    <h2 id="google-gegevens" data-i18n="privacy.g.title">Google-gegevens</h2>
+    <p data-i18n="privacy.g.intro">ADAM is een dienst voor bedrijven (onze klanten). Een klant kan zelf kiezen om Google Agenda en/of Gmail aan ADAM te koppelen. Dit onderdeel beschrijft hoe ADAM gegevens uit die koppelingen opent, gebruikt, bewaart, deelt en verwijdert. De app heet ADAM; het dashboard staat op app.adamagents.nl.</p>
+    <h3 data-i18n="privacy.g.cal.title">Google Agenda</h3>
+    <p data-i18n-html="privacy.g.cal.scopes">Toegangsrechten (scopes) die we vragen: <code>calendar.calendarlist.readonly</code> (lijst van uw agenda's, zodat u de zakelijke agenda kunt kiezen), <code>calendar.events.owned</code> (afspraken lezen en aanmaken, alleen in agenda's waarvan u eigenaar bent) en <code>calendar.events.freebusy</code> (controleren wanneer u vrij of bezet bent).</p>
+    <p data-i18n="privacy.g.cal.data">Welke gegevens: de lijst van uw agenda's, de afspraken (titel, locatie, begin- en eindtijd, status) van de ene agenda die u kiest, van 30 dagen terug tot 400 dagen vooruit, en uw vrij/bezet-tijden.</p>
+    <p data-i18n="privacy.g.cal.use">Waarvoor: wij tonen de afspraken naast de boekingen die de assistent aanneemt, controleren of een tijdstip vrij is, en maken voor een boeking een afspraak in de gekozen agenda (voorlopig, tot uw medewerkers de boeking bevestigen; bij afwijzing of annulering wordt die afspraak weer verwijderd of aangepast). Wij gebruiken deze gegevens niet voor andere doelen.</p>
+    <p data-i18n="privacy.g.cal.never">Wat wij nooit doen: andere agenda's lezen dan die u kiest, of agenda's waarvan u geen eigenaar bent.</p>
+    <h3 data-i18n="privacy.g.mail.title">Gmail</h3>
+    <p data-i18n-html="privacy.g.mail.scopes">Toegangsrechten (scopes) die we vragen: <code>gmail.readonly</code> (nieuwe e-mails en gesprekken lezen en zien welke mailbox is ingelogd) en <code>gmail.compose</code> (een conceptantwoord klaarzetten in uw mailbox).</p>
+    <p data-i18n="privacy.g.mail.data">Welke gegevens: alleen e-mails die binnenkomen nadat u de mailbox hebt gekoppeld (afzender, onderwerp, datum, tekst en gespreks-id). De tekst van een e-mail slaan wij niet op.</p>
+    <p data-i18n="privacy.g.mail.use">Waarvoor: om een conceptantwoord te schrijven. Daarvoor sturen wij alleen het nieuwste bericht, zonder geciteerde berichtgeschiedenis en met e-mailadressen en telefoonnummers afgeschermd, naar onze verwerkers (zie hieronder). Het concept wordt in hetzelfde gesprek in uw eigen mailbox gezet. ADAM verstuurt zelf nooit e-mail: u kijkt het concept na en verstuurt of verwijdert het zelf. Onze software gebruikt de verzendfuncties van Gmail niet.</p>
+    <p data-i18n="privacy.g.mail.never">Wat wij nooit doen: e-mail versturen, verwijderen of verplaatsen, of mail lezen van vóór de koppeling.</p>
+    <h3 data-i18n="privacy.g.store.title">Waar en hoe lang wij Google-gegevens bewaren</h3>
+    <ul>
+      <li data-i18n-html="privacy.g.store.list.0">Toegangstokens: versleuteld opgeslagen (AES-256-GCM), tot u de koppeling verbreekt.</li>
+      <li data-i18n-html="privacy.g.store.list.1">Afspraken uit uw agenda: een kopie om te tonen; afspraken die meer dan 30 dagen geleden zijn afgelopen worden verwijderd, en alles wordt verwijderd zodra u de koppeling verbreekt.</li>
+      <li data-i18n-html="privacy.g.store.list.2">E-mailgegevens: onderwerp, categorie, status, tijdstippen, de voornaam van de afzender en een versleutelde (gehashte) vorm van het adres van de afzender worden maximaal 90 dagen bewaard en daarna verwijderd.</li>
+      <li data-i18n-html="privacy.g.store.list.3">Conceptantwoorden die wij schrijven: standaard 30 dagen (per locatie in te stellen), nooit langer dan 90 dagen. Het concept zelf staat ook in uw eigen mailbox, tot u het verstuurt of verwijdert.</li>
+      <li data-i18n-html="privacy.g.store.list.4">De tekst van binnengekomen e-mails wordt niet opgeslagen.</li>
+    </ul>
+    <h3 data-i18n="privacy.g.proc.title">Wie wij Google-gegevens delen</h3>
+    <p data-i18n="privacy.g.proc.intro">Google-gegevens gaan alleen naar de verwerkers die ADAM nodig heeft om de dienst te leveren, en niet naar anderen:</p>
+    <ul>
+      <li data-i18n-html="privacy.g.proc.list.0">Supabase (database), in Ierland (EU): alle opgeslagen gegevens hierboven, tokens versleuteld.</li>
+      <li data-i18n-html="privacy.g.proc.list.1">Vercel (hosting van app.adamagents.nl), regio Dublin (EU).</li>
+      <li data-i18n-html="privacy.g.proc.list.2">n8n Cloud (workflowautomatisering): het afgeschermde nieuwste e-mailbericht om een concept te maken, en e-mails met meldingen aan uw medewerkers (alleen onderwerpen en redenen, geen berichttekst). n8n krijgt nooit toegangstokens en bewaart geen uitvoeringsgegevens.</li>
+      <li data-i18n-html="privacy.g.proc.list.3">OpenAI (taalmodel dat het concept schrijft): hetzelfde afgeschermde bericht. OpenAI gebruikt gegevens die via de API binnenkomen standaard niet om modellen te trainen. Voor klanten die dat willen is een in de EU gehost model mogelijk.</li>
+      <li data-i18n-html="privacy.g.proc.list.4">ElevenLabs (spraak van de telefoonassistent): alleen vrije tijdstippen die uit uw vrij/bezet-gegevens volgen, nooit details van afspraken.</li>
+    </ul>
+    <p data-i18n="privacy.g.proc.never">Wij gebruiken Google-gegevens niet om AI-modellen te trainen, verkopen ze niet en gebruiken ze niet voor reclame. Alleen de medewerkers van de klant zelf zien deze gegevens in het dashboard. Medewerkers van ADAM kijken alleen naar klantgegevens als de klant om ondersteuning vraagt, bij beveiligingsincidenten of als de wet dat verplicht. Elke toegang wordt vastgelegd.</p>
+    <h3 data-i18n="privacy.g.del.title">Loskoppelen en verwijderen</h3>
+    <ul>
+      <li data-i18n-html="privacy.g.del.list.0">Google Agenda loskoppelen: in het dashboard bij de agenda-instellingen. Het toegangsrecht wordt bij Google ingetrokken en onze kopie van uw afspraken en de koppeling worden direct verwijderd.</li>
+      <li data-i18n-html="privacy.g.del.list.1">Gmail loskoppelen: in het dashboard, bij de locatie op het tabblad E-mail, onder Mailbox, met Loskoppelen (alleen eigenaars). Het toegangsrecht wordt bij Google ingetrokken en het opgeslagen token wordt verwijderd. Opgeslagen e-mailgegevens en concepten verdwijnen uiterlijk na de bewaartermijnen hierboven; concepten die al in uw mailbox staan blijven daar staan.</li>
+      <li data-i18n-html="privacy.g.del.list.2">U kunt de toegang ook altijd zelf intrekken op <a href="https://myaccount.google.com/permissions" rel="noopener">myaccount.google.com/permissions</a>. De koppeling stopt dan en wij vragen u opnieuw te verbinden.</li>
+      <li data-i18n-html="privacy.g.del.list.3">Verwijdering van gegevens aanvragen: mail naar support@adamagents.nl. Wij reageren binnen 30 dagen.</li>
+    </ul>
+    <h3 data-i18n="privacy.g.lu.title">Google API Services User Data Policy</h3>
+    <p data-i18n-html="privacy.g.lu.text">ADAM's use and transfer of information received from Google APIs to any other app will adhere to the <a href="https://developers.google.com/terms/api-services-user-data-policy" rel="noopener">Google API Services User Data Policy</a>, including the Limited Use requirements.</p>
+    <!-- GOOGLE-DATA:END -->
+
     <h2 data-i18n="privacy.wijzigingen_92f033">Wijzigingen</h2>
     <p data-i18n="privacy.wij_kunnen_deze_privacyverklaring_6693a6">Wij kunnen deze privacyverklaring aanpassen. De actuele versie staat altijd op deze pagina.</p>
 
@@ -196,7 +240,7 @@
     <a data-i18n="nav.pricing" href="pricing.html">Prijzen</a>
     <a data-i18n="nav.about" href="about.html">Over ons</a>
     <a data-i18n="foot.contact.title" href="contact.html">Contact</a>
-    <a data-i18n="common.privacyverklaring_871fa2" href="privacyverklaring.html">Privacyverklaring</a>
+    <a data-i18n="common.privacyverklaring_871fa2" href="/privacyverklaring.html">Privacyverklaring</a>
   </nav>
   <span data-i18n="common.2026_adam_groningen_nl_26fadd" class="foot-right">© 2026 ADAM — Groningen, NL</span>
 </footer>

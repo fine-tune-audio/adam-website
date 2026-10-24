@@ -1,5 +1,10 @@
 export default {
   "nl": {
+    "index.google.label": "Google-koppelingen",
+    "index.google.title": "Koppelingen met Google Agenda en Gmail",
+    "index.google.p1": "ADAM is een dienst voor bedrijven. In het dashboard op app.adamagents.nl kunt u, als u dat wilt, uw Google Agenda koppelen: dan ziet u uw afspraken naast de boekingen die de assistent aanneemt, en weet de assistent welke tijden vrij zijn. Als u uw Gmail koppelt, schrijft de assistent conceptantwoorden in uw eigen mailbox. ADAM verstuurt zelf nooit e-mail: u kijkt het concept na en verstuurt het zelf.",
+    "index.google.p2": "Wij vragen alleen toegang die daarvoor nodig is. U kiest zelf of u koppelt en kunt op elk moment loskoppelen in het dashboard.",
+    "index.google.link": "Lees hoe we met je Google-gegevens omgaan →",
     "index.hero.title1": "Je klant praat.",
     "index.hero.title2": "Het systeem handelt.",
     "index.hero.sub": "ADAM zorgt dat elk klantgesprek direct wordt afgehandeld, met agents die natuurlijk aanvoelen, afgestemd zijn op je processen en direct tot actie leiden.",
@@ -74,6 +79,11 @@ export default {
     "index.2026_adam_haren_nl_424dd2": "© 2026 ADAM — Haren, NL"
   },
   "en": {
+    "index.google.label": "Google connections",
+    "index.google.title": "Connections with Google Calendar and Gmail",
+    "index.google.p1": "ADAM is a service for businesses. In the dashboard at app.adamagents.nl you can, if you want, connect your Google Calendar: you then see your events next to the bookings the assistant takes, and the assistant knows which times are free. If you connect your Gmail, the assistant writes reply drafts in your own inbox. ADAM never sends email itself: you review the draft and send it yourself.",
+    "index.google.p2": "We only ask for the access needed for this. You choose whether to connect and can disconnect at any time in the dashboard.",
+    "index.google.link": "Read how we handle your Google data →",
     "index.hero.title1": "Your customer talks.",
     "index.hero.title2": "The system acts.",
     "index.hero.sub": "ADAM makes sure every customer conversation is handled immediately, with agents that feel natural, match your processes, and lead straight to action.",
@@ -148,6 +158,11 @@ export default {
     "index.2026_adam_haren_nl_424dd2": "© 2026 ADAM — Haren, NL"
   },
   "de": {
+    "index.google.label": "Google-Verbindungen",
+    "index.google.title": "Verbindungen mit Google Kalender und Gmail",
+    "index.google.p1": "ADAM ist ein Dienst für Unternehmen. Im Dashboard unter app.adamagents.nl können Sie, wenn Sie möchten, Ihren Google Kalender verbinden: Dann sehen Sie Ihre Termine neben den Buchungen, die der Assistent entgegennimmt, und der Assistent weiß, welche Zeiten frei sind. Wenn Sie Ihr Gmail verbinden, schreibt der Assistent Antwortentwürfe in Ihrem eigenen Postfach. ADAM versendet selbst nie E-Mails: Sie prüfen den Entwurf und senden ihn selbst.",
+    "index.google.p2": "Wir fragen nur den dafür nötigen Zugriff an. Sie entscheiden selbst, ob Sie verbinden, und können jederzeit im Dashboard trennen.",
+    "index.google.link": "Lesen Sie, wie wir mit Ihren Google-Daten umgehen →",
     "index.hero.title1": "Ihr Kunde spricht.",
     "index.hero.title2": "Das System handelt.",
     "index.hero.sub": "ADAM sorgt dafür, dass jedes Kundengespräch sofort bearbeitet wird — mit Agenten, die sich natürlich anfühlen, zu Ihren Prozessen passen und direkt zu einer Aktion führen.",
