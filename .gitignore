@@ -1,0 +1,7 @@
+# Secrets and local config: never commit
+.env*
+!.env.example
+*.local
+private/
+
+node_modules/
