@@ -1,5 +1,7 @@
 export default {
   "nl": {
+    "common.voorwaarden": "Algemene voorwaarden",
+    "common.voorwaarden": "Algemene voorwaarden",
     "nav.cases": "Cases",
     "nav.pricing": "Prijzen",
     "nav.about": "Over ons",
@@ -28,7 +30,7 @@ export default {
     "common.dijk_van_een_wijf_a5ae98": "Dijk van een Wijf",
     "common.blauvolt_62d5b6": "Blauvolt",
     "common.belmaatje_522deb": "BelMaatje",
-    "common.kerklaan_30b_br_9751_23feee": "Kerklaan 30B<br>9751 NN Haren",
+    "common.kerklaan_30b_br_9751_23feee": "Kerklaan 30A<br>9751 NN Haren",
     "common.a_href_mailto_hello_a64f8c": "<a href=\"mailto:hello@adamagents.nl\">support@adamagents.nl</a><br> <a href=\"tel:0502113680\">050 211 3680</a><br> KvK NR. 58025057",
     "common.2026_adam_groningen_nl_87641e": "© 2026 ADAM Groningen, NL",
     "common.a_6dcd4c": "A",
@@ -36,6 +38,8 @@ export default {
     "common.m_c5a8b7": "— m"
   },
   "en": {
+    "common.voorwaarden": "Terms and conditions",
+    "common.voorwaarden": "Terms and conditions",
     "nav.cases": "Cases",
     "nav.pricing": "Pricing",
     "nav.about": "About us",
@@ -64,7 +68,7 @@ export default {
     "common.dijk_van_een_wijf_a5ae98": "Dijk van een Wijf",
     "common.blauvolt_62d5b6": "Blauvolt",
     "common.belmaatje_522deb": "BelMaatje",
-    "common.kerklaan_30b_br_9751_23feee": "Kerklaan 30B<br>9751 NN Haren",
+    "common.kerklaan_30b_br_9751_23feee": "Kerklaan 30A<br>9751 NN Haren",
     "common.a_href_mailto_hello_a64f8c": "<a href=\"mailto:hello@adamagents.nl\">support@adamagents.nl</a><br> <a href=\"tel:0502113680\">050 211 3680</a><br> KvK NR. 58025057",
     "common.2026_adam_groningen_nl_87641e": "© 2026 ADAM Groningen, NL",
     "common.a_6dcd4c": "A",
@@ -72,6 +76,8 @@ export default {
     "common.m_c5a8b7": "— m"
   },
   "de": {
+    "common.voorwaarden": "AGB",
+    "common.voorwaarden": "AGB",
     "nav.cases": "Referenzen",
     "nav.pricing": "Preise",
     "nav.about": "Über uns",
@@ -100,7 +106,7 @@ export default {
     "common.dijk_van_een_wijf_a5ae98": "Dijk van een Wijf",
     "common.blauvolt_62d5b6": "Blauvolt",
     "common.belmaatje_522deb": "BelMaatje",
-    "common.kerklaan_30b_br_9751_23feee": "Kerklaan 30B<br>9751 NN Haren",
+    "common.kerklaan_30b_br_9751_23feee": "Kerklaan 30A<br>9751 NN Haren",
     "common.a_href_mailto_hello_a64f8c": "<a href=\"mailto:hello@adamagents.nl\">support@adamagents.nl</a><br> <a href=\"tel:0502113680\">050 211 3680</a><br> KvK NR. 58025057",
     "common.2026_adam_groningen_nl_87641e": "© 2026 ADAM Groningen, NL",
     "common.a_6dcd4c": "A",
