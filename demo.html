@@ -11,15 +11,12 @@
   <link rel="alternate" hreflang="en" href="https://adamagents.nl/demo.html?lang=en"/>
   <link rel="alternate" hreflang="de" href="https://adamagents.nl/demo.html?lang=de"/>
   <link rel="alternate" hreflang="x-default" href="https://adamagents.nl/demo.html"/>
-  <link rel="preconnect" href="https://fonts.googleapis.com"/>
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <!-- warms the DNS/TCP/TLS handshake to ElevenLabs ahead of the click, so
        clicking the orb attaches to an already-open connection instead of
        paying that ~80-200ms cold-start cost inside the connect path -->
   <link rel="preconnect" href="https://api.elevenlabs.io" crossorigin/>
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin/>
-  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Archivo:wght@300;400;600;700;800&display=swap"/>
-  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@300;400;600;700;800&display=swap" rel="stylesheet"/>
+  <link href="fonts/fonts.css" rel="stylesheet"/>
   <script>
     try {
       var __p = new URLSearchParams(location.search).get('lang'),
@@ -2415,6 +2412,7 @@ html:not(#p_) .foot-contact-text a:hover{border-color:var(--blue)!important}
         <div class="subhead" data-i18n-html="demo.s6.subhead">
           <strong>Probeer een echt scenario</strong> · of zeg iets wat een beller zou kunnen zeggen.
         </div>
+        <p data-i18n-html="demo.s6.privacy" style="font-size:12px;line-height:1.5;opacity:.75;margin:8px 0 0">Tijdens het gesprek wordt uw stem verwerkt door onze spraakdienst ElevenLabs, zodat de assistent kan antwoorden. Meer in onze <a href="/privacyverklaring.html" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline">privacyverklaring</a>.</p>
 
         <div class="section-title" data-i18n="demo.s6.scenarios">Probeer een scenario</div>
         <div class="scenario-grid">
@@ -4090,29 +4088,29 @@ html:not(#p_) .foot-contact-text a:hover{border-color:var(--blue)!important}
   window.addEventListener('resize',resize);resize();draw();
 })();
 </script>
-<div id="adam-consent-banner" style="display:none;position:fixed;left:16px;right:16px;bottom:16px;z-index:9999;max-width:680px;margin:0 auto;background:#111;color:#fff;padding:16px 18px;border-radius:12px;font:14px/1.5 system-ui,sans-serif;box-shadow:0 10px 30px rgba(0,0,0,.3)">
-  <div data-i18n-html="common.wij_gebruiken_privacyvriendelijke_cookieloze_ba2e4a" style="margin-bottom:10px">
-    Wij gebruiken privacyvriendelijke, cookieloze statistieken om onze site te
-    verbeteren. Functionele opslag die nodig is om de demo te laten werken,
-    gebruiken we altijd. Meer in onze
-    <a href="/privacyverklaring.html" style="color:#8ab4ff">privacyverklaring</a>.
-  </div>
+<div id="adam-consent-banner" role="region" aria-label="Privacykeuze" data-i18n-aria-label="common.consent.aria" style="display:none;position:fixed;left:16px;right:16px;bottom:16px;z-index:9999;max-width:680px;margin:0 auto;background:#111;color:#fff;padding:16px 18px;border-radius:12px;font:14px/1.5 system-ui,sans-serif;box-shadow:0 10px 30px rgba(0,0,0,.3)">
+  <div data-i18n-html="common.wij_gebruiken_privacyvriendelijke_cookieloze_ba2e4a" style="margin-bottom:10px">Wij gebruiken privacyvriendelijke, cookieloze statistieken om onze site te verbeteren, alleen als u dat goed vindt. Functionele opslag die nodig is om de demo te laten werken, gebruiken we altijd. U kunt uw keuze later wijzigen via ‘Cookie-instellingen’ onderaan onze pagina's. Meer in onze <a href="/privacyverklaring.html" style="color:#8ab4ff">privacyverklaring</a>.</div>
   <div style="display:flex;gap:10px;flex-wrap:wrap">
-    <button data-i18n="common.accepteren_b9b470" type="button" id="adam-consent-accept" style="background:#fff;color:#111;border:0;border-radius:8px;padding:8px 14px;cursor:pointer;font-weight:600">Accepteren</button>
-    <button data-i18n="common.weigeren_6b74af" type="button" id="adam-consent-deny" style="background:transparent;color:#fff;border:1px solid #555;border-radius:8px;padding:8px 14px;cursor:pointer">Weigeren</button>
+    <button data-i18n="common.accepteren_b9b470" type="button" id="adam-consent-accept" style="background:#fff;color:#111;border:1px solid #fff;border-radius:8px;padding:8px 14px;cursor:pointer;font-weight:600">Accepteren</button>
+    <button data-i18n="common.weigeren_6b74af" type="button" id="adam-consent-deny" style="background:#fff;color:#111;border:1px solid #fff;border-radius:8px;padding:8px 14px;cursor:pointer;font-weight:600">Weigeren</button>
   </div>
 </div>
 <script>
 (function () {
   var k = 'adam_consent_analytics';
   var banner = document.getElementById('adam-consent-banner');
-  if (!localStorage.getItem(k)) banner.style.display = 'block';
+  // Only ask when statistics are actually switched on (see adam-tracking.js).
+  if (window.adamAnalyticsConfigured && !localStorage.getItem(k)) banner.style.display = 'block';
   document.getElementById('adam-consent-accept').onclick = function () {
     window.adamGrantAnalytics && window.adamGrantAnalytics(); banner.style.display = 'none';
   };
   document.getElementById('adam-consent-deny').onclick = function () {
     window.adamDenyAnalytics && window.adamDenyAnalytics(); banner.style.display = 'none';
   };
+  var open = document.querySelectorAll('[data-consent-open]');
+  for (var i = 0; i < open.length; i++) {
+    open[i].onclick = function (e) { e.preventDefault(); banner.style.display = 'block'; };
+  }
 })();
 </script>
 </body>

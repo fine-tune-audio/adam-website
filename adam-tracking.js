@@ -3,14 +3,19 @@
   var CONSENT_KEY = 'adam_consent_analytics';
 
   // ---- Analytics loader, gated on consent (GoatCounter, cookieless) ----
+  // Your GoatCounter site code (the part before .goatcounter.com). While this
+  // is empty no statistics are collected, GoatCounter is never contacted and
+  // the consent banner stays hidden.
+  var GOATCOUNTER_CODE = 'adamagents';
+  window.adamAnalyticsConfigured = !!GOATCOUNTER_CODE;
+
   function loadAnalytics() {
-    if (document.getElementById('adam-gc')) return;
+    if (!GOATCOUNTER_CODE || document.getElementById('adam-gc')) return;
     var s = document.createElement('script');
     s.id = 'adam-gc';
     s.async = true;
-    // TODO: replace MYCODE with your GoatCounter code
-    s.setAttribute('data-goatcounter', 'https://MYCODE.goatcounter.com/count');
-    s.src = '//gc.zgo.at/count.js';
+    s.setAttribute('data-goatcounter', 'https://' + GOATCOUNTER_CODE + '.goatcounter.com/count');
+    s.src = 'https://gc.zgo.at/count.js';
     document.head.appendChild(s);
   }
   if (localStorage.getItem(CONSENT_KEY) === 'granted') loadAnalytics();

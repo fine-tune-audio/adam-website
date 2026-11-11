@@ -15,7 +15,7 @@
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <title data-i18n="case-fraeylemaborg.fraeylemaborg_adam_cases_b775f6">Fraeylemaborg | ADAM Cases</title>
   <meta data-i18n-content="case-fraeylemaborg.twee_audio_ervaringen_voor_99b31f" name="description" content="Twee audio-ervaringen voor Fraeylemaborg: een conversationele AI-gids die praat als de voormalige landheer, en een klassieke audiotour."/>
-  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@300;400;600;700;800&display=swap" rel="stylesheet"/>
+  <link href="fonts/fonts.css" rel="stylesheet"/>
   <style>
     *{margin:0;padding:0;box-sizing:border-box;}
     :root{--blue:#4400FF;--yellow:#37BE71;--black:#120F1F;--white:#FFFFFF;--gray:#E2DDF0;--gray-mid:#5F5A72;}
@@ -117,6 +117,9 @@
     .video-title{font-size:clamp(26px,3.5vw,42px);font-weight:800;letter-spacing:-0.03em;line-height:0.97;margin-bottom:40px;}
     .video-wrap{position:relative;width:100%;aspect-ratio:16/9;background:var(--black);overflow:hidden;}
     .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%;border:0;}
+.video-consent{position:absolute;inset:0;width:100%;height:100%;border:0;cursor:pointer;color:#fff;font-family:inherit;font-size:16px;font-weight:700;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:16px;background:linear-gradient(rgba(0,0,0,.55),rgba(0,0,0,.55)),url('images/fraeylemaborg/hero.jpg') center/cover;}
+.video-consent-play{font-size:34px;line-height:1;}
+.video-consent small{font-size:12px;font-weight:400;opacity:.85;max-width:420px;line-height:1.5;}
     .video-caption{font-size:13px;color:var(--gray-mid);margin-top:16px;padding-bottom:88px;}
     /* RESULT */
     .result-section{background:var(--blue);padding:96px 60px;}
@@ -408,12 +411,21 @@ html:not(#p_) .foot-contact-text a:hover{border-color:var(--blue)!important}
     <div data-i18n-html="case-fraeylemaborg.niet_alleen_informeren_maar_be05a6" class="pull-quote reveal" style="margin-top:0;">"Niet alleen informeren, maar aanwezig zijn. Een stem die voelt alsof ze <em>zelf uit het landgoed komt.</em>"</div>
     <h2 data-i18n="case-fraeylemaborg.hoe_het_klinkt_en_cccbdf" class="video-title reveal">Hoe het klinkt en voelt op locatie.</h2>
     <div class="video-wrap reveal">
-      <iframe data-i18n-title="case-fraeylemaborg.fraeylemaborg_audiotour_55bf1b"
-        src="https://www.youtube.com/embed/4fMGlWzucS8?rel=0&modestbranding=1&color=white"
-        title="Fraeylemaborg audiotour"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-        allowfullscreen>
-      </iframe>
+      <button type="button" class="video-consent" id="fraeyVideoBtn" data-i18n-title="case-fraeylemaborg.fraeylemaborg_audiotour_55bf1b" title="Fraeylemaborg audiotour">
+        <span class="video-consent-play" aria-hidden="true">&#9654;</span>
+        <span data-i18n="case-fraeylemaborg.video.play">Video afspelen</span>
+        <small data-i18n="case-fraeylemaborg.video.note">De video wordt geladen van YouTube. YouTube (Google) kan dan cookies plaatsen.</small>
+      </button>
+      <script>
+      document.getElementById('fraeyVideoBtn').onclick = function () {
+        var f = document.createElement('iframe');
+        f.src = 'https://www.youtube-nocookie.com/embed/4fMGlWzucS8?rel=0&modestbranding=1&color=white&autoplay=1';
+        f.title = this.title;
+        f.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+        f.allowFullscreen = true;
+        this.parentNode.replaceChild(f, this);
+      };
+      </script>
     </div>
     <p data-i18n="case-fraeylemaborg.impressievideo_van_de_conversationele_b7df26" class="video-caption reveal">Impressievideo van de conversationele audiotour bij Fraeylemaborg, Slochteren.</p>
   </div>
@@ -507,6 +519,8 @@ html:not(#p_) .foot-contact-text a:hover{border-color:var(--blue)!important}
     <a data-i18n="foot.contact.title" href="contact.html">Contact</a>
     <a data-i18n="common.privacyverklaring_871fa2" href="/privacyverklaring.html">Privacyverklaring</a>
     <a data-i18n="common.voorwaarden" href="/voorwaarden.html">Algemene voorwaarden</a>
+    <a href="#" data-consent-open data-i18n="common.consent.settings">Cookie-instellingen</a>
+    <a href="#" data-consent-open data-i18n="common.consent.settings">Cookie-instellingen</a>
   </nav>
   <span data-i18n="common.2026_adam_groningen_nl_26fadd" class="foot-right">&#169; 2026 ADAM &#8212; Groningen, NL</span>
 </footer>
@@ -524,29 +538,29 @@ html:not(#p_) .foot-contact-text a:hover{border-color:var(--blue)!important}
     burger.classList.toggle('open');
   });
 </script>
-<div id="adam-consent-banner" style="display:none;position:fixed;left:16px;right:16px;bottom:16px;z-index:9999;max-width:680px;margin:0 auto;background:#111;color:#fff;padding:16px 18px;border-radius:12px;font:14px/1.5 system-ui,sans-serif;box-shadow:0 10px 30px rgba(0,0,0,.3)">
-  <div data-i18n-html="common.wij_gebruiken_privacyvriendelijke_cookieloze_ba2e4a" style="margin-bottom:10px">
-    Wij gebruiken privacyvriendelijke, cookieloze statistieken om onze site te
-    verbeteren. Functionele opslag die nodig is om de demo te laten werken,
-    gebruiken we altijd. Meer in onze
-    <a href="/privacyverklaring.html" style="color:#8ab4ff">privacyverklaring</a>.
-  </div>
+<div id="adam-consent-banner" role="region" aria-label="Privacykeuze" data-i18n-aria-label="common.consent.aria" style="display:none;position:fixed;left:16px;right:16px;bottom:16px;z-index:9999;max-width:680px;margin:0 auto;background:#111;color:#fff;padding:16px 18px;border-radius:12px;font:14px/1.5 system-ui,sans-serif;box-shadow:0 10px 30px rgba(0,0,0,.3)">
+  <div data-i18n-html="common.wij_gebruiken_privacyvriendelijke_cookieloze_ba2e4a" style="margin-bottom:10px">Wij gebruiken privacyvriendelijke, cookieloze statistieken om onze site te verbeteren, alleen als u dat goed vindt. Functionele opslag die nodig is om de demo te laten werken, gebruiken we altijd. U kunt uw keuze later wijzigen via ‘Cookie-instellingen’ onderaan onze pagina's. Meer in onze <a href="/privacyverklaring.html" style="color:#8ab4ff">privacyverklaring</a>.</div>
   <div style="display:flex;gap:10px;flex-wrap:wrap">
-    <button data-i18n="common.accepteren_b9b470" type="button" id="adam-consent-accept" style="background:#fff;color:#111;border:0;border-radius:8px;padding:8px 14px;cursor:pointer;font-weight:600">Accepteren</button>
-    <button data-i18n="common.weigeren_6b74af" type="button" id="adam-consent-deny" style="background:transparent;color:#fff;border:1px solid #555;border-radius:8px;padding:8px 14px;cursor:pointer">Weigeren</button>
+    <button data-i18n="common.accepteren_b9b470" type="button" id="adam-consent-accept" style="background:#fff;color:#111;border:1px solid #fff;border-radius:8px;padding:8px 14px;cursor:pointer;font-weight:600">Accepteren</button>
+    <button data-i18n="common.weigeren_6b74af" type="button" id="adam-consent-deny" style="background:#fff;color:#111;border:1px solid #fff;border-radius:8px;padding:8px 14px;cursor:pointer;font-weight:600">Weigeren</button>
   </div>
 </div>
 <script>
 (function () {
   var k = 'adam_consent_analytics';
   var banner = document.getElementById('adam-consent-banner');
-  if (!localStorage.getItem(k)) banner.style.display = 'block';
+  // Only ask when statistics are actually switched on (see adam-tracking.js).
+  if (window.adamAnalyticsConfigured && !localStorage.getItem(k)) banner.style.display = 'block';
   document.getElementById('adam-consent-accept').onclick = function () {
     window.adamGrantAnalytics && window.adamGrantAnalytics(); banner.style.display = 'none';
   };
   document.getElementById('adam-consent-deny').onclick = function () {
     window.adamDenyAnalytics && window.adamDenyAnalytics(); banner.style.display = 'none';
   };
+  var open = document.querySelectorAll('[data-consent-open]');
+  for (var i = 0; i < open.length; i++) {
+    open[i].onclick = function (e) { e.preventDefault(); banner.style.display = 'block'; };
+  }
 })();
 </script>
 </body>

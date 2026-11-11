@@ -48,7 +48,8 @@ export default {
     "contact.op_maat_afgestemd_op_bb472d": "Op maat, afgestemd op uw context. Geen generiek pakket, geen verborgen kosten. Duidelijk wat we bouwen en wat het oplevert.",
     "contact.js.emailRequired": "Vul uw e-mailadres in.",
     "contact.js.submitFailed": "Er ging iets mis. Probeer het opnieuw.",
-    "contact.wat_loopt_er_nu_1fcbc4": "Wat loopt er nu niet soepel? Welk volume verwerkt u? Wat is uw tijdlijn?"
+    "contact.wat_loopt_er_nu_1fcbc4": "Wat loopt er nu niet soepel? Welk volume verwerkt u? Wat is uw tijdlijn?",
+    "contact.privacy_note": "Uw gegevens worden verstuurd via Formspree en alleen gebruikt om uw aanvraag te beantwoorden. Zie onze <a href=\"/privacyverklaring.html\">privacyverklaring</a>."
   },
   "en": {
     "contact.demo_aanvragen_adam_ai_5c0c0e": "Request a demo | ADAM AI Agents",
@@ -99,7 +100,8 @@ export default {
     "contact.op_maat_afgestemd_op_bb472d": "Tailor-made, tuned to your context. No generic package, no hidden costs. Clear about what we build and what it delivers.",
     "contact.js.emailRequired": "Please enter your email address.",
     "contact.js.submitFailed": "Something went wrong. Please try again.",
-    "contact.wat_loopt_er_nu_1fcbc4": "What isn't running smoothly right now? What volume do you handle? What is your timeline?"
+    "contact.wat_loopt_er_nu_1fcbc4": "What isn't running smoothly right now? What volume do you handle? What is your timeline?",
+    "contact.privacy_note": "Your details are sent via Formspree and only used to answer your request. See our <a href=\"/privacyverklaring.html\">privacy policy</a>."
   },
   "de": {
     "contact.demo_aanvragen_adam_ai_5c0c0e": "Demo anfragen | ADAM AI Agents",
@@ -150,6 +152,7 @@ export default {
     "contact.op_maat_afgestemd_op_bb472d": "Maßgeschneidert und auf Ihren Kontext abgestimmt. Kein generisches Paket, keine versteckten Kosten. Klar, was wir bauen und was es bringt.",
     "contact.js.emailRequired": "Bitte geben Sie Ihre E-Mail-Adresse ein.",
     "contact.js.submitFailed": "Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut.",
-    "contact.wat_loopt_er_nu_1fcbc4": "Was läuft derzeit nicht reibungslos? Welches Volumen bearbeiten Sie? Wie sieht Ihr Zeitplan aus?"
+    "contact.wat_loopt_er_nu_1fcbc4": "Was läuft derzeit nicht reibungslos? Welches Volumen bearbeiten Sie? Wie sieht Ihr Zeitplan aus?",
+    "contact.privacy_note": "Ihre Daten werden über Formspree gesendet und nur zur Beantwortung Ihrer Anfrage verwendet. Siehe unsere <a href=\"/privacyverklaring.html\">Datenschutzerklärung</a>."
   }
 };

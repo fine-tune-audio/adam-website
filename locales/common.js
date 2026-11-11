@@ -1,7 +1,6 @@
 export default {
   "nl": {
     "common.voorwaarden": "Algemene voorwaarden",
-    "common.voorwaarden": "Algemene voorwaarden",
     "nav.cases": "Cases",
     "nav.pricing": "Prijzen",
     "nav.about": "Over ons",
@@ -21,7 +20,7 @@ export default {
     "foot.contact.title": "Contact",
     "foot.contact.officeLabel": "Kantoor",
     "common.privacyverklaring_871fa2": "Privacyverklaring",
-    "common.wij_gebruiken_privacyvriendelijke_cookieloze_ba2e4a": "Wij gebruiken privacyvriendelijke, cookieloze statistieken om onze site te verbeteren. Functionele opslag die nodig is om de demo te laten werken, gebruiken we altijd. Meer in onze <a href=\"/privacyverklaring.html\" style=\"color:#8ab4ff\">privacyverklaring</a>.",
+    "common.wij_gebruiken_privacyvriendelijke_cookieloze_ba2e4a": "Wij gebruiken privacyvriendelijke, cookieloze statistieken om onze site te verbeteren, alleen als u dat goed vindt. Functionele opslag die nodig is om de demo te laten werken, gebruiken we altijd. U kunt uw keuze later wijzigen via ‘Cookie-instellingen’ onderaan onze pagina's. Meer in onze <a href=\"/privacyverklaring.html\" style=\"color:#8ab4ff\">privacyverklaring</a>.",
     "common.audio_gids_8692d0": "Audio gids",
     "common.hoe_werkt_dit_6cce9e": "Hoe werkt dit?",
     "common.accepteren_b9b470": "Accepteren",
@@ -32,14 +31,15 @@ export default {
     "common.blauvolt_62d5b6": "Blauvolt",
     "common.belmaatje_522deb": "BelMaatje",
     "common.kerklaan_30b_br_9751_23feee": "Kerklaan 30A<br>9751 NN Haren",
-    "common.a_href_mailto_hello_a64f8c": "<a href=\"mailto:hello@adamagents.nl\">support@adamagents.nl</a><br> <a href=\"tel:0502113680\">050 211 3680</a><br> KvK NR. 58025057",
+    "common.a_href_mailto_hello_a64f8c": "<a href=\"mailto:support@adamagents.nl\">support@adamagents.nl</a><br> <a href=\"tel:0502113680\">050 211 3680</a><br> KvK NR. 58025057",
     "common.2026_adam_groningen_nl_87641e": "© 2026 ADAM Groningen, NL",
     "common.a_6dcd4c": "A",
     "common.polygon_walker_88baf2": "Polygon Walker",
-    "common.m_c5a8b7": "— m"
+    "common.m_c5a8b7": "— m",
+    "common.consent.aria": "Privacykeuze",
+    "common.consent.settings": "Cookie-instellingen"
   },
   "en": {
-    "common.voorwaarden": "Terms and conditions",
     "common.voorwaarden": "Terms and conditions",
     "nav.cases": "Cases",
     "nav.pricing": "Pricing",
@@ -60,7 +60,7 @@ export default {
     "foot.contact.title": "Contact",
     "foot.contact.officeLabel": "Office",
     "common.privacyverklaring_871fa2": "Privacy policy",
-    "common.wij_gebruiken_privacyvriendelijke_cookieloze_ba2e4a": "We use privacy-friendly, cookie-free analytics to improve our site. Functional storage needed to make the demo work is always used. More in our <a href=\"/privacyverklaring.html\" style=\"color:#8ab4ff\">privacy policy</a>.",
+    "common.wij_gebruiken_privacyvriendelijke_cookieloze_ba2e4a": "We use privacy-friendly, cookie-free analytics to improve our site, only if you agree. Functional storage needed to make the demo work is always used. You can change your choice later via ‘Cookie settings’ at the bottom of our pages. More in our <a href=\"/privacyverklaring.html\" style=\"color:#8ab4ff\">privacy policy</a>.",
     "common.audio_gids_8692d0": "Audio guide",
     "common.hoe_werkt_dit_6cce9e": "How does this work?",
     "common.accepteren_b9b470": "Accept",
@@ -71,14 +71,15 @@ export default {
     "common.blauvolt_62d5b6": "Blauvolt",
     "common.belmaatje_522deb": "BelMaatje",
     "common.kerklaan_30b_br_9751_23feee": "Kerklaan 30A<br>9751 NN Haren",
-    "common.a_href_mailto_hello_a64f8c": "<a href=\"mailto:hello@adamagents.nl\">support@adamagents.nl</a><br> <a href=\"tel:0502113680\">050 211 3680</a><br> KvK NR. 58025057",
+    "common.a_href_mailto_hello_a64f8c": "<a href=\"mailto:support@adamagents.nl\">support@adamagents.nl</a><br> <a href=\"tel:0502113680\">050 211 3680</a><br> KvK NR. 58025057",
     "common.2026_adam_groningen_nl_87641e": "© 2026 ADAM Groningen, NL",
     "common.a_6dcd4c": "A",
     "common.polygon_walker_88baf2": "Polygon Walker",
-    "common.m_c5a8b7": "— m"
+    "common.m_c5a8b7": "— m",
+    "common.consent.aria": "Privacy choice",
+    "common.consent.settings": "Cookie settings"
   },
   "de": {
-    "common.voorwaarden": "AGB",
     "common.voorwaarden": "AGB",
     "nav.cases": "Referenzen",
     "nav.pricing": "Preise",
@@ -99,7 +100,7 @@ export default {
     "foot.contact.title": "Kontakt",
     "foot.contact.officeLabel": "Büro",
     "common.privacyverklaring_871fa2": "Datenschutzerklärung",
-    "common.wij_gebruiken_privacyvriendelijke_cookieloze_ba2e4a": "Wir verwenden datenschutzfreundliche, cookielose Statistiken, um unsere Website zu verbessern. Funktionale Speicherung, die für die Demo nötig ist, nutzen wir immer. Mehr in unserer <a href=\"/privacyverklaring.html\" style=\"color:#8ab4ff\">Datenschutzerklärung</a>.",
+    "common.wij_gebruiken_privacyvriendelijke_cookieloze_ba2e4a": "Wir verwenden datenschutzfreundliche, cookielose Statistiken, um unsere Website zu verbessern, nur wenn Sie zustimmen. Funktionale Speicherung, die für die Demo nötig ist, nutzen wir immer. Sie können Ihre Wahl später über „Cookie-Einstellungen“ unten auf unseren Seiten ändern. Mehr in unserer <a href=\"/privacyverklaring.html\" style=\"color:#8ab4ff\">Datenschutzerklärung</a>.",
     "common.audio_gids_8692d0": "Audioguide",
     "common.hoe_werkt_dit_6cce9e": "Wie funktioniert das?",
     "common.accepteren_b9b470": "Akzeptieren",
@@ -110,10 +111,12 @@ export default {
     "common.blauvolt_62d5b6": "Blauvolt",
     "common.belmaatje_522deb": "BelMaatje",
     "common.kerklaan_30b_br_9751_23feee": "Kerklaan 30A<br>9751 NN Haren",
-    "common.a_href_mailto_hello_a64f8c": "<a href=\"mailto:hello@adamagents.nl\">support@adamagents.nl</a><br> <a href=\"tel:0502113680\">050 211 3680</a><br> KvK NR. 58025057",
+    "common.a_href_mailto_hello_a64f8c": "<a href=\"mailto:support@adamagents.nl\">support@adamagents.nl</a><br> <a href=\"tel:0502113680\">050 211 3680</a><br> KvK NR. 58025057",
     "common.2026_adam_groningen_nl_87641e": "© 2026 ADAM Groningen, NL",
     "common.a_6dcd4c": "A",
     "common.polygon_walker_88baf2": "Polygon Walker",
-    "common.m_c5a8b7": "— m"
+    "common.m_c5a8b7": "— m",
+    "common.consent.aria": "Datenschutzauswahl",
+    "common.consent.settings": "Cookie-Einstellungen"
   }
 };

@@ -1,5 +1,3 @@
-// Demo page (demo.html) interface copy. {placeholders} are filled by demo.html.
-// Industry-specific copy lives in locales/demo-industries.js.
 export default {
   "nl": {
     "meta.demo.title": "AI Telefoonassistent Demo | ADAM AI Agents",
@@ -110,7 +108,8 @@ export default {
     "demo.email.toFallback": "u@voorbeeld.nl",
     "demo.email.body": "Hoi team,\n\nDe AI-assistent heeft zojuist een gesprek afgehandeld{with}.\n\n{transcript}\n\n— Verstuurd door uw AI-telefoonassistent namens {company}",
     "demo.email.with": " met {name}",
-    "demo.email.bodyShort": "Hoi team,\n\nDe AI-assistent heeft zojuist een gesprek afgehandeld. Details staan in het transcript.\n\n— Verstuurd door uw AI-telefoonassistent"
+    "demo.email.bodyShort": "Hoi team,\n\nDe AI-assistent heeft zojuist een gesprek afgehandeld. Details staan in het transcript.\n\n— Verstuurd door uw AI-telefoonassistent",
+    "demo.s6.privacy": "Tijdens het gesprek wordt uw stem verwerkt door onze spraakdienst ElevenLabs, zodat de assistent kan antwoorden. Meer in onze <a href=\"/privacyverklaring.html\" target=\"_blank\" rel=\"noopener\" style=\"color:inherit;text-decoration:underline\">privacyverklaring</a>."
   },
   "en": {
     "meta.demo.title": "AI Phone Assistant Demo | ADAM AI Agents",
@@ -221,7 +220,8 @@ export default {
     "demo.email.toFallback": "you@example.com",
     "demo.email.body": "Hi team,\n\nThe AI assistant has just handled a call{with}.\n\n{transcript}\n\n— Sent by your AI phone assistant on behalf of {company}",
     "demo.email.with": " with {name}",
-    "demo.email.bodyShort": "Hi team,\n\nThe AI assistant has just handled a call. Details are in the transcript.\n\n— Sent by your AI phone assistant"
+    "demo.email.bodyShort": "Hi team,\n\nThe AI assistant has just handled a call. Details are in the transcript.\n\n— Sent by your AI phone assistant",
+    "demo.s6.privacy": "During the call your voice is processed by our speech provider ElevenLabs so the assistant can answer. More in our <a href=\"/privacyverklaring.html\" target=\"_blank\" rel=\"noopener\" style=\"color:inherit;text-decoration:underline\">privacy policy</a>."
   },
   "de": {
     "meta.demo.title": "KI-Telefonassistent Demo | ADAM AI Agents",
@@ -332,6 +332,7 @@ export default {
     "demo.email.toFallback": "sie@beispiel.de",
     "demo.email.body": "Hallo Team,\n\nder KI-Assistent hat soeben ein Gespräch bearbeitet{with}.\n\n{transcript}\n\n— Gesendet von Ihrem KI-Telefonassistenten im Auftrag von {company}",
     "demo.email.with": " mit {name}",
-    "demo.email.bodyShort": "Hallo Team,\n\nder KI-Assistent hat soeben ein Gespräch bearbeitet. Details finden Sie im Transkript.\n\n— Gesendet von Ihrem KI-Telefonassistenten"
+    "demo.email.bodyShort": "Hallo Team,\n\nder KI-Assistent hat soeben ein Gespräch bearbeitet. Details finden Sie im Transkript.\n\n— Gesendet von Ihrem KI-Telefonassistenten",
+    "demo.s6.privacy": "Während des Gesprächs wird Ihre Stimme von unserem Sprachdienst ElevenLabs verarbeitet, damit der Assistent antworten kann. Mehr in unserer <a href=\"/privacyverklaring.html\" target=\"_blank\" rel=\"noopener\" style=\"color:inherit;text-decoration:underline\">Datenschutzerklärung</a>."
   }
 };

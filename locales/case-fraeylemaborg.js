@@ -47,7 +47,9 @@ export default {
     "case-fraeylemaborg.unieke_stem_gereconstrueerd_en_7a84bc": "Unieke stem, gereconstrueerd en getraind op maat",
     "case-fraeylemaborg.uitspraakwoordenlijst_voor_lokale_namen_76c616": "Uitspraakwoordenlijst voor lokale namen en historische verwijzingen",
     "case-fraeylemaborg.volgend_project_3fe484": "Volgend project",
-    "case-fraeylemaborg.bekijk_case_ade6b3": "Bekijk case →"
+    "case-fraeylemaborg.bekijk_case_ade6b3": "Bekijk case →",
+    "case-fraeylemaborg.video.play": "Video afspelen",
+    "case-fraeylemaborg.video.note": "De video wordt geladen van YouTube. YouTube (Google) kan dan cookies plaatsen."
   },
   "en": {
     "case-fraeylemaborg.fraeylemaborg_adam_cases_b775f6": "Fraeylemaborg | ADAM Cases",
@@ -97,7 +99,9 @@ export default {
     "case-fraeylemaborg.unieke_stem_gereconstrueerd_en_7a84bc": "Unique voice, reconstructed and trained to measure",
     "case-fraeylemaborg.uitspraakwoordenlijst_voor_lokale_namen_76c616": "Pronunciation dictionary for local names and historical references",
     "case-fraeylemaborg.volgend_project_3fe484": "Next project",
-    "case-fraeylemaborg.bekijk_case_ade6b3": "View case →"
+    "case-fraeylemaborg.bekijk_case_ade6b3": "View case →",
+    "case-fraeylemaborg.video.play": "Play video",
+    "case-fraeylemaborg.video.note": "The video is loaded from YouTube. YouTube (Google) may then place cookies."
   },
   "de": {
     "case-fraeylemaborg.fraeylemaborg_adam_cases_b775f6": "Fraeylemaborg | ADAM Referenzen",
@@ -147,6 +151,8 @@ export default {
     "case-fraeylemaborg.unieke_stem_gereconstrueerd_en_7a84bc": "Einzigartige Stimme, rekonstruiert und maßgeschneidert trainiert",
     "case-fraeylemaborg.uitspraakwoordenlijst_voor_lokale_namen_76c616": "Ausspracheverzeichnis für lokale Namen und historische Verweise",
     "case-fraeylemaborg.volgend_project_3fe484": "Nächstes Projekt",
-    "case-fraeylemaborg.bekijk_case_ade6b3": "Referenz ansehen →"
+    "case-fraeylemaborg.bekijk_case_ade6b3": "Referenz ansehen →",
+    "case-fraeylemaborg.video.play": "Video abspielen",
+    "case-fraeylemaborg.video.note": "Das Video wird von YouTube geladen. YouTube (Google) kann dann Cookies setzen."
   }
 };
