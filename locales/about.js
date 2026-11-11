@@ -61,7 +61,7 @@ export default {
     "about.samenwerken_edeaf1": "Samenwerken",
     "about.klaar_om_te_starten_739818": "Klaar om te starten?",
     "about.vertel_ons_wat_u_411bba": "Vertel ons wat u wil oplossen. Wij laten zien hoe ADAM dat aanpakt.",
-    "about.neem_contact_op_1933fe": "Neem contact op →"
+    "about.neem_contact_op_1933fe": "Probeer de demo →"
   },
   "en": {
     "about.over_adam_ai_agents_817a20": "About ADAM | AI agents for business communication",
@@ -125,7 +125,7 @@ export default {
     "about.samenwerken_edeaf1": "Work with us",
     "about.klaar_om_te_starten_739818": "Ready to get started?",
     "about.vertel_ons_wat_u_411bba": "Tell us what you want to solve. We'll show you how ADAM tackles it.",
-    "about.neem_contact_op_1933fe": "Get in touch →"
+    "about.neem_contact_op_1933fe": "Try the demo →"
   },
   "de": {
     "about.over_adam_ai_agents_817a20": "Über ADAM | KI-Agenten für die Unternehmenskommunikation",
@@ -189,6 +189,6 @@ export default {
     "about.samenwerken_edeaf1": "Zusammenarbeit",
     "about.klaar_om_te_starten_739818": "Bereit für den Start?",
     "about.vertel_ons_wat_u_411bba": "Erzählen Sie uns, was Sie lösen möchten. Wir zeigen Ihnen, wie ADAM das angeht.",
-    "about.neem_contact_op_1933fe": "Kontakt aufnehmen →"
+    "about.neem_contact_op_1933fe": "Demo ausprobieren"
   }
 };

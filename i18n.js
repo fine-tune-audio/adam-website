@@ -41,7 +41,7 @@ const SWITCH_CSS = `
 .lang-switch{display:flex;align-items:center;gap:2px;margin-right:6px;}
 .lang-switch-btn{
   background:transparent;border:none;cursor:pointer;
-  font-family:'Sora',sans-serif;font-size:12px;font-weight:700;letter-spacing:0.03em;
+  font-family:'Archivo',sans-serif;font-size:12px;font-weight:700;letter-spacing:0.03em;
   padding:6px 8px;border-radius:3px;transition:opacity 0.2s,background 0.2s,color 0.2s;
   color:rgba(0,0,0,0.55);
 }

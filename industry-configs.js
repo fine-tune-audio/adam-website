@@ -343,7 +343,7 @@ CLOSING: confirm whether it's booked, escalated, or a callback, then end warmly.
   msp: {
     id: "msp",
     label: "Horeca",
-    emoji: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M11 9H9V2H7v7H5V2H3v7c0 2.12 1.66 3.84 3.75 3.97V22h2.5v-9.03C11.34 12.84 13 11.12 13 9V2h-2v7zm5-3v8h2.5v8H21V2c-2.76 0-5 2.24-5 4z"/></svg>',
+    emoji: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M19 3v12h-5c-.023 -3.681 .184 -7.406 5 -12zm0 12v6h-1v-3m-10 -14v17m-3 -17v3a3 3 0 1 0 6 0v-3"/></svg>',
     eyebrow: "Ontdek hoe een virtuele telefonische assistent werkt voor jouw organisatie",
     headline: "Maak in een paar minuten jouw telefonische assistent.",
     subheadline: "Vul je praktijkgegevens in, kies de functies en test de assistent zelf.",

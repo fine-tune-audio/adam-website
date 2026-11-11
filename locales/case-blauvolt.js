@@ -59,7 +59,7 @@ export default {
     "case-blauvolt.de_routeringslogica_urgentietriage_en_71eaa2": "De routeringslogica, urgentietriage en overdrachtsinfrastructuur zijn hetzelfde product voor elk volgend servicebedrijf.",
     "case-blauvolt.een_telefoonlijn_die_opneemt_5531e2": "Een telefoonlijn die opneemt in nul seconden, in drie talen, elke dag van het jaar.",
     "case-blauvolt.benieuwd_wat_een_soortgelijke_76ee08": "Benieuwd wat een soortgelijke agent voor jouw organisatie kan betekenen? We laten in een gesprek zien hoe snel het staat.",
-    "case-blauvolt.neem_contact_op_1933fe": "Neem contact op →",
+    "case-blauvolt.neem_contact_op_1933fe": "Probeer de demo →",
     "case-blauvolt.blauvolt_showroom_125d90": "Blauvolt showroom",
     "case-blauvolt.volgend_project_3fe484": "Volgend project",
     "case-blauvolt.bekijk_case_ade6b3": "Bekijk case →"
@@ -124,7 +124,7 @@ export default {
     "case-blauvolt.de_routeringslogica_urgentietriage_en_71eaa2": "The routing logic, urgency triage and handover infrastructure are the same product for every following service company.",
     "case-blauvolt.een_telefoonlijn_die_opneemt_5531e2": "A phone line that answers in zero seconds, in three languages, every day of the year.",
     "case-blauvolt.benieuwd_wat_een_soortgelijke_76ee08": "Curious what a similar agent can mean for your organisation? In a conversation we'll show you how quickly it's up and running.",
-    "case-blauvolt.neem_contact_op_1933fe": "Get in touch →",
+    "case-blauvolt.neem_contact_op_1933fe": "Try the demo →",
     "case-blauvolt.blauvolt_showroom_125d90": "Blauvolt showroom",
     "case-blauvolt.volgend_project_3fe484": "Next project",
     "case-blauvolt.bekijk_case_ade6b3": "View case →"
@@ -189,7 +189,7 @@ export default {
     "case-blauvolt.de_routeringslogica_urgentietriage_en_71eaa2": "Die Routing-Logik, die Dringlichkeits-Triage und die Übergabe-Infrastruktur sind für jeden weiteren Servicebetrieb dasselbe Produkt.",
     "case-blauvolt.een_telefoonlijn_die_opneemt_5531e2": "Eine Telefonleitung, die in null Sekunden abnimmt, in drei Sprachen, an jedem Tag des Jahres.",
     "case-blauvolt.benieuwd_wat_een_soortgelijke_76ee08": "Neugierig, was ein ähnlicher Agent für Ihre Organisation bedeuten kann? In einem Gespräch zeigen wir, wie schnell er einsatzbereit ist.",
-    "case-blauvolt.neem_contact_op_1933fe": "Kontakt aufnehmen →",
+    "case-blauvolt.neem_contact_op_1933fe": "Demo ausprobieren →",
     "case-blauvolt.blauvolt_showroom_125d90": "Blauvolt-Showroom",
     "case-blauvolt.volgend_project_3fe484": "Nächstes Projekt",
     "case-blauvolt.bekijk_case_ade6b3": "Referenz ansehen →"

@@ -94,7 +94,15 @@ export default {
     "calc.cta": "Kies {plan}",
     "pricing.closing.title": "Klaar om te beginnen?",
     "pricing.closing.sub": "Vertel ons wat je wilt oplossen, dan laten we zien hoe een ADAM agent dat aanpakt.",
-    "pricing.closing.cta": "Plan een demo"
+    "pricing.closing.cta": "Start de demo",
+    "pricing.every.1.title": "Extra telefoonnummer",
+    "pricing.every.1.sub": "{price} per maand",
+    "pricing.every.2.title": "Onbeperkt aantal gebruikers",
+    "pricing.every.2.sub": "Voor je hele team",
+    "pricing.every.3.title": "Installatieservice",
+    "pricing.every.3.sub": "Gratis bij jaarlijks betalen",
+    "pricing.every.g.title": "dagen geld-terug-garantie",
+    "pricing.every.g.sub": "Niet tevreden? Dan krijg je je geld terug."
   },
   "en": {
     "meta.pricing.title": "Pricing | ADAM AI Agents",
@@ -189,13 +197,21 @@ export default {
     "calc.cta": "Choose {plan}",
     "pricing.closing.title": "Ready to get started?",
     "pricing.closing.sub": "Tell us what you want to solve and we will show you how an ADAM agent handles it.",
-    "pricing.closing.cta": "Book a demo"
+    "pricing.closing.cta": "Start the demo",
+    "pricing.every.1.title": "Extra phone number",
+    "pricing.every.1.sub": "{price} per month",
+    "pricing.every.2.title": "Unlimited users",
+    "pricing.every.2.sub": "For your whole team",
+    "pricing.every.3.title": "Setup service",
+    "pricing.every.3.sub": "Free with yearly billing",
+    "pricing.every.g.title": "day money-back guarantee",
+    "pricing.every.g.sub": "Not happy? You get your money back."
   },
   "de": {
     "meta.pricing.title": "Preise | ADAM AI Agents",
     "meta.pricing.desc": "Die Preise von ADAM: drei Tarife für Ihren KI-Telefonassistenten. Geben Sie ein, wie viele Anrufe Sie bekommen, und sehen Sie, welcher Tarif passt. Alle Preise in Euro, zzgl. MwSt.",
     "pricing.label": "Preise",
-    "pricing.title": "ADAM nimmt ab, wenn Sie nicht können.",
+    "pricing.title": "ADAM nimmt ab, wenn Sie <br>nicht können.",
     "pricing.sub": "Lassen Sie ADAM nur verpasste, besetzte und späte Anrufe annehmen, oder jeden Anruf beantworten. Sie entscheiden.",
     "pricing.ways.title": "Zwei Möglichkeiten, ADAM zu nutzen",
     "pricing.ways.1.title": "Nur verpasste Anrufe",
@@ -254,7 +270,6 @@ export default {
     "pricing.every.3": "Einrichtungsservice kostenlos bei jährlicher Zahlung",
     "pricing.every.4": "Kostenlose Einrichtung und Testanrufe im Browser, ohne Karte",
     "pricing.every.5": "{days} Tage Geld-zurück-Garantie",
-    "pricing.talk": "Sprechen Sie mit uns",
     "pricing.compare.title": "Tarife vergleichen",
     "pricing.compare.caption": "Vergleich der Tarife Start, Groei und Pro",
     "pricing.compare.feature": "Merkmal",
@@ -275,7 +290,7 @@ export default {
     "pricing.cell.yes": "Ja",
     "pricing.cell.no": "Nein",
     "pricing.addons.note": "Zusätzliche Telefonnummern und unbegrenzt viele Nutzer gelten für jeden Tarif.",
-    "calc.title": "Wie viele Anrufe bekommen Sie?",
+    "calc.title": "<span style=\"color: rgb(255, 255, 255);\">Wie viele Anrufe bekommen Sie?</span>",
     "calc.callsPerDay": "Anrufe pro Tag",
     "calc.assumption": "Auf Basis von etwa {minutes} Minuten pro Anruf und {days} Tagen pro Monat.",
     "calc.callsDec": "Weniger Anrufe pro Tag",
@@ -284,6 +299,14 @@ export default {
     "calc.cta": "{plan} wählen",
     "pricing.closing.title": "Bereit loszulegen?",
     "pricing.closing.sub": "Sagen Sie uns, was Sie lösen möchten, und wir zeigen Ihnen, wie ein ADAM-Agent das angeht.",
-    "pricing.closing.cta": "Demo vereinbaren"
+    "pricing.closing.cta": "Demo starten",
+    "pricing.every.1.title": "Zusätzliche Telefonnummer",
+    "pricing.every.1.sub": "{price} pro Monat",
+    "pricing.every.2.title": "Unbegrenzt viele Nutzer",
+    "pricing.every.2.sub": "Für Ihr ganzes Team",
+    "pricing.every.3.title": "Einrichtungsservice",
+    "pricing.every.3.sub": "Kostenlos bei jährlicher Zahlung",
+    "pricing.every.g.title": "Tage Geld-zurück-Garantie",
+    "pricing.every.g.sub": "Nicht zufrieden? Dann bekommen Sie Ihr Geld zurück."
   }
 };

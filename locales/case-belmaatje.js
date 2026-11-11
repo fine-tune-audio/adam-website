@@ -66,7 +66,7 @@ export default {
     "case-belmaatje.belmaatje_vervangt_menselijk_contact_13f1b0": "BelMaatje vervangt menselijk contact niet. Het is een opstap ernaartoe.",
     "case-belmaatje.soms_zit_innovatie_niet_eda90c": "Soms zit innovatie niet in iets nieuws, maar in iets dat al bestaat.",
     "case-belmaatje.de_vaste_telefoon_is_031aef": "De vaste telefoon is er al decennia. Maar wat je ermee kunt doen, verandert nog steeds. Benieuwd wat ADAM voor jouw organisatie kan betekenen?",
-    "case-belmaatje.neem_contact_op_1933fe": "Neem contact op →",
+    "case-belmaatje.neem_contact_op_1933fe": "Probeer de demo →",
     "case-belmaatje.belmaatje_in_gebruik_3d16ca": "BelMaatje in gebruik",
     "case-belmaatje.volgend_project_3fe484": "Volgend project",
     "case-belmaatje.bekijk_case_ade6b3": "Bekijk case →"
@@ -138,7 +138,7 @@ export default {
     "case-belmaatje.belmaatje_vervangt_menselijk_contact_13f1b0": "BelMaatje does not replace human contact. It is a stepping stone towards it.",
     "case-belmaatje.soms_zit_innovatie_niet_eda90c": "Sometimes innovation is not in something new, but in something that already exists.",
     "case-belmaatje.de_vaste_telefoon_is_031aef": "The landline has been around for decades. But what you can do with it keeps changing. Curious what ADAM can mean for your organisation?",
-    "case-belmaatje.neem_contact_op_1933fe": "Get in touch →",
+    "case-belmaatje.neem_contact_op_1933fe": "Try the demo →",
     "case-belmaatje.belmaatje_in_gebruik_3d16ca": "BelMaatje in use",
     "case-belmaatje.volgend_project_3fe484": "Next project",
     "case-belmaatje.bekijk_case_ade6b3": "View case →"
@@ -210,7 +210,7 @@ export default {
     "case-belmaatje.belmaatje_vervangt_menselijk_contact_13f1b0": "BelMaatje ersetzt den menschlichen Kontakt nicht. Es ist ein Schritt dorthin.",
     "case-belmaatje.soms_zit_innovatie_niet_eda90c": "Manchmal liegt Innovation nicht in etwas Neuem, sondern in etwas, das schon existiert.",
     "case-belmaatje.de_vaste_telefoon_is_031aef": "Das Festnetztelefon gibt es seit Jahrzehnten. Doch was man damit tun kann, verändert sich ständig. Neugierig, was ADAM für Ihre Organisation bedeuten kann?",
-    "case-belmaatje.neem_contact_op_1933fe": "Kontakt aufnehmen →",
+    "case-belmaatje.neem_contact_op_1933fe": "Demo ausprobieren →",
     "case-belmaatje.belmaatje_in_gebruik_3d16ca": "BelMaatje im Einsatz",
     "case-belmaatje.volgend_project_3fe484": "Nächstes Projekt",
     "case-belmaatje.bekijk_case_ade6b3": "Referenz ansehen →"

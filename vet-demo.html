@@ -7,6 +7,59 @@
   <link rel="canonical" href="https://adamagents.nl/demo.html"/>
   <meta http-equiv="refresh" content="0;url=demo.html"/>
   <script>location.replace('demo.html' + location.search + location.hash);</script>
+<style data-studio="custom">
+/* ADAM snake palette: colour roles (violet = brand, green = action, violet-tinted ink and greys for text) */
+:root{--muted:#5F5A72;--violet-50:#F5F2FF;--violet-100:#E9E2FF;--violet-200:#D3C4FF;--violet-400:#7C55FF;--violet-700:#3600CC;--night:#14004D;--green-200:#A6E4C0;--green-600:#2EA562;--green-700:#1E7A47;--body:#3E3A4F;--mist:#C8C2DA}
+
+/* home hero: white text and logo on violet (no dark layer: the ribbon keeps one even colour across the hero) */
+html:not(#p_) .hero .nav{z-index:20}
+html:not(#p_) .hero .hero-title,html:not(#p_) .hero .hero-title span{color:#FFFFFF!important}
+html:not(#p_) .hero .hero-sub{color:#FFFFFF!important}
+html:not(#p_) .hero .nav .nav-logo-text{color:#FFFFFF!important}
+html:not(#p_) .hero .nav .nav-logo svg path{fill:#FFFFFF!important}
+html:not(#p_) .hero .nav .nav-hamburger span{background:#FFFFFF!important}
+html:not(#p_) .hero .nav .lang-switch-btn{color:rgba(255,255,255,.72)!important}
+html:not(#p_) .hero .nav .lang-switch-btn.active{color:#FFFFFF!important;background:rgba(255,255,255,.14)!important}
+
+/* labels and numbers: violet on light, light violet on the violet band */
+html:not(#p_) .label,html:not(#p_) .app-num{color:var(--blue)!important}
+html:not(#p_) .cta-lbl{color:var(--violet-200)!important}
+
+/* text on lilac tiles */
+html:not(#p_) .wie-card-body{color:var(--body)!important}
+
+/* the hero's green button keeps a white outline, so it stays visible when the green ribbon passes behind it */
+html:not(#p_) .hero .btn-primary{box-shadow:0 0 0 2px #FFFFFF!important}
+
+/* every button keeps its label on one line, in every language; the button grows to fit instead */
+:where(.btn,.btn-primary,.nav-cta,.case-hero-cta,.cta-btn,.cta-btn-primary,.cta-btn-secondary,.cta-strip-btn,.demo-cta,.how-demo-link,.pricing-teaser-btn,.result-cta,.th-cta,.form-submit,.lang-switch-btn){white-space:nowrap!important}
+
+/* every main button: green with dark text, a darker green on hover */
+html:not(#p_) .nav-cta:hover,html:not(#p_) .btn-primary:hover,html:not(#p_) .demo-cta:hover,html:not(#p_) .cta-btn-primary:hover,html:not(#p_) .result-cta:hover,html:not(#p_) .cta-strip-btn:hover,html:not(#p_) .case-hero-cta:hover,html:not(#p_) .btn.yellow:hover{background:var(--green-600)!important;color:var(--black)!important}
+
+/* the calculator's “Kies Groei” button is a main button too: always green (Fill in the panel still overrides it) */
+.btn.result-cta{background:var(--yellow)!important;color:var(--black)!important}
+
+/* section labels: violet on light sections, green on dark ones */
+html:not(#p_) .section-label{color:var(--blue)!important}
+html:not(#p_) .values-section .section-label,html:not(#p_) .section-label-white{color:var(--yellow)!important}
+
+/* text on violet bands: light violet instead of see-through white */
+html:not(#p_) .meta-section .meta-label{color:var(--violet-200)!important}
+html:not(#p_) .meta-body p,html:not(#p_) .result-body,html:not(#p_) .result-stat-label{color:var(--violet-100)!important}
+
+/* numbers on dark cards */
+html:not(#p_) .tech-card-num,html:not(#p_) .routing-card-num{color:var(--violet-200)!important}
+
+/* small print */
+html:not(#p_) #statusText{color:rgba(255,255,255,.65)!important}
+html:not(#p_) .calc-assumption,html:not(#p_) .th-price{color:#5F5A72!important}
+
+/* footer links turn violet on hover (and on keyboard focus) */
+html:not(#p_) .foot-nav a{color:var(--muted)}
+html:not(#p_) .foot-nav a:hover,html:not(#p_) .foot-nav a:focus-visible,html:not(#p_) .foot-col-links a:hover,html:not(#p_) .foot-col-links a:focus-visible,html:not(#p_) .foot-contact-text a:hover,html:not(#p_) .foot-contact-text a:focus-visible,html:not(#p_) .foot-social a:hover{color:var(--blue)!important}
+html:not(#p_) .foot-contact-text a:hover{border-color:var(--blue)!important}
+</style>
 </head>
 <body><a href="demo.html">demo.html</a></body>
 </html>

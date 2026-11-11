@@ -15,11 +15,11 @@
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <title data-i18n="contact.demo_aanvragen_adam_ai_5c0c0e">Demo aanvragen | ADAM AI Agents</title>
   <meta data-i18n-content="contact.plan_een_kennismaking_met_3d16cd" name="description" content="Plan een kennismaking met ADAM. Vertel ons welk vraagstuk u wil oplossen. Wij laten zien hoe een AI agent dat voor uw organisatie aanpakt."/>
-  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@300;400;600;700;800&display=swap" rel="stylesheet"/>
   <style>
     *{margin:0;padding:0;box-sizing:border-box;}
-    :root{--blue:#1D2ED8;--yellow:#CEFF1A;--black:#0A0A0A;--white:#FFFFFF;--gray:#E5E7EB;--gray-mid:#9CA3AF;}
-    body{font-family:'Sora',sans-serif;background:var(--white);color:var(--black);overflow-x:hidden;}
+    :root{--blue:#4400FF;--yellow:#37BE71;--black:#120F1F;--white:#FFFFFF;--gray:#E2DDF0;--gray-mid:#5F5A72;}
+    body{font-family:'Archivo',sans-serif;background:var(--white);color:var(--black);overflow-x:hidden;}
 
     html, body {
       overflow-x: hidden;
@@ -32,7 +32,7 @@
     .nav-right{display:flex;align-items:center;gap:6px;}
     .nav-link{color:var(--gray-mid);font-size:14px;font-weight:600;text-decoration:none;padding:9px 18px;border-radius:3px;transition:color 0.2s;}
     .nav-link:hover,.nav-link.active{color:var(--black);}
-    .nav-cta{background:var(--yellow);color:var(--black);font-family:'Sora',sans-serif;font-size:14px;font-weight:700;padding:10px 22px;border-radius:3px;text-decoration:none;transition:background 0.2s;}
+    .nav-cta{background:var(--yellow);color:var(--black);font-family:'Archivo',sans-serif;font-size:14px;font-weight:700;padding:10px 22px;border-radius:3px;text-decoration:none;transition:background 0.2s;}
     .nav-cta:hover{background:var(--gray);}
     .nav-hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:8px;background:none;border:none;z-index:30;}
     .nav-hamburger span{display:block;width:22px;height:2px;background:var(--black);border-radius:2px;transition:all 0.3s;}
@@ -58,12 +58,12 @@
     .form-section-label{font-size:12px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--gray-mid);margin-bottom:36px;}
     .form-group{margin-bottom:24px;}
     .form-group label{display:block;font-size:13px;font-weight:700;color:var(--black);margin-bottom:8px;letter-spacing:0.01em;}
-    .form-group input,.form-group textarea,.form-group select{width:100%;font-family:'Sora',sans-serif;font-size:15px;font-weight:400;color:var(--black);background:var(--white);border:1px solid var(--gray);border-radius:3px;padding:14px 16px;outline:none;transition:border-color 0.2s;appearance:none;}
+    .form-group input,.form-group textarea,.form-group select{width:100%;font-family:'Archivo',sans-serif;font-size:15px;font-weight:400;color:var(--black);background:var(--white);border:1px solid var(--gray);border-radius:3px;padding:14px 16px;outline:none;transition:border-color 0.2s;appearance:none;}
     .form-group input:focus,.form-group textarea:focus,.form-group select:focus{border-color:var(--blue);}
     .form-group textarea{resize:vertical;min-height:120px;line-height:1.65;}
     .form-group select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%239CA3AF' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 16px center;cursor:pointer;}
     .form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
-    .form-submit{width:100%;background:var(--blue);color:#fff;font-family:'Sora',sans-serif;font-size:15px;font-weight:700;padding:16px;border-radius:3px;border:none;cursor:pointer;transition:opacity 0.2s;margin-top:8px;}
+    .form-submit{width:100%;background:var(--blue);color:#fff;font-family:'Archivo',sans-serif;font-size:15px;font-weight:700;padding:16px;border-radius:3px;border:none;cursor:pointer;transition:opacity 0.2s;margin-top:8px;}
     .form-submit:hover{opacity:0.85;}
     .form-note{font-size:12px;color:var(--gray-mid);text-align:center;margin-top:12px;line-height:1.5;}
 
@@ -82,7 +82,7 @@
     .info-block-value a:hover{text-decoration:underline;}
     .info-block-sub{font-size:13px;color:var(--gray-mid);margin-top:6px;line-height:1.6;}
 
-    .trust-block{background:#F8F8F8;border-radius:4px;padding:28px;margin-top:8px;}
+    .trust-block{background:#E9E2FF;border-radius:4px;padding:28px;margin-top:8px;}
     .trust-block-title{font-size:14px;font-weight:800;margin-bottom:12px;}
     .trust-items-list{display:flex;flex-direction:column;gap:10px;}
     .trust-item-row{display:flex;align-items:flex-start;gap:10px;font-size:13px;color:#555;line-height:1.5;}
@@ -141,6 +141,92 @@
 }
     
   </style>
+<style data-studio="nav">
+@media(min-width:769px){.nav-right{flex:1;margin-left:40px}.nav-right>a:first-of-type{margin-left:auto}.nav-right>.nav-cta{margin-left:auto}}
+.nav-right>.nav-link{padding-left:20px!important;padding-right:20px!important}
+body>.nav{background:rgba(18,15,31,0.96)!important;-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border-bottom-color:transparent!important}
+body>.nav .nav-logo-text{color:#FFFFFF!important}
+body>.nav .nav-logo svg path{fill:#FFFFFF!important}
+body>.nav .nav-link,body>.nav .nav-back{color:#E6E6E6!important}
+body>.nav .nav-link:hover,body>.nav .nav-link.active,body>.nav .nav-link[aria-current],body>.nav .nav-back:hover{color:#FFFFFF!important}
+body>.nav .lang-switch-btn{color:rgba(255,255,255,0.55)!important}
+body>.nav .lang-switch-btn:hover{color:#FFFFFF!important}
+body>.nav .lang-switch-btn.active{color:#FFFFFF!important;background:rgba(255,255,255,0.12)!important}
+body>.nav .nav-hamburger span{background:#FFFFFF!important}
+.nav-menu{background:#120F1F!important;border-bottom-color:transparent!important}
+.nav-menu a{color:rgba(255,255,255,0.7)!important;border-bottom:1px solid rgba(255,255,255,0.06)!important}
+.nav-menu .lang-switch-btn{color:rgba(255,255,255,0.55)!important}
+.nav-menu .lang-switch-btn.active{color:#FFFFFF!important;background:rgba(255,255,255,0.12)!important}
+body .nav .nav-cta{font-size:14px!important;padding:10px 20px!important;line-height:1.2!important;white-space:nowrap!important;width:auto!important;min-width:0!important;min-height:0!important;height:auto!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;box-sizing:border-box!important;margin-right:16px!important}
+@media(max-width:768px){body .nav .nav-right .nav-cta{display:none!important}}
+@media(min-width:769px) and (max-width:1023px){body .nav{padding-left:20px!important;padding-right:20px!important}body .nav .nav-right{margin-left:16px!important;gap:4px!important}body .nav .nav-right>.nav-link{padding-left:10px!important;padding-right:10px!important;white-space:nowrap!important}body .nav .nav-cta{font-size:13px!important;padding:8px 14px!important;margin-right:10px!important}}
+.nav .nav-link[aria-current="page"],.nav .nav-link[aria-current="page"]:hover{color:#4400FF!important}
+.nav-menu a[aria-current="page"]{color:#37BE71!important}
+.hero .nav .nav-link[aria-current="page"],.hero .nav .nav-link[aria-current="page"]:hover{color:#37BE71!important}
+body>.nav .nav-link[aria-current="page"],body>.nav .nav-link[aria-current="page"]:hover{color:#37BE71!important}
+</style>
+<style data-studio="buttons">
+.hero .nav-cta,.hero .btn-primary,.how-section .how-demo-link,.nav .nav-cta{background:#37BE71!important;color:#120F1F!important;border-radius:32px!important;font-weight:600!important}
+.hero .nav-cta:hover,.hero .btn-primary:hover,.how-section .how-demo-link:hover,.nav .nav-cta:hover{background:#2EA562!important;color:#120F1F!important}
+.how-section .how-demo-link{justify-content:center;white-space:nowrap;flex:none}.how-section .how-demo-link:hover{gap:8px!important}
+.hero .nav-cta{font-size:12.5px!important;padding:7px 10px!important}
+.hero .btn-primary{font-size:13.5px!important;padding:11px 14.5px!important}
+.how-section .how-demo-link{font-size:12.5px!important;padding:7px 10px!important}
+.nav .nav-cta{font-size:12.5px!important;padding:7px 10px!important}
+</style>
+<style data-studio="custom">
+/* ADAM snake palette: colour roles (violet = brand, green = action, violet-tinted ink and greys for text) */
+:root{--muted:#5F5A72;--violet-50:#F5F2FF;--violet-100:#E9E2FF;--violet-200:#D3C4FF;--violet-400:#7C55FF;--violet-700:#3600CC;--night:#14004D;--green-200:#A6E4C0;--green-600:#2EA562;--green-700:#1E7A47;--body:#3E3A4F;--mist:#C8C2DA}
+
+/* home hero: white text and logo on violet (no dark layer: the ribbon keeps one even colour across the hero) */
+html:not(#p_) .hero .nav{z-index:20}
+html:not(#p_) .hero .hero-title,html:not(#p_) .hero .hero-title span{color:#FFFFFF!important}
+html:not(#p_) .hero .hero-sub{color:#FFFFFF!important}
+html:not(#p_) .hero .nav .nav-logo-text{color:#FFFFFF!important}
+html:not(#p_) .hero .nav .nav-logo svg path{fill:#FFFFFF!important}
+html:not(#p_) .hero .nav .nav-hamburger span{background:#FFFFFF!important}
+html:not(#p_) .hero .nav .lang-switch-btn{color:rgba(255,255,255,.72)!important}
+html:not(#p_) .hero .nav .lang-switch-btn.active{color:#FFFFFF!important;background:rgba(255,255,255,.14)!important}
+
+/* labels and numbers: violet on light, light violet on the violet band */
+html:not(#p_) .label,html:not(#p_) .app-num{color:var(--blue)!important}
+html:not(#p_) .cta-lbl{color:var(--violet-200)!important}
+
+/* text on lilac tiles */
+html:not(#p_) .wie-card-body{color:var(--body)!important}
+
+/* the hero's green button keeps a white outline, so it stays visible when the green ribbon passes behind it */
+html:not(#p_) .hero .btn-primary{box-shadow:0 0 0 2px #FFFFFF!important}
+
+/* every button keeps its label on one line, in every language; the button grows to fit instead */
+:where(.btn,.btn-primary,.nav-cta,.case-hero-cta,.cta-btn,.cta-btn-primary,.cta-btn-secondary,.cta-strip-btn,.demo-cta,.how-demo-link,.pricing-teaser-btn,.result-cta,.th-cta,.form-submit,.lang-switch-btn){white-space:nowrap!important}
+
+/* every main button: green with dark text, a darker green on hover */
+html:not(#p_) .nav-cta:hover,html:not(#p_) .btn-primary:hover,html:not(#p_) .demo-cta:hover,html:not(#p_) .cta-btn-primary:hover,html:not(#p_) .result-cta:hover,html:not(#p_) .cta-strip-btn:hover,html:not(#p_) .case-hero-cta:hover,html:not(#p_) .btn.yellow:hover{background:var(--green-600)!important;color:var(--black)!important}
+
+/* the calculator's “Kies Groei” button is a main button too: always green (Fill in the panel still overrides it) */
+.btn.result-cta{background:var(--yellow)!important;color:var(--black)!important}
+
+/* section labels: violet on light sections, green on dark ones */
+html:not(#p_) .section-label{color:var(--blue)!important}
+html:not(#p_) .values-section .section-label,html:not(#p_) .section-label-white{color:var(--yellow)!important}
+
+/* text on violet bands: light violet instead of see-through white */
+html:not(#p_) .meta-section .meta-label{color:var(--violet-200)!important}
+html:not(#p_) .meta-body p,html:not(#p_) .result-body,html:not(#p_) .result-stat-label{color:var(--violet-100)!important}
+
+/* numbers on dark cards */
+html:not(#p_) .tech-card-num,html:not(#p_) .routing-card-num{color:var(--violet-200)!important}
+
+/* small print */
+html:not(#p_) #statusText{color:rgba(255,255,255,.65)!important}
+html:not(#p_) .calc-assumption,html:not(#p_) .th-price{color:#5F5A72!important}
+
+/* footer links turn violet on hover (and on keyboard focus) */
+html:not(#p_) .foot-nav a{color:var(--muted)}
+html:not(#p_) .foot-nav a:hover,html:not(#p_) .foot-nav a:focus-visible,html:not(#p_) .foot-col-links a:hover,html:not(#p_) .foot-col-links a:focus-visible,html:not(#p_) .foot-contact-text a:hover,html:not(#p_) .foot-contact-text a:focus-visible,html:not(#p_) .foot-social a:hover{color:var(--blue)!important}
+html:not(#p_) .foot-contact-text a:hover{border-color:var(--blue)!important}
+</style>
 </head>
 <body>
 
@@ -155,7 +241,7 @@
     <a data-i18n="foot.company.home" class="nav-link" href="index.html">Home</a>
     <a data-i18n="nav.pricing" class="nav-link" href="pricing.html">Prijzen</a>
     <a data-i18n="nav.about" class="nav-link" href="about.html">Over ons</a>
-    <a data-i18n="nav.cta" class="nav-cta active" href="contact.html">Plan een demo</a>
+    <a data-i18n="nav.try" class="nav-cta" href="demo.html">Probeer het zelf</a>
     <div data-lang-switcher></div>
     <button data-i18n-aria-label="nav.menuAria" class="nav-hamburger" id="hamburger" aria-label="Menu">
       <span></span><span></span><span></span>
@@ -167,7 +253,7 @@
   <a data-i18n="foot.company.home" href="index.html">Home</a>
   <a data-i18n="nav.pricing" href="pricing.html">Prijzen</a>
   <a data-i18n="nav.about" href="about.html">Over ons</a>
-  <a data-i18n="nav.cta" href="contact.html">Plan een demo</a>
+  <a data-i18n="nav.try" href="demo.html">Probeer het zelf</a>
 </div>
 
 <div class="contact-hero">
@@ -281,7 +367,7 @@
 <footer>
   <a class="foot-logo" href="index.html">
     <svg height="26" viewBox="0 0 1922.77 1081.56" xmlns="http://www.w3.org/2000/svg">
-      <path fill="#1D2ED8" d="M1326.1,434.57c-5.43-14.15-7.03-27.6-3.86-42.53,10.48-49.65-13.3-100.44-57.9-122.61-17.47-8.69-30.58-20.58-39.27-37.77-2.29-4.52-5.02-8.81-7.56-13.21-30.08-52.01-70.7-93.85-122.8-123.71-67.09-38.49-139.4-51.79-215.96-40.12-40.43,6.18-77.23,21.33-107.21,49.65-52.35,49.5-68.6,111.29-55.02,180.39,13.86,70.7,56.34,120.36,120.98,151.35,43,20.64,89.08,31.09,135.29,41.19,1.54.34,2.92.63,4.17.88.31.09.63.16.91.19l1.95.38,9.85,1.88,3.51-10.79.47-1.44,3.73-11.32c3.32-10.07,6.68-20.14,10-30.21,1.51,2.29,1.66,4.36,1.47,6.4-1.41,16.5-2.42,33.03-4.45,49.43-2.01,15.93-7.25,31.02-16.66,44.23-20.07,28.14-49.34,39.08-82.21,41.81-30.46,2.54-58.34-6.74-83.5-23.09-37.04-24.09-73.34-49.25-109.88-74.09-33.88-23.06-68.1-45.11-108.53-55.49-41.88-10.76-82.78-10.04-122.3,8.47-10.13,4.74-19.16,11.83-28.7,17.85.34.69,5.4.75,6.09.82,4.27.34,4.58.28,6.27.38,49.94,2.1,90.34,16.47,133.19,42.5,28.07,17.03,52.98,38.14,77.51,59.85,27.79,24.56,54.67,50.5,84.57,72.27,91.31,66.56,197.24,64.62,287.67-3.11,6.12-4.58,12.08-9.35,18.1-14.02.41.34.81.66,1.25.97-4.99,7.4-9.28,15.37-15.03,22.11-48.24,56.68-109.97,78.1-183.06,68.79-33.31-4.27-64.71-15.65-96.24-26.57-42.31-14.68-84.38-30.21-127.07-43.73-46.39-14.68-93.91-23.62-142.97-19.07-47.93,4.49-91.91,19.29-128.73,51.63-10.32,9.07-18.85,19.54-26.88,31.77,2.7-.5,5.08-1.07,6.56-1.38,16.62-3.57,32.56-5.74,48.96-10.13,39.84-10.7,79.92-13.74,120.76-7.12,31.05,5.05,60.32,15.65,88.68,28.48,44.85,20.33,89.15,41.81,133.69,62.77,48.24,22.71,97.77,40.68,151.63,44.57,66.4,4.83,128.73-8.13,186.79-40.94,57.03-32.24,98.46-79.74,132.28-134.72,1.1-1.79,2.23-3.51,4.01-6.31,0,2.45.16,3.54-.03,4.58-6.31,35.38-19.45,67.85-41.81,96.2-33.41,42.32-76.85,70.52-127.2,88.52-34.66,12.39-71.08,17.5-107.12,24.15-44.32,8.15-87.42,20.04-125.72,45.01-32.65,21.27-56.27,49.5-65.53,88.11-2.04,8.41-2.51,17.16-3.73,25.78l8.53-7.65c12.04-10.35,25.28-19.16,37.77-28.98,38.14-29.99,83.19-42.16,130.17-47.99,32.87-4.08,66.06-5.55,98.93-9.54,80.99-9.88,154.48-38.61,217.81-90.68,55.17-45.36,90.87-102.76,104.33-173.46,13.21-69.35,3.89-136.35-20.95-201.6ZM1213.77,398.71c-17.63-9.13-29.74-31.74-27.54-51.41,1.94-17.44,17.13-26.91,33.72-21.05,18.16,6.43,32.24,27.16,32.65,48.15.44,23.68-17.88,35.13-38.83,24.31Z"/>
+      <path fill="#4400FF" d="M1326.1,434.57c-5.43-14.15-7.03-27.6-3.86-42.53,10.48-49.65-13.3-100.44-57.9-122.61-17.47-8.69-30.58-20.58-39.27-37.77-2.29-4.52-5.02-8.81-7.56-13.21-30.08-52.01-70.7-93.85-122.8-123.71-67.09-38.49-139.4-51.79-215.96-40.12-40.43,6.18-77.23,21.33-107.21,49.65-52.35,49.5-68.6,111.29-55.02,180.39,13.86,70.7,56.34,120.36,120.98,151.35,43,20.64,89.08,31.09,135.29,41.19,1.54.34,2.92.63,4.17.88.31.09.63.16.91.19l1.95.38,9.85,1.88,3.51-10.79.47-1.44,3.73-11.32c3.32-10.07,6.68-20.14,10-30.21,1.51,2.29,1.66,4.36,1.47,6.4-1.41,16.5-2.42,33.03-4.45,49.43-2.01,15.93-7.25,31.02-16.66,44.23-20.07,28.14-49.34,39.08-82.21,41.81-30.46,2.54-58.34-6.74-83.5-23.09-37.04-24.09-73.34-49.25-109.88-74.09-33.88-23.06-68.1-45.11-108.53-55.49-41.88-10.76-82.78-10.04-122.3,8.47-10.13,4.74-19.16,11.83-28.7,17.85.34.69,5.4.75,6.09.82,4.27.34,4.58.28,6.27.38,49.94,2.1,90.34,16.47,133.19,42.5,28.07,17.03,52.98,38.14,77.51,59.85,27.79,24.56,54.67,50.5,84.57,72.27,91.31,66.56,197.24,64.62,287.67-3.11,6.12-4.58,12.08-9.35,18.1-14.02.41.34.81.66,1.25.97-4.99,7.4-9.28,15.37-15.03,22.11-48.24,56.68-109.97,78.1-183.06,68.79-33.31-4.27-64.71-15.65-96.24-26.57-42.31-14.68-84.38-30.21-127.07-43.73-46.39-14.68-93.91-23.62-142.97-19.07-47.93,4.49-91.91,19.29-128.73,51.63-10.32,9.07-18.85,19.54-26.88,31.77,2.7-.5,5.08-1.07,6.56-1.38,16.62-3.57,32.56-5.74,48.96-10.13,39.84-10.7,79.92-13.74,120.76-7.12,31.05,5.05,60.32,15.65,88.68,28.48,44.85,20.33,89.15,41.81,133.69,62.77,48.24,22.71,97.77,40.68,151.63,44.57,66.4,4.83,128.73-8.13,186.79-40.94,57.03-32.24,98.46-79.74,132.28-134.72,1.1-1.79,2.23-3.51,4.01-6.31,0,2.45.16,3.54-.03,4.58-6.31,35.38-19.45,67.85-41.81,96.2-33.41,42.32-76.85,70.52-127.2,88.52-34.66,12.39-71.08,17.5-107.12,24.15-44.32,8.15-87.42,20.04-125.72,45.01-32.65,21.27-56.27,49.5-65.53,88.11-2.04,8.41-2.51,17.16-3.73,25.78l8.53-7.65c12.04-10.35,25.28-19.16,37.77-28.98,38.14-29.99,83.19-42.16,130.17-47.99,32.87-4.08,66.06-5.55,98.93-9.54,80.99-9.88,154.48-38.61,217.81-90.68,55.17-45.36,90.87-102.76,104.33-173.46,13.21-69.35,3.89-136.35-20.95-201.6ZM1213.77,398.71c-17.63-9.13-29.74-31.74-27.54-51.41,1.94-17.44,17.13-26.91,33.72-21.05,18.16,6.43,32.24,27.16,32.65,48.15.44,23.68-17.88,35.13-38.83,24.31Z"/>
     </svg>
     <span class="foot-logo-text">ADAM</span>
   </a>
@@ -299,9 +385,9 @@
 <script>
   (function(){
     const canvas=document.getElementById('heroC'),ctx=canvas.getContext('2d'),sec=canvas.parentElement;
-    let W=0,H=0,t=0;const YR=206,YG=255,YB=26;
+    let W=0,H=0,t=0;const YR=55,YG=190,YB=113;
     function resize(){W=sec.offsetWidth;H=sec.offsetHeight;canvas.width=W;canvas.height=H;}
-    function draw(){if(W===0||H===0){requestAnimationFrame(draw);return;}t+=.003;ctx.fillStyle='#0A0A0A';ctx.fillRect(0,0,W,H);
+    function draw(){if(W===0||H===0){requestAnimationFrame(draw);return;}t+=.003;ctx.fillStyle='#120F1F';ctx.fillRect(0,0,W,H);
     const blobs=[{x:.12,y:.5,r:.32,s:.5},{x:.65,y:.35,r:.38,s:.35},{x:.5,y:.75,r:.28,s:.7},{x:.88,y:.6,r:.22,s:.55}];
     blobs.forEach((b,i)=>{const cx=(b.x+Math.sin(t*b.s+i)*0.1)*W,cy=(b.y+Math.cos(t*b.s*0.7+i)*0.18)*H,r=b.r*W,g=ctx.createRadialGradient(cx,cy,0,cx,cy,r);g.addColorStop(0,`rgba(${YR},${YG},${YB},.09)`);g.addColorStop(.5,`rgba(${YR},${YG},${YB},.03)`);g.addColorStop(1,`rgba(${YR},${YG},${YB},0)`);ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.fillStyle=g;ctx.fill();});
     requestAnimationFrame(draw);}

@@ -18,7 +18,9 @@ export default {
     "cases.welzijn_sociale_inclusie_e25bc6": "Welzijn & sociale inclusie",
     "cases.samenwerken_edeaf1": "Samenwerken",
     "cases.iets_soortgelijks_bouwen_br_45c631": "Iets soortgelijks bouwen?<br>We denken graag mee.",
-    "cases.plan_een_demo_2b9e59": "Plan een demo →"
+    "cases.plan_een_demo_2b9e59": "Start de demo →",
+    "cases.case_more": "Meer lezen",
+    "cases.case_less": "Minder tonen"
   },
   "en": {
     "cases.cases_adam_ai_agents_fbfa29": "Cases | ADAM AI Agents",
@@ -39,14 +41,14 @@ export default {
     "cases.welzijn_sociale_inclusie_e25bc6": "Wellbeing & social inclusion",
     "cases.samenwerken_edeaf1": "Work with us",
     "cases.iets_soortgelijks_bouwen_br_45c631": "Building something similar?<br>We'd love to think along.",
-    "cases.plan_een_demo_2b9e59": "Book a demo →"
+    "cases.plan_een_demo_2b9e59": "Start the demo →",
+    "cases.case_more": "Read more",
+    "cases.case_less": "Show less"
   },
   "de": {
     "cases.cases_adam_ai_agents_fbfa29": "Referenzen | ADAM AI Agents",
     "cases.projecten_waarbij_spraak_geluid_560599": "Projekte, in denen Sprache, Klang und KI zusammenkommen. Von kulturellen Erlebnissen bis zu skalierbarer Kommunikation.",
-    "cases.werk_b7f98c": "Arbeiten",
-    "cases.4_projecten_081450": "4 Projekte",
-    "cases.projecten_waarbij_spraak_geluid_cbad3d": "Projekte, in denen Sprache, Klang und KI zusammenkommen. Von kulturellen Erlebnissen bis zu skalierbarer Kommunikation für Organisationen.",
+    "cases.projecten_waarbij_spraak_geluid_cbad3d": "Projekte, in denen Sprache, Klang und KI zusammenkommen. <br>Von kulturellen Erlebnissen bis zu skalierbarer Kommunikation für Organisationen.",
     "cases.voice_ai_61c29e": "Voice AI",
     "cases.sound_design_741e53": "Sounddesign",
     "cases.een_landschapskunstwerk_waarmee_bezoekers_75edbc": "Ein Landschaftskunstwerk, mit dem Besucher ins Gespräch kommen können. Nicht als Audiotour, sondern als lebendige Wesenheit, die sich anfühlt, als käme sie aus dem Wattenmeer selbst.",
@@ -60,6 +62,8 @@ export default {
     "cases.welzijn_sociale_inclusie_e25bc6": "Wohlbefinden & soziale Inklusion",
     "cases.samenwerken_edeaf1": "Zusammenarbeit",
     "cases.iets_soortgelijks_bouwen_br_45c631": "Etwas Ähnliches geplant?<br>Wir denken gerne mit.",
-    "cases.plan_een_demo_2b9e59": "Demo vereinbaren →"
+    "cases.plan_een_demo_2b9e59": "Demo starten →",
+    "cases.case_more": "Mehr lesen",
+    "cases.case_less": "Weniger anzeigen"
   }
 };
