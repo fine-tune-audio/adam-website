@@ -80,6 +80,26 @@ export const ADDONS = Object.freeze({
 });
 
 /**
+ * E-mail plans: per location (one shared mailbox, unlimited users), on top of a phone plan. Not shown on the
+ * pricing page yet. The app mirrors these numbers in lib/billing/email-plans.ts (pinned by its test).
+ * An e-mail counts when it gets a draft or is routed to a person; newsletters, automatic replies, the
+ * mailbox's own mail and blocklisted senders are free.
+ */
+export const EMAIL_PLANS = Object.freeze([
+  { id: 'email_start', name: 'E-mail Start', monthly: 39, annual: annualOf(39), includedEmails: 300, extraEmailRate: 0.1, catering: false },
+  { id: 'email_plus', name: 'E-mail Plus', monthly: 79, annual: annualOf(79), includedEmails: 1000, extraEmailRate: 0.08, catering: true }
+]);
+
+/** E-mail setup: the first location, and each further one ("copy settings from"). Free with annual billing. */
+export const EMAIL_SETUP = Object.freeze({ firstLocation: 149, extraLocation: 79, freeWithAnnual: true });
+
+/** Discount on a company's whole bill (phone and e-mail) by number of paying locations. Ten or more: custom quote. */
+export const COMPANY_DISCOUNTS = Object.freeze([
+  { minLocations: 2, maxLocations: 4, percent: 10 },
+  { minLocations: 5, maxLocations: 9, percent: 15 }
+]);
+
+/**
  * Billing rules, read by Phase 3 (billing); not shown on the pricing page. Time is in seconds/days,
  * percentages are of the included minutes.
  */
