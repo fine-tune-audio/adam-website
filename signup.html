@@ -92,10 +92,11 @@
     }
   });
 
-  // Placeholder for the payment step: go straight to the real app signup + onboarding.
-  const APP_SIGNUP = 'https://app.adamagents.nl/signup';
+  // The payment step lives in the app: /pay asks the company details and goes to Mollie. While payments are not
+  // switched on there yet, the app sends the visitor on to its ordinary signup.
+  const APP_PAY = 'https://app.adamagents.nl/pay';
   $('payBtn').addEventListener('click', () => {
-    location.href = `${APP_SIGNUP}?code=pasta123&plan=${encodeURIComponent(plan.id)}&interval=${interval}`;
+    location.href = `${APP_PAY}?code=pasta123&plan=${encodeURIComponent(plan.id)}&interval=${interval}`;
   });
 </script>
 </body>
