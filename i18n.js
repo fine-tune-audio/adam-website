@@ -185,3 +185,26 @@ export const ready = typeof document === 'undefined'
 if (typeof window !== 'undefined') {
   window.adamI18n = { t, getLang, setLang, ready, LANGS };
 }
+
+// The top menu closes when you click or tap outside it, press Escape, or widen the window past the point where its button
+// is shown. Each page has its own open/close handler on the button, so closing goes through the button and stays in step.
+if (typeof document !== 'undefined') {
+  const closeNavMenu = () => {
+    const menu = document.getElementById('navMenu');
+    const burger = document.getElementById('hamburger');
+    if (menu && burger && menu.classList.contains('open')) burger.click();
+  };
+  document.addEventListener('click', (e) => {
+    // The path as it was at the click: a language button is redrawn by its own click, so afterwards it is no longer inside the menu.
+    const inside = e.composedPath().some((el) => el instanceof Element && (el.id === 'navMenu' || el.id === 'hamburger'));
+    if (inside) return;
+    closeNavMenu();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeNavMenu();
+  });
+  window.addEventListener('resize', () => {
+    const burger = document.getElementById('hamburger');
+    if (burger && getComputedStyle(burger).display === 'none') closeNavMenu();
+  });
+}
