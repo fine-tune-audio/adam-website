@@ -123,6 +123,8 @@
       line-height:0.95;letter-spacing:-0.04em;
       max-width:1100px;margin-bottom:44px;
     }
+    /* English headline is the longest; a slightly smaller size keeps it on one line above the mobile breakpoint. */
+    :where(html[lang="en"]) .hero-title{font-size:clamp(44px,5.8vw,110px);max-width:none;}
     .hero-title .line{display:block;overflow:hidden;}
     .hero-title .line span{
       display:block;opacity:0;transform:translateY(105%);
